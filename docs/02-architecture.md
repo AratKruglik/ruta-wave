@@ -15,27 +15,27 @@ Everything in this document is a **[decision]** unless labelled otherwise.
 | Settings | `UserDefaults` / `@AppStorage` | replaces `electron-store` |
 | Secrets | Keychain | session cookies, Last.fm keys |
 | Dependencies | none at the start | everything needed is in the SDK |
-| Build | Xcode project, one app + local Swift packages for modules | modules are tested separately with `swift test` |
+| Build | XcodeGen `project.yml` (generates `Tunewave.xcodeproj`, not committed) + local Swift packages for modules | modules are tested separately with `swift test` |
 | Distribution | DMG file outside the App Store | user's decision; see [03](03-roadmap.md#stage-8-building-the-dmg) |
 | Sandbox | off; Hardened Runtime on | the sandbox is only required for the App Store; Hardened Runtime is a notarization prerequisite |
 
 ## 2. Modules
 
 ```
-YTMusic.app
+Tunewave.app
 ├─ App            — entry point, scenes, routing, DI
-├─ UI             — SwiftUI screens and components
+├─ UI             — SwiftUI screens and components (for now lives in `App/`; extraction is decided at stage 4)
 ├─ PlayerEngine   — hidden WKWebView, JS bridge, player state
 ├─ InnerTube      — HTTP client, authorization, parsers, models
 ├─ Auth           — sign-in window, cookies, Keychain, session state
 ├─ SystemKit      — Now Playing, media keys, notifications, menus, hotkeys
 ├─ Plugins        — plugin protocol, registry, built-in plugins
-└─ Settings       — typed settings on top of UserDefaults
+└─ AppSettings    — typed settings on top of UserDefaults
 ```
 
-Dependencies point downwards: `UI` knows about `PlayerEngine`, `InnerTube`,
-`Settings`; `Plugins` knows only about `PlayerEngine` events and `Settings`;
-`InnerTube` and `PlayerEngine` do not know about each other and both depend on `Auth`.
+Dependencies point downwards: `InnerTube → Auth`, `PlayerEngine → Auth`,
+`Plugins → PlayerEngine, InnerTube, AppSettings`, `SystemKit → PlayerEngine, AppSettings`.
+`InnerTube` and `PlayerEngine` do not know about each other; `Auth` and `AppSettings` are leaves.
 
 ## 3. Why audio goes through a hidden WKWebView
 
@@ -313,15 +313,18 @@ loading of third-party code. The list and the split across stages is in
 ```
 yt-music-mac/
 ├─ docs/                      — this documentation
-├─ YTMusic.xcodeproj
-├─ App/                       — the app: scenes, resources, Info.plist
+├─ project.yml                — XcodeGen manifest
+├─ Tunewave.xcodeproj         — generated, in .gitignore
+├─ App/                       — the app: scenes, resources (Info.plist is generated)
 ├─ Packages/
 │  ├─ InnerTube/              — Sources, Tests, Fixtures
 │  ├─ PlayerEngine/           — Sources, Resources/bridge.js, Tests
 │  ├─ Auth/
 │  ├─ SystemKit/
 │  ├─ Plugins/
-│  └─ Settings/
+│  └─ AppSettings/
 ├─ scripts/build-dmg.sh
 └─ README.md
 ```
+
+Packages reference each other by relative paths (`../Auth`), so renaming a package directory breaks the build.

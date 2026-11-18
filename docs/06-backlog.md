@@ -14,8 +14,8 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 
 | ID | Branch | What | Depends on | Run |
 |---|---|---|---|---|
-| [ ] 0.1 | `main`, `develop` | `git init`, `.gitignore`, docs commit, `develop` branch, GitHub remote | — | done by hand, outside the pipeline |
-| [ ] 0.2 | `feature/project-skeleton` | XcodeGen `project.yml` (app **Tunewave**, bundle ID `dev.kruhlyk.tunewave`, macOS 14, Swift 6, empty window), `Packages/` with empty packages, `xcodebuild build` + `swift test` pass. **Prerequisites:** Xcode installed, `sudo xcode-select -s /Applications/Xcode.app`, `brew install xcodegen` | 0.1 | `/sdlc:start "Create Tunewave macOS app skeleton: XcodeGen project.yml (bundle id dev.kruhlyk.tunewave, macOS 14, Swift 6, empty SwiftUI window) and empty local Swift packages per docs/02-architecture.md section 12" --type=feature --stack=apple` |
+| [x] 0.1 | `main`, `develop` | `git init`, `.gitignore`, docs commit, `develop` branch, GitHub remote | — | done by hand, outside the pipeline |
+| [x] 0.2 | `feature/project-skeleton` | XcodeGen `project.yml` (app **Tunewave**, bundle ID `dev.kruhlyk.tunewave`, macOS 14, Swift 6, empty window), `Packages/` with empty packages, `xcodebuild build` + `swift test` pass. **Prerequisites:** Xcode installed, `sudo xcode-select -s /Applications/Xcode.app`, `brew install xcodegen` | 0.1 | `/sdlc:start "Create Tunewave macOS app skeleton: XcodeGen project.yml (bundle id dev.kruhlyk.tunewave, macOS 14, Swift 6, empty SwiftUI window) and empty local Swift packages per docs/02-architecture.md section 12" --type=feature --stack=apple` |
 
 ## Stage 1. Sign-in and session
 
@@ -23,6 +23,8 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 |---|---|---|---|---|
 | [ ] 1.1 ⛔ | `feature/auth-signin` | `Auth`: sign-in window on `WKWebView`, Safari UA, success detection via `SAPISID`, cookies → Keychain, sign-out. **Go/no-go:** if Google blocks the web view, stop and pick a fallback | 0.2 | `/sdlc:start "Auth package: Google sign-in in WKWebView, cookie capture to Keychain, sign-out (docs/03 stage 1)" --type=feature` |
 | [ ] 1.2 | `feature/innertube-core` | `JSONValue`, `InnerTubeClient` actor, `SAPISIDHASH` (+ vector test), `account/account_menu`, account screen with name/avatar | 1.1 | `/sdlc:start "InnerTube core client: WEB_REMIX context, SAPISIDHASH signing, account_menu request and account screen" --type=feature` |
+
+> Security note for 1.1 (from 0.2 review): `WKWebsiteDataStore.default()` persists cookies on disk under ~/Library outside the Keychain — include this in the 1.1 threat model.
 
 ## Stage 2. InnerTube client
 
@@ -67,6 +69,8 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 |---|---|---|---|---|
 | [ ] 8.1 ⛔ | `feature/build-dmg` | `scripts/build-dmg.sh`, Hardened Runtime, ad-hoc signing, version from `MARKETING_VERSION` | 5.x | `/sdlc:start "DMG build script with ad-hoc signing per docs/03 stage 8" --type=feature` |
 | [ ] R1 | `release/0.1.0` | Release: README (Gatekeeper, disclaimer), version, merge into `main` + back-merge | 8.1 | `/sdlc:start "Release 0.1.0" --type=release` |
+
+> Security note for 8.1 (from 0.2 review): sign with `codesign --force --options runtime --sign -` (no `--deep`), and make the script assert the final artifact has the `runtime` flag and no `get-task-allow`.
 
 ## Stage 6. Plugins, first wave
 
