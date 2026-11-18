@@ -4,7 +4,7 @@
 
 | # | Risk | Likelihood | Impact | What we do |
 |---|---|---|---|---|
-| 1 | Google blocks sign-in in `WKWebView` as an "insecure browser" | medium | the project stops | checked first (stage 1); Safari User-Agent; fallbacks are `ASWebAuthenticationSession` or importing cookies |
+| 1 | Google blocks sign-in in `WKWebView` as an "insecure browser" | medium | the project stops | **go — checked 2026-11-18 (stage 1.1, macOS 27):** sign-in in `WKWebView` with the Safari User-Agent works; the session survives a relaunch, add-account and sign-out work. Fallbacks (`ASWebAuthenticationSession`, importing cookies) are not needed for now |
 | 2 | The InnerTube response format changes without notice | high over time | individual screens come up empty | parsers are isolated, tolerant of unknown blocks, covered by fixture tests |
 | 3 | The site player's methods differ from what is expected, or change | medium | controls do not work | all access is in one `bridge.js`; we consult the `pear-desktop` code, which solves the same problem |
 | 4 | WebKit suspends the hidden web view | medium | audio stops in the background | the web view is attached to a window; checked at stage 3 with the window minimized and hidden |
@@ -29,9 +29,12 @@
 3. **The original's license is MIT.** Ideas, the `peard:*` protocol, regular
    expressions and API routes can be ported. If a noticeable amount of code or
    text is copied, keep the copyright notice.
-4. **Credentials.** Session cookies give full access to the Google account
-   within YouTube. They are stored only in the Keychain, never logged, and never
-   end up in fixtures or crash reports.
+4. **Credentials.** Two stores hold the session.
+   - The Keychain item (`dev.kruhlyk.tunewave.session`, generic password in the login keychain, not synchronized) holds only the `youtube.com` cookies. It is the source of the app's session state and of the cookies InnerTube sends; they give full access to the Google account within YouTube.
+   - The WebKit website data store (`WKWebsiteDataStore.default()`; files named after `dev.kruhlyk.tunewave` under `~/Library/HTTPStorages`, `~/Library/WebKit` and `~/Library/Caches`) is the browser session that the sign-in window and the player share. It also holds the `google.com` / `accounts.google.com` session cookies, which give access to the **whole Google account** (Gmail, Drive, account settings), not only YouTube. Unlike Safari's cookies, which macOS protects behind Full Disk Access, these files are readable without any prompt by every process running as the same user, and the cookie files can be copied by file backups such as Time Machine.
+   - **Status: accepted for personal use (user decision, 2026-11-18, re-confirmed after the security review).**
+   - Sign-out clears both stores on this Mac only. It does not end the session at Google: a copy that has already leaked, or sits in a backup, stays valid until Google expires it or the user signs the device out in the Google Account or changes the password.
+   - Cookie values are never logged and never end up in fixtures, test output or crash reports.
 
 ## 3. What we deliberately do not do
 
@@ -54,7 +57,7 @@ They need a decision from the user or are settled at the stage shown.
 | # | Question | When |
 |---|---|---|
 | 1 | App name, bundle ID, icon | stage 0 |
-| 2 | Whether multiple accounts are needed (`X-Goog-AuthUser`) | stage 1 |
+| 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). The account list and switching UI come with `account_menu` (stage 1.2). Sign-out ends the session of every account | — |
 | 3 | Whether to show music videos, or only audio with artwork | stages 3–4 |
 | 4 | Whether podcasts and user-uploaded music are needed | stage 2 |
 | 5 | Source of synchronized lyrics: YouTube only, or third-party services too (LRCLIB and others) | stage 6 |
