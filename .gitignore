@@ -1,0 +1,14 @@
+.DS_Store
+# Xcode
+xcuserdata/
+DerivedData/
+build/
+*.xcuserstate
+# XcodeGen generates the project from project.yml
+*.xcodeproj/
+# SwiftPM
+.build/
+.swiftpm/
+Packages/*/.build/
+# SDLC pipeline local state
+.claude/.sdlc-*.json
