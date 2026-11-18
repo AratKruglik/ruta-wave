@@ -1,4 +1,7 @@
-# YT Music for macOS — plan documentation
+# Redwave — plan documentation
+
+Redwave is a native YouTube Music client for macOS (name chosen 2026-11-18,
+see [00-prd.md](00-prd.md#1-name-and-positioning)).
 
 Project goal: reproduce the capabilities of **YouTube Music Desktop**
 (`com.github.th-ch.youtube-music` 3.12.0, the `pear-devs/pear-desktop` project, MIT)
@@ -10,11 +13,15 @@ Status as of 2026-11-18: only analysis and planning are done. There is no code y
 
 | File | What it covers |
 |---|---|
+| [00-prd.md](00-prd.md) | Product requirements: name, users, goals, functional and non-functional requirements, releases |
 | [01-reverse-engineering.md](01-reverse-engineering.md) | What was found in the original app: structure, IPC, config, plugins, limits of the analysis |
 | [02-architecture.md](02-architecture.md) | Architecture of the Swift version: modules, decisions, contracts between them |
 | [03-roadmap.md](03-roadmap.md) | Seven development stages plus the DMG build: tasks, done criteria, checks |
 | [04-plugins.md](04-plugins.md) | All 41 plugins of the original: what is ported, when and how |
 | [05-risks-and-scope.md](05-risks-and-scope.md) | Risks, deliberate exclusions, open questions |
+| [06-backlog.md](06-backlog.md) | Subtasks for step-by-step delivery, one pipeline run each |
+| [07-designbook.md](07-designbook.md) | How the app looks: layout, colour, type, components |
+| [08-ui-spec.md](08-ui-spec.md) | What every part of the interface does: data, actions, states, guest behaviour |
 
 ## The decision in one paragraph
 

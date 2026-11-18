@@ -15,14 +15,14 @@ Everything in this document is a **[decision]** unless labelled otherwise.
 | Settings | `UserDefaults` / `@AppStorage` | replaces `electron-store` |
 | Secrets | Keychain | session cookies, Last.fm keys |
 | Dependencies | none at the start | everything needed is in the SDK |
-| Build | XcodeGen `project.yml` (generates `Tunewave.xcodeproj`, not committed) + local Swift packages for modules | modules are tested separately with `swift test` |
+| Build | XcodeGen `project.yml` (generates `Redwave.xcodeproj`, not committed) + local Swift packages for modules | modules are tested separately with `swift test` |
 | Distribution | DMG file outside the App Store | user's decision; see [03](03-roadmap.md#stage-8-building-the-dmg) |
 | Sandbox | off; Hardened Runtime on | the sandbox is only required for the App Store; Hardened Runtime is a notarization prerequisite |
 
 ## 2. Modules
 
 ```
-Tunewave.app
+Redwave.app
 ├─ App            — entry point, scenes, routing, DI
 ├─ UI             — SwiftUI screens and components (for now lives in `App/`; extraction is decided at stage 4)
 ├─ PlayerEngine   — hidden WKWebView, JS bridge, player state
@@ -161,6 +161,9 @@ Everything in this section is **[known]** from open projects and is verified at 
   - `Authorization: SAPISIDHASH <ts>_<sha1("<ts> <SAPISID> <origin>")>`;
   - `X-Origin: https://music.youtube.com`, same for `Origin`;
   - `X-Goog-AuthUser: <authUserIndex>` — the selected account, 0 by default.
+- Headers of a guest request: `Content-Type`, `Origin`, `X-Origin`, `User-Agent`, and `X-Goog-Visitor-Id` once known;
+  never `Cookie`, `Authorization` or `X-Goog-AuthUser`. `visitorData` comes from `responseContext.visitorData` of a
+  guest response (the latest valid value wins), is kept in memory only and is reset on sign-in and sign-out.
 - `GET https://music.youtube.com/getAccountSwitcherEndpoint` — same headers, no body; the JSON may start with the
   XSSI prefix `)]}'`, which is optional. The app always sends it with `X-Goog-AuthUser: 0`.
 
@@ -194,8 +197,10 @@ the only place that knows Google's format.
 
 ## 6. Auth
 
-1. If the Keychain has no cookies, a window with a `WKWebView` on Google's sign-in page
-   is shown (the same `ServiceLogin…continue=music.youtube.com` URL the original uses).
+1. Without a session the app shows the guest screen; sign-in opens in a sheet behind a "Sign in" button.
+   Cancel wipes the `WKWebsiteDataStore` (not the Keychain) and returns to the guest. Sign-out also leads to the guest.
+   `.keychainUnavailable` offers "Try again" and "Continue without signing in" (this launch only; the Keychain entry is kept, but cancelling a later sign-in still wipes the web view store).
+   The sign-in page is the same `ServiceLogin…continue=music.youtube.com` URL the original uses.
    In 1.2 an unauthorized `account/account_menu` response shows an error with
    Retry / Sign out; the automatic return to sign-in arrives in 2.1.
    Besides exact Google hosts, only `accounts.<google domain>/accounts/SetSID` is allowed, for domains from an embedded snapshot of google.com/supported_domains (taken 2026-11-18); refresh the snapshot manually when a regional sign-in hangs.
@@ -206,8 +211,13 @@ the only place that knows Google's format.
    The player web view uses the same website data store, so they do not need to
    be passed to it separately.
 4. Sign-out: clear the Keychain and `WKWebsiteDataStore`.
+5. `AuthSession.State.isSignedIn` is the single source for "hide an account-only action or offer sign-in";
+   `.signedOut` means guest. Consumers: 2.1, 2.4, 3.2, 4.1, 4.5, 4.6.
 
 ## 7. UI
+
+The look is fixed in [07-designbook.md](07-designbook.md) and the behaviour of every part in
+[08-ui-spec.md](08-ui-spec.md); this section keeps only the structure.
 
 The window is a `NavigationSplitView`:
 
@@ -319,7 +329,7 @@ loading of third-party code. The list and the split across stages is in
 yt-music-mac/
 ├─ docs/                      — this documentation
 ├─ project.yml                — XcodeGen manifest
-├─ Tunewave.xcodeproj         — generated, in .gitignore
+├─ Redwave.xcodeproj         — generated, in .gitignore
 ├─ App/                       — the app: scenes, resources (Info.plist is generated)
 ├─ Packages/
 │  ├─ InnerTube/              — Sources, Tests, Fixtures

@@ -33,6 +33,7 @@
 4. **Credentials.** Two stores hold the session.
    - The Keychain item (`dev.kruhlyk.tunewave.session`, generic password in the login keychain, not synchronized) holds only the `youtube.com` cookies. It is the source of the app's session state and of the cookies InnerTube sends; they give full access to the Google account within YouTube.
    - The WebKit website data store (`WKWebsiteDataStore.default()`; files named after `dev.kruhlyk.tunewave` under `~/Library/HTTPStorages`, `~/Library/WebKit` and `~/Library/Caches`) is the browser session that the sign-in window and the player share. It also holds the `google.com` / `accounts.google.com` session cookies, which give access to the **whole Google account** (Gmail, Drive, account settings), not only YouTube. Unlike Safari's cookies, which macOS protects behind Full Disk Access, these files are readable without any prompt by every process running as the same user, and the cookie files can be copied by file backups such as Time Machine.
+   - The identifiers above are the current ones; after the rename to Redwave (backlog 0.3) they become `dev.kruhlyk.redwave.session` and `dev.kruhlyk.redwave`, and the stores of the old identifiers must be removed, not left on disk.
    - **Status: accepted for personal use (user decision, 2026-11-18, re-confirmed after the security review).**
    - Sign-out clears both stores on this Mac only. It does not end the session at Google: a copy that has already leaked, or sits in a backup, stays valid until Google expires it or the user signs the device out in the Google Account or changes the password.
    - Cookie values are never logged and never end up in fixtures, test output or crash reports.
@@ -57,7 +58,7 @@ They need a decision from the user or are settled at the stage shown.
 
 | # | Question | When |
 |---|---|---|
-| 1 | App name, bundle ID, icon | stage 0 |
+| 1 | ~~App name, bundle ID~~ — **decided: Redwave, `dev.kruhlyk.redwave`** ([00](00-prd.md#1-name-and-positioning)); the icon is still open | stage 0 |
 | 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). `account/accounts_list` was checked on 2026-11-18 (AC13) and returned no accounts, so the list comes from `GET /getAccountSwitcherEndpoint` and switching is only a change of `X-Goog-AuthUser` (backlog 1.3; Google accounts only, brand accounts are out of scope). Sign-out ends the session of every account | — |
 | 3 | Whether to show music videos, or only audio with artwork | stages 3–4 |
 | 4 | Whether podcasts and user-uploaded music are needed | stage 2 |
