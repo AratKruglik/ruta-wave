@@ -38,6 +38,19 @@ public actor InnerTubeClient {
         return AccountListItem.list(accountSwitcher: try await send(request))
     }
 
+    public func connectAsGuest() async throws {
+        let snapshot = GuestVisitor.shared.snapshot()
+        let request = try InnerTubeRequest.makeGuest(
+            endpoint: "browse", body: ["browseId": "FEmusic_home"], visitorData: snapshot.value, locale: .current)
+        let raw = try await send(request)["responseContext"]?["visitorData"]?.string
+        guard GuestVisitor.validated(raw) != nil else { throw InnerTubeError.unexpectedResponse }
+        GuestVisitor.shared.accept(raw, generation: snapshot.generation)
+    }
+
+    public static func resetGuestVisitor() {
+        GuestVisitor.shared.reset()
+    }
+
     private func post(
         _ endpoint: String,
         body: [String: String] = [:],

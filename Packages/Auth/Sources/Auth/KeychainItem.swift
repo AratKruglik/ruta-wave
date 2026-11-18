@@ -9,7 +9,13 @@ public struct KeychainError: LocalizedError, Sendable {
     }
 }
 
-struct KeychainItem: Sendable {
+protocol KeychainStore: Sendable {
+    func read() throws(KeychainError) -> Data?
+    func write(_ data: Data) throws(KeychainError)
+    func delete() throws(KeychainError)
+}
+
+struct KeychainItem: KeychainStore {
     let service: String
     let account: String
 

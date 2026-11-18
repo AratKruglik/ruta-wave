@@ -22,14 +22,14 @@ public final class AuthSession {
         didSet { defaults.set(authUserIndex, forKey: Self.authUserIndexKey) }
     }
 
-    private let keychain: KeychainItem
+    private let keychain: any KeychainStore
     private let defaults: UserDefaults
 
     public convenience init() {
-        self.init(keychain: .session, defaults: .standard)
+        self.init(keychain: KeychainItem.session, defaults: .standard)
     }
 
-    init(keychain: KeychainItem, defaults: UserDefaults) {
+    init(keychain: any KeychainStore, defaults: UserDefaults) {
         self.keychain = keychain
         self.defaults = defaults
         authUserIndex = defaults.integer(forKey: Self.authUserIndexKey)
@@ -69,6 +69,25 @@ public final class AuthSession {
         signInError = nil
     }
 
+    public func continueAsGuest() {
+        guard case .keychainUnavailable = state else { return }
+        state = .signedOut
+    }
+
+    // The state guard matters: a successful sign-in dismisses the sheet, which must not wipe the new session.
+    public func cancelSignIn() async {
+        guard case .signedOut = state, !isSigningOut else { return }
+        signInError = nil
+        isSigningOut = true
+        defer { isSigningOut = false }
+        await wipeWebData()
+    }
+
+    private func wipeWebData() async {
+        await WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
+        URLCache.shared.removeAllCachedResponses()
+    }
+
     public func signOut() async {
         guard !isSigningOut else { return }
         isSigningOut = true
@@ -76,8 +95,7 @@ public final class AuthSession {
         signOutError = nil
         isAddingAccount = false
         // WebKit first: a crash mid-wipe must not leave an empty Keychain next to live google.com cookies.
-        await WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
-        URLCache.shared.removeAllCachedResponses()
+        await wipeWebData()
         do {
             try keychain.delete()
         } catch {
@@ -90,6 +108,7 @@ public final class AuthSession {
 
     // Returns false while the cookie set is still incomplete, so the caller keeps observing.
     func completeSignIn(with cookies: [HTTPCookie]) -> Bool {
+        guard !isSigningOut else { return false }
         do {
             let data = try SessionCookies.encode(cookies)
             guard case .signedIn(let restored) = SessionCookies.restore(from: data, now: Date()) else { return false }
@@ -102,5 +121,12 @@ public final class AuthSession {
             signInError = error
         }
         return true
+    }
+}
+
+extension AuthSession.State {
+    public var isSignedIn: Bool {
+        if case .signedIn = self { return true }
+        return false
     }
 }
