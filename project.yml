@@ -1,0 +1,37 @@
+name: Tunewave
+options:
+  deploymentTarget:
+    macOS: "14.0"
+packages:
+  Auth: {path: Packages/Auth}
+  AppSettings: {path: Packages/AppSettings}
+  InnerTube: {path: Packages/InnerTube}
+  PlayerEngine: {path: Packages/PlayerEngine}
+  Plugins: {path: Packages/Plugins}
+  SystemKit: {path: Packages/SystemKit}
+targets:
+  Tunewave:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - package: Auth
+      - package: AppSettings
+      - package: InnerTube
+      - package: PlayerEngine
+      - package: Plugins
+      - package: SystemKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.tunewave
+        PRODUCT_NAME: Tunewave
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+      configs:
+        Release:
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
