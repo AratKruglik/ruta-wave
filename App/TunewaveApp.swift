@@ -12,7 +12,7 @@ struct TunewaveApp: App {
                 case .signedOut:
                     SignInView(session: session)
                 case .signedIn:
-                    SignedInPlaceholderView(session: session)
+                    AccountView(session: session)
                 case .keychainUnavailable:
                     VStack(spacing: 12) {
                         Text("Couldn't access the saved session")

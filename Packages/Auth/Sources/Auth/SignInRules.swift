@@ -9,6 +9,7 @@ public enum SignInRules {
         "consent.google.com", "consent.youtube.com",
         "music.youtube.com", "www.youtube.com",
         "myaccount.google.com", "www.google.com",
+        "gds.google.com",
     ]
 
     // shortcut: Safari version is read from the installed app, falling back to a constant, update the fallback when it ages.
@@ -20,7 +21,12 @@ public enum SignInRules {
 
     public static func isAllowedMainFrameNavigation(_ url: URL) -> Bool {
         guard url.scheme == "https", let host = url.host?.lowercased() else { return false }
-        return allowedHosts.contains(host)
+        return allowedHosts.contains(host) || isRegionalAccountsHost(host)
+    }
+
+    // Google redirects SetSID to a country-specific accounts domain (e.g. accounts.google.com.ua).
+    private static func isRegionalAccountsHost(_ host: String) -> Bool {
+        host.wholeMatch(of: /accounts\.google\.(?:com\.|co\.)?[a-z]{2}/) != nil
     }
 
     public static func musicCookies(_ cookies: [HTTPCookie]) -> [HTTPCookie] {
