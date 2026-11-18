@@ -37,3 +37,4 @@
 {"event":"pending","ts":"2026-11-18T11:53:35.363Z","agent_type":"document-writer","description":"Phase 4/4: documentation","phase":"documentation","aspect":null,"pass":null}
 {"event":"start","ts":"2026-11-18T11:53:35.518Z","agent_id":"a03959c5d9f71ee56","agent_type":"document-writer"}
 {"event":"stop","ts":"2026-11-18T11:53:41.467Z","agent_id":"a7df119dcf665a7e0","agent_type":"","model":null,"input_tokens":null,"output_tokens":null,"cache_creation_input_tokens":null,"cache_read_input_tokens":null,"turns":null,"cost_usd":null,"pricing_note":null,"last_message_chars":41,"usage_source":"transcript_missing"}
+{"event":"stop","ts":"2026-11-18T11:54:22.369Z","agent_id":"a03959c5d9f71ee56","agent_type":"document-writer","model":"claude-haiku-5-5","input_tokens":14,"output_tokens":8653,"cache_creation_input_tokens":48802,"cache_read_input_tokens":225906,"turns":7,"cost_usd":0.126872,"pricing_note":null,"last_message_chars":2064,"usage_source":"measured"}

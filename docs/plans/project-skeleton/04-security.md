@@ -33,6 +33,8 @@
 
 ### 1. `com.apple.security.get-task-allow` у Release-збірці — `project.yml:24-34` (`targets.Tunewave.settings`)
 
+> **Статус:** виправлено в цьому PR за рішенням користувача (security fix pass): `configs: Release: CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO`. Перевірено: у Release `get-task-allow` немає, `flags=0x10002(adhoc,runtime)`; у Debug ключ лишився. QA verify rerun: 6/6.
+
 **Проблема.** Ad-hoc підпис (`CODE_SIGN_IDENTITY: "-"`) використовується з `CODE_SIGN_INJECT_BASE_ENTITLEMENTS` за замовчуванням (`YES`). Тому Xcode додає `get-task-allow` у підпис обох конфігурацій, зокрема Release, і звіт розробки це підтверджує (02-development.md:17). Цей entitlement є саме тим винятком Hardened Runtime, який дозволяє іншим процесам отримати task port застосунку. З ним Hardened Runtime і далі блокує `DYLD_*`-ін'єкцію, але вже не захищає від під'єднання налагоджувача. Також не справджується очікування «Hardened Runtime увімкнено» з docs/02 §1: Release-збірка фактично налагоджувана.
 
 **Сценарій експлуатації (з'явиться з backlog 1.1).** Шкідливий процес працює від імені того самого користувача і підписаний ad-hoc з `com.apple.security.cs.debugger`, а це не restricted entitlement. На Mac з увімкненим Developer Mode, що типово для машини з Xcode, він отримує task port Tunewave. Далі він читає пам'ять процесу або виконує код усередині нього. Від імені Tunewave можна прочитати Keychain-елементи з сесійними cookies Google, і ACL Keychain не покаже запиту. Ці cookies дають повний доступ до Google-акаунта в межах YouTube (docs/05 §2.4).
