@@ -15,6 +15,7 @@
 | 9 | Web view memory use | high | 150–300 MB on top of the native UI | acceptable; still far less than Electron |
 | 10 | Amount of work: a native UI is effectively a new client | high | the project drags on | stages are ordered so that after stage 5 there is an app fit for daily use with no plugins at all |
 | 11 | Ad-hoc signature: Keychain and system permissions are requested again after every new build | high | repeated Keychain password prompt or repeated sign-in | acceptable for personal use; check at stage 8, and if needed use a local self-signed certificate with a stable identity |
+| 12 | Guest mode: signed-out playback includes YouTube audio ads, and the hidden web view plays them | certain for guests | ads between tracks for users who are not signed in | accepted (decision 2026-11-18): guest mode is in scope (backlog 1.4); ads are not blocked or skipped. Signing in with a Premium account removes them |
 
 ## 2. Legal and policy constraints
 
@@ -57,7 +58,7 @@ They need a decision from the user or are settled at the stage shown.
 | # | Question | When |
 |---|---|---|
 | 1 | App name, bundle ID, icon | stage 0 |
-| 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). `account/accounts_list` was checked on 2026-11-18 (AC13) and returned no accounts, so the account list and switching moved to backlog 1.3; stage 1.2 shows only the active account (Google accounts only, brand accounts are out of scope). Sign-out ends the session of every account | — |
+| 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). `account/accounts_list` was checked on 2026-11-18 (AC13) and returned no accounts, so the list comes from `GET /getAccountSwitcherEndpoint` and switching is only a change of `X-Goog-AuthUser` (backlog 1.3; Google accounts only, brand accounts are out of scope). Sign-out ends the session of every account | — |
 | 3 | Whether to show music videos, or only audio with artwork | stages 3–4 |
 | 4 | Whether podcasts and user-uploaded music are needed | stage 2 |
 | 5 | Source of synchronized lyrics: YouTube only, or third-party services too (LRCLIB and others) | stage 6 |

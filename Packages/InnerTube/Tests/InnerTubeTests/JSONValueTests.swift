@@ -31,4 +31,14 @@ private func decode(_ json: String) throws -> JSONValue {
         #expect(value["o"]?[0] == nil)
         #expect(value["a"]?.string == nil)
     }
+
+    @Test(arguments: [")]}'\n{\"a\":1}", "{\"a\":1}"])
+    func responseStripsOptionalXSSIPrefix(raw: String) throws {
+        #expect(try JSONValue(response: Data(raw.utf8))["a"] == .number(1))
+    }
+
+    @Test(arguments: ["garbage", ")]}'garbage", ""])
+    func responseRejectsGarbage(raw: String) {
+        #expect(throws: InnerTubeError.unexpectedResponse) { try JSONValue(response: Data(raw.utf8)) }
+    }
 }

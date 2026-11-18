@@ -32,6 +32,12 @@ public actor InnerTubeClient {
         try AccountInfo(accountMenu: await post("account/account_menu", cookies: cookies, authUserIndex: authUserIndex))
     }
 
+    public func accountSwitcher(cookies: [HTTPCookie], authUserIndex: Int) async throws -> [AccountListItem] {
+        let request = try InnerTubeRequest.makeGet(
+            path: "/getAccountSwitcherEndpoint", cookies: cookies, authUserIndex: authUserIndex, now: Date())
+        return AccountListItem.list(accountSwitcher: try await send(request))
+    }
+
     private func post(
         _ endpoint: String,
         body: [String: String] = [:],
@@ -46,13 +52,13 @@ public actor InnerTubeClient {
             now: Date(),
             locale: .current
         )
+        return try await send(request)
+    }
+
+    private func send(_ request: URLRequest) async throws -> JSONValue {
         let (data, response) = try await session.data(for: request)
         guard let status = (response as? HTTPURLResponse)?.statusCode else { throw InnerTubeError.unexpectedResponse }
         guard (200..<300).contains(status) else { throw InnerTubeError.httpStatus(status) }
-        do {
-            return try JSONDecoder().decode(JSONValue.self, from: data)
-        } catch {
-            throw InnerTubeError.unexpectedResponse
-        }
+        return try JSONValue(response: data)
     }
 }

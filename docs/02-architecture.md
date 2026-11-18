@@ -160,7 +160,9 @@ Everything in this section is **[known]** from open projects and is verified at 
   - `Cookie` — session cookies;
   - `Authorization: SAPISIDHASH <ts>_<sha1("<ts> <SAPISID> <origin>")>`;
   - `X-Origin: https://music.youtube.com`, same for `Origin`;
-  - `X-Goog-AuthUser: 0`.
+  - `X-Goog-AuthUser: <authUserIndex>` — the selected account, 0 by default.
+- `GET https://music.youtube.com/getAccountSwitcherEndpoint` — same headers, no body; the JSON may start with the
+  XSSI prefix `)]}'`, which is optional. The app always sends it with `X-Goog-AuthUser: 0`.
 
 ### 5.2. Endpoints
 
@@ -173,6 +175,7 @@ Everything in this section is **[known]** from open projects and is verified at 
 | `like/like`, `like/dislike`, `like/removelike` | ratings |
 | `playlist/create`, `playlist/delete`, `browse/edit_playlist` | playlist management |
 | `account/account_menu` | account name and avatar, session check |
+| `GET /getAccountSwitcherEndpoint` | the session's Google accounts; `authuser` comes from `signinUrl` (brand accounts are skipped) |
 
 ### 5.3. Module layout
 
@@ -195,6 +198,7 @@ the only place that knows Google's format.
    is shown (the same `ServiceLogin…continue=music.youtube.com` URL the original uses).
    In 1.2 an unauthorized `account/account_menu` response shows an error with
    Retry / Sign out; the automatic return to sign-in arrives in 2.1.
+   Besides exact Google hosts, only `accounts.<google domain>/accounts/SetSID` is allowed, for domains from an embedded snapshot of google.com/supported_domains (taken 2026-11-18); refresh the snapshot manually when a regional sign-in hangs.
 2. After the redirect back to `music.youtube.com`, cookies are read from
    `WKHTTPCookieStore`; at least `SAPISID`, `__Secure-3PAPISID`, `SID`, `HSID`,
    `SSID` are needed **[known]**.

@@ -21,12 +21,14 @@ public enum SignInRules {
 
     public static func isAllowedMainFrameNavigation(_ url: URL) -> Bool {
         guard url.scheme == "https", let host = url.host?.lowercased() else { return false }
-        return allowedHosts.contains(host) || isRegionalAccountsHost(host)
+        return allowedHosts.contains(host) || isRegionalSetSID(url, host: host)
     }
 
     // Google redirects SetSID to a country-specific accounts domain (e.g. accounts.google.com.ua).
-    private static func isRegionalAccountsHost(_ host: String) -> Bool {
-        host.wholeMatch(of: /accounts\.google\.(?:com\.|co\.)?[a-z]{2}/) != nil
+    private static func isRegionalSetSID(_ url: URL, host: String) -> Bool {
+        host.hasPrefix("accounts.")
+            && GoogleSupportedDomains.all.contains(String(host.dropFirst("accounts.".count)))
+            && url.path(percentEncoded: true) == "/accounts/SetSID"
     }
 
     public static func musicCookies(_ cookies: [HTTPCookie]) -> [HTTPCookie] {

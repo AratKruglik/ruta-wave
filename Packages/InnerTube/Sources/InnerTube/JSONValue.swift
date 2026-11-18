@@ -25,6 +25,17 @@ enum JSONValue: Decodable, Sendable, Equatable {
         }
     }
 
+    // The switcher endpoint may prefix its JSON with the XSSI guard `)]}'`.
+    init(response data: Data) throws(InnerTubeError) {
+        let guardPrefix = Data(")]}'".utf8)
+        let body = data.starts(with: guardPrefix) ? data.dropFirst(guardPrefix.count) : data[...]
+        do {
+            self = try JSONDecoder().decode(JSONValue.self, from: Data(body))
+        } catch {
+            throw .unexpectedResponse
+        }
+    }
+
     subscript(key: String) -> JSONValue? {
         guard case .object(let dict) = self else { return nil }
         return dict[key]
