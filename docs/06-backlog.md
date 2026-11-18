@@ -22,7 +22,8 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 | ID | Branch | What | Depends on | Run |
 |---|---|---|---|---|
 | [x] 1.1 ⛔ | `feature/auth-signin` | `Auth`: sign-in window on `WKWebView`, Safari UA, success detection via `SAPISID`, cookies → Keychain, sign-out. **Go/no-go:** if Google blocks the web view, stop and pick a fallback | 0.2 | `/sdlc:start "Auth package: Google sign-in in WKWebView, cookie capture to Keychain, sign-out (docs/03 stage 1)" --type=feature` |
-| [ ] 1.2 | `feature/innertube-core` | `JSONValue`, `InnerTubeClient` actor, `SAPISIDHASH` (+ vector test), `account/account_menu`, account screen with name/avatar | 1.1 | `/sdlc:start "InnerTube core client: WEB_REMIX context, SAPISIDHASH signing, account_menu request and account screen" --type=feature` |
+| [x] 1.2 | `feature/innertube-core` | `JSONValue`, `InnerTubeClient` actor, `SAPISIDHASH` (+ vector test), `account/account_menu`, account screen with name/avatar | 1.1 | `/sdlc:start "InnerTube core client: WEB_REMIX context, SAPISIDHASH signing, account_menu request and account screen" --type=feature` |
+| [ ] 1.3 | `feature/account-switching` | Account list and switching: find the endpoint/body WEB_REMIX uses for the account switcher (accounts_list with this body returns no accounts), list + switch UI, index fallback | 1.2 | `/sdlc:start "Account list and switching for multiple Google accounts in the session" --type=feature` |
 
 > Security note for 1.1 (from 0.2 review): `WKWebsiteDataStore.default()` persists cookies on disk under ~/Library outside the Keychain — include this in the 1.1 threat model.
 

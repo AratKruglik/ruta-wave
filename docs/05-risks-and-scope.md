@@ -57,7 +57,7 @@ They need a decision from the user or are settled at the stage shown.
 | # | Question | When |
 |---|---|---|
 | 1 | App name, bundle ID, icon | stage 0 |
-| 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). The account list and switching UI come with `account_menu` (stage 1.2). Sign-out ends the session of every account | — |
+| 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). `account/accounts_list` was checked on 2026-11-18 (AC13) and returned no accounts, so the account list and switching moved to backlog 1.3; stage 1.2 shows only the active account (Google accounts only, brand accounts are out of scope). Sign-out ends the session of every account | — |
 | 3 | Whether to show music videos, or only audio with artwork | stages 3–4 |
 | 4 | Whether podcasts and user-uploaded music are needed | stage 2 |
 | 5 | Source of synchronized lyrics: YouTube only, or third-party services too (LRCLIB and others) | stage 6 |

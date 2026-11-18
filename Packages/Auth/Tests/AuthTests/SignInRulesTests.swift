@@ -40,8 +40,14 @@ func makeCookie(_ name: String, domain: String = ".youtube.com", expires: Date? 
         ("https://consent.google.com/", true), ("https://consent.youtube.com/", true),
         ("https://music.youtube.com/", true), ("https://www.youtube.com/", true),
         ("https://myaccount.google.com/", true), ("https://www.google.com/", true),
-        ("https://Accounts.Google.com/", true),
-        ("http://accounts.google.com/", false), ("https://google.com.evil.example/", false),
+        ("https://Accounts.Google.com/", true), ("https://gds.google.com/web/landing", true),
+        ("https://accounts.google.com.ua/accounts/SetSID", true),
+        ("https://accounts.google.de/accounts/SetSID", true),
+        ("https://accounts.google.co.uk/accounts/SetSID", true),
+        ("https://accounts.google.xyz/", false), ("https://accounts.google.com.evil.ua/", false),
+        ("https://evil.accounts.google.com.ua/", false), ("https://accounts.google.com.ua.evil.com/", false),
+        ("http://accounts.google.com.ua/", false),
+        ("http://accounts.google.com/", false),("https://google.com.evil.example/", false),
         ("https://notyoutube.com/", false), ("https://evil.example/", false), ("about:blank", false),
     ])
     func allowlist(url: String, allowed: Bool) {

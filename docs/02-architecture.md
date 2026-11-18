@@ -191,9 +191,10 @@ the only place that knows Google's format.
 
 ## 6. Auth
 
-1. If the Keychain has no cookies, or `account/account_menu` returns an
-   unauthorized response, a window with a `WKWebView` on Google's sign-in page
+1. If the Keychain has no cookies, a window with a `WKWebView` on Google's sign-in page
    is shown (the same `ServiceLogin…continue=music.youtube.com` URL the original uses).
+   In 1.2 an unauthorized `account/account_menu` response shows an error with
+   Retry / Sign out; the automatic return to sign-in arrives in 2.1.
 2. After the redirect back to `music.youtube.com`, cookies are read from
    `WKHTTPCookieStore`; at least `SAPISID`, `__Secure-3PAPISID`, `SID`, `HSID`,
    `SSID` are needed **[known]**.

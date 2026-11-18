@@ -48,7 +48,10 @@ public final class AuthSession {
         case .signedIn(let cookies):
             state = .signedIn(cookies: cookies)
         case .signedOut, .corrupt:
-            if data != nil { try? keychain.delete() }
+            if data != nil {
+                try? keychain.delete()
+                authUserIndex = 0
+            }
             state = .signedOut
         }
     }
@@ -74,6 +77,7 @@ public final class AuthSession {
         isAddingAccount = false
         // WebKit first: a crash mid-wipe must not leave an empty Keychain next to live google.com cookies.
         await WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
+        URLCache.shared.removeAllCachedResponses()
         do {
             try keychain.delete()
         } catch {
@@ -90,6 +94,7 @@ public final class AuthSession {
             let data = try SessionCookies.encode(cookies)
             guard case .signedIn(let restored) = SessionCookies.restore(from: data, now: Date()) else { return false }
             try keychain.write(data)
+            if !isAddingAccount { authUserIndex = 0 }
             state = .signedIn(cookies: restored)
             signInError = nil
             isAddingAccount = false
