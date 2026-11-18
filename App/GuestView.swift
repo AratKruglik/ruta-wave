@@ -40,7 +40,7 @@ private struct GuestContent: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("Tunewave").font(.largeTitle)
+            Text("Redwave").font(.largeTitle)
             Group {
                 switch status {
                 case .connecting:

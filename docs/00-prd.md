@@ -44,10 +44,9 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
 | DMG file | `Redwave-<version>-arm64.dmg` |
 | URL scheme for links (stage 5.4) | `redwave://` |
 
-The code still uses the old identifiers; the rename is backlog row **0.3**
-([06](06-backlog.md#stage-0-preparation)). Changing the bundle ID moves the
-Keychain item and the WebKit data store, so the session of the old build
-stays on disk under `dev.kruhlyk.tunewave` — 0.3 must remove it
+Backlog row **0.3** ([06](06-backlog.md#stage-0-preparation)) moved the code
+to these identifiers. The renamed build removes the session stores of the
+previous identifier on launch
 ([05 §2.4](05-risks-and-scope.md#2-legal-and-policy-constraints)).
 
 Not checked yet: whether "Redwave" is free on GitHub, as a domain, and as a

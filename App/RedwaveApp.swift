@@ -3,8 +3,13 @@ import InnerTube
 import SwiftUI
 
 @main
-struct TunewaveApp: App {
+struct RedwaveApp: App {
     @State private var session = AuthSession()
+
+    init() {
+        // SecItemDelete can block on a Keychain prompt for the old binary's item, so this must stay off the main actor.
+        Task.detached(priority: .utility) { LegacyStores.remove() }
+    }
 
     var body: some Scene {
         WindowGroup {
