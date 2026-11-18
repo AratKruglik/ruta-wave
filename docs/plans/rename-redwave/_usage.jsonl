@@ -1,0 +1,4 @@
+{"event":"pending","ts":"2026-11-18T21:59:41.513Z","agent_type":"business-analyst","description":"Phase 1/4: business_analysis","phase":"business_analysis","aspect":null,"pass":null}
+{"event":"start","ts":"2026-11-18T21:59:41.618Z","agent_id":"a90f2ff062971d87d","agent_type":"business-analyst"}
+{"event":"stop","ts":"2026-11-18T21:59:51.124Z","agent_id":"a41ed0843ff86b67e","agent_type":"","model":null,"input_tokens":null,"output_tokens":null,"cache_creation_input_tokens":null,"cache_read_input_tokens":null,"turns":null,"cost_usd":null,"pricing_note":null,"last_message_chars":42,"usage_source":"transcript_missing"}
+{"event":"stop","ts":"2026-11-18T22:03:45.720Z","agent_id":"a90f2ff062971d87d","agent_type":"business-analyst","model":"claude-opus-5-5","input_tokens":21,"output_tokens":17755,"cache_creation_input_tokens":76739,"cache_read_input_tokens":469354,"turns":10,"cost_usd":1.158276,"pricing_note":null,"last_message_chars":6307,"usage_source":"measured"}
