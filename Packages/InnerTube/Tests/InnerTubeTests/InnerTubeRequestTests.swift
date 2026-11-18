@@ -73,4 +73,32 @@ private let cookies = [
             try InnerTubeRequest.make(endpoint: "x", cookies: onlyMusic, authUserIndex: 0, now: now, locale: .init(identifier: "en_US"))
         }
     }
+
+    @Test func getRequestHasSameAuthHeadersAndNoBody() throws {
+        let request = try InnerTubeRequest.makeGet(path: "/getAccountSwitcherEndpoint", cookies: cookies, authUserIndex: 0, now: now)
+        #expect(request.httpMethod == "GET")
+        #expect(request.url?.absoluteString == "https://music.youtube.com/getAccountSwitcherEndpoint")
+        #expect(request.httpBody == nil)
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == nil)
+        let expected = SAPISIDHash.make(sapisid: "test-root", timestamp: 1_700_000_000, origin: "https://music.youtube.com")
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "SAPISIDHASH \(expected)")
+        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "0")
+        #expect(request.value(forHTTPHeaderField: "Origin") == "https://music.youtube.com")
+        #expect(request.value(forHTTPHeaderField: "X-Origin") == "https://music.youtube.com")
+        let header = try #require(request.value(forHTTPHeaderField: "Cookie"))
+        #expect(header.contains("SID=test-sid"))
+        #expect(!header.contains("test-google"))
+    }
+
+    @Test func getRequestThrowsWithoutRootSAPISID() {
+        let onlyMusic = [cookie("SAPISID", "test-music", domain: "music.youtube.com")]
+        #expect(throws: InnerTubeError.missingSAPISID) {
+            try InnerTubeRequest.makeGet(path: "/getAccountSwitcherEndpoint", cookies: onlyMusic, authUserIndex: 0, now: now)
+        }
+    }
+
+    @Test func getRequestCarriesGivenAuthUserIndex() throws {
+        let request = try InnerTubeRequest.makeGet(path: "/p", cookies: cookies, authUserIndex: 3, now: now)
+        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "3")
+    }
 }

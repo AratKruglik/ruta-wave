@@ -23,7 +23,10 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 |---|---|---|---|---|
 | [x] 1.1 ⛔ | `feature/auth-signin` | `Auth`: sign-in window on `WKWebView`, Safari UA, success detection via `SAPISID`, cookies → Keychain, sign-out. **Go/no-go:** if Google blocks the web view, stop and pick a fallback | 0.2 | `/sdlc:start "Auth package: Google sign-in in WKWebView, cookie capture to Keychain, sign-out (docs/03 stage 1)" --type=feature` |
 | [x] 1.2 | `feature/innertube-core` | `JSONValue`, `InnerTubeClient` actor, `SAPISIDHASH` (+ vector test), `account/account_menu`, account screen with name/avatar | 1.1 | `/sdlc:start "InnerTube core client: WEB_REMIX context, SAPISIDHASH signing, account_menu request and account screen" --type=feature` |
-| [ ] 1.3 | `feature/account-switching` | Account list and switching: find the endpoint/body WEB_REMIX uses for the account switcher (accounts_list with this body returns no accounts), list + switch UI, index fallback | 1.2 | `/sdlc:start "Account list and switching for multiple Google accounts in the session" --type=feature` |
+| [x] 1.3 | `feature/account-switching` | Account list and switching: find the endpoint/body WEB_REMIX uses for the account switcher (accounts_list with this body returns no accounts), list + switch UI, index fallback | 1.2 | `/sdlc:start "Account list and switching for multiple Google accounts in the session" --type=feature` |
+| [ ] 1.4 | `feature/guest-mode` | Guest mode: the app starts without sign-in; `InnerTubeClient` sends unauthenticated requests (`visitorData`, no `Cookie`/`Authorization`); "Sign in" becomes an optional button; account-only actions (library, likes, playlists) are hidden or prompt to sign in | 1.2 | `/sdlc:start "Guest mode: browse and play without signing in, optional sign-in, unauthenticated InnerTube requests" --type=feature` |
+
+> ~~Security note for 1.3~~ **resolved in 1.3:** the regex is replaced by a dated snapshot of google.com/supported_domains and only `/accounts/SetSID` is allowed on regional hosts. Original note (from the automated review of 1.2): `SignInRules.isRegionalAccountsHost` accepts any `accounts.google.(com.|co.)?<cc>` host. If some `google.com.<cc>` / `google.co.<cc>` domain is not Google-owned, a page on it could load in the credential web view. Replace the regex with Google's published supported-domains list (google.com/supported_domains) and allow only the `/accounts/SetSID` path on those hosts.
 
 > Security note for 1.1 (from 0.2 review): `WKWebsiteDataStore.default()` persists cookies on disk under ~/Library outside the Keychain — include this in the 1.1 threat model.
 
@@ -31,7 +34,7 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 
 | ID | Branch | What | Depends on | Run |
 |---|---|---|---|---|
-| [ ] 2.1 | `feature/innertube-paging-errors` | `INNERTUBE_CLIENT_VERSION` from the page + cache, `Page<T>`/`continuation`, errors (401 → sign-in, retry, unknown blocks skipped) | 1.2 | `/sdlc:start "InnerTube client version discovery, continuation paging and error handling" --type=feature` |
+| [ ] 2.1 | `feature/innertube-paging-errors` | `INNERTUBE_CLIENT_VERSION` from the page + cache, `Page<T>`/`continuation`, errors (401 → sign-in, retry, unknown blocks skipped); works for guests too | 1.2, 1.4 | `/sdlc:start "InnerTube client version discovery, continuation paging and error handling" --type=feature` |
 | [ ] 2.2 | `feature/innertube-browse-search` | Models; home, explore, search, suggestions parsers; fixtures without personal data; tests | 2.1 | `/sdlc:start "InnerTube models and parsers for home, explore, search and suggestions with fixture tests" --type=feature` |
 | [ ] 2.3 | `feature/innertube-entities` | Album, artist, playlist, library, history, `next` (up next) parsers; tests | 2.2 | `/sdlc:start "InnerTube parsers for album, artist, playlist, library, history and up-next queue" --type=feature` |
 | [ ] 2.4 | `feature/innertube-mutations` | `like/*`, `playlist/create|delete`, `browse/edit_playlist` | 2.1 | `/sdlc:start "InnerTube mutation endpoints: likes and playlist management" --type=feature` |
@@ -47,11 +50,11 @@ Legend: ⛔ — decision point / manual check by the user (sign-in, listening to
 
 | ID | Branch | What | Depends on | Run |
 |---|---|---|---|---|
-| [ ] 4.1 | `feature/ui-shell-player-bar` | `NavigationSplitView`, sidebar, routes, player bar | 3.2 | `/sdlc:start "Main window shell with NavigationSplitView, routing and player bar" --type=feature` |
+| [ ] 4.1 | `feature/ui-shell-player-bar` | `NavigationSplitView`, sidebar, routes, player bar; guest and signed-in states (Sign in button for guests) | 3.2, 1.4 | `/sdlc:start "Main window shell with NavigationSplitView, routing and player bar" --type=feature` |
 | [ ] 4.2 | `feature/ui-home-explore` | Home (shelves), Explore | 4.1, 2.2 | `/sdlc:start "Home and Explore screens with horizontal shelves" --type=feature` |
 | [ ] 4.3 | `feature/ui-search` | Search: toolbar field, suggestions, filters, results | 4.1, 2.2 | `/sdlc:start "Search screen with suggestions, filters and results" --type=feature` |
 | [ ] 4.4 | `feature/ui-entity-pages` | Album, artist, playlist pages (with paging) | 4.1, 2.3 | `/sdlc:start "Album, artist and playlist pages with paging" --type=feature` |
-| [ ] 4.5 | `feature/ui-library` | Library: playlists, songs, albums, artists, liked | 4.4 | `/sdlc:start "Library screens: playlists, songs, albums, artists, liked" --type=feature` |
+| [ ] 4.5 | `feature/ui-library` | Library: playlists, songs, albums, artists, liked; guests see a sign-in prompt instead | 4.4 | `/sdlc:start "Library screens: playlists, songs, albums, artists, liked" --type=feature` |
 | [ ] 4.6 | `feature/ui-queue-menus` | Queue panel (jump, drag, remove), context menus | 4.4, 2.4 | `/sdlc:start "Queue panel and context menus for tracks, albums and playlists" --type=feature` |
 | [ ] 4.7 | `feature/ui-polish-a11y` | Loading/empty/error states, keyboard, VoiceOver | 4.2–4.6 | `/sdlc:start "Loading, empty and error states, keyboard shortcuts and VoiceOver accessibility" --type=feature` |
 
