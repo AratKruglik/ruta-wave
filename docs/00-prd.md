@@ -31,7 +31,7 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
   They appear only in the descriptive subtitle ("a client **for** YouTube Music"),
   never in the name, icon or bundle ID.
 - Short, easy to say in Ukrainian and English, and different from existing
-  clients (Pear Desktop, Kaset and others).
+  clients (Pear Desktop and others).
 
 **Identifiers that follow from the name** **[decision]**:
 
@@ -57,8 +57,8 @@ registered trademark in software (class 9). Do it before the first public releas
 
 ## 2. Problem
 
-YouTube Music has no desktop app on macOS. People listen in a browser tab or
-in an Electron wrapper ([pear-desktop](01-reverse-engineering.md)). Both:
+YouTube Music has no native macOS app. People listen in a browser tab, an
+installed web app (PWA) or an Electron wrapper ([pear-desktop](01-reverse-engineering.md)). Both:
 
 - feel like a web page: no native menus, sidebar, keyboard focus, VoiceOver,
   window behaviour or system look;
