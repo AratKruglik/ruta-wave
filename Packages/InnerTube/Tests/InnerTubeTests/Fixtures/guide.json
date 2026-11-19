@@ -1,0 +1,140 @@
+{
+ "items": [
+  {
+   "guideSectionRenderer": {
+    "items": [
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "runs": [
+         {
+          "text": "Home"
+         }
+        ]
+       },
+       "icon": {
+        "iconType": "TAB_HOME"
+       },
+       "isPrimary": true,
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "FEmusic_home"
+        }
+       }
+      }
+     },
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "runs": [
+         {
+          "text": "Explore"
+         }
+        ]
+       },
+       "icon": {
+        "iconType": "TAB_EXPLORE"
+       },
+       "isPrimary": true,
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "FEmusic_explore"
+        }
+       }
+      }
+     },
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "runs": [
+         {
+          "text": "Library"
+         }
+        ]
+       },
+       "icon": {
+        "iconType": "TAB_BOOKMARK"
+       },
+       "isPrimary": true,
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "FEmusic_library_landing"
+        }
+       },
+       "targetId": "library-guide-item"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "guideSectionRenderer": {
+    "items": [
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "simpleText": "Liked music"
+       },
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "VLLM"
+        }
+       },
+       "thumbnail": {
+        "thumbnails": [
+         {
+          "height": 48,
+          "url": "https://yt3.googleusercontent.com/placeholder=s48",
+          "width": 48
+         }
+        ]
+       }
+      }
+     },
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "simpleText": "Placeholder playlist 1"
+       },
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "VLPLplaceholder0000000000000000000001"
+        }
+       },
+       "thumbnail": {
+        "thumbnails": [
+         {
+          "height": 48,
+          "url": "https://yt3.googleusercontent.com/placeholder=s48",
+          "width": 48
+         }
+        ]
+       }
+      }
+     },
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "simpleText": "Placeholder playlist 2"
+       },
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "VLPLplaceholder0000000000000000000002"
+        }
+       },
+       "thumbnail": {
+        "thumbnails": [
+         {
+          "height": 48,
+          "url": "https://yt3.googleusercontent.com/placeholder=s48",
+          "width": 48
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

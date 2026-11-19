@@ -14,6 +14,13 @@ public struct BrowseTarget: Sendable, Equatable, Hashable {
     public static let newReleases = BrowseTarget(browseId: "FEmusic_new_releases")
     public static let moodsAndGenres = BrowseTarget(browseId: "FEmusic_moods_and_genres")
     public static let charts = BrowseTarget(browseId: "FEmusic_charts")
+    public static let likedPlaylists = BrowseTarget(browseId: "FEmusic_liked_playlists")
+    public static let likedSongs = BrowseTarget(browseId: "FEmusic_liked_videos")
+    public static let likedAlbums = BrowseTarget(browseId: "FEmusic_liked_albums")
+    public static let libraryArtists = BrowseTarget(browseId: "FEmusic_library_corpus_track_artists")
+    public static let librarySubscriptions = BrowseTarget(browseId: "FEmusic_library_corpus_artists")
+    public static let history = BrowseTarget(browseId: "FEmusic_history")
+    public static let likedMusic = BrowseTarget(browseId: "VLLM")
 }
 
 /// An artist (`UC…`) or album (`MPREb…`) link inside a subtitle.

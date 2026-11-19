@@ -1,0 +1,488 @@
+{
+ "onResponseReceivedActions": [
+  {
+   "appendContinuationItemsAction": {
+    "continuationItems": [
+     {
+      "musicResponsiveListItemRenderer": {
+       "fixedColumns": [
+        {
+         "musicResponsiveListItemFixedColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL",
+          "text": {
+           "runs": [
+            {
+             "text": "3:29"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "flexColumns": [
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "watchEndpoint": {
+               "params": "8gECGAM%3D",
+               "playlistId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg",
+               "videoId": "TnGzgenHpvU",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                }
+               }
+              }
+             },
+             "text": "Long Train Runnin'"
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                }
+               },
+               "browseId": "UCu_glVzsM9pvbSyXi2zzuVA"
+              }
+             },
+             "text": "The Doobie Brothers"
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM",
+          "text": {}
+         }
+        }
+       ],
+       "multiSelectCheckbox": {
+        "checkboxRenderer": {
+         "checkedState": "CHECKBOX_CHECKED_STATE_UNCHECKED",
+         "onSelectionChangeCommand": {
+          "updateMultiSelectStateCommand": {
+           "multiSelectItem": "Ch8KC1RuR3pnZW5IcHZVEhA3ODA2MDVCQzY5QzZDMjUw",
+           "multiSelectParams": "CAISK1JEQ0xBSzV1eV9uWmlHOWVoel9NUW9XUXhZNXlFbHNMSENjRzB0djlQUmc="
+          }
+         }
+        }
+       },
+       "overlay": {
+        "musicItemThumbnailOverlayRenderer": {
+         "background": {
+          "verticalGradient": {
+           "gradientLayerColors": [
+            "3422552064",
+            "3422552064"
+           ]
+          }
+         },
+         "content": {
+          "musicPlayButtonRenderer": {
+           "activeBackgroundColor": 0,
+           "activeScaleFactor": 1,
+           "backgroundColor": 0,
+           "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+           "iconColor": 4294967295,
+           "iconLoadingColor": 0,
+           "loadingIndicatorColor": 14745645,
+           "pauseIcon": {
+            "iconType": "PAUSE"
+           },
+           "playIcon": {
+            "iconType": "PLAY_ARROW"
+           },
+           "playNavigationEndpoint": {
+            "watchEndpoint": {
+             "params": "8gECGAM%3D",
+             "playerParams": "ygYQNzgwNjA1QkM2OUM2QzI1MA%3D%3D",
+             "playlistId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg",
+             "playlistSetVideoId": "780605BC69C6C250",
+             "videoId": "TnGzgenHpvU",
+             "watchEndpointMusicSupportedConfigs": {
+              "watchEndpointMusicConfig": {
+               "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+              }
+             }
+            }
+           },
+           "playingIcon": {
+            "iconType": "VOLUME_UP"
+           },
+           "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+          }
+         },
+         "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+         "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+        }
+       },
+       "playlistItemData": {
+        "playlistSetVideoId": "780605BC69C6C250",
+        "videoId": "TnGzgenHpvU"
+       },
+       "thumbnail": {
+        "musicThumbnailRenderer": {
+         "thumbnail": {
+          "thumbnails": [
+           {
+            "height": 225,
+            "url": "https://i.ytimg.com/vi/TnGzgenHpvU/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3lh_zEeoEyEIFG9hVRyldWkpdWm3g",
+            "width": 400
+           }
+          ]
+         },
+         "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+         "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+        }
+       }
+      }
+     },
+     {
+      "musicResponsiveListItemRenderer": {
+       "fixedColumns": [
+        {
+         "musicResponsiveListItemFixedColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL",
+          "text": {
+           "runs": [
+            {
+             "text": "3:42"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "flexColumns": [
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "watchEndpoint": {
+               "params": "8gECGAM%3D",
+               "playlistId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg",
+               "videoId": "0CVLVaBECuc",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                }
+               }
+              }
+             },
+             "text": "Small Town (Official Music Video)"
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                }
+               },
+               "browseId": "UCmlelS5UQVygg4mLuJSf6pw"
+              }
+             },
+             "text": "John Mellencamp"
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM",
+          "text": {}
+         }
+        }
+       ],
+       "multiSelectCheckbox": {
+        "checkboxRenderer": {
+         "checkedState": "CHECKBOX_CHECKED_STATE_UNCHECKED",
+         "onSelectionChangeCommand": {
+          "updateMultiSelectStateCommand": {
+           "multiSelectItem": "Ch8KCzBDVkxWYUJFQ3VjEhA0OTQ5QjlEMDgzN0FBNUIw",
+           "multiSelectParams": "CAISK1JEQ0xBSzV1eV9uWmlHOWVoel9NUW9XUXhZNXlFbHNMSENjRzB0djlQUmc="
+          }
+         }
+        }
+       },
+       "overlay": {
+        "musicItemThumbnailOverlayRenderer": {
+         "background": {
+          "verticalGradient": {
+           "gradientLayerColors": [
+            "3422552064",
+            "3422552064"
+           ]
+          }
+         },
+         "content": {
+          "musicPlayButtonRenderer": {
+           "activeBackgroundColor": 0,
+           "activeScaleFactor": 1,
+           "backgroundColor": 0,
+           "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+           "iconColor": 4294967295,
+           "iconLoadingColor": 0,
+           "loadingIndicatorColor": 14745645,
+           "pauseIcon": {
+            "iconType": "PAUSE"
+           },
+           "playIcon": {
+            "iconType": "PLAY_ARROW"
+           },
+           "playNavigationEndpoint": {
+            "watchEndpoint": {
+             "params": "8gECGAM%3D",
+             "playerParams": "ygYQNDk0OUI5RDA4MzdBQTVCMA%3D%3D",
+             "playlistId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg",
+             "playlistSetVideoId": "4949B9D0837AA5B0",
+             "videoId": "0CVLVaBECuc",
+             "watchEndpointMusicSupportedConfigs": {
+              "watchEndpointMusicConfig": {
+               "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+              }
+             }
+            }
+           },
+           "playingIcon": {
+            "iconType": "VOLUME_UP"
+           },
+           "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+          }
+         },
+         "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+         "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+        }
+       },
+       "playlistItemData": {
+        "playlistSetVideoId": "4949B9D0837AA5B0",
+        "videoId": "0CVLVaBECuc"
+       },
+       "thumbnail": {
+        "musicThumbnailRenderer": {
+         "thumbnail": {
+          "thumbnails": [
+           {
+            "height": 225,
+            "url": "https://i.ytimg.com/vi/0CVLVaBECuc/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3lyWgoAjaLDkiLxTt6QulzZXVZg7A",
+            "width": 400
+           }
+          ]
+         },
+         "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+         "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+        }
+       }
+      }
+     },
+     {
+      "musicResponsiveListItemRenderer": {
+       "fixedColumns": [
+        {
+         "musicResponsiveListItemFixedColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL",
+          "text": {
+           "runs": [
+            {
+             "text": "4:29"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "flexColumns": [
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "watchEndpoint": {
+               "params": "8gECGAM%3D",
+               "playlistId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg",
+               "videoId": "Ug1qRiLUwac",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                }
+               }
+              }
+             },
+             "text": "Hot Blooded"
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                }
+               },
+               "browseId": "UClWBvmriAFpqxngoC7DPhJg"
+              }
+             },
+             "text": "Foreigner"
+            }
+           ]
+          }
+         }
+        },
+        {
+         "musicResponsiveListItemFlexColumnRenderer": {
+          "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM",
+          "text": {
+           "runs": [
+            {
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                }
+               },
+               "browseId": "MPREb_qDv4CCCZpKU"
+              }
+             },
+             "text": "Double Vision (Expanded)"
+            }
+           ]
+          }
+         }
+        }
+       ],
+       "multiSelectCheckbox": {
+        "checkboxRenderer": {
+         "checkedState": "CHECKBOX_CHECKED_STATE_UNCHECKED",
+         "onSelectionChangeCommand": {
+          "updateMultiSelectStateCommand": {
+           "multiSelectItem": "Ch8KC1VnMXFSaUxVd2FjEhBCQzUwREI3MzkxQjdBM0E0",
+           "multiSelectParams": "CAISK1JEQ0xBSzV1eV9uWmlHOWVoel9NUW9XUXhZNXlFbHNMSENjRzB0djlQUmc="
+          }
+         }
+        }
+       },
+       "overlay": {
+        "musicItemThumbnailOverlayRenderer": {
+         "background": {
+          "verticalGradient": {
+           "gradientLayerColors": [
+            "3422552064",
+            "3422552064"
+           ]
+          }
+         },
+         "content": {
+          "musicPlayButtonRenderer": {
+           "activeBackgroundColor": 0,
+           "activeScaleFactor": 1,
+           "backgroundColor": 0,
+           "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+           "iconColor": 4294967295,
+           "iconLoadingColor": 0,
+           "loadingIndicatorColor": 14745645,
+           "pauseIcon": {
+            "iconType": "PAUSE"
+           },
+           "playIcon": {
+            "iconType": "PLAY_ARROW"
+           },
+           "playNavigationEndpoint": {
+            "watchEndpoint": {
+             "params": "8gECGAM%3D",
+             "playerParams": "ygYQQkM1MERCNzM5MUI3QTNBNA%3D%3D",
+             "playlistId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg",
+             "playlistSetVideoId": "BC50DB7391B7A3A4",
+             "videoId": "Ug1qRiLUwac",
+             "watchEndpointMusicSupportedConfigs": {
+              "watchEndpointMusicConfig": {
+               "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+              }
+             }
+            }
+           },
+           "playingIcon": {
+            "iconType": "VOLUME_UP"
+           },
+           "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+          }
+         },
+         "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+         "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+        }
+       },
+       "playlistItemData": {
+        "playlistSetVideoId": "BC50DB7391B7A3A4",
+        "videoId": "Ug1qRiLUwac"
+       },
+       "thumbnail": {
+        "musicThumbnailRenderer": {
+         "thumbnail": {
+          "thumbnails": [
+           {
+            "height": 60,
+            "url": "https://yt3.googleusercontent.com/78XKI4LC4FYwD2wdyaR2Sgcbxds7rBpfkzu4rU1duFUOUU38x_gzbSgsSdEMcp_nnC6_t1bHIOg6N8eCTA=w60-h60-l90-rj",
+            "width": 60
+           },
+           {
+            "height": 120,
+            "url": "https://yt3.googleusercontent.com/78XKI4LC4FYwD2wdyaR2Sgcbxds7rBpfkzu4rU1duFUOUU38x_gzbSgsSdEMcp_nnC6_t1bHIOg6N8eCTA=w120-h120-l90-rj",
+            "width": 120
+           }
+          ]
+         },
+         "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+         "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+        }
+       }
+      }
+     }
+    ],
+    "targetId": "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg"
+   }
+  }
+ ]
+}

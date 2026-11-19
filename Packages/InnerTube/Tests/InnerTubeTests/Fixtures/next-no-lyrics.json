@@ -1,0 +1,516 @@
+{
+ "contents": {
+  "singleColumnMusicWatchNextResultsRenderer": {
+   "tabbedRenderer": {
+    "watchNextTabbedResultsRenderer": {
+     "tabs": [
+      {
+       "tabRenderer": {
+        "content": {
+         "musicQueueRenderer": {
+          "content": {
+           "playlistPanelRenderer": {
+            "contents": [
+             {
+              "playlistPanelVideoRenderer": {
+               "canReorder": true,
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:43"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    },
+                    "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+                   }
+                  },
+                  "text": "Radiohead"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    },
+                    "browseId": "MPREb_ob5cslgCNc0"
+                   }
+                  },
+                  "text": "Kid A"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "2000"
+                 }
+                ]
+               },
+               "navigationEndpoint": {
+                "watchEndpoint": {
+                 "params": "OAHyAQIIAeoEC0w3cDQ3ellLSm9N",
+                 "playerParams": "0gcJCU4BEIKdP_Kw",
+                 "videoId": "L7p47zYKJoM",
+                 "watchEndpointMusicSupportedConfigs": {
+                  "watchEndpointMusicConfig": {
+                   "hasPersistentPlaylistPanel": true,
+                   "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                  }
+                 }
+                }
+               },
+               "queueNavigationEndpoint": {
+                "queueAddEndpoint": {
+                 "params": "Q0FJJTNE",
+                 "queueInsertPosition": "INSERT_AT_END",
+                 "queueTarget": {
+                  "videoId": "L7p47zYKJoM"
+                 }
+                }
+               },
+               "selected": true,
+               "shortBylineText": {
+                "runs": [
+                 {
+                  "text": "Radiohead"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "height": 60,
+                  "url": "https://yt3.googleusercontent.com/yJLXG7QJySOUp57Nff9te1cqhRqvz9BHusWk8c9ek08m-DRv5TJhCqW0HV2tAk5K2ErChBlHEUeFfGt_6A=w60-h60-l90-rj",
+                  "width": 60
+                 },
+                 {
+                  "height": 544,
+                  "url": "https://yt3.googleusercontent.com/yJLXG7QJySOUp57Nff9te1cqhRqvz9BHusWk8c9ek08m-DRv5TJhCqW0HV2tAk5K2ErChBlHEUeFfGt_6A=w544-h544-l90-rj",
+                  "width": 544
+                 }
+                ]
+               },
+               "title": {
+                "runs": [
+                 {
+                  "text": "Treefingers"
+                 }
+                ]
+               },
+               "videoId": "L7p47zYKJoM"
+              }
+             },
+             {
+              "automixPreviewVideoRenderer": {
+               "content": {
+                "automixPlaylistVideoRenderer": {
+                 "automixMode": "AUTOMIX_MODE_DEFAULT_ON",
+                 "navigationEndpoint": {
+                  "watchPlaylistEndpoint": {
+                   "params": "wAEB8gECeAHqBAtMN3A0N3pZS0pvTQ%3D%3D",
+                   "playlistId": "RDAMVML7p47zYKJoM"
+                  }
+                 }
+                }
+               }
+              }
+             }
+            ],
+            "isInfinite": false,
+            "shuffleToggleButton": {
+             "toggleButtonRenderer": {
+              "defaultIcon": {
+               "iconType": "MUSIC_SHUFFLE"
+              },
+              "defaultServiceEndpoint": {
+               "watchPlaylistEndpoint": {
+                "params": "wAEB8gECKAE%3D"
+               }
+              },
+              "toggledIcon": {
+               "iconType": "MUSIC_SHUFFLE"
+              },
+              "toggledServiceEndpoint": {
+               "watchPlaylistEndpoint": {
+                "params": "wAEB"
+               }
+              }
+             }
+            }
+           }
+          },
+          "hack": true,
+          "header": {
+           "musicQueueHeaderRenderer": {
+            "buttons": [
+             {
+              "chipCloudChipRenderer": {
+               "icon": {
+                "iconType": "ADD_TO_PLAYLIST"
+               },
+               "isSelected": false,
+               "navigationEndpoint": {
+                "modalEndpoint": {
+                 "modal": {
+                  "modalWithTitleAndButtonRenderer": {
+                   "button": {
+                    "buttonRenderer": {
+                     "isDisabled": false,
+                     "navigationEndpoint": {
+                      "signInEndpoint": {
+                       "hack": true
+                      }
+                     },
+                     "style": "STYLE_BLUE_TEXT",
+                     "text": {
+                      "runs": [
+                       {
+                        "text": "Sign in"
+                       }
+                      ]
+                     }
+                    }
+                   },
+                   "content": {
+                    "runs": [
+                     {
+                      "text": "Make playlists and share them after signing in"
+                     }
+                    ]
+                   },
+                   "title": {
+                    "runs": [
+                     {
+                      "text": "Save this for later"
+                     }
+                    ]
+                   }
+                  }
+                 }
+                },
+                "saveQueueToPlaylistCommand": {}
+               },
+               "style": {
+                "styleType": "STYLE_TRANSPARENT"
+               },
+               "text": {
+                "runs": [
+                 {
+                  "text": "Save"
+                 }
+                ]
+               },
+               "uniqueId": "Save"
+              }
+             }
+            ],
+            "subtitle": {
+             "runs": [
+              {
+               "text": "Treefingers Mix"
+              }
+             ]
+            },
+            "title": {
+             "runs": [
+              {
+               "text": "Playing from"
+              }
+             ]
+            }
+           }
+          },
+          "musicQueueConfig": {}
+         }
+        },
+        "title": "Up next"
+       }
+      },
+      {
+       "tabRenderer": {
+        "endpoint": {
+         "browseEndpoint": {
+          "browseEndpointContextSupportedConfigs": {
+           "browseEndpointContextMusicConfig": {
+            "pageType": "MUSIC_PAGE_TYPE_TRACK_LYRICS"
+           }
+          },
+          "browseId": "MPLYt_ob5cslgCNc0-5"
+         }
+        },
+        "title": "Lyrics",
+        "unselectable": true
+       }
+      },
+      {
+       "tabRenderer": {
+        "content": {
+         "sectionListRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "PLACEHOLDER_CONTINUATION_1"
+            }
+           }
+          ],
+          "targetId": "L7p47zYKJoM"
+         }
+        },
+        "title": "Comments"
+       }
+      },
+      {
+       "tabRenderer": {
+        "endpoint": {
+         "browseEndpoint": {
+          "browseEndpointContextSupportedConfigs": {
+           "browseEndpointContextMusicConfig": {
+            "pageType": "MUSIC_PAGE_TYPE_TRACK_RELATED"
+           }
+          },
+          "browseId": "MPTRt_ob5cslgCNc0-5"
+         }
+        },
+        "title": "Related"
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "currentVideoEndpoint": {
+  "watchEndpoint": {
+   "ustreamerConfig": "GgIIBQ==",
+   "videoId": "L7p47zYKJoM"
+  }
+ },
+ "playerOverlays": {
+  "playerOverlayRenderer": {
+   "actions": [
+    {
+     "likeButtonRenderer": {
+      "dislikeNavigationEndpoint": {
+       "modalEndpoint": {
+        "modal": {
+         "modalWithTitleAndButtonRenderer": {
+          "button": {
+           "buttonRenderer": {
+            "isDisabled": false,
+            "navigationEndpoint": {
+             "signInEndpoint": {
+              "hack": true
+             }
+            },
+            "style": "STYLE_BLUE_TEXT",
+            "text": {
+             "runs": [
+              {
+               "text": "Sign in"
+              }
+             ]
+            }
+           }
+          },
+          "content": {
+           "runs": [
+            {
+             "text": "Improve your recommendations after signing in"
+            }
+           ]
+          },
+          "title": {
+           "runs": [
+            {
+             "text": "Not a fan?"
+            }
+           ]
+          }
+         }
+        }
+       }
+      },
+      "likeCommand": {
+       "modalEndpoint": {
+        "modal": {
+         "modalWithTitleAndButtonRenderer": {
+          "button": {
+           "buttonRenderer": {
+            "isDisabled": false,
+            "navigationEndpoint": {
+             "signInEndpoint": {
+              "hack": true
+             }
+            },
+            "style": "STYLE_BLUE_TEXT",
+            "text": {
+             "runs": [
+              {
+               "text": "Sign in"
+              }
+             ]
+            }
+           }
+          },
+          "content": {
+           "runs": [
+            {
+             "text": "Improve recommendations and save music after signing in"
+            }
+           ]
+          },
+          "title": {
+           "runs": [
+            {
+             "text": "Like this song"
+            }
+           ]
+          }
+         }
+        }
+       }
+      },
+      "likeStatus": "INDIFFERENT",
+      "likesAllowed": true,
+      "target": {
+       "videoId": "L7p47zYKJoM"
+      }
+     }
+    }
+   ],
+   "browserMediaSession": {
+    "browserMediaSessionRenderer": {
+     "album": {
+      "runs": [
+       {
+        "text": "Kid A"
+       }
+      ]
+     },
+     "thumbnailDetails": {
+      "thumbnails": [
+       {
+        "height": 60,
+        "url": "https://yt3.googleusercontent.com/yJLXG7QJySOUp57Nff9te1cqhRqvz9BHusWk8c9ek08m-DRv5TJhCqW0HV2tAk5K2ErChBlHEUeFfGt_6A=w60-h60-l90-rj",
+        "width": 60
+       },
+       {
+        "height": 544,
+        "url": "https://yt3.googleusercontent.com/yJLXG7QJySOUp57Nff9te1cqhRqvz9BHusWk8c9ek08m-DRv5TJhCqW0HV2tAk5K2ErChBlHEUeFfGt_6A=w544-h544-l90-rj",
+        "width": 544
+       }
+      ]
+     }
+    }
+   }
+  }
+ },
+ "queueContextParams": "CAEaEVJEQU1WTUw3cDQ3ellLSm9NIKaXjJT3k5gDMgtMN3A0N3pZS0pvTUoLTDdwNDd6WUtKb01QAFoECAAQAXgB",
+ "videoReporting": {
+  "reportFormModalRenderer": {
+   "cancelButton": {
+    "buttonRenderer": {
+     "isDisabled": false,
+     "style": "STYLE_TEXT",
+     "text": {
+      "runs": [
+       {
+        "text": "Cancel"
+       }
+      ]
+     }
+    }
+   },
+   "footer": {
+    "runs": [
+     {
+      "text": "If you are the copyright owner of this video and believe it has been uploaded without your permission, please follow "
+     },
+     {
+      "navigationEndpoint": {
+       "urlEndpoint": {
+        "url": "//support.google.com/youtube/answer/2807622?hl=en"
+       }
+      },
+      "text": "these directions"
+     },
+     {
+      "text": " to submit a copyright infringement notice."
+     }
+    ]
+   },
+   "optionsSupportedRenderers": {
+    "optionsRenderer": {
+     "items": [
+      {
+       "optionSelectableItemRenderer": {
+        "submitEndpoint": {
+         "flagEndpoint": {
+          "flagAction": "EAciDwoLTDdwNDd6WUtKb01QBTILTDdwNDd6WUtKb02QASyYAQGoAQM%3D"
+         }
+        },
+        "text": {
+         "runs": [
+          {
+           "text": "Sexual content"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "optionSelectableItemRenderer": {
+        "submitEndpoint": {
+         "flagEndpoint": {
+          "flagAction": "EAciDwoLTDdwNDd6WUtKb01QBTILTDdwNDd6WUtKb02QATaYAQGoAQM%3D"
+         }
+        },
+        "text": {
+         "runs": [
+          {
+           "text": "Violent or repulsive content"
+          }
+         ]
+        }
+       }
+      }
+     ]
+    }
+   },
+   "submitButton": {
+    "buttonRenderer": {
+     "isDisabled": true,
+     "style": "STYLE_BRAND",
+     "text": {
+      "runs": [
+       {
+        "text": "Report"
+       }
+      ]
+     }
+    }
+   },
+   "title": {
+    "runs": [
+     {
+      "text": "Report video"
+     }
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,28 @@
+{
+ "contents": {
+  "sectionListRenderer": {
+   "contents": [
+    {
+     "musicDescriptionShelfRenderer": {
+      "description": {
+       "runs": [
+        {
+         "text": "Placeholder line 1\r\nPlaceholder line 2\r\n\r\nPlaceholder line 3"
+        }
+       ]
+      },
+      "footer": {
+       "runs": [
+        {
+         "text": "Source: LyricFind"
+        }
+       ]
+      },
+      "maxCollapsedLines": 0,
+      "maxExpandedLines": 0
+     }
+    }
+   ]
+  }
+ }
+}

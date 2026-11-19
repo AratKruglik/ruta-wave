@@ -1,0 +1,275 @@
+{
+ "contents": {
+  "singleColumnMusicWatchNextResultsRenderer": {
+   "tabbedRenderer": {
+    "watchNextTabbedResultsRenderer": {
+     "tabs": [
+      {
+       "tabRenderer": {
+        "content": {
+         "musicQueueRenderer": {
+          "hack": true
+         }
+        },
+        "title": "Up next"
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "continuationContents": {
+  "playlistPanelContinuation": {
+   "contents": [
+    {
+     "playlistPanelVideoRenderer": {
+      "canReorder": true,
+      "lengthText": {
+       "runs": [
+        {
+         "text": "6:04"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           },
+           "browseId": "UCGz-eguN8tcic5kUG4s1ZgA"
+          }
+         },
+         "text": "Tame Impala"
+        },
+        {
+         "text": " • "
+        },
+        {
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           },
+           "browseId": "MPREb_AjwAqo5hI0U"
+          }
+         },
+         "text": "Currents"
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "2015"
+        }
+       ]
+      },
+      "navigationEndpoint": {
+       "watchEndpoint": {
+        "index": 50,
+        "params": "OAHyAQIIAQ%3D%3D",
+        "playerParams": "8AUBygYQOEM1RkFFNkIxNjQ4MTNDONIHCQlOARCCnT_ysLAIAg%3D%3D",
+        "playlistId": "RDAMVMjNY_wLukVW0",
+        "playlistSetVideoId": "8C5FAE6B164813C8",
+        "videoId": "tEXYfT_G0W0",
+        "watchEndpointMusicSupportedConfigs": {
+         "watchEndpointMusicConfig": {
+          "hasPersistentPlaylistPanel": true,
+          "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+         }
+        }
+       }
+      },
+      "playlistSetVideoId": "8C5FAE6B164813C8",
+      "queueNavigationEndpoint": {
+       "queueAddEndpoint": {
+        "params": "Q0FJJTNE",
+        "queueInsertPosition": "INSERT_AT_END",
+        "queueTarget": {
+         "videoId": "tEXYfT_G0W0"
+        }
+       }
+      },
+      "selected": false,
+      "shortBylineText": {
+       "runs": [
+        {
+         "text": "Tame Impala"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "height": 60,
+         "url": "https://yt3.googleusercontent.com/J67cuSWAzGMlj8d9orcAZjPHsl8RWcXIXkT1d8mGmx9jmXPvXkYpFzuLnucmaqJwVMqxPlSq1GbqPeQy=w60-h60-l90-rj",
+         "width": 60
+        },
+        {
+         "height": 544,
+         "url": "https://yt3.googleusercontent.com/J67cuSWAzGMlj8d9orcAZjPHsl8RWcXIXkT1d8mGmx9jmXPvXkYpFzuLnucmaqJwVMqxPlSq1GbqPeQy=w544-h544-l90-rj",
+         "width": 544
+        }
+       ]
+      },
+      "title": {
+       "runs": [
+        {
+         "text": "New Person, Same Old Mistakes"
+        }
+       ]
+      },
+      "videoId": "tEXYfT_G0W0"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "canReorder": true,
+      "lengthText": {
+       "runs": [
+        {
+         "text": "4:25"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           },
+           "browseId": "UCyqq-aiu3vEHuf5NhwmOJcw"
+          }
+         },
+         "text": "Lana Del Rey"
+        },
+        {
+         "text": " • "
+        },
+        {
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           },
+           "browseId": "MPREb_0BvQR3pOs9K"
+          }
+         },
+         "text": "Born To Die - The Paradise Edition (Special Version)"
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "2012"
+        }
+       ]
+      },
+      "navigationEndpoint": {
+       "watchEndpoint": {
+        "index": 51,
+        "params": "OAHyAQIIAQ%3D%3D",
+        "playerParams": "8AUBygYQMTM4MDMwREY0ODYxMzVBObAIAg%3D%3D",
+        "playlistId": "RDAMVMjNY_wLukVW0",
+        "playlistSetVideoId": "138030DF486135A9",
+        "videoId": "fRQg_9ulGuI",
+        "watchEndpointMusicSupportedConfigs": {
+         "watchEndpointMusicConfig": {
+          "hasPersistentPlaylistPanel": true,
+          "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+         }
+        }
+       }
+      },
+      "playlistSetVideoId": "138030DF486135A9",
+      "queueNavigationEndpoint": {
+       "queueAddEndpoint": {
+        "params": "Q0FJJTNE",
+        "queueInsertPosition": "INSERT_AT_END",
+        "queueTarget": {
+         "videoId": "fRQg_9ulGuI"
+        }
+       }
+      },
+      "selected": false,
+      "shortBylineText": {
+       "runs": [
+        {
+         "text": "Lana Del Rey"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "height": 60,
+         "url": "https://yt3.googleusercontent.com/F5k4fYPgIA1lnykIMM0dqji6pKcpAgc26CAJB8Z3OCaCSfpyBMUM6ruxvbgpU8GTZfNELXP9dpf4BxlT=w60-h60-l90-rj",
+         "width": 60
+        },
+        {
+         "height": 544,
+         "url": "https://yt3.googleusercontent.com/F5k4fYPgIA1lnykIMM0dqji6pKcpAgc26CAJB8Z3OCaCSfpyBMUM6ruxvbgpU8GTZfNELXP9dpf4BxlT=w544-h544-l90-rj",
+         "width": 544
+        }
+       ]
+      },
+      "title": {
+       "runs": [
+        {
+         "text": "Summertime Sadness"
+        }
+       ]
+      },
+      "videoId": "fRQg_9ulGuI"
+     }
+    }
+   ],
+   "continuations": [
+    {
+     "nextRadioContinuationData": {
+      "continuation": "PLACEHOLDER_CONTINUATION_1"
+     }
+    }
+   ],
+   "isInfinite": true,
+   "numItemsToShow": 25,
+   "playlistId": "RDAMVMjNY_wLukVW0",
+   "shuffleToggleButton": {
+    "toggleButtonRenderer": {
+     "defaultIcon": {
+      "iconType": "MUSIC_SHUFFLE"
+     },
+     "defaultServiceEndpoint": {
+      "watchPlaylistEndpoint": {
+       "params": "wAEB8gECGAE%3D",
+       "playlistId": "RDAMVMjNY_wLukVW0"
+      }
+     },
+     "toggledIcon": {
+      "iconType": "MUSIC_SHUFFLE"
+     },
+     "toggledServiceEndpoint": {
+      "watchPlaylistEndpoint": {
+       "params": "wAEB",
+       "playlistId": "RDAMVMjNY_wLukVW0"
+      }
+     }
+    }
+   }
+  }
+ },
+ "queueContextParams": "CAAaEVJEQU1WTWpOWV93THVrVlcwIABQAVoECAAQAGIAcAF4AQ=="
+}

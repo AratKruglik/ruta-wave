@@ -3,6 +3,7 @@ extension JSONValue {
     var sectionList: JSONValue? {
         self["continuationContents"]?["sectionListContinuation"]
             ?? self["contents"]?["singleColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?["sectionListRenderer"]
+            ?? self["contents"]?["sectionListRenderer"]
     }
 }
 
