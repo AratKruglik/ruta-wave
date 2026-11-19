@@ -112,10 +112,12 @@ A single `Resources/bridge.js` file in the `PlayerEngine` target. It:
   Swift drops anything that is not a trusted-origin, well-formed message;
 - receives commands through `window.__bridge.cmd(name, ...args)`, which calls only whitelisted method names on `#movie_player`.
 
-Site player methods **[known, verify at stage 3]**: `playVideo()`,
+Site player methods **[presence verified on the live page, MC-5, 2026-11-19]**: `playVideo()`,
 `pauseVideo()`, `nextVideo()`, `previousVideo()`, `seekTo(sec)`, `setVolume(0…100)`,
 `getVolume()`, `mute()`, `unMute()`, `getCurrentTime()`, `getDuration()`,
-`getPlayerResponse()`. They stay "verify" until MC-5 is recorded on the live page.
+`getPlayerResponse()`, plus `stopVideo()`, `loadVideoById()`, `setShuffle()`, `setLoop()`,
+`isMuted()` and `getPlayerState()`. Getters were called and returned plausible values; methods with
+side effects were only checked to exist — their behaviour is verified at stage 3.2, when Swift sends commands.
 
 ### 4.3. Contract with Swift
 
