@@ -63,6 +63,9 @@ These shapes only occur when signed in or could not be reproduced as a guest. Th
 | `guide.json` | `guide` signed in: Home, Explore and Library, then Liked music (`VLLM`) and 2 placeholder playlists. Shape after `youtubei.js` (`GuideSection`, `GuideEntry`). It has no owner field. |
 | `history.json` | `FEmusic_history`: "Today" with 2 rows that carry a `REMOVE_FROM_HISTORY` menu item with a `PLACEHOLDER_FEEDBACK_*` token, "Yesterday" with a row that has no token. Shape after `ytmusicapi` (`get_history`). |
 | `next-counterpart.json` | A radio queue with one `playlistPanelVideoWrapperRenderer` (a song with its video counterpart) and a plain row. A guest never received this shape. Shape after `ytmusicapi` (`parse_watch_playlist`). |
+| `playlist-create.json` | `playlist/create` response with a placeholder `playlistId`. Shape after `ytmusicapi` (`create_playlist`). |
+| `edit-playlist.json` | `browse/edit_playlist` response: `STATUS_SUCCEEDED` and two `playlistEditVideoAddedResultData` entries. Shape after `ytmusicapi` (`edit_playlist`, `add_playlist_items`). |
+| `feedback.json` | `feedback` response with two processed entries. Shape after `ytmusicapi` (`remove_history_items`). |
 
 ## Adding a real signed-in capture
 

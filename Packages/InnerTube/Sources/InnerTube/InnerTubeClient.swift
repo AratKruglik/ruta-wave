@@ -8,6 +8,10 @@ public enum InnerTubeError: Error, Sendable, Equatable {
     case unexpectedResponse
     /// A private, deleted or non-existent playlist, album or artist: the server answers 200 without `contents`.
     case notAvailable
+    /// A mutation was called without credentials. No request was sent.
+    case signInRequired
+    /// A mutation argument failed client-side validation. No request was sent.
+    case invalidArgument
 }
 
 extension InnerTubeError {
@@ -189,6 +193,65 @@ public actor InnerTubeClient {
         SearchSuggestions(suggestions: try await fetch("music/get_search_suggestions", body: ["input": input], credentials: credentials))
     }
 
+    public func rate(videoId: String, _ rating: Rating, credentials: Credentials?) async throws {
+        guard !videoId.isEmpty else { throw InnerTubeError.invalidArgument }
+        _ = try await mutate(rating.endpoint, body: ["target": ["videoId": videoId]], credentials: credentials)
+    }
+
+    /// Save to library is `.like`, remove from library is `.indifferent`. An album passes `AlbumPage.audioPlaylistId`.
+    public func rate(playlistId: String, _ rating: Rating, credentials: Credentials?) async throws {
+        let id = try Self.editableId(playlistId)
+        _ = try await mutate(rating.endpoint, body: ["target": ["playlistId": id]], credentials: credentials)
+    }
+
+    /// Returns the bare playlist id. Not retried: after `.network` reload the playlists instead of calling again.
+    public func createPlaylist(
+        title: String, description: String = "", privacy: PlaylistPrivacy = .private, videoIds: [String] = [],
+        credentials: Credentials?
+    ) async throws -> String {
+        guard let title = PlaylistEdit.validTitle(title) else { throw InnerTubeError.invalidArgument }
+        guard !videoIds.contains(where: \.isEmpty) else { throw InnerTubeError.invalidArgument }
+        var body: [String: any Sendable] = ["title": title, "description": description, "privacyStatus": privacy.rawValue]
+        if !videoIds.isEmpty { body["videoIds"] = videoIds }
+        let json = try JSONValue(response: await mutate("playlist/create", body: body, credentials: credentials))
+        guard let id = json["playlistId"]?.string, !id.isEmpty else { throw InnerTubeError.unexpectedResponse }
+        return id
+    }
+
+    public func deletePlaylist(_ playlistId: String, credentials: Credentials?) async throws {
+        let id = try Self.editableId(playlistId)
+        _ = try await mutate("playlist/delete", body: ["playlistId": id], credentials: credentials)
+    }
+
+    /// All edits go in one request, in order. The result lists the rows an `.add` created; it is empty when the response has none.
+    /// `playlistSetVideoId` values are only valid for the account that fetched the playlist.
+    @discardableResult
+    public func editPlaylist(_ playlistId: String, _ edits: [PlaylistEdit], credentials: Credentials?) async throws -> [AddedPlaylistRow] {
+        let id = try Self.editableId(playlistId)
+        guard !edits.isEmpty, edits.allSatisfy(\.isValid) else { throw InnerTubeError.invalidArgument }
+        let body: [String: any Sendable] = ["playlistId": id, "actions": edits.map(\.action)]
+        let json = try JSONValue(response: await mutate("browse/edit_playlist", body: body, credentials: credentials))
+        guard json["status"]?.string == "STATUS_SUCCEEDED" else { throw InnerTubeError.unexpectedResponse }
+        return [AddedPlaylistRow](editResponse: json)
+    }
+
+    /// `channelId` is `ArtistPage.channelId`, never the page `browseId`.
+    public func setSubscribed(_ subscribed: Bool, channelId: String, credentials: Credentials?) async throws {
+        guard !channelId.isEmpty else { throw InnerTubeError.invalidArgument }
+        _ = try await mutate(
+            subscribed ? "subscription/subscribe" : "subscription/unsubscribe", body: ["channelIds": [channelId]],
+            credentials: credentials)
+    }
+
+    /// Tokens are bound to the account that fetched them: send only with its credentials, and cancel a delayed send (Undo window) on sign-out or account switch.
+    public func sendFeedback(_ tokens: [String], credentials: Credentials?) async throws {
+        guard !tokens.isEmpty, !tokens.contains(where: \.isEmpty) else { throw InnerTubeError.invalidArgument }
+        let json = try JSONValue(response: await mutate("feedback", body: ["feedbackTokens": tokens], credentials: credentials))
+        guard let responses = json["feedbackResponses"]?.array, !responses.isEmpty,
+            responses.allSatisfy({ $0["isProcessed"]?.bool == true })
+        else { throw InnerTubeError.unexpectedResponse }
+    }
+
     public static func resetGuestVisitor() {
         GuestVisitor.shared.reset()
     }
@@ -217,6 +280,22 @@ public actor InnerTubeClient {
         let json = try await send(request)
         GuestVisitor.shared.accept(json["responseContext"]?["visitorData"]?.string, generation: snapshot.generation)
         return json
+    }
+
+    // Never retried: a resend after a timeout can duplicate a playlist or flip a toggle back.
+    private func mutate(_ endpoint: String, body: [String: any Sendable], credentials: Credentials?) async throws -> Data {
+        guard let credentials else { throw InnerTubeError.signInRequired }
+        let request = try InnerTubeRequest.make(
+            endpoint: endpoint, body: body, cookies: credentials.cookies, authUserIndex: credentials.authUserIndex,
+            now: Date(), locale: .current)
+        return try await attemptOnce(request)
+    }
+
+    /// Drops `VL`. Liked music (`LM`) cannot be saved, deleted or edited.
+    private static func editableId(_ playlistId: String) throws -> String {
+        let id = playlistId.hasPrefix("VL") ? String(playlistId.dropFirst(2)) : playlistId
+        guard !id.isEmpty, id != "LM" else { throw InnerTubeError.invalidArgument }
+        return id
     }
 
     private func fetchBrowse(_ target: BrowseTarget, credentials: Credentials?) async throws -> JSONValue {

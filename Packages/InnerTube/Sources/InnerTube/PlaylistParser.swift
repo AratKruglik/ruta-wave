@@ -19,7 +19,7 @@ extension PlaylistPage {
         let shelf = blocks.lazy.compactMap { $0["musicPlaylistShelfRenderer"] }.first
         self.init(
             header: header,
-            tracks: Page(items: parseBlocks(shelf?["contents"]?.array ?? [], ItemParser.song), continuation: shelf?.nextContinuation),
+            tracks: Page(items: parseBlocks(shelf?["contents"]?.array ?? [], ItemParser.playlistRow), continuation: shelf?.nextContinuation),
             sectionsContinuation: sectionsContinuation)
     }
 }
@@ -29,6 +29,6 @@ extension Page where Item == Song {
         guard let rows = json["onResponseReceivedActions"]?.array?.lazy.compactMap({
             $0["appendContinuationItemsAction"]?["continuationItems"]?.array
         }).first else { throw .unexpectedResponse }
-        self.init(items: parseBlocks(rows, ItemParser.song), continuation: JSONValue.array(rows).nextContinuation)
+        self.init(items: parseBlocks(rows, ItemParser.playlistRow), continuation: JSONValue.array(rows).nextContinuation)
     }
 }
