@@ -62,10 +62,15 @@ Consequences we accept:
 
 ### 4.1. Web view
 
-- One `WKWebView` for the whole lifetime of the app.
+- One `WKWebView` at a time. It is **recreated** when the session switches between
+  guest and signed-in, and playback stops. A guest uses `WKWebsiteDataStore.nonPersistent()`
+  so leftover `default()` cookies never reach a guest page; a signed-in session uses
+  `.default()`, and the Keychain cookies are restored into it when it holds no `SAPISID`.
+  `PlayerEngine.start(_:)` does this, and the App tears the view down as soon as sign-out starts (the wipe may already be running).
 - It must be **attached to a window**, otherwise WebKit suspends timers and
-  media: it is placed in the main window at 1×1 size with `alphaValue = 0`
-  (the exact approach is verified at stage 3).
+  media: `PlayerHost` (App) puts it in a 1×1 container `NSView` with `alphaValue = 0`
+  in the main window background, and `preferences.inactiveSchedulingPolicy = .none`.
+  Whether this survives minimize, hide and Cmd-W is the manual check MC-1.
 - It must stay **re-parentable**: a later music video mode or picture-in-picture
   ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) moves it into a visible container without reloading the page or
   interrupting playback. The stage 3 design (#13) must not rule this out; whether
@@ -73,14 +78,16 @@ Consequences we accept:
   mode is picked up (risk 4 in [05](05-risks-and-scope.md)).
 - `WKWebViewConfiguration`:
   - `mediaTypesRequiringUserActionForPlayback = []` — audio autoplay;
-  - `websiteDataStore = .default()` — cookies shared with the sign-in window;
-  - `customUserAgent` — a Safari string (like `overrideUserAgent` in the original);
+  - `websiteDataStore` — `nonPersistent()` for a guest, `.default()` when signed in (above);
+  - `applicationNameForUserAgent = SignInRules.safariApplicationName` — the same Safari identity as the sign-in window;
   - a `WKUserScript` with the bridge, injected `atDocumentEnd`, main frame only.
-- Loads `https://music.youtube.com/watch?v=<id>&list=<playlistId>`.
+- Loads `https://music.youtube.com/watch?v=<id>&list=<playlistId>`, plus `authuser=<authUserIndex>` when the index is above 0.
+  IDs must match `^[A-Za-z0-9_-]{1,64}$`, otherwise nothing is loaded.
 - **Navigation lock.** The view holds the Google-wide session, so the main frame
   may only load `https://music.youtube.com` (plus hosts that stage 3 proves it
-  needs). Anything else is cancelled in `decidePolicyFor`; a user-clicked link is
-  dropped or opened in the browser as a rebuilt https URL; `createWebViewWith`
+  needs; `PlayerRules` currently allows only `music.youtube.com`, every cancelled host is
+  logged for MC-7). Anything else is cancelled in `decidePolicyFor`; a user-clicked link is
+  dropped (opening it in the browser is later work); `createWebViewWith`
   returns `nil`. `SignInView.swift` follows the same pattern. This matters once the
   view becomes visible and clickable (video mode, [#12](https://github.com/AratKruglik/yt-music-mac/issues/12)),
   and keeps the privacy rule that the app sends data only to Google
@@ -88,24 +95,27 @@ Consequences we accept:
 - **Bridge trust.** The `player` message handler accepts a message only when
   `frameInfo.isMainFrame` and the origin is https `music.youtube.com`. Message
   bodies are untrusted input, and a URL taken from a message is never opened.
-  `evaluateJavaScript` runs only while the host is `music.youtube.com`. The bridge
+  `evaluateJavaScript` runs only while the host is `music.youtube.com`; 3.1 has no Swift to JS call, and 3.2 adds
+  commands through `callAsyncJavaScript` with arguments (no string building), guarded by that check. The bridge
   stays in the page world: an isolated `WKContentWorld` would break the
   `#movie_player` methods. Stage 3 tests that a foreign-host navigation is
   cancelled and a non-main-frame or foreign-origin message is dropped.
 
 ### 4.2. JS bridge
 
-A single `bridge.js` file in resources. It:
+A single `Resources/bridge.js` file in the `PlayerEngine` target. It:
 - waits for the site player to appear (the `#movie_player` and `ytmusic-app` elements) **[known]**;
 - subscribes to events from the player and the `<video>` element
   (`play`, `pause`, `timeupdate`, `volumechange`, `seeked`, `loadedmetadata`);
-- sends events to Swift through `window.webkit.messageHandlers.player.postMessage`;
-- receives commands through `evaluateJavaScript("window.__bridge.cmd(…)")`.
+- sends events to Swift through `window.webkit.messageHandlers.player.postMessage(JSON.stringify(...))`, always a string of at most 256 KiB
+  (`ready`, `song` with the `videoDetails` and `microformat` of `getPlayerResponse()`, `playback {paused, time}`, `time {time}`);
+  Swift drops anything that is not a trusted-origin, well-formed message;
+- receives commands through `window.__bridge.cmd(name, ...args)`, which calls only whitelisted method names on `#movie_player`.
 
 Site player methods **[known, verify at stage 3]**: `playVideo()`,
 `pauseVideo()`, `nextVideo()`, `previousVideo()`, `seekTo(sec)`, `setVolume(0…100)`,
 `getVolume()`, `mute()`, `unMute()`, `getCurrentTime()`, `getDuration()`,
-`getPlayerResponse()`.
+`getPlayerResponse()`. They stay "verify" until MC-5 is recorded on the live page.
 
 ### 4.3. Contract with Swift
 
@@ -150,6 +160,11 @@ struct SongInfo: Equatable, Sendable {
     var url: URL
 }
 ```
+
+Stage 3.1 implements the minimum: `PlayerEvent` has `ready`, `songChanged`, `playbackChanged` and `timeChanged`,
+and the only command is `load`. The rest of the enums above arrive in 3.2. `SongInfo.elapsed` and `isPaused` are a snapshot
+taken at `songChanged`; the live values are `PlayerEngine.elapsed` and `isPaused`, so a 4 Hz time update never invalidates observers of `song`.
+`events()` fans out to every caller, each with a 64-event buffer.
 
 `PlayerEngine` is a `@MainActor @Observable` class: it holds the current state
 for the UI and vends an `AsyncStream<PlayerEvent>` for plugins and `SystemKit`.
@@ -235,8 +250,8 @@ the only place that knows Google's format.
    `WKHTTPCookieStore`; at least `SAPISID`, `__Secure-3PAPISID`, `SID`, `HSID`,
    `SSID` are needed **[known]**.
 3. Cookies are stored in the Keychain and supplied to `InnerTubeClient`.
-   The player web view uses the same website data store, so they do not need to
-   be passed to it separately.
+   A signed-in player web view uses the same `default()` website data store. On sign-in the Keychain cookies are
+   restored into it when it has no `SAPISID`. A guest player uses its own `nonPersistent()` store.
 4. Sign-out: clear the Keychain and `WKWebsiteDataStore`.
 5. `AuthSession.State.isSignedIn` is the single source for "hide an account-only action or offer sign-in";
    `.signedOut` means guest. Consumers: 2.1, 2.4, 3.2, 4.1, 4.5, 4.6.
