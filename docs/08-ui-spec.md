@@ -50,7 +50,9 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 - Routes: `home`, `explore`, `explore.newReleases`, `explore.charts`,
   `explore.moods`, `explore.mood(params)`, `library(section)`, `search(query,
   filter)`, `album(browseId)`, `artist(channelId)`, `playlist(playlistId)`,
-  `podcast(browseId)`, `more(browseId, params)` (a "More" list of a shelf).
+  `more(browseId, params)` (a "More" list of a shelf). Podcast deep links
+  (`music.youtube.com/podcast/…`, `browse/MPSP…`) have no route; stage 5.4 opens
+  them in the browser.
   The player page is an overlay, not a route.
 - One `NavigationStack` per sidebar section; switching sections keeps each
   stack, re-selecting the active section pops it to the root. **[decision]**
@@ -81,7 +83,7 @@ avatar (signed in) or **Sign in** pill (guest).
 ## 3. Search
 
 ### 3.1. Field and dropdown
-**Shows:** placeholder "Search songs, albums, artists, podcasts". Focusing the
+**Shows:** placeholder "Search songs, albums, artists". Focusing the
 empty field opens the dropdown with recent searches (signed in) — up to 7
 **[observed]**. Typing replaces them with suggestions: plain text suggestions
 first, then entity suggestions (artist, album, song) with thumbnails.
@@ -113,8 +115,9 @@ hides silently (suggestions are optional).
 ### 3.2. Results page
 **Shows**
 1. Filter chips: All, Songs, Videos, Albums, Artists, Community playlists,
-   Featured playlists, Podcasts, Episodes, Profiles (labels come from the
-   response; only the ones it offers are shown) **[known]**.
+   Featured playlists (labels come from the response; only the ones it offers
+   are shown) **[known]**. The Podcasts, Episodes and Profiles filters are never
+   shown, even when offered; the parser drops them by `params`, not by label (#7).
 2. With **All**: the top result card (large artwork, type, title, subtitle,
    **Play** and **Shuffle** / **Subscribe** buttons), then one section per
    type with 3–4 rows and a **Show all** button that switches the chip.
@@ -233,9 +236,10 @@ because the response has none; the screen is otherwise the same.
 ## 7. Library
 
 **Shows:** a chip row of sections — Playlists, Songs, Albums, Artists,
-Subscriptions, Podcasts (offered sections come from the response) — and a sort
+Subscriptions (offered sections come from the response) — and a sort
 popup (Recently added, Recently played, A–Z, Z–A). Default section: Playlists
 as a grid with a "New playlist" card first and "Liked music" second.
+Podcasts and Uploads sections are never shown, even when offered (#7).
 
 | Section | Shows | Data **[known]** |
 |---|---|---|
@@ -244,7 +248,6 @@ as a grid with a "New playlist" card first and "Liked music" second.
 | Albums | grid | `browse FEmusic_liked_albums` |
 | Artists | list of artists of liked songs | `browse FEmusic_library_corpus_track_artists` |
 | Subscriptions | list of subscribed artists | `browse FEmusic_library_corpus_artists` |
-| Podcasts | grid of saved shows | `browse FEmusic_library_non_music_audio_list` (verify) |
 | History | grouped by day ("Today", "Yesterday", "This week"…), `detailed` rows | `browse FEmusic_history` |
 | Liked music | the playlist page of `LM` | `browse VLLM` |
 
@@ -268,7 +271,7 @@ redirects to sign-in **[observed]**).
 
 ### 8.1. Playlist
 **Shows** (07 §6.8): cover, title, owner (link to the channel), "Playlist •
-year", "N songs • duration", description; action row; the track list
+year", "N songs • duration" (uploaded tracks and podcast episodes are skipped, so the count can exceed the rows, #7), description; action row; the track list
 (`detailed`); for own playlists a "Suggestions" shelf at the end with
 **Add** buttons **[observed]**.
 
@@ -321,9 +324,7 @@ playback without leaving the page.
 **Stage:** 2.3, 4.4.
 
 ### 8.4. Podcast and episode
-Show page: cover, title, author, description, Play latest, Save, episode list
-with date and duration and a played progress bar. Kept behind open question
-#4 in [05](05-risks-and-scope.md#4-open-questions); backlog 4.9 if the answer is yes.
+Out of scope (decided no, [#7](https://github.com/AratKruglik/yt-music-mac/issues/7)); see [05](05-risks-and-scope.md#4-open-questions) row 4.
 
 ## 9. Player bar
 
@@ -515,5 +516,5 @@ rows that now cover them (added 2026-11-18):
 | Artist Subscribe (`subscription/*`) | 2.4 (endpoint), 4.4 (button) |
 | Multi-select, selection bar, drag and drop | 4.6 |
 | Offline banner and retry on reconnect | 4.7 |
-| Podcasts | 4.9, only if open question #4 in 05 says yes |
+| Podcasts | not planned (decided no, #7) |
 | Artwork colour theme (look of the reference) | S7 `album-color-theme` (stage 7); can be pulled into 4.7 |

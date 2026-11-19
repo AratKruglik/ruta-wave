@@ -36,7 +36,7 @@ and their states. What every part of the interface **does** is described in
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ ● ● ●  [≡] Redwave      [ 🔍 Search songs, albums, artists, podcasts ]   ‹ › (A) │ top bar, 64 pt
+│ ● ● ●  [≡] Redwave      [ 🔍 Search songs, albums, artists ]             ‹ › (A) │ top bar, 64 pt
 ├──────────────┬───────────────────────────────────────────────────────────────┤
 │ ⌂ Home       │                                                               │
 │ ◎ Explore    │                                                               │

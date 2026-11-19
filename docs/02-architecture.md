@@ -283,7 +283,7 @@ A typed wrapper over `UserDefaults`. Mapping to the original's options:
 | `language` | system language; no separate switch |
 | `proxy` | system proxy; no separate option |
 | `likeButtons`, `swapLikeButtonsOrder` | `showDislikeButton` |
-| `usePodcastParticipantAsArtist` | the same |
+| `usePodcastParticipantAsArtist` | not needed (podcasts out of scope, #7) |
 | `autoUpdates` | arrives together with Sparkle |
 | `hideMenu`, `removeUpgradeButton`, `themes`, `disableHardwareAcceleration`, `overrideUserAgent`, `autoResetAppCache`, `restartOnConfigChanges` | not needed in a native UI |
 | `plugins.<id>` | `plugins.<id>.enabled` plus the plugin's own keys |

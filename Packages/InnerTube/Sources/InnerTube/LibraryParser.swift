@@ -1,4 +1,9 @@
 extension LibraryPage {
+    // podcasts and uploads sections are out of scope (#7)
+    private static func isHiddenSection(_ browseId: String) -> Bool {
+        browseId == "FEmusic_library_non_music_audio_list" || browseId.hasPrefix("FEmusic_library_privately_owned_")
+    }
+
     private struct Container {
         let node: JSONValue
         let rows: [JSONValue]
@@ -22,7 +27,7 @@ extension LibraryPage {
             $0["itemSectionRenderer"]?["header"]?["itemSectionTabbedHeaderRenderer"]?["endItems"]?.array
         }.first?.flatMap { $0["dropdownRenderer"]?["entries"]?.array ?? [] } ?? []
         self.init(
-            sections: ItemParser.chips(list["header"]?["chipCloudRenderer"]).filter { $0.target != nil },
+            sections: ItemParser.chips(list["header"]?["chipCloudRenderer"]).filter { $0.target.map { !Self.isHiddenSection($0.browseId) } ?? false },
             sortOptions: sortEntries.compactMap { entry in
                 guard let item = entry["dropdownItemRenderer"], let title = item["label"].flatMap(text) ?? item["label"]?.string,
                       let target = item["onSelectCommand"]?["browseEndpoint"].flatMap(ItemParser.browseTarget)

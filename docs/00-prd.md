@@ -138,7 +138,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | F-BRW-2 | Explore: New releases, Charts with country selector, Moods & genres | P1 | 08 §6 | 4.2 |
 | F-BRW-3 | Album, artist (with Subscribe), playlist pages, long playlists paged | P0 | 08 §8 | 2.3, 4.4 |
 | F-BRW-4 | "More" lists for every shelf | P1 | 08 §1.3 | 4.2 |
-| F-BRW-5 | Podcasts (show, episode, library section) — only if open question #4 says yes | P2 | 08 §8.4 | 4.9 |
+| F-BRW-5 | ~~Podcasts (show, episode, library section)~~ — out of scope (decided no, #7) | P2 | 08 §8.4 | 4.9 |
 
 ### 5.3. Search
 
@@ -298,7 +298,7 @@ macOS 14 or later, Apple Silicon. Intel support depends on open question #9.
 | **0.1.0** — daily driver | Stages 0–5 and 8: all P0, most P1 of §5.1–§5.8 | Flows 1–7 of §6 pass by hand; §7.1 budgets met; DMG installs on a clean user account |
 | **0.1.x** | Remaining P1, fixes from daily use | — |
 | **0.2.0** — plugins | Stages 6–7: §5.9 | Every plugin toggles without a relaunch, has unit tests for its logic; audio effects survive track changes |
-| **later** | P2 leftovers, Sparkle, podcasts if wanted | by decision |
+| **later** | P2 leftovers, Sparkle | by decision |
 
 Order and dependencies are in [06](06-backlog.md); the DMG stage is moved
 before the plugins so working builds can be installed early.
@@ -328,7 +328,7 @@ Kept in one place, [05](05-risks-and-scope.md). The ones that shape the product:
   any time; isolated parsers and one `bridge.js` keep fixes small.
 - **Ads for guests and free accounts** — accepted, not blocked.
 
-Open questions that affect this PRD: #3 music videos, #4 podcasts,
+Open questions that affect this PRD: #3 music videos,
 #5 lyrics source, #6 optional plugins, #7 languages, #9 Intel, #10 auto-update.
 Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 
@@ -339,3 +339,4 @@ Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 | Date | Change |
 |---|---|
 | 2026-11-18 | Draft 1. Product named **Redwave** (was Tunewave); bundle ID `dev.kruhlyk.redwave`; rename in code planned as backlog 0.3 |
+| 2026-11-19 | Podcasts and user uploads out of scope (open question #4, #7); F-BRW-5 dropped |

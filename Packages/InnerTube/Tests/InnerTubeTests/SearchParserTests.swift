@@ -8,7 +8,9 @@ private func results(_ name: String) throws -> SearchResults {
 @Suite struct SearchParserTests {
     @Test func unfilteredHasChipsTopResultAndFlatItems() throws {
         let search = try results("search")
-        #expect(search.chips.map(\.title).prefix(3) == ["Artists", "Albums", "Episodes"])
+        #expect(search.chips.map(\.title) == ["Artists", "Albums", "Songs", "Videos", "Community playlists", "Featured playlists"])
+        let hiddenPrefixes = ["EgWKAQJI", "EgWKAQJQ", "EgWKAQJY"]
+        #expect(!search.chips.contains { chip in hiddenPrefixes.contains { chip.searchParams?.hasPrefix($0) == true } })
         #expect(search.chips.allSatisfy { $0.searchParams != nil && $0.target == nil })
         guard case .artist(let top) = try #require(search.topResult) else {
             Issue.record("expected artist card")
