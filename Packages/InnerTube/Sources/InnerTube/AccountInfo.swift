@@ -23,7 +23,8 @@ public struct AccountInfo: Sendable, Equatable {
 }
 
 func text(_ value: JSONValue) -> String? {
-    value["runs"]?[0]?["text"]?.string ?? value["simpleText"]?.string
+    let joined = value["runs"]?.array?.compactMap { $0["text"]?.string }.joined()
+    return [joined, value["simpleText"]?.string].lazy.compactMap { $0 }.first { !$0.isEmpty }
 }
 
 private let allowedAvatarHosts = ["ggpht.com", "googleusercontent.com", "ytimg.com"]

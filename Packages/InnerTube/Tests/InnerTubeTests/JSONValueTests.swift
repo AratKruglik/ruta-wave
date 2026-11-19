@@ -41,4 +41,14 @@ private func decode(_ json: String) throws -> JSONValue {
     func responseRejectsGarbage(raw: String) {
         #expect(throws: InnerTubeError.unexpectedResponse) { try JSONValue(response: Data(raw.utf8)) }
     }
+
+    @Test func textJoinsAllRuns() throws {
+        #expect(text(try decode(#"{"runs":[{"text":"Song"},{"text":" • "},{"text":"Artist"}]}"#)) == "Song • Artist")
+        #expect(text(try decode(#"{"simpleText":"plain"}"#)) == "plain")
+    }
+
+    @Test func textOfEmptyRunsIsNil() throws {
+        #expect(text(try decode(#"{"runs":[]}"#)) == nil)
+        #expect(text(try decode(#"{"runs":[{"text":""}]}"#)) == nil)
+    }
 }

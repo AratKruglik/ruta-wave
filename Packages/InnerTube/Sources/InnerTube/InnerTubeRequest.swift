@@ -6,7 +6,7 @@ enum InnerTubeRequest {
 
     static func make(
         endpoint: String,
-        body: [String: String] = [:],
+        body: [String: any Sendable] = [:],
         cookies: [HTTPCookie],
         authUserIndex: Int,
         now: Date,
@@ -21,7 +21,7 @@ enum InnerTubeRequest {
 
     static func makeGuest(
         endpoint: String,
-        body: [String: String] = [:],
+        body: [String: any Sendable] = [:],
         visitorData: String?,
         locale: Locale
     ) throws(InnerTubeError) -> URLRequest {
@@ -81,7 +81,7 @@ enum InnerTubeRequest {
         return request
     }
 
-    private static func attachPayload(_ request: inout URLRequest, body: [String: String], locale: Locale) throws(InnerTubeError) {
+    private static func attachPayload(_ request: inout URLRequest, body: [String: any Sendable], locale: Locale) throws(InnerTubeError) {
         var payload: [String: Any] = body
         payload["context"] = [
             "client": [
@@ -92,6 +92,7 @@ enum InnerTubeRequest {
             ],
         ]
         request.httpMethod = "POST"
+        guard JSONSerialization.isValidJSONObject(payload) else { throw .unexpectedResponse }
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: payload)
         } catch {
