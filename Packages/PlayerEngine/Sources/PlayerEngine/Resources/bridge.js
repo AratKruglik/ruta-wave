@@ -35,6 +35,8 @@
     v.addEventListener('seeked', () => post({ type: 'time', time: v.currentTime }));
     post({ type: 'ready' });
     postSong();
+    // The video may have started before the bridge attached, so its 'play' event was already missed.
+    post({ type: 'playback', paused: v.paused, time: v.currentTime });
   };
 
   const deadline = Date.now() + 30000;
