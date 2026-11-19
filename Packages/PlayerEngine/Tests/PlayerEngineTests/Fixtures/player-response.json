@@ -1,0 +1,19 @@
+{
+  "videoDetails": {
+    "videoId": "dQw4w9WgXcQ",
+    "title": "Never Gonna Give You Up (Official Video)",
+    "lengthSeconds": "213",
+    "author": "Rick Astley - Topic",
+    "thumbnail": {
+      "thumbnails": [
+        {"url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/sddefault.jpg?sqp=small&rs=small", "width": 120, "height": 90},
+        {"url": "https://lh3.googleusercontent.com/example-cover=w544-h544-l90-rj?sqp=large", "width": 544, "height": 544}
+      ]
+    }
+  },
+  "microformat": {
+    "microformatDataRenderer": {
+      "urlCanonical": "https://music.youtube.com/watch?v=dQw4w9WgXcQ&list=RDAMVMdQw4w9WgXcQ"
+    }
+  }
+}
