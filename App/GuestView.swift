@@ -11,10 +11,12 @@ struct GuestView: View {
         GuestContent(
             status: model.state,
             isSignInDisabled: session.isSigningOut,
+            isSessionExpired: session.isSessionExpired,
             onRetry: { attempt += 1 },
             onSignIn: { isSigningIn = true }
         )
         .task(id: attempt) { await model.connect() }
+        .onAppear { if session.isSessionExpired { isSigningIn = true } }
         .sheet(isPresented: Binding(get: { isSigningIn }, set: { if !$0 { cancel() } })) {
             VStack(spacing: 0) {
                 SignInView(session: session)
@@ -35,12 +37,16 @@ struct GuestView: View {
 private struct GuestContent: View {
     let status: GuestModel.State
     let isSignInDisabled: Bool
+    let isSessionExpired: Bool
     let onRetry: () -> Void
     let onSignIn: () -> Void
 
     var body: some View {
         VStack(spacing: 12) {
             Text("Redwave").font(.largeTitle)
+            if isSessionExpired {
+                Text("Your session expired. Sign in again.")
+            }
             Group {
                 switch status {
                 case .connecting:
@@ -63,13 +69,17 @@ private struct GuestContent: View {
 }
 
 #Preview("Connecting") {
-    GuestContent(status: .connecting, isSignInDisabled: false, onRetry: {}, onSignIn: {})
+    GuestContent(status: .connecting, isSignInDisabled: false, isSessionExpired: false, onRetry: {}, onSignIn: {})
 }
 
 #Preview("Connected") {
-    GuestContent(status: .connected, isSignInDisabled: false, onRetry: {}, onSignIn: {})
+    GuestContent(status: .connected, isSignInDisabled: false, isSessionExpired: false, onRetry: {}, onSignIn: {})
 }
 
 #Preview("Failed") {
-    GuestContent(status: .failed, isSignInDisabled: false, onRetry: {}, onSignIn: {})
+    GuestContent(status: .failed, isSignInDisabled: false, isSessionExpired: false, onRetry: {}, onSignIn: {})
+}
+
+#Preview("Expired") {
+    GuestContent(status: .connected, isSignInDisabled: false, isSessionExpired: true, onRetry: {}, onSignIn: {})
 }

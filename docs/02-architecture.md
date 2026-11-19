@@ -156,6 +156,8 @@ Everything in this section is **[known]** from open projects and is verified at 
 - `POST https://music.youtube.com/youtubei/v1/<endpoint>?prettyPrint=false`
 - The body contains `context.client`: `clientName: "WEB_REMIX"`, `clientVersion`
   (taken from the page, key `INNERTUBE_CLIENT_VERSION` in `ytcfg`), `hl`, `gl`.
+  Every launch refreshes the version in the background with an anonymous `GET /`; requests never wait for it.
+  The fallback order is the discovered value, then the cached one (`UserDefaults`), then the built-in one.
 - Headers of an authorized request:
   - `Cookie` — session cookies;
   - `Authorization: SAPISIDHASH <ts>_<sha1("<ts> <SAPISID> <origin>")>`;
@@ -201,8 +203,9 @@ the only place that knows Google's format.
    Cancel wipes the `WKWebsiteDataStore` (not the Keychain) and returns to the guest. Sign-out also leads to the guest.
    `.keychainUnavailable` offers "Try again" and "Continue without signing in" (this launch only; the Keychain entry is kept, but cancelling a later sign-in still wipes the web view store).
    The sign-in page is the same `ServiceLogin…continue=music.youtube.com` URL the original uses.
-   In 1.2 an unauthorized `account/account_menu` response shows an error with
-   Retry / Sign out; the automatic return to sign-in arrives in 2.1.
+   An HTTP 401 on a signed-in request wipes the session (WebKit store, then Keychain) and shows the guest screen
+   with "Your session expired. Sign in again." and the sign-in sheet; there is no cookie re-read and no retry (2.1).
+   Other failures still show the error with Retry / Sign out.
    Besides exact Google hosts, only `accounts.<google domain>/accounts/SetSID` is allowed, for domains from an embedded snapshot of google.com/supported_domains (taken 2026-11-18); refresh the snapshot manually when a regional sign-in hangs.
 2. After the redirect back to `music.youtube.com`, cookies are read from
    `WKHTTPCookieStore`; at least `SAPISID`, `__Secure-3PAPISID`, `SID`, `HSID`,

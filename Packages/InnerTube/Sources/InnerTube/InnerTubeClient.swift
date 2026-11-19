@@ -2,8 +2,20 @@ import Foundation
 
 public enum InnerTubeError: Error, Sendable, Equatable {
     case missingSAPISID
+    case unauthorized
+    case network(URLError.Code)
     case httpStatus(Int)
     case unexpectedResponse
+}
+
+extension InnerTubeError {
+    var isTransient: Bool {
+        switch self {
+        case .network: true
+        case .httpStatus(let status): (500...599).contains(status)
+        default: false
+        }
+    }
 }
 
 private final class RejectRedirects: NSObject, URLSessionTaskDelegate, Sendable {
@@ -18,14 +30,30 @@ private final class RejectRedirects: NSObject, URLSessionTaskDelegate, Sendable 
 }
 
 public actor InnerTubeClient {
-    private let session: URLSession
+    typealias Transport = @Sendable (URLRequest) async throws -> (Data, URLResponse)
+
+    static let maxAttempts = 3
+
+    private let transport: Transport
+    private let retryDelay: Duration
 
     public init() {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
         configuration.urlCache = nil
-        session = URLSession(configuration: configuration, delegate: RejectRedirects(), delegateQueue: nil)
+        let session = URLSession(configuration: configuration, delegate: RejectRedirects(), delegateQueue: nil)
+        self.init(transport: { try await session.data(for: $0) }, retryDelay: .milliseconds(500))
+    }
+
+    init(transport: @escaping Transport, retryDelay: Duration) {
+        self.transport = transport
+        self.retryDelay = retryDelay
+    }
+
+    public func refreshClientVersion() async {
+        guard let data = try? await data(for: InnerTubeRequest.makePage()) else { return }
+        ClientVersion.shared.accept(ClientVersion.extract(fromPage: String(decoding: data, as: UTF8.self)))
     }
 
     public func accountMenu(cookies: [HTTPCookie], authUserIndex: Int) async throws -> AccountInfo {
@@ -39,19 +67,17 @@ public actor InnerTubeClient {
     }
 
     public func connectAsGuest() async throws {
-        let snapshot = GuestVisitor.shared.snapshot()
-        let request = try InnerTubeRequest.makeGuest(
-            endpoint: "browse", body: ["browseId": "FEmusic_home"], visitorData: snapshot.value, locale: .current)
-        let raw = try await send(request)["responseContext"]?["visitorData"]?.string
-        guard GuestVisitor.validated(raw) != nil else { throw InnerTubeError.unexpectedResponse }
-        GuestVisitor.shared.accept(raw, generation: snapshot.generation)
+        let json = try await postGuest("browse", body: ["browseId": "FEmusic_home"])
+        guard GuestVisitor.validated(json["responseContext"]?["visitorData"]?.string) != nil else {
+            throw InnerTubeError.unexpectedResponse
+        }
     }
 
     public static func resetGuestVisitor() {
         GuestVisitor.shared.reset()
     }
 
-    private func post(
+    func post(
         _ endpoint: String,
         body: [String: String] = [:],
         cookies: [HTTPCookie],
@@ -68,10 +94,43 @@ public actor InnerTubeClient {
         return try await send(request)
     }
 
+    func postGuest(_ endpoint: String, body: [String: String] = [:]) async throws -> JSONValue {
+        let snapshot = GuestVisitor.shared.snapshot()
+        let request = try InnerTubeRequest.makeGuest(
+            endpoint: endpoint, body: body, visitorData: snapshot.value, locale: .current)
+        let json = try await send(request)
+        GuestVisitor.shared.accept(json["responseContext"]?["visitorData"]?.string, generation: snapshot.generation)
+        return json
+    }
+
     private func send(_ request: URLRequest) async throws -> JSONValue {
-        let (data, response) = try await session.data(for: request)
+        try JSONValue(response: try await data(for: request))
+    }
+
+    // Every attempt reuses the same request, so the visitor and signed headers stay fixed across retries.
+    private func data(for request: URLRequest) async throws -> Data {
+        var attempt = 1
+        while true {
+            do {
+                return try await attemptOnce(request)
+            } catch let error as InnerTubeError where error.isTransient && attempt < Self.maxAttempts {
+                try await Task.sleep(for: retryDelay * attempt)
+                attempt += 1
+            }
+        }
+    }
+
+    private func attemptOnce(_ request: URLRequest) async throws -> Data {
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await transport(request)
+        } catch let error as URLError where error.code != .cancelled {
+            throw InnerTubeError.network(error.code)
+        }
         guard let status = (response as? HTTPURLResponse)?.statusCode else { throw InnerTubeError.unexpectedResponse }
+        if status == 401 { throw InnerTubeError.unauthorized }
         guard (200..<300).contains(status) else { throw InnerTubeError.httpStatus(status) }
-        return try JSONValue(response: data)
+        return data
     }
 }
