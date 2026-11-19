@@ -1,0 +1,71 @@
+{
+ "contents": {
+  "singleColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "content": {
+       "sectionListRenderer": {
+        "contents": [
+         {
+          "itemSectionRenderer": {
+           "contents": [
+            {
+             "messageRenderer": {
+              "button": {
+               "buttonRenderer": {
+                "isDisabled": false,
+                "navigationEndpoint": {
+                 "signInEndpoint": {
+                  "hack": true
+                 }
+                },
+                "style": "STYLE_DEFAULT",
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Sign in"
+                  }
+                 ]
+                }
+               }
+              },
+              "icon": {
+               "iconType": "LIKE"
+              },
+              "style": {
+               "value": "RENDER_STYLE_VERTICAL_CENTERED"
+              },
+              "subtext": {
+               "messageSubtextRenderer": {
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Sign in to listen to your liked tracks"
+                  }
+                 ]
+                }
+               }
+              },
+              "text": {
+               "runs": [
+                {
+                 "text": "Looking for what you’ve liked?"
+                }
+               ]
+              }
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      "selected": true
+     }
+    }
+   ]
+  }
+ }
+}

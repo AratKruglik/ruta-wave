@@ -1,0 +1,809 @@
+{
+ "contents": {
+  "sectionListRenderer": {
+   "contents": [
+    {
+     "musicCarouselShelfRenderer": {
+      "contents": [
+       {
+        "musicResponsiveListItemRenderer": {
+         "flexColumnDisplayStyle": "MUSIC_RESPONSIVE_LIST_ITEM_FLEX_COLUMN_DISPLAY_STYLE_TWO_LINE_STACK",
+         "flexColumns": [
+          {
+           "musicResponsiveListItemFlexColumnRenderer": {
+            "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+            "text": {
+             "runs": [
+              {
+               "navigationEndpoint": {
+                "watchEndpoint": {
+                 "videoId": "g0az4OkM02Y",
+                 "watchEndpointMusicSupportedConfigs": {
+                  "watchEndpointMusicConfig": {
+                   "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                  }
+                 }
+                }
+               },
+               "text": "Planet Telex"
+              }
+             ]
+            }
+           }
+          },
+          {
+           "musicResponsiveListItemFlexColumnRenderer": {
+            "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+            "text": {
+             "runs": [
+              {
+               "navigationEndpoint": {
+                "browseEndpoint": {
+                 "browseEndpointContextSupportedConfigs": {
+                  "browseEndpointContextMusicConfig": {
+                   "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                  }
+                 },
+                 "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+                }
+               },
+               "text": "Radiohead"
+              }
+             ]
+            }
+           }
+          },
+          {
+           "musicResponsiveListItemFlexColumnRenderer": {
+            "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM",
+            "text": {
+             "runs": [
+              {
+               "navigationEndpoint": {
+                "browseEndpoint": {
+                 "browseEndpointContextSupportedConfigs": {
+                  "browseEndpointContextMusicConfig": {
+                   "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                  }
+                 },
+                 "browseId": "MPREb_xsmDKhqhQrG"
+                }
+               },
+               "text": "The Bends"
+              }
+             ]
+            }
+           }
+          }
+         ],
+         "itemHeight": "MUSIC_RESPONSIVE_LIST_ITEM_HEIGHT_MEDIUM_COMPACT",
+         "overlay": {
+          "musicItemThumbnailOverlayRenderer": {
+           "background": {
+            "verticalGradient": {
+             "gradientLayerColors": [
+              "3422552064",
+              "3422552064"
+             ]
+            }
+           },
+           "content": {
+            "musicPlayButtonRenderer": {
+             "activeBackgroundColor": 0,
+             "activeScaleFactor": 1,
+             "backgroundColor": 0,
+             "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+             "iconColor": 4294967295,
+             "iconLoadingColor": 0,
+             "loadingIndicatorColor": 14745645,
+             "pauseIcon": {
+              "iconType": "PAUSE"
+             },
+             "playIcon": {
+              "iconType": "PLAY_ARROW"
+             },
+             "playNavigationEndpoint": {
+              "watchEndpoint": {
+               "videoId": "g0az4OkM02Y",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                }
+               }
+              }
+             },
+             "playingIcon": {
+              "iconType": "VOLUME_UP"
+             },
+             "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+            }
+           },
+           "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+           "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+          }
+         },
+         "playlistItemData": {
+          "videoId": "g0az4OkM02Y"
+         },
+         "thumbnail": {
+          "musicThumbnailRenderer": {
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "height": 60,
+              "url": "https://yt3.googleusercontent.com/TWWT47cHLv3yAugk4h9eOzQ46FHmXc_g-KmBVy2d4sbg_F-Gv6xrPglztRVzp8D_l-yzOnvh-QToM8s=w60-h60-l90-rj",
+              "width": 60
+             },
+             {
+              "height": 120,
+              "url": "https://yt3.googleusercontent.com/TWWT47cHLv3yAugk4h9eOzQ46FHmXc_g-KmBVy2d4sbg_F-Gv6xrPglztRVzp8D_l-yzOnvh-QToM8s=w120-h120-l90-rj",
+              "width": 120
+             }
+            ]
+           },
+           "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+           "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+          }
+         }
+        }
+       },
+       {
+        "musicResponsiveListItemRenderer": {
+         "flexColumnDisplayStyle": "MUSIC_RESPONSIVE_LIST_ITEM_FLEX_COLUMN_DISPLAY_STYLE_TWO_LINE_STACK",
+         "flexColumns": [
+          {
+           "musicResponsiveListItemFlexColumnRenderer": {
+            "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+            "text": {
+             "runs": [
+              {
+               "navigationEndpoint": {
+                "watchEndpoint": {
+                 "videoId": "Qnk4jiWamm4",
+                 "watchEndpointMusicSupportedConfigs": {
+                  "watchEndpointMusicConfig": {
+                   "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                  }
+                 }
+                }
+               },
+               "text": "Just"
+              }
+             ]
+            }
+           }
+          },
+          {
+           "musicResponsiveListItemFlexColumnRenderer": {
+            "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+            "text": {
+             "runs": [
+              {
+               "navigationEndpoint": {
+                "browseEndpoint": {
+                 "browseEndpointContextSupportedConfigs": {
+                  "browseEndpointContextMusicConfig": {
+                   "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                  }
+                 },
+                 "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+                }
+               },
+               "text": "Radiohead"
+              }
+             ]
+            }
+           }
+          },
+          {
+           "musicResponsiveListItemFlexColumnRenderer": {
+            "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM",
+            "text": {
+             "runs": [
+              {
+               "navigationEndpoint": {
+                "browseEndpoint": {
+                 "browseEndpointContextSupportedConfigs": {
+                  "browseEndpointContextMusicConfig": {
+                   "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                  }
+                 },
+                 "browseId": "MPREb_xsmDKhqhQrG"
+                }
+               },
+               "text": "The Bends"
+              }
+             ]
+            }
+           }
+          }
+         ],
+         "itemHeight": "MUSIC_RESPONSIVE_LIST_ITEM_HEIGHT_MEDIUM_COMPACT",
+         "overlay": {
+          "musicItemThumbnailOverlayRenderer": {
+           "background": {
+            "verticalGradient": {
+             "gradientLayerColors": [
+              "3422552064",
+              "3422552064"
+             ]
+            }
+           },
+           "content": {
+            "musicPlayButtonRenderer": {
+             "activeBackgroundColor": 0,
+             "activeScaleFactor": 1,
+             "backgroundColor": 0,
+             "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+             "iconColor": 4294967295,
+             "iconLoadingColor": 0,
+             "loadingIndicatorColor": 14745645,
+             "pauseIcon": {
+              "iconType": "PAUSE"
+             },
+             "playIcon": {
+              "iconType": "PLAY_ARROW"
+             },
+             "playNavigationEndpoint": {
+              "watchEndpoint": {
+               "playerParams": "0gcJCQkB-iE-y48-",
+               "videoId": "Qnk4jiWamm4",
+               "watchEndpointMusicSupportedConfigs": {
+                "watchEndpointMusicConfig": {
+                 "musicVideoType": "MUSIC_VIDEO_TYPE_ATV"
+                }
+               }
+              }
+             },
+             "playingIcon": {
+              "iconType": "VOLUME_UP"
+             },
+             "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+            }
+           },
+           "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+           "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+          }
+         },
+         "playlistItemData": {
+          "videoId": "Qnk4jiWamm4"
+         },
+         "thumbnail": {
+          "musicThumbnailRenderer": {
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "height": 60,
+              "url": "https://yt3.googleusercontent.com/TWWT47cHLv3yAugk4h9eOzQ46FHmXc_g-KmBVy2d4sbg_F-Gv6xrPglztRVzp8D_l-yzOnvh-QToM8s=w60-h60-l90-rj",
+              "width": 60
+             },
+             {
+              "height": 120,
+              "url": "https://yt3.googleusercontent.com/TWWT47cHLv3yAugk4h9eOzQ46FHmXc_g-KmBVy2d4sbg_F-Gv6xrPglztRVzp8D_l-yzOnvh-QToM8s=w120-h120-l90-rj",
+              "width": 120
+             }
+            ]
+           },
+           "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+           "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+          }
+         }
+        }
+       }
+      ],
+      "fullbleedStyle": "MUSIC_CAROUSEL_SHELF_FULLBLEED_STYLE_CONTENT_NOT_INSET",
+      "header": {
+       "musicCarouselShelfBasicHeaderRenderer": {
+        "headerStyle": "MUSIC_CAROUSEL_SHELF_BASIC_HEADER_STYLE_DISPLAY_TWO",
+        "title": {
+         "runs": [
+          {
+           "text": "You might also like"
+          }
+         ]
+        }
+       }
+      },
+      "itemSize": "COLLECTION_STYLE_ITEM_SIZE_SMALL",
+      "numItemsPerColumn": "4"
+     }
+    },
+    {
+     "musicCarouselShelfRenderer": {
+      "contents": [
+       {
+        "musicTwoRowItemRenderer": {
+         "aspectRatio": "MUSIC_TWO_ROW_ITEM_THUMBNAIL_ASPECT_RATIO_SQUARE",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           },
+           "browseId": "UCbchKSYoDnilVrYQYsKPhxg"
+          }
+         },
+         "subtitle": {
+          "runs": [
+           {
+            "text": "740K subscribers"
+           }
+          ]
+         },
+         "thumbnailRenderer": {
+          "musicThumbnailRenderer": {
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "height": 226,
+              "url": "https://lh3.googleusercontent.com/zr20vq4zoD1eFXonRd93rOY26wk159ns7yVf9R81Eyevrg-RTueCjmxZNpwO_3jq7Jt1kjoyUEcJbg=w226-h226-p-l90-rj",
+              "width": 226
+             },
+             {
+              "height": 544,
+              "url": "https://lh3.googleusercontent.com/zr20vq4zoD1eFXonRd93rOY26wk159ns7yVf9R81Eyevrg-RTueCjmxZNpwO_3jq7Jt1kjoyUEcJbg=w544-h544-p-l90-rj",
+              "width": 544
+             }
+            ]
+           },
+           "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_CIRCLE",
+           "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FILL"
+          }
+         },
+         "title": {
+          "runs": [
+           {
+            "navigationEndpoint": {
+             "browseEndpoint": {
+              "browseEndpointContextSupportedConfigs": {
+               "browseEndpointContextMusicConfig": {
+                "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+               }
+              },
+              "browseId": "UCbchKSYoDnilVrYQYsKPhxg"
+             }
+            },
+            "text": "Jeff Buckley"
+           }
+          ]
+         }
+        }
+       },
+       {
+        "musicTwoRowItemRenderer": {
+         "aspectRatio": "MUSIC_TWO_ROW_ITEM_THUMBNAIL_ASPECT_RATIO_SQUARE",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           },
+           "browseId": "UCgXVrNtoMd3CusXrRMX3Tqg"
+          }
+         },
+         "subtitle": {
+          "runs": [
+           {
+            "text": "315K subscribers"
+           }
+          ]
+         },
+         "thumbnailRenderer": {
+          "musicThumbnailRenderer": {
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "height": 226,
+              "url": "https://lh3.googleusercontent.com/2xRbt_iwYTfOr2FIXvkjR76pEEwGhZidE6aTCbahbwHZzr_QwaaWBJcNLGGx8oT0o8O9_NKiDxIhsos=w226-h226-p-l90-rj",
+              "width": 226
+             },
+             {
+              "height": 544,
+              "url": "https://lh3.googleusercontent.com/2xRbt_iwYTfOr2FIXvkjR76pEEwGhZidE6aTCbahbwHZzr_QwaaWBJcNLGGx8oT0o8O9_NKiDxIhsos=w544-h544-p-l90-rj",
+              "width": 544
+             }
+            ]
+           },
+           "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_CIRCLE",
+           "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FILL"
+          }
+         },
+         "title": {
+          "runs": [
+           {
+            "navigationEndpoint": {
+             "browseEndpoint": {
+              "browseEndpointContextSupportedConfigs": {
+               "browseEndpointContextMusicConfig": {
+                "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+               }
+              },
+              "browseId": "UCgXVrNtoMd3CusXrRMX3Tqg"
+             }
+            },
+            "text": "Thom Yorke"
+           }
+          ]
+         }
+        }
+       }
+      ],
+      "fullbleedStyle": "MUSIC_CAROUSEL_SHELF_FULLBLEED_STYLE_CONTENT_NOT_INSET",
+      "header": {
+       "musicCarouselShelfBasicHeaderRenderer": {
+        "headerStyle": "MUSIC_CAROUSEL_SHELF_BASIC_HEADER_STYLE_DISPLAY_TWO",
+        "title": {
+         "runs": [
+          {
+           "text": "Similar artists"
+          }
+         ]
+        }
+       }
+      },
+      "itemSize": "COLLECTION_STYLE_ITEM_SIZE_SMALL"
+     }
+    },
+    {
+     "musicCarouselShelfRenderer": {
+      "contents": [
+       {
+        "musicTwoRowItemRenderer": {
+         "aspectRatio": "MUSIC_TWO_ROW_ITEM_THUMBNAIL_ASPECT_RATIO_SQUARE",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           },
+           "browseId": "MPREb_E7NpKw54NIT"
+          }
+         },
+         "subtitle": {
+          "runs": [
+           {
+            "text": "Album"
+           },
+           {
+            "text": " • "
+           },
+           {
+            "text": "2021"
+           }
+          ]
+         },
+         "thumbnailOverlay": {
+          "musicItemThumbnailOverlayRenderer": {
+           "background": {
+            "verticalGradient": {
+             "gradientLayerColors": [
+              "2147483648",
+              "0",
+              "0"
+             ]
+            }
+           },
+           "content": {
+            "musicPlayButtonRenderer": {
+             "activeBackgroundColor": 4278190080,
+             "activeScaleFactor": 1.2,
+             "backgroundColor": 2566914048,
+             "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_MEDIUM",
+             "iconColor": 4294967295,
+             "iconLoadingColor": 1308622847,
+             "loadingIndicatorColor": 14745645,
+             "pauseIcon": {
+              "iconType": "PAUSE"
+             },
+             "playIcon": {
+              "iconType": "PLAY_ARROW"
+             },
+             "playNavigationEndpoint": {
+              "watchPlaylistEndpoint": {
+               "playlistId": "OLAK5uy_m8Yan_MSAia_ZYmZpl6xm1AINDg8LF1NI"
+              }
+             },
+             "playingIcon": {
+              "iconType": "VOLUME_UP"
+             },
+             "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+            }
+           },
+           "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_BOTTOM_RIGHT",
+           "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_HOVER"
+          }
+         },
+         "thumbnailRenderer": {
+          "musicThumbnailRenderer": {
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "height": 226,
+              "url": "https://yt3.googleusercontent.com/xKX7vViVFA060KCM-JtJSpGBI3o-pt45fL1Nrl1WaOr0GVfdlcEeDyyAKnHF3-Urh0T36n0bx50_Woc=w226-h226-l90-rj",
+              "width": 226
+             },
+             {
+              "height": 544,
+              "url": "https://yt3.googleusercontent.com/xKX7vViVFA060KCM-JtJSpGBI3o-pt45fL1Nrl1WaOr0GVfdlcEeDyyAKnHF3-Urh0T36n0bx50_Woc=w544-h544-l90-rj",
+              "width": 544
+             }
+            ]
+           },
+           "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+           "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FILL"
+          }
+         },
+         "title": {
+          "runs": [
+           {
+            "navigationEndpoint": {
+             "browseEndpoint": {
+              "browseEndpointContextSupportedConfigs": {
+               "browseEndpointContextMusicConfig": {
+                "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+               }
+              },
+              "browseId": "MPREb_E7NpKw54NIT"
+             }
+            },
+            "text": "KID A MNESIA"
+           }
+          ]
+         }
+        }
+       },
+       {
+        "musicTwoRowItemRenderer": {
+         "aspectRatio": "MUSIC_TWO_ROW_ITEM_THUMBNAIL_ASPECT_RATIO_SQUARE",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           },
+           "browseId": "MPREb_YtIbyjkuDJN"
+          }
+         },
+         "subtitle": {
+          "runs": [
+           {
+            "text": "Album"
+           },
+           {
+            "text": " • "
+           },
+           {
+            "text": "2016"
+           }
+          ]
+         },
+         "subtitleBadges": [
+          {
+           "musicInlineBadgeRenderer": {
+            "icon": {
+             "iconType": "MUSIC_EXPLICIT_BADGE"
+            }
+           }
+          }
+         ],
+         "thumbnailOverlay": {
+          "musicItemThumbnailOverlayRenderer": {
+           "background": {
+            "verticalGradient": {
+             "gradientLayerColors": [
+              "2147483648",
+              "0",
+              "0"
+             ]
+            }
+           },
+           "content": {
+            "musicPlayButtonRenderer": {
+             "activeBackgroundColor": 4278190080,
+             "activeScaleFactor": 1.2,
+             "backgroundColor": 2566914048,
+             "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_MEDIUM",
+             "iconColor": 4294967295,
+             "iconLoadingColor": 1308622847,
+             "loadingIndicatorColor": 14745645,
+             "pauseIcon": {
+              "iconType": "PAUSE"
+             },
+             "playIcon": {
+              "iconType": "PLAY_ARROW"
+             },
+             "playNavigationEndpoint": {
+              "watchPlaylistEndpoint": {
+               "playlistId": "OLAK5uy_mXbNXlc9onrp6Rb6XnX2noXE0khaT1A8E"
+              }
+             },
+             "playingIcon": {
+              "iconType": "VOLUME_UP"
+             },
+             "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF"
+            }
+           },
+           "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_BOTTOM_RIGHT",
+           "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_HOVER"
+          }
+         },
+         "thumbnailRenderer": {
+          "musicThumbnailRenderer": {
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "height": 226,
+              "url": "https://yt3.googleusercontent.com/34czD9R-iLgQ4CXS2HUjYdz-V9CKptCleqLOP3oRpC0iadmlI3vY92rlgoRdnC96QusnHR0vdr-fgZgT-A=w226-h226-l90-rj",
+              "width": 226
+             },
+             {
+              "height": 544,
+              "url": "https://yt3.googleusercontent.com/34czD9R-iLgQ4CXS2HUjYdz-V9CKptCleqLOP3oRpC0iadmlI3vY92rlgoRdnC96QusnHR0vdr-fgZgT-A=w544-h544-l90-rj",
+              "width": 544
+             }
+            ]
+           },
+           "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+           "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FILL"
+          }
+         },
+         "title": {
+          "runs": [
+           {
+            "navigationEndpoint": {
+             "browseEndpoint": {
+              "browseEndpointContextSupportedConfigs": {
+               "browseEndpointContextMusicConfig": {
+                "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+               }
+              },
+              "browseId": "MPREb_YtIbyjkuDJN"
+             }
+            },
+            "text": "In Rainbows (Disk 2)"
+           }
+          ]
+         }
+        }
+       }
+      ],
+      "fullbleedStyle": "MUSIC_CAROUSEL_SHELF_FULLBLEED_STYLE_CONTENT_NOT_INSET",
+      "header": {
+       "musicCarouselShelfBasicHeaderRenderer": {
+        "headerStyle": "MUSIC_CAROUSEL_SHELF_BASIC_HEADER_STYLE_DISPLAY_TWO",
+        "strapline": {
+         "runs": [
+          {
+           "text": "MORE FROM"
+          }
+         ]
+        },
+        "thumbnail": {
+         "musicThumbnailRenderer": {
+          "onTap": {
+           "browseEndpoint": {
+            "browseEndpointContextSupportedConfigs": {
+             "browseEndpointContextMusicConfig": {
+              "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+             }
+            },
+            "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+           }
+          },
+          "thumbnail": {
+           "thumbnails": [
+            {
+             "height": 60,
+             "url": "https://lh3.googleusercontent.com/G-Vsaq4pw6Bl5Ny4p_wV9obzu_eyZxynQycvCvQru4Wglzfxg4NO9owDKnSlKys_-WRzPEc0O6ydGA=w60-h60-p-l90-rj",
+             "width": 60
+            },
+            {
+             "height": 120,
+             "url": "https://lh3.googleusercontent.com/G-Vsaq4pw6Bl5Ny4p_wV9obzu_eyZxynQycvCvQru4Wglzfxg4NO9owDKnSlKys_-WRzPEc0O6ydGA=w120-h120-p-l90-rj",
+             "width": 120
+            }
+           ]
+          },
+          "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_CIRCLE",
+          "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FILL"
+         }
+        },
+        "title": {
+         "runs": [
+          {
+           "navigationEndpoint": {
+            "browseEndpoint": {
+             "browseEndpointContextSupportedConfigs": {
+              "browseEndpointContextMusicConfig": {
+               "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+              }
+             },
+             "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+            }
+           },
+           "text": "Radiohead"
+          }
+         ]
+        }
+       }
+      },
+      "itemSize": "COLLECTION_STYLE_ITEM_SIZE_SMALL"
+     }
+    },
+    {
+     "musicDescriptionShelfRenderer": {
+      "description": {
+       "runs": [
+        {
+         "text": "Radiohead are an English rock band formed in Abingdon, Oxfordshire, in 1985. The members are Thom Yorke; brothers Jonny Greenwood and Colin Greenwood; Ed O'Brien; and Philip Selway. They have worked with the producer Nigel Godrich and the cover artist Stanley Donwood since 1994. Radiohead's experimental approach is credited with advancing the sound of alternative rock.\nRadiohead signed to EMI in 1991 and released their debut album, Pablo Honey, in 1993. Their debut single, \"Creep\", was a worldwide hit, and their popularity and critical standing rose with The Bends in 1995. Their third album, OK Computer, is acclaimed as a landmark record and one of the greatest albums in popular music, with complex production and themes of modern alienation. Their fourth album, Kid A, marked a dramatic change in style, incorporating influences from electronic music, jazz, classical music and krautrock. Though Kid A divided listeners, it was later named the best album of the decade by multiple outlets. It was followed by Amnesiac, recorded in the same sessions. Radiohead's final album for EMI, Hail to the Thief, blended rock and electronic music, with lyrics addressing the war on terror.\n\nFrom Wikipedia ("
+        },
+        {
+         "navigationEndpoint": {
+          "urlEndpoint": {
+           "target": "TARGET_NEW_WINDOW",
+           "url": "https://en.wikipedia.org/wiki/Radiohead"
+          }
+         },
+         "text": "https://en.wikipedia.org/wiki/Radiohead"
+        },
+        {
+         "text": ") under Creative Commons Attribution CC-BY-SA 3.0 ("
+        },
+        {
+         "navigationEndpoint": {
+          "urlEndpoint": {
+           "target": "TARGET_NEW_WINDOW",
+           "url": "http://creativecommons.org/licenses/by-sa/3.0/legalcode"
+          }
+         },
+         "text": "http://creativecommons.org/licenses/b..."
+        },
+        {
+         "text": ")"
+        }
+       ]
+      },
+      "header": {
+       "runs": [
+        {
+         "text": "About the artist"
+        }
+       ]
+      },
+      "moreButton": {
+       "toggleButtonRenderer": {
+        "defaultIcon": {
+         "iconType": "EXPAND"
+        },
+        "defaultText": {
+         "runs": [
+          {
+           "text": "More"
+          }
+         ]
+        },
+        "isDisabled": false,
+        "isToggled": false,
+        "toggledIcon": {
+         "iconType": "COLLAPSE"
+        },
+        "toggledText": {
+         "runs": [
+          {
+           "text": "Less"
+          }
+         ]
+        }
+       }
+      },
+      "shelfStyle": "MUSIC_SHELF_STYLE_COMPACT"
+     }
+    }
+   ]
+  }
+ }
+}

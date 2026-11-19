@@ -15,6 +15,11 @@ enum ItemParser {
         return nil
     }
 
+    static func song(_ block: JSONValue) -> Song? {
+        guard case .song(let song)? = item(block) else { return nil }
+        return song
+    }
+
     static func section(_ block: JSONValue) -> Shelf? {
         let shelf: Shelf
         if let renderer = block["musicCarouselShelfRenderer"] {
@@ -29,7 +34,8 @@ enum ItemParser {
                 layout: .grid, contents: renderer["items"]?.array ?? [])
         } else if let renderer = block["musicShelfRenderer"] {
             shelf = makeShelf(
-                title: renderer["title"], strapline: nil, moreCandidates: [],
+                title: renderer["title"], strapline: nil,
+                moreCandidates: [renderer["bottomEndpoint"], renderer["title"]?["runs"]?[0]?["navigationEndpoint"]],
                 layout: .list, contents: renderer["contents"]?.array ?? [])
         } else {
             return nil
@@ -57,8 +63,29 @@ enum ItemParser {
                 title: title,
                 target: endpoint?["browseEndpoint"].flatMap(browseTarget),
                 searchParams: endpoint?["searchEndpoint"]?["params"]?.string,
-                isSelected: chip["isSelected"]?.bool ?? false)
+                isSelected: chip["isSelected"]?.bool ?? false,
+                watchTarget: endpoint?["queueUpdateCommand"]?["fetchContentsCommand"].flatMap(watchTarget))
         }
+    }
+
+    /// Reads a `watchEndpoint` or a `watchPlaylistEndpoint` held by `parent`, or by the endpoint itself.
+    static func watchTarget(_ parent: JSONValue) -> WatchTarget? {
+        guard let endpoint = parent["watchEndpoint"] ?? parent["watchPlaylistEndpoint"] else { return nil }
+        let target = WatchTarget(
+            videoId: endpoint["videoId"]?.string, playlistId: endpoint["playlistId"]?.string, params: endpoint["params"]?.string)
+        return target.videoId == nil && target.playlistId == nil ? nil : target
+    }
+
+    /// A row of the Up next queue (`playlistPanelVideoRenderer`).
+    static func queueItem(_ renderer: JSONValue) -> Song? {
+        guard renderer["unplayableText"] == nil, let title = renderer["title"].flatMap(text), case .song(let videoId, let playlistId, let isVideo)? = destination(renderer["navigationEndpoint"])
+        else { return nil }
+        let byline = renderer["longBylineText"]
+        let (artists, album) = refs(byline?["runs"]?.array ?? [])
+        return Song(
+            videoId: videoId, playlistId: playlistId, title: title, subtitle: byline.flatMap(text), artists: artists, album: album,
+            duration: renderer["lengthText"]?["runs"]?.array.flatMap(duration), thumbnailURL: renderer["thumbnail"].flatMap(lastThumbnailURL),
+            isExplicit: isExplicit(renderer), isVideo: isVideo)
     }
 
     static func browseTarget(_ endpoint: JSONValue) -> BrowseTarget? {
@@ -106,10 +133,13 @@ enum ItemParser {
             destination = renderer["playlistItemData"]?["videoId"]?.string.map { .song(videoId: $0, playlistId: nil, isVideo: false) }
         }
         let details = columns.dropFirst()
+        let fixed = (renderer["fixedColumns"]?.array ?? []).flatMap {
+            $0["musicResponsiveListItemFixedColumnRenderer"]?["text"]?["runs"]?.array ?? []
+        }
         return build(
             destination: destination, title: columns.first.flatMap(text),
             subtitleRuns: details.flatMap { $0["runs"]?.array ?? [] },
-            subtitle: details.compactMap(text).joined(separator: " • "),
+            subtitle: details.compactMap(text).joined(separator: " • "), durationRuns: fixed,
             thumbnail: renderer["thumbnail"]?["musicThumbnailRenderer"]?["thumbnail"], renderer: renderer)
     }
 
@@ -122,7 +152,7 @@ enum ItemParser {
 
     private static func build(
         destination: Destination?, title: String?, subtitleRuns: [JSONValue], subtitle: String? = nil,
-        thumbnail: JSONValue?, renderer: JSONValue
+        durationRuns: [JSONValue] = [], thumbnail: JSONValue?, renderer: JSONValue
     ) -> MusicItem? {
         guard let destination, let title else { return nil }
         let subtitle = (subtitle ?? text(.object(["runs": .array(subtitleRuns)]))).flatMap { $0.isEmpty ? nil : $0 }
@@ -134,7 +164,7 @@ enum ItemParser {
         case .song(let videoId, let playlistId, let isVideo):
             return .song(Song(
                 videoId: videoId, playlistId: playlistId, title: title, subtitle: subtitle, artists: artists, album: album,
-                duration: duration(subtitleRuns), thumbnailURL: url, isExplicit: isExplicit, isVideo: isVideo, rank: rank))
+                duration: duration(subtitleRuns + durationRuns), thumbnailURL: url, isExplicit: isExplicit, isVideo: isVideo, rank: rank))
         case .album(let browseId):
             return .album(Album(
                 browseId: browseId, title: title, subtitle: subtitle, artists: artists, thumbnailURL: url, isExplicit: isExplicit))
@@ -171,11 +201,11 @@ enum ItemParser {
         return nil
     }
 
-    private static func pageType(_ browse: JSONValue) -> String? {
+    static func pageType(_ browse: JSONValue) -> String? {
         browse["browseEndpointContextSupportedConfigs"]?["browseEndpointContextMusicConfig"]?["pageType"]?.string
     }
 
-    private static func refs(_ runs: [JSONValue]) -> (artists: [ItemRef], album: ItemRef?) {
+    static func refs(_ runs: [JSONValue]) -> (artists: [ItemRef], album: ItemRef?) {
         var artists: [ItemRef] = []
         var album: ItemRef?
         for run in runs {
@@ -195,7 +225,7 @@ enum ItemParser {
         runs.compactMap { $0["text"]?.string }.last { $0.wholeMatch(of: /\d+(:\d{2})+/) != nil }
     }
 
-    private static func isExplicit(_ renderer: JSONValue) -> Bool {
+    static func isExplicit(_ renderer: JSONValue) -> Bool {
         ["badges", "subtitleBadges"].contains { key in
             (renderer[key]?.array ?? []).contains {
                 $0["musicInlineBadgeRenderer"]?["icon"]?["iconType"]?.string == "MUSIC_EXPLICIT_BADGE"

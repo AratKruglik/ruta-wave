@@ -6,6 +6,8 @@ public enum InnerTubeError: Error, Sendable, Equatable {
     case network(URLError.Code)
     case httpStatus(Int)
     case unexpectedResponse
+    /// A private, deleted or non-existent playlist, album or artist: the server answers 200 without `contents`.
+    case notAvailable
 }
 
 extension InnerTubeError {
@@ -88,7 +90,8 @@ public actor InnerTubeClient {
         try await browse(BrowseTarget(browseId: BrowseTarget.home.browseId, params: params), credentials: credentials)
     }
 
-    /// A `VL…` playlist target returns the playlist page shape, which this parser does not handle: route it to the playlist screen.
+    /// Not for entity pages: `MPREb_…` goes to `album(_:)`, `UC…` without params to `artist(_:)` and every `VL…` target to `playlist(_:)`.
+    /// Artist "Show all" (`MPAD…`, `UC…` with params), the Related page and other section lists parse here.
     public func browse(_ target: BrowseTarget, credentials: Credentials?) async throws -> BrowsePage {
         var body: [String: any Sendable] = ["browseId": target.browseId]
         body["params"] = target.params
@@ -98,6 +101,70 @@ public actor InnerTubeClient {
     /// A guest continuation works only while the guest visitor is unchanged; after `resetGuestVisitor()` restart from page 1.
     public func browseContinuation(_ token: String, credentials: Credentials?) async throws -> Page<Shelf> {
         try BrowsePage(browse: await fetch("browse", body: ["continuation": token], credentials: credentials)).shelves
+    }
+
+    /// `MPREb_…`, with the optional `params` of an "Other versions" card.
+    public func album(_ target: BrowseTarget, credentials: Credentials?) async throws -> AlbumPage {
+        try AlbumPage(album: await fetchBrowse(target, credentials: credentials))
+    }
+
+    /// `UC…` without params.
+    public func artist(_ target: BrowseTarget, credentials: Credentials?) async throws -> ArtistPage {
+        try ArtistPage(artist: await fetchBrowse(target, credentials: credentials))
+    }
+
+    /// Every `VL…` target, including `VLLM` and the `VLOLAK…` target of an artist's Top songs. Private, deleted and non-existent
+    /// playlists throw `.notAvailable`.
+    public func playlist(_ target: BrowseTarget, credentials: Credentials?) async throws -> PlaylistPage {
+        try PlaylistPage(playlist: await fetchBrowse(target, credentials: credentials))
+    }
+
+    /// A guest continuation works only while the guest visitor is unchanged. Without the issuing visitor the server does not fail:
+    /// it silently returns page 1 again. After `resetGuestVisitor()` reload page 1.
+    public func playlistContinuation(_ token: String, credentials: Credentials?) async throws -> Page<Song> {
+        try Page<Song>(playlistContinuation: await fetch("browse", body: ["continuation": token], credentials: credentials))
+    }
+
+    /// A guest gets an empty page.
+    public func library(_ target: BrowseTarget, credentials: Credentials?) async throws -> LibraryPage {
+        try LibraryPage(library: await fetchBrowse(target, credentials: credentials))
+    }
+
+    public func libraryContinuation(_ token: String, credentials: Credentials?) async throws -> Page<MusicItem> {
+        try Page<MusicItem>(libraryContinuation: await fetch("browse", body: ["continuation": token], credentials: credentials))
+    }
+
+    /// The `guide` playlists, or the library playlists when the guide has none. Liked music is the entry with
+    /// `browseId == BrowseTarget.likedMusic.browseId`. A guest gets an empty list.
+    public func sidebarPlaylists(credentials: Credentials?) async throws -> [Playlist] {
+        let guided = [Playlist](guide: try await fetch("guide", body: [:], credentials: credentials))
+        if !guided.isEmpty { return guided }
+        return try await library(.likedPlaylists, credentials: credentials).items.items.compactMap {
+            if case .playlist(let playlist) = $0 { playlist } else { nil }
+        }
+    }
+
+    /// A guest gets no days.
+    public func history(credentials: Credentials?) async throws -> [HistoryDay] {
+        try [HistoryDay](history: await fetchBrowse(.history, credentials: credentials))
+    }
+
+    /// The bridge stays the source of truth for the live queue; this is for the initial display and chip switching.
+    public func watchNext(_ target: WatchTarget, credentials: Credentials?) async throws -> WatchNext {
+        var body: [String: any Sendable] = [:]
+        body["videoId"] = target.videoId
+        body["playlistId"] = target.playlistId
+        body["params"] = target.params
+        return try WatchNext(next: await fetch("next", body: body, credentials: credentials))
+    }
+
+    public func watchNextContinuation(_ token: String, credentials: Credentials?) async throws -> Page<QueueItem> {
+        try Page<QueueItem>(nextContinuation: await fetch("next", body: ["continuation": token], credentials: credentials))
+    }
+
+    /// `nil` is "Lyrics not available".
+    public func lyrics(_ browseId: String, credentials: Credentials?) async throws -> Lyrics? {
+        try LyricsParser.parse(await fetch("browse", body: ["browseId": browseId], credentials: credentials))
     }
 
     /// `country` is a `ChartCountry.code`. Without it the server picks the country from the caller's IP address.
@@ -150,6 +217,12 @@ public actor InnerTubeClient {
         let json = try await send(request)
         GuestVisitor.shared.accept(json["responseContext"]?["visitorData"]?.string, generation: snapshot.generation)
         return json
+    }
+
+    private func fetchBrowse(_ target: BrowseTarget, credentials: Credentials?) async throws -> JSONValue {
+        var body: [String: any Sendable] = ["browseId": target.browseId]
+        body["params"] = target.params
+        return try await fetch("browse", body: body, credentials: credentials)
     }
 
     private func fetch(_ endpoint: String, body: [String: any Sendable], credentials: Credentials?) async throws -> JSONValue {

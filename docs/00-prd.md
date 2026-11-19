@@ -153,9 +153,9 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | ID | Requirement | Pri | Spec | Row |
 |---|---|---|---|---|
 | F-LIB-1 | Playlists, songs, albums, artists, subscriptions, liked music | P0 | 08 §7 | 2.3, 4.5 |
-| F-LIB-2 | Sidebar list of own and saved playlists; New playlist | P0 | 08 §4 | 4.1, 4.5 |
+| F-LIB-2 | Sidebar list of own and saved playlists; New playlist | P0 | 08 §4 | 2.3, 4.1, 4.5 |
 | F-LIB-3 | Like / dislike, save to library, add to playlist, edit own playlist | P0 | 08 §11 | 2.4, 4.6 |
-| F-LIB-4 | History page with removal from history | P1 | 08 §7 | 2.4, 4.5 |
+| F-LIB-4 | History page with removal from history | P1 | 08 §7 | 2.3, 2.4, 4.5 |
 
 ### 5.5. Playback
 
@@ -164,8 +164,8 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | F-PLY-1 | Everything the site plays plays here, including Premium quality and, for free accounts and guests, the ads YouTube serves | P0 | 02 §3 | 3.1 |
 | F-PLY-2 | Player bar: artwork, title, artist, play/pause, previous/next, seek, volume, like, shuffle, repeat | P0 | 08 §9 | 3.2, 4.1 |
 | F-PLY-3 | Audio continues with the window minimized, hidden or on another Space | P0 | 05 risk 4 | 3.1 |
-| F-PLY-4 | Up next queue: view, jump, reorder by drag, remove, play next / add to queue, radio chips, save queue as playlist | P0 | 08 §10.2 | 3.2, 4.6 |
-| F-PLY-5 | Player page with Song/Video toggle, Lyrics and Related tabs | P1 | 08 §10 | 4.8 |
+| F-PLY-4 | Up next queue: view, jump, reorder by drag, remove, play next / add to queue, radio chips, save queue as playlist | P0 | 08 §10.2 | 2.3, 3.2, 4.6 |
+| F-PLY-5 | Player page with Song/Video toggle, Lyrics and Related tabs | P1 | 08 §10 | 2.3, 4.8 |
 | F-PLY-6 | Comments tab | P2 | 08 §10.4 | 4.8 |
 | F-PLY-7 | A web view crash or a stalled player recovers by itself and returns to the same track and position | P0 | 03 stage 3 | 3.2 |
 

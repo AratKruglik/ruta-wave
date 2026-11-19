@@ -30,11 +30,17 @@ public struct Chip: Sendable, Equatable {
     public let target: BrowseTarget?
     public let searchParams: String?
     public let isSelected: Bool
+    /// A queue chip (radio filter) uses `watchTarget`.
+    public let watchTarget: WatchTarget?
 
-    public init(title: String, target: BrowseTarget? = nil, searchParams: String? = nil, isSelected: Bool = false) {
+    public init(
+        title: String, target: BrowseTarget? = nil, searchParams: String? = nil, isSelected: Bool = false,
+        watchTarget: WatchTarget? = nil
+    ) {
         self.title = title
         self.target = target
         self.searchParams = searchParams
+        self.watchTarget = watchTarget
         self.isSelected = isSelected
     }
 }

@@ -1,0 +1,103 @@
+{
+ "items": [
+  {
+   "guideSectionRenderer": {
+    "items": [
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "runs": [
+         {
+          "text": "Home"
+         }
+        ]
+       },
+       "icon": {
+        "iconType": "TAB_HOME"
+       },
+       "isPrimary": true,
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "FEmusic_home"
+        }
+       }
+      }
+     },
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "runs": [
+         {
+          "text": "Explore"
+         }
+        ]
+       },
+       "icon": {
+        "iconType": "TAB_EXPLORE"
+       },
+       "isPrimary": true,
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "FEmusic_explore"
+        }
+       }
+      }
+     },
+     {
+      "guideEntryRenderer": {
+       "formattedTitle": {
+        "runs": [
+         {
+          "text": "Library"
+         }
+        ]
+       },
+       "icon": {
+        "iconType": "TAB_BOOKMARK"
+       },
+       "isPrimary": true,
+       "navigationEndpoint": {
+        "browseEndpoint": {
+         "browseId": "FEmusic_library_landing"
+        }
+       },
+       "targetId": "library-guide-item"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "guideSigninPromoRenderer": {
+    "actionText": {
+     "runs": [
+      {
+       "text": "Sign in"
+      }
+     ]
+    },
+    "descriptiveText": {
+     "runs": [
+      {
+       "text": "Sign in to create & share playlists, get personalized recommendations, and more."
+      }
+     ]
+    },
+    "signInButton": {
+     "buttonRenderer": {
+      "isDisabled": false,
+      "navigationEndpoint": {
+       "signInEndpoint": {
+        "hack": true
+       }
+      },
+      "style": "STYLE_DEFAULT",
+      "text": {
+       "simpleText": "Sign in"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

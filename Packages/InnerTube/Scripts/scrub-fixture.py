@@ -25,7 +25,10 @@ SECTION_KEYS = {
 }
 # A fixed subset, so the capturer's own (IP based) country does not leak into the fixture.
 KEEP_COUNTRIES = {"ZZ", "AR", "DE"}
+EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 HANDLE = re.compile(r"@[A-Za-z0-9._-]+")
+# Rows that end a list and must survive trimming: the paging token and the automix preview.
+TRAILING_KEYS = {"continuationItemRenderer", "automixPreviewVideoRenderer"}
 
 
 class Scrubber:
@@ -45,6 +48,9 @@ class Scrubber:
                 if key in DROP_KEYS or key.startswith("accessibility"):
                     continue
                 if key == "menu" and "musicMultiSelectMenuRenderer" not in json.dumps(value)[:200]:
+                    removal = self.removal_menu(value)
+                    if removal:
+                        out[key] = self.clean(removal, key)
                     continue
                 if key in TOKEN_KEYS and isinstance(value, str):
                     out[key] = self.placeholder(key)
@@ -58,8 +64,15 @@ class Scrubber:
                 node = node.replace(name, "Placeholder Name")
             for browse_id in self.args.mask_id:
                 node = node.replace(browse_id, "placeholder0000000000000000")
-            return HANDLE.sub("@placeholder", node)
+            return HANDLE.sub("@placeholder", EMAIL.sub("placeholder email", node))
         return node
+
+    @staticmethod
+    def removal_menu(menu):
+        """Only the "remove from history" item is kept: it carries the token the 2.4 mutation needs."""
+        items = menu.get("menuRenderer", {}).get("items", []) if isinstance(menu, dict) else []
+        kept = [i for i in items if i.get("menuServiceItemRenderer", {}).get("icon", {}).get("iconType") == "REMOVE_FROM_HISTORY"]
+        return {"menuRenderer": {"items": kept}} if kept else None
 
     def mask_profile_items(self, node):
         if isinstance(node, dict):
@@ -132,9 +145,11 @@ class Scrubber:
             if self.args.one_per_kind and any("itemSectionRenderer" in i for i in items):
                 return self.one_per_kind(items)
             return items[: self.args.sections]
-        if key not in ("contents", "items"):
+        if key not in ("contents", "items", "continuationItems"):
             return items
         kept = items[: self.args.items]
+        if items[-1] not in kept and next(iter(items[-1]), "") in TRAILING_KEYS:
+            kept.append(items[-1])
         if self.args.distinct_trend:
             seen = {self.trend(i) for i in kept}
             for item in items[self.args.items:]:
