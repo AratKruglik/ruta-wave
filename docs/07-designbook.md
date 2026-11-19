@@ -280,17 +280,18 @@ Charts (`chart.line.uptrend.xyaxis`), Moods & genres (`face.smiling`).
 - Centre group (max 560 pt): artwork 40 pt (square) or 71 × 40 pt (video),
   title `title`, subtitle `body`/`text.secondary`
   ("Artist • Album • Year" or "Channel • N views • N likes"), then 👍 👎 ⋮.
-- Right group: volume (icon; slider appears on hover), captions **CC** (only
-  for videos with captions — S6 `captions-selector`), repeat (off / all / one:
+- Right group: volume (icon; slider appears on hover), repeat (off / all / one:
   `repeat`, `repeat` filled, `repeat.1`), shuffle, expand chevron (`▲` opens the
-  player page, `▼` closes it).
+  player page, `▼` closes it). Captions **CC** (only for videos with captions,
+  `captions-selector`) is deferred with music video mode ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)).
 
 ### 6.12. Player page
 Covers the content area (sidebar, top bar and player bar stay), slides up from
 the player bar.
-- Left: **Song | Video** segmented pill (36 pt, selected segment
-  `surface.inverse`) centred above the artwork. Artwork: square up to 560 pt
-  for songs, 16:9 for videos, `radius.card`.
+- Left: artwork, square up to 560 pt for songs, 16:9 for videos, `radius.card`.
+  The **Song | Video** segmented pill (36 pt, selected segment
+  `surface.inverse`, centred above the artwork) is deferred with music video
+  mode ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)).
 - Right panel, 360–420 pt wide: tabs **Up next / Lyrics / Comments / Related**
   (`tab` style, selected `text.primary` with a 2 pt underline, others
   `text.tertiary`, disabled ones at `text.disabled`).

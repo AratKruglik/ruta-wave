@@ -165,7 +165,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | F-PLY-2 | Player bar: artwork, title, artist, play/pause, previous/next, seek, volume, like, shuffle, repeat | P0 | 08 §9 | 3.2, 4.1 |
 | F-PLY-3 | Audio continues with the window minimized, hidden or on another Space | P0 | 05 risk 4 | 3.1 |
 | F-PLY-4 | Up next queue: view, jump, reorder by drag, remove, play next / add to queue, radio chips, save queue as playlist | P0 | 08 §10.2 | 2.3, 3.2, 4.6 |
-| F-PLY-5 | Player page with Song/Video toggle, Lyrics and Related tabs | P1 | 08 §10 | 2.3, 4.8 |
+| F-PLY-5 | Player page with Lyrics and Related tabs (the Song/Video toggle is deferred, [#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) | P1 | 08 §10 | 2.3, 4.8 |
 | F-PLY-6 | Comments tab | P2 | 08 §10.4 | 4.8 |
 | F-PLY-7 | A web view crash or a stalled player recovers by itself and returns to the same track and position | P0 | 03 stage 3 | 3.2 |
 
@@ -298,7 +298,7 @@ macOS 14 or later, Apple Silicon. Intel support depends on open question #9.
 | **0.1.0** — daily driver | Stages 0–5 and 8: all P0, most P1 of §5.1–§5.8 | Flows 1–7 of §6 pass by hand; §7.1 budgets met; DMG installs on a clean user account |
 | **0.1.x** | Remaining P1, fixes from daily use | — |
 | **0.2.0** — plugins | Stages 6–7: §5.9 | Every plugin toggles without a relaunch, has unit tests for its logic; audio effects survive track changes |
-| **later** | P2 leftovers, Sparkle | by decision |
+| **later** | P2 leftovers, Sparkle, music video mode (Song/Video toggle, captions, picture-in-picture; [#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) | by decision |
 
 Order and dependencies are in [06](06-backlog.md); the DMG stage is moved
 before the plugins so working builds can be installed early.
@@ -328,7 +328,7 @@ Kept in one place, [05](05-risks-and-scope.md). The ones that shape the product:
   any time; isolated parsers and one `bridge.js` keep fixes small.
 - **Ads for guests and free accounts** — accepted, not blocked.
 
-Open questions that affect this PRD: #3 music videos,
+Open questions that affect this PRD:
 #5 lyrics source, #6 optional plugins, #7 languages, #9 Intel, #10 auto-update.
 Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 
@@ -340,3 +340,4 @@ Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 |---|---|
 | 2026-11-18 | Draft 1. Product named **Redwave** (was Tunewave); bundle ID `dev.kruhlyk.redwave`; rename in code planned as backlog 0.3 |
 | 2026-11-19 | Podcasts and user uploads out of scope (open question #4, #7); F-BRW-5 dropped |
+| 2026-11-19 | Music video mode deferred to later (open question #3, #12); Song/Video toggle removed from F-PLY-5; 02 §4.1 requires a re-parentable web view |

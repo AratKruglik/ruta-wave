@@ -10,6 +10,7 @@ Labels in the "Decision" column:
 - **S5 / S6 / S7** — ported at that stage ([03-roadmap.md](03-roadmap.md));
 - **Built in** — in a native interface this is an ordinary property, not a plugin;
 - **If needed** — implemented only if it turns out to be wanted;
+- **Later** — deferred by a decision, not scheduled ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12));
 - **No** — not ported.
 
 | # | Plugin | What it does | Decision | In the Swift version |
@@ -22,7 +23,7 @@ Labels in the "Decision" column:
 | 6 | `audio-compressor` | dynamic range compressor | S7 | `DynamicsCompressorNode` in the page |
 | 7 | `auth-proxy-adapter` | support for authenticated proxies (SOCKS) | No | the system proxy is used |
 | 8 | `blur-nav-bar` | blurred navigation bar | Built in | SwiftUI materials |
-| 9 | `captions-selector` | caption selection | S6 | command through the bridge, menu in the player |
+| 9 | `captions-selector` | caption selection | Later (#12) | command through the bridge, menu in the player |
 | 10 | `clock` | shows a clock in the interface | If needed | — |
 | 11 | `crossfade` | smooth transition between tracks | S7 | Web Audio in the page; the hardest of the audio plugins |
 | 12 | `custom-output-device` | audio output device selection | S7 | `setSinkId` in the page, or the system picker |
@@ -38,7 +39,7 @@ Labels in the "Decision" column:
 | 22 | `navigation` | back and forward buttons | Built in | `NavigationStack` |
 | 23 | `notifications` | track-change notifications | S5–S6 | `UNUserNotificationCenter` |
 | 24 | `performance-improvement` | web page optimizations | No | a native UI does not need them |
-| 25 | `picture-in-picture` | picture-in-picture mode | S7 | music videos only; needs a visible web view |
+| 25 | `picture-in-picture` | picture-in-picture mode | Later (#12) | music videos only; needs a visible web view |
 | 26 | `playback-speed` | playback speed | S6 | `video.playbackRate` through the bridge |
 | 27 | `precise-volume` | precise volume step, hotkeys | S6 | logic in Swift, value through the bridge |
 | 28 | `quality-changer` | quality selection | S6 | player method through the bridge |
@@ -53,18 +54,19 @@ Labels in the "Decision" column:
 | 37 | `transparent-player` | transparent player window | Built in | window materials |
 | 38 | `tuna-obs` | sends the track to OBS (Tuna plugin) | If needed | HTTP request to a local port |
 | 39 | `unobtrusive-player` | hides the player while scrolling | Built in | player bar behaviour |
-| 40 | `video-toggle` | switches between video and artwork | S6 | the native UI shows artwork by default; video is a separate mode |
+| 40 | `video-toggle` | switches between video and artwork | Later (#12) | the native UI shows artwork by default; video is a separate mode |
 | 41 | `visualizer` | audio visualization | S7 | `AnalyserNode` → data to Swift → `Canvas` |
 
 ## Summary
 
 | Decision | Count |
 |---|---|
-| S5–S6 (first wave) | 13 |
-| S7 (second wave) | 12 |
+| S5–S6 (first wave) | 11 |
+| S7 (second wave) | 11 |
 | Built into the native UI | 6 |
 | If needed | 5 |
 | Not ported | 5 |
+| Later (music video mode, #12) | 3 |
 
 ## Notes
 
