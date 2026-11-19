@@ -3,8 +3,6 @@ import Foundation
 
 enum InnerTubeRequest {
     static let origin = "https://music.youtube.com"
-    // shortcut: fixed version, replaced by page discovery in 2.1.
-    static let clientVersion = "1.20261115.14.00"
 
     static func make(
         endpoint: String,
@@ -46,6 +44,12 @@ enum InnerTubeRequest {
         return request
     }
 
+    static func makePage() -> URLRequest {
+        var request = unauthenticated(URL(string: origin + "/")!)
+        request.httpMethod = "GET"
+        return request
+    }
+
     private static func signed(
         _ url: URL,
         cookies: [HTTPCookie],
@@ -82,7 +86,7 @@ enum InnerTubeRequest {
         payload["context"] = [
             "client": [
                 "clientName": "WEB_REMIX",
-                "clientVersion": clientVersion,
+                "clientVersion": ClientVersion.shared.current,
                 "hl": locale.language.languageCode?.identifier ?? "en",
                 "gl": locale.region?.identifier ?? "US",
             ],

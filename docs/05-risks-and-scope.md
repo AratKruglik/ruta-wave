@@ -11,7 +11,7 @@
 | 5 | Now Playing conflict between WebKit and the app | medium | duplicated or wrong metadata in Control Centre | checked at stage 5; disable Media Session on the page |
 | 6 | DRM-protected videos or tracks do not play in `WKWebView` | low for music | individual tracks unavailable | WebKit supports FairPlay; check at stage 3 on several content types |
 | 7 | Web Audio effects break because of CORS on the media stream | medium | equalizer and visualizer do not work | check with one prototype at the start of stage 7, before writing all audio plugins |
-| 8 | The session expires, cookies rotate | high | sudden 401s | on a 401 re-read cookies from the web view store; if that does not help, show the sign-in window |
+| 8 | The session expires, cookies rotate | high | sudden 401s | on a 401 the session is dropped and sign-in is shown (no cookie re-read; decided in 2.1) |
 | 9 | Web view memory use | high | 150–300 MB on top of the native UI | acceptable; still far less than Electron |
 | 10 | Amount of work: a native UI is effectively a new client | high | the project drags on | stages are ordered so that after stage 5 there is an app fit for daily use with no plugins at all |
 | 11 | Ad-hoc signature: Keychain and system permissions are requested again after every new build | high | repeated Keychain password prompt or repeated sign-in | acceptable for personal use; check at stage 8, and if needed use a local self-signed certificate with a stable identity |

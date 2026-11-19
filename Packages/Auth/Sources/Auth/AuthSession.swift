@@ -17,6 +17,7 @@ public final class AuthSession {
     public private(set) var signOutError: KeychainError?
     public private(set) var isAddingAccount = false
     public private(set) var isSigningOut = false
+    public private(set) var isSessionExpired = false
 
     public var authUserIndex: Int {
         didSet { defaults.set(authUserIndex, forKey: Self.authUserIndexKey) }
@@ -106,6 +107,13 @@ public final class AuthSession {
         state = .signedOut
     }
 
+    // The caller passes the cookies it sent, so a late 401 from a replaced session is ignored.
+    public func expireSession(cookies: [HTTPCookie]) async {
+        guard case .signedIn(let current) = state, current == cookies else { return }
+        await signOut()
+        if case .signedOut = state { isSessionExpired = true }
+    }
+
     // Returns false while the cookie set is still incomplete, so the caller keeps observing.
     func completeSignIn(with cookies: [HTTPCookie]) -> Bool {
         guard !isSigningOut else { return false }
@@ -115,6 +123,7 @@ public final class AuthSession {
             try keychain.write(data)
             if !isAddingAccount { authUserIndex = 0 }
             state = .signedIn(cookies: restored)
+            isSessionExpired = false
             signInError = nil
             isAddingAccount = false
         } catch {

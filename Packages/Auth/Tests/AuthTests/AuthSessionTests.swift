@@ -6,6 +6,7 @@ import Testing
 private final class KeychainSpy: KeychainStore, @unchecked Sendable {
     var stored: Data?
     var readError: KeychainError?
+    var deleteError: KeychainError?
     private(set) var deleteCount = 0
 
     func read() throws(KeychainError) -> Data? {
@@ -15,8 +16,9 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
 
     func write(_ data: Data) { stored = data }
 
-    func delete() {
+    func delete() throws(KeychainError) {
         deleteCount += 1
+        if let deleteError { throw deleteError }
         stored = nil
     }
 }
@@ -122,5 +124,74 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
         #expect(!session.completeSignIn(with: [makeCookie("SID")]))
         #expect(!session.state.isSignedIn)
         #expect(keychain.stored == nil)
+    }
+
+    private func signedInSession(_ keychain: KeychainSpy) throws -> (AuthSession, [HTTPCookie]) {
+        keychain.stored = try validData()
+        let session = AuthSession(keychain: keychain, defaults: defaults)
+        guard case .signedIn(let cookies) = session.state else { throw KeychainError(status: errSecItemNotFound) }
+        return (session, cookies)
+    }
+
+    @Test func expireSessionSignsOutAndFlags() async throws {
+        let keychain = KeychainSpy()
+        let (session, cookies) = try signedInSession(keychain)
+        session.authUserIndex = 2
+        await session.expireSession(cookies: cookies)
+        guard case .signedOut = session.state else { Issue.record("expected signedOut"); return }
+        #expect(session.isSessionExpired)
+        #expect(keychain.deleteCount == 1)
+        #expect(session.authUserIndex == 0)
+        await session.expireSession(cookies: cookies)
+        #expect(keychain.deleteCount == 1)
+    }
+
+    @Test func expireSessionIgnoresStaleCookies() async throws {
+        let keychain = KeychainSpy()
+        let (session, _) = try signedInSession(keychain)
+        await session.expireSession(cookies: [makeCookie("SID")])
+        #expect(session.state.isSignedIn)
+        #expect(!session.isSessionExpired)
+        #expect(keychain.deleteCount == 0)
+    }
+
+    @Test func expireSessionIgnoresSameNamesWithDifferentValues() async throws {
+        let keychain = KeychainSpy()
+        let (session, current) = try signedInSession(keychain)
+        let stale = current.map { cookie in
+            HTTPCookie(properties: [
+                .name: cookie.name, .value: cookie.value + "-old", .domain: cookie.domain, .path: cookie.path,
+            ])!
+        }
+        await session.expireSession(cookies: stale)
+        #expect(session.state.isSignedIn)
+        #expect(!session.isSessionExpired)
+        #expect(keychain.deleteCount == 0)
+    }
+
+    @Test func expireSessionIgnoredWhenSignedOut() async {
+        let keychain = KeychainSpy()
+        let session = AuthSession(keychain: keychain, defaults: defaults)
+        await session.expireSession(cookies: [])
+        #expect(!session.isSessionExpired)
+        #expect(keychain.deleteCount == 0)
+    }
+
+    @Test func expireSessionKeepsSessionWhenKeychainDeleteFails() async throws {
+        let keychain = KeychainSpy()
+        let (session, cookies) = try signedInSession(keychain)
+        keychain.deleteError = KeychainError(status: errSecInteractionNotAllowed)
+        await session.expireSession(cookies: cookies)
+        #expect(session.state.isSignedIn)
+        #expect(!session.isSessionExpired)
+    }
+
+    @Test func completeSignInClearsExpiredFlag() async throws {
+        let keychain = KeychainSpy()
+        let (session, cookies) = try signedInSession(keychain)
+        await session.expireSession(cookies: cookies)
+        #expect(session.isSessionExpired)
+        #expect(session.completeSignIn(with: SessionCookies.requiredNames.map { makeCookie($0) }))
+        #expect(!session.isSessionExpired)
     }
 }

@@ -9,6 +9,7 @@ struct RedwaveApp: App {
     init() {
         // SecItemDelete can block on a Keychain prompt for the old binary's item, so this must stay off the main actor.
         Task.detached(priority: .utility) { LegacyStores.remove() }
+        Task.detached(priority: .utility) { await InnerTubeClient().refreshClientVersion() }
     }
 
     var body: some Scene {
