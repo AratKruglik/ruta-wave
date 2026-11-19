@@ -66,6 +66,11 @@ Consequences we accept:
 - It must be **attached to a window**, otherwise WebKit suspends timers and
   media: it is placed in the main window at 1×1 size with `alphaValue = 0`
   (the exact approach is verified at stage 3).
+- It must stay **re-parentable**: a later music video mode or picture-in-picture
+  ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) moves it into a visible container without reloading the page or
+  interrupting playback. The stage 3 design (#13) must not rule this out; whether
+  WebKit pauses media while the view is briefly detached is checked when video
+  mode is picked up (risk 4 in [05](05-risks-and-scope.md)).
 - `WKWebViewConfiguration`:
   - `mediaTypesRequiringUserActionForPlayback = []` — audio autoplay;
   - `websiteDataStore = .default()` — cookies shared with the sign-in window;

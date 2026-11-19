@@ -148,8 +148,8 @@ relaunch the app returns to the last track.
 - [ ] `skip-disliked-songs`.
 - [ ] `disable-autoplay`.
 - [ ] `shortcuts`: configurable global hotkeys.
-- [ ] `quality-changer`, `captions-selector`, `video-toggle` — if the bridge
-      gives access to them.
+- [ ] `quality-changer` — if the bridge gives access to it.
+- `captions-selector`, `video-toggle` — later, music video mode is deferred ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)).
 
 **Done when:** every plugin can be turned on and off without a relaunch and has
 unit tests for its logic.
@@ -167,7 +167,7 @@ unit tests for its logic.
 - [ ] `api-server`: a local HTTP server on `Network.framework` with `/api/v1/*`
       routes compatible with the original (listed in [01](01-reverse-engineering.md#47-plugins)).
 - [ ] `album-color-theme`, `ambient-mode` — as properties of the native theme.
-- [ ] `picture-in-picture` — for music videos.
+- `picture-in-picture` — later, music video mode is deferred ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)).
 - [ ] `touchbar`.
 - [ ] `music-together`, `tuna-obs`, `lumiastream`, `amuse` — if needed.
 

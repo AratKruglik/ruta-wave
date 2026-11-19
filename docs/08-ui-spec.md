@@ -347,7 +347,7 @@ volume, like status, repeat, shuffle) ([02 §4](02-architecture.md#4-playerengin
 | 👍 / 👎 | set / clear the rating (`like/like`, `like/dislike`, `like/removelike`) | ⌥⌘L like, ⌥⌘D dislike | filled when on; guest: prompt |
 | ⋮ | the track context menu (§11) | | |
 | Volume | click mutes / unmutes; hover shows a slider; scroll over it changes volume | ⌘↑ / ⌘↓, ⌘⌥↓ mute | step 5 % (S6 `precise-volume` makes it configurable) |
-| CC | captions menu (video only) | | S6 |
+| CC | captions menu (video only); **deferred**, music video mode is later ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) — no CC control in v1 | | later ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) |
 | Repeat | off → all → one → off | ⌘R | |
 | Shuffle | shuffles the remaining queue | ⌘S | |
 | Chevron | opens / closes the player page | ⌘P, Esc closes | |
@@ -364,11 +364,11 @@ title and disables seeking and next, as the page does (risk #12 in 05).
 ## 10. Player page
 
 ### 10.1. Left side
-- **Song | Video** toggle: shown only when the current item has both an audio
-  track (ATV) and a music video (OMV) counterpart; switching keeps the position
-  **[observed]**. The counterpart id comes from the player / `next` response
-  **[known]**. Video mode shows the web view itself in the artwork area
-  (open question #3 in 05 decides whether video ships).
+- **Song | Video** toggle — **deferred** past v1 ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)); v1 shows the artwork
+  only. Kept for the future work: shown only when the current item has both an
+  audio track (ATV) and a music video (OMV) counterpart; switching keeps the
+  position **[observed]**. The counterpart id comes from the player / `next`
+  response **[known]**. Video mode shows the web view itself in the artwork area.
 - Artwork: the largest thumbnail; click toggles play / pause.
 
 ### 10.2. Up next tab
@@ -408,7 +408,7 @@ Shelves "You might also like", "Recommended playlists", "Similar artists",
 "About the artist" **[observed]**. **Data:** `browse` with the related
 `browseId` from `next` **[known]**. Cards behave as on Home.
 
-**Stage:** 2.3 (`next` parser), 4.6 (queue), 4.8 (Song/Video toggle, lyrics, related,
+**Stage:** 2.3 (`next` parser), 4.6 (queue), 4.8 (lyrics, related,
 comments).
 
 ## 11. Context menus — one action set
@@ -499,7 +499,7 @@ All shortcuts appear in the app menu (stage 5.2) so they are discoverable.
 
 ### 14.5. What is remembered between launches
 Sidebar collapsed state, last section and stacks, Library section and sort,
-chart country, volume, repeat and shuffle, Song/Video choice, player page open
+chart country, volume, repeat and shuffle, player page open
 state; playback position per `resumeOnStart`.
 
 ## 15. Where the backlog covers these parts
@@ -509,7 +509,7 @@ rows that now cover them (added 2026-11-18):
 
 | Part | Backlog row |
 |---|---|
-| Player page: Song/Video toggle, Lyrics, Related, Comments tabs | 4.8 |
+| Player page: Lyrics, Related, Comments tabs | 4.8 |
 | Explore subpages (New releases, Charts with country, Moods & genres) | 4.2 |
 | Search history in the dropdown with delete (`feedback`) | 4.3 (+ `feedback` in 2.4) |
 | History page and removal from history | 4.5 (+ `feedback` in 2.4) |
@@ -517,4 +517,5 @@ rows that now cover them (added 2026-11-18):
 | Multi-select, selection bar, drag and drop | 4.6 |
 | Offline banner and retry on reconnect | 4.7 |
 | Podcasts | not planned (decided no, #7) |
+| Music video mode (Song/Video toggle, CC, picture-in-picture) | later ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) |
 | Artwork colour theme (look of the reference) | S7 `album-color-theme` (stage 7); can be pulled into 4.7 |
