@@ -1,0 +1,7 @@
+{
+ "status": "STATUS_SUCCEEDED",
+ "playlistEditResults": [
+  {"playlistEditVideoAddedResultData": {"videoId": "PLACEHOLDER_V1", "setVideoId": "PLACEHOLDER_SET_1"}},
+  {"playlistEditVideoAddedResultData": {"videoId": "PLACEHOLDER_V2", "setVideoId": "PLACEHOLDER_SET_2"}}
+ ]
+}

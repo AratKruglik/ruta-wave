@@ -136,7 +136,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 |---|---|---|---|---|
 | F-BRW-1 | Home: mood chips and horizontal shelves, paged | P0 | 08 §5 | 2.2, 4.2 |
 | F-BRW-2 | Explore: New releases, Charts with country selector, Moods & genres | P1 | 08 §6 | 4.2 |
-| F-BRW-3 | Album, artist (with Subscribe), playlist pages, long playlists paged | P0 | 08 §8 | 2.3, 4.4 |
+| F-BRW-3 | Album, artist (with Subscribe), playlist pages, long playlists paged | P0 | 08 §8 | 2.3, 2.4, 4.4 |
 | F-BRW-4 | "More" lists for every shelf | P1 | 08 §1.3 | 4.2 |
 | F-BRW-5 | ~~Podcasts (show, episode, library section)~~ — out of scope (decided no, #7) | P2 | 08 §8.4 | 4.9 |
 

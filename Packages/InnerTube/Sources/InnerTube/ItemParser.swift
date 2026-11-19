@@ -20,6 +20,12 @@ enum ItemParser {
         return song
     }
 
+    static func playlistRow(_ block: JSONValue) -> Song? {
+        guard var song = song(block) else { return nil }
+        song.playlistSetVideoId = block["musicResponsiveListItemRenderer"]?["playlistItemData"]?["playlistSetVideoId"]?.string
+        return song
+    }
+
     static func section(_ block: JSONValue) -> Shelf? {
         let shelf: Shelf
         if let renderer = block["musicCarouselShelfRenderer"] {

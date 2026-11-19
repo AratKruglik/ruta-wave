@@ -179,8 +179,12 @@ Everything in this section is **[known]** from open projects and is verified at 
 | `next` | "up next" queue, radio, related tracks, lyrics identifier |
 | `like/like`, `like/dislike`, `like/removelike` | ratings |
 | `playlist/create`, `playlist/delete`, `browse/edit_playlist` | playlist management |
+| `subscription/subscribe`, `subscription/unsubscribe` | artist subscription |
+| `feedback` | remove a search-history entry or a History row by `feedbackToken` |
 | `account/account_menu` | account name and avatar, session check |
 | `GET /getAccountSwitcherEndpoint` | the session's Google accounts; `authuser` comes from `signinUrl` (brand accounts are skipped) |
+
+Mutations are signed-only (a guest call throws `signInRequired` before any request) and are never retried. Feedback tokens and `playlistSetVideoId` values are bound to the account that fetched them: send them only with that account's credentials, and cancel any delayed send (Undo window) on sign-out or account switch.
 
 ### 5.3. Module layout
 

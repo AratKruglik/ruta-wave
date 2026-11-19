@@ -17,6 +17,13 @@ import Testing
         #expect(page.sectionsContinuation == "PLACEHOLDER_CONTINUATION_2")
     }
 
+    @Test func playlistRowsCarryTheirSetVideoId() throws {
+        let own = try PlaylistPage(playlist: Fixture.json("playlist-own"))
+        #expect(own.tracks.items.map(\.playlistSetVideoId) == ["289F4A46DF0A30D2", "56B44F6D10557CC6"])
+        let next = try Page<Song>(playlistContinuation: Fixture.json("playlist-continuation"))
+        #expect(next.items.map(\.playlistSetVideoId) == ["780605BC69C6C250", "4949B9D0837AA5B0", "BC50DB7391B7A3A4"])
+    }
+
     @Test func singleColumnTopSongsIsAPlaylist() throws {
         let page = try PlaylistPage(playlist: Fixture.json("playlist-top-songs"))
         #expect(page.header.title == "Top songs")
