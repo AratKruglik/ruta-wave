@@ -39,6 +39,8 @@ public final class PlayerEngine {
         return stream
     }
 
+    private static let terminationReason = "Player web view is active"
+
     public func start(_ state: AuthSession.State) async {
         let ephemeral: Bool
         let cookies: [HTTPCookie]
@@ -56,6 +58,8 @@ public final class PlayerEngine {
 
         let store = ephemeral ? WKWebsiteDataStore.nonPersistent() : WKWebsiteDataStore.default()
         let view = makeWebView(store: store)
+        // Without this, macOS terminates the app ~10 s after the last window closes and playback dies with it.
+        ProcessInfo.processInfo.disableAutomaticTermination(Self.terminationReason)
         webView = view
         isEphemeral = ephemeral
         if !ephemeral {
@@ -73,6 +77,7 @@ public final class PlayerEngine {
     }
 
     public func stop() {
+        if webView != nil { ProcessInfo.processInfo.enableAutomaticTermination(Self.terminationReason) }
         webView?.configuration.userContentController.removeAllScriptMessageHandlers()
         webView?.stopLoading()
         webView?.removeFromSuperview()
