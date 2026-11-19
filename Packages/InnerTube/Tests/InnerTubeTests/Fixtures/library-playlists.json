@@ -350,6 +350,28 @@
                  "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
                 }
                },
+               "browseId": "FEmusic_library_non_music_audio_list"
+              }
+             },
+             "text": {
+              "runs": [
+               {
+                "text": "Podcasts"
+               }
+              ]
+             }
+            }
+           },
+           {
+            "chipCloudChipRenderer": {
+             "isSelected": false,
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
+                }
+               },
                "browseId": "FEmusic_liked_albums"
               }
              },
@@ -357,6 +379,28 @@
               "runs": [
                {
                 "text": "Albums"
+               }
+              ]
+             }
+            }
+           },
+           {
+            "chipCloudChipRenderer": {
+             "isSelected": false,
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseEndpointContextSupportedConfigs": {
+                "browseEndpointContextMusicConfig": {
+                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
+                }
+               },
+               "browseId": "FEmusic_library_privately_owned_landing"
+              }
+             },
+             "text": {
+              "runs": [
+               {
+                "text": "Uploads"
                }
               ]
              }

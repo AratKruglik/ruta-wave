@@ -1,4 +1,7 @@
 extension SearchResults {
+    // protobuf filter field 9/10/11 = episodes, podcasts, profiles; out of scope (#7)
+    private static let hiddenFilterPrefixes = ["EgWKAQJI", "EgWKAQJQ", "EgWKAQJY"]
+
     init(search json: JSONValue) throws(InnerTubeError) {
         if let paged = json["continuationContents"]?["musicShelfContinuation"] {
             self.init(
@@ -27,7 +30,7 @@ extension SearchResults {
         }
         let corrections = blocks.compactMap(Self.correction)
         self.init(
-            chips: ItemParser.chips(list["header"]?["chipCloudRenderer"]).filter { $0.searchParams != nil },
+            chips: ItemParser.chips(list["header"]?["chipCloudRenderer"]).filter { $0.searchParams.map { params in !Self.hiddenFilterPrefixes.contains(where: params.hasPrefix) } ?? false },
             topResult: topResult,
             items: Page(
                 items: parseBlocks(blocks.filter { Self.correction($0) == nil }, ItemParser.item),

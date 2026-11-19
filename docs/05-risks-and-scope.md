@@ -61,7 +61,7 @@ They need a decision from the user or are settled at the stage shown.
 | 1 | ~~App name, bundle ID~~ — **decided: Redwave, `dev.kruhlyk.redwave`** ([00](00-prd.md#1-name-and-positioning)); the icon is still open | stage 0 |
 | 2 | ~~Whether multiple accounts are needed (`X-Goog-AuthUser`)~~ — **decided: yes.** Google keeps all accounts in one cookie session, so one Keychain item holds it; `Auth` stores the selected `authUserIndex` (default 0) and offers `addAccount()` (stage 1.1). `account/accounts_list` was checked on 2026-11-18 (AC13) and returned no accounts, so the list comes from `GET /getAccountSwitcherEndpoint` and switching is only a change of `X-Goog-AuthUser` (backlog 1.3; Google accounts only, brand accounts are out of scope). Sign-out ends the session of every account | — |
 | 3 | Whether to show music videos, or only audio with artwork | stages 3–4 |
-| 4 | Whether podcasts and user-uploaded music are needed | stage 2 |
+| 4 | ~~Whether podcasts and user-uploaded music are needed~~ — **decided: no** (podcasts and user uploads, 2026-11-19, [#7](https://github.com/AratKruglik/yt-music-mac/issues/7)). The parsers skip podcast and upload items and hide the Podcasts, Episodes and Profiles search filters and the Podcasts and Uploads library sections. Known limitation: uploaded tracks and episodes inside own playlists, Liked songs and history are dropped, so a playlist's "N songs" can exceed its rows | — |
 | 5 | Source of synchronized lyrics: YouTube only, or third-party services too (LRCLIB and others) | stage 6 |
 | 6 | Which of the "If needed" plugins are actually wanted | stage 7 |
 | 7 | Localization: only Ukrainian and English, or more | stage 4 |
