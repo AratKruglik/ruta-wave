@@ -101,4 +101,20 @@ private let cookies = [
         let request = try InnerTubeRequest.makeGet(path: "/p", cookies: cookies, authUserIndex: 3, now: now)
         #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "3")
     }
+
+    @Test func nestedBodyIsSerialized() throws {
+        let request = try InnerTubeRequest.makeGuest(
+            endpoint: "browse", body: ["formData": ["selectedValues": ["US"]]], visitorData: nil, locale: .init(identifier: "en_US"))
+        let body = try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))
+        #expect(body["formData"]?["selectedValues"]?[0]?.string == "US")
+    }
+
+    @Test func bodyThatIsNotJSONThrowsInsteadOfCrashing() {
+        #expect(throws: InnerTubeError.unexpectedResponse) {
+            try InnerTubeRequest.makeGuest(endpoint: "browse", body: ["x": Double.nan], visitorData: nil, locale: .init(identifier: "en_US"))
+        }
+        #expect(throws: InnerTubeError.unexpectedResponse) {
+            try InnerTubeRequest.makeGuest(endpoint: "browse", body: ["x": URL(filePath: "/")], visitorData: nil, locale: .init(identifier: "en_US"))
+        }
+    }
 }

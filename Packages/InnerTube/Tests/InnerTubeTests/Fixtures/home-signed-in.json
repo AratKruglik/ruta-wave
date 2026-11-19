@@ -1,0 +1,267 @@
+{
+ "contents": {
+  "singleColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "content": {
+       "sectionListRenderer": {
+        "contents": [
+         {
+          "musicCarouselShelfRenderer": {
+           "contents": [
+            {
+             "musicTwoRowItemRenderer": {
+              "navigationEndpoint": {
+               "browseEndpoint": {
+                "browseEndpointContextSupportedConfigs": {
+                 "browseEndpointContextMusicConfig": {
+                  "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                 }
+                },
+                "browseId": "MPREb_placeholder0001"
+               }
+              },
+              "subtitle": {
+               "runs": [
+                {
+                 "text": "Album"
+                },
+                {
+                 "text": " \u2022 "
+                },
+                {
+                 "navigationEndpoint": {
+                  "browseEndpoint": {
+                   "browseEndpointContextSupportedConfigs": {
+                    "browseEndpointContextMusicConfig": {
+                     "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                    }
+                   },
+                   "browseId": "UCplaceholderartist0000001"
+                  }
+                 },
+                 "text": "Placeholder Artist"
+                }
+               ]
+              },
+              "thumbnailRenderer": {
+               "musicThumbnailRenderer": {
+                "thumbnail": {
+                 "thumbnails": [
+                  {
+                   "height": 60,
+                   "url": "https://lh3.googleusercontent.com/placeholder-one=w60-h60",
+                   "width": 60
+                  },
+                  {
+                   "height": 226,
+                   "url": "https://lh3.googleusercontent.com/placeholder-one=w226-h226",
+                   "width": 226
+                  }
+                 ]
+                }
+               }
+              },
+              "title": {
+               "runs": [
+                {
+                 "text": "Placeholder Album One"
+                }
+               ]
+              }
+             }
+            },
+            {
+             "musicTwoRowItemRenderer": {
+              "navigationEndpoint": {
+               "browseEndpoint": {
+                "browseEndpointContextSupportedConfigs": {
+                 "browseEndpointContextMusicConfig": {
+                  "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                 }
+                },
+                "browseId": "MPREb_placeholder0002"
+               }
+              },
+              "subtitle": {
+               "runs": [
+                {
+                 "text": "Album"
+                }
+               ]
+              },
+              "thumbnailRenderer": {
+               "musicThumbnailRenderer": {
+                "thumbnail": {
+                 "thumbnails": [
+                  {
+                   "height": 60,
+                   "url": "https://lh3.googleusercontent.com/placeholder-two=w60-h60",
+                   "width": 60
+                  },
+                  {
+                   "height": 226,
+                   "url": "https://lh3.googleusercontent.com/placeholder-two=w226-h226",
+                   "width": 226
+                  }
+                 ]
+                }
+               }
+              },
+              "title": {
+               "runs": [
+                {
+                 "text": "Placeholder Album Two"
+                }
+               ]
+              }
+             }
+            }
+           ],
+           "header": {
+            "musicCarouselShelfBasicHeaderRenderer": {
+             "strapline": {
+              "runs": [
+               {
+                "text": "Placeholder Name"
+               }
+              ]
+             },
+             "title": {
+              "runs": [
+               {
+                "text": "Listen again"
+               }
+              ]
+             }
+            }
+           }
+          }
+         },
+         {
+          "musicCarouselShelfRenderer": {
+           "contents": [
+            {
+             "musicTwoRowItemRenderer": {
+              "navigationEndpoint": {
+               "watchPlaylistEndpoint": {
+                "params": "wAEB",
+                "playlistId": "RDPLACEHOLDERMIX0001"
+               }
+              },
+              "subtitle": {
+               "runs": [
+                {
+                 "text": "Placeholder Artist"
+                }
+               ]
+              },
+              "thumbnailRenderer": {
+               "musicThumbnailRenderer": {
+                "thumbnail": {
+                 "thumbnails": [
+                  {
+                   "height": 60,
+                   "url": "https://lh3.googleusercontent.com/placeholder-mix=w60-h60",
+                   "width": 60
+                  },
+                  {
+                   "height": 226,
+                   "url": "https://lh3.googleusercontent.com/placeholder-mix=w226-h226",
+                   "width": 226
+                  }
+                 ]
+                }
+               }
+              },
+              "title": {
+               "runs": [
+                {
+                 "text": "Placeholder Mix"
+                }
+               ]
+              }
+             }
+            }
+           ],
+           "header": {
+            "musicCarouselShelfBasicHeaderRenderer": {
+             "moreContentButton": {
+              "buttonRenderer": {
+               "navigationEndpoint": {
+                "browseEndpoint": {
+                 "browseId": "FEmusic_mixed_for_you"
+                }
+               }
+              }
+             },
+             "title": {
+              "runs": [
+               {
+                "text": "Mixed for you"
+               }
+              ]
+             }
+            }
+           }
+          }
+         }
+        ],
+        "continuations": [
+         {
+          "nextContinuationData": {
+           "continuation": "PLACEHOLDER_CONTINUATION_1"
+          }
+         }
+        ],
+        "header": {
+         "chipCloudRenderer": {
+          "chips": [
+           {
+            "chipCloudChipRenderer": {
+             "isSelected": false,
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseId": "FEmusic_home",
+               "params": "PLACEHOLDER_PARAMS_RELAX"
+              }
+             },
+             "text": {
+              "runs": [
+               {
+                "text": "Relax"
+               }
+              ]
+             }
+            }
+           },
+           {
+            "chipCloudChipRenderer": {
+             "isSelected": true,
+             "navigationEndpoint": {
+              "browseEndpoint": {
+               "browseId": "FEmusic_home",
+               "params": "PLACEHOLDER_PARAMS_WORKOUT"
+              }
+             },
+             "text": {
+              "runs": [
+               {
+                "text": "Workout"
+               }
+              ]
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

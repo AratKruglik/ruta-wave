@@ -1,0 +1,52 @@
+{
+ "contents": [
+  {
+   "searchSuggestionsSectionRenderer": {
+    "contents": [
+     {
+      "historySuggestionRenderer": {
+       "navigationEndpoint": {
+        "searchEndpoint": {
+         "query": "placeholder query 1"
+        }
+       },
+       "serviceEndpoint": {
+        "feedbackEndpoint": {
+         "feedbackToken": "PLACEHOLDER_FEEDBACK_1"
+        }
+       },
+       "suggestion": {
+        "runs": [
+         {
+          "text": "placeholder query 1"
+         }
+        ]
+       }
+      }
+     },
+     {
+      "historySuggestionRenderer": {
+       "navigationEndpoint": {
+        "searchEndpoint": {
+         "query": "placeholder query 2"
+        }
+       },
+       "serviceEndpoint": {
+        "feedbackEndpoint": {
+         "feedbackToken": "PLACEHOLDER_FEEDBACK_2"
+        }
+       },
+       "suggestion": {
+        "runs": [
+         {
+          "text": "placeholder query 2"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

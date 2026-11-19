@@ -1,0 +1,41 @@
+{
+ "contents": {
+  "tabbedSearchResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "content": {
+       "sectionListRenderer": {
+        "contents": [],
+        "header": {
+         "chipCloudRenderer": {
+          "chips": [
+           {
+            "chipCloudChipRenderer": {
+             "isSelected": false,
+             "navigationEndpoint": {
+              "searchEndpoint": {
+               "params": "PLACEHOLDER_PARAMS_SONGS",
+               "query": "placeholder query"
+              }
+             },
+             "text": {
+              "runs": [
+               {
+                "text": "Songs"
+               }
+              ]
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

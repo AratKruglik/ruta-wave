@@ -8,6 +8,6 @@ let package = Package(
     dependencies: [.package(path: "../Auth")],
     targets: [
         .target(name: "InnerTube", dependencies: [.product(name: "Auth", package: "Auth")]),
-        .testTarget(name: "InnerTubeTests", dependencies: ["InnerTube"]),
+        .testTarget(name: "InnerTubeTests", dependencies: ["InnerTube"], resources: [.copy("Fixtures")]),
     ]
 )

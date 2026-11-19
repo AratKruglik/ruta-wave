@@ -335,7 +335,7 @@ yt-music-mac/
 ├─ Redwave.xcodeproj         — generated, in .gitignore
 ├─ App/                       — the app: scenes, resources (Info.plist is generated)
 ├─ Packages/
-│  ├─ InnerTube/              — Sources, Tests, Fixtures
+│  ├─ InnerTube/              — Sources, Tests (fixtures in Tests/InnerTubeTests/Fixtures)
 │  ├─ PlayerEngine/           — Sources, Resources/bridge.js, Tests
 │  ├─ Auth/
 │  ├─ SystemKit/

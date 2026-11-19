@@ -245,6 +245,29 @@ and also `/auth/{id}`.
 | `fast-average-color`, `color` | theme from the artwork colour |
 | `electron-updater` | auto-update from GitHub Releases |
 
+### 4.9. InnerTube discovery endpoints (verified 2026-11-19)
+
+Checked with live guest requests (`WEB_REMIX`, client `1.20261115.14.00`, `hl=en`, `gl=US`), not read from the Electron bundle. The scrubbed captures are the test fixtures in `Packages/InnerTube/Tests/InnerTubeTests/Fixtures`.
+
+| Page | Request | Root |
+|---|---|---|
+| Home | `browse FEmusic_home` | `contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer` |
+| Explore and its subpages | `browse FEmusic_explore`, `FEmusic_new_releases`, `FEmusic_moods_and_genres`, `FEmusic_moods_and_genres_category` + `params`, a shelf's More target | the same section list, plus `header.musicHeaderRenderer` for the page title |
+| Charts | `browse FEmusic_charts` + `formData` | the same section list, plus `frameworkUpdates` |
+| Search | `search` + `query` (+ filter `params`) | `contents.tabbedSearchResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer` |
+| Suggestions | `music/get_search_suggestions` + `input` | `contents[].searchSuggestionsSectionRenderer.contents[]` |
+
+- **Section kinds.** `musicCarouselShelfRenderer` (items are `musicTwoRowItemRenderer` cards or `musicResponsiveListItemRenderer` rows), `gridRenderer` and `musicShelfRenderer`. The guest Home also holds a `musicTastebuilderShelfRenderer` that is not a catalogue shelf.
+- **Chips.** Home mood chips and search filters are `header.chipCloudRenderer.chips[].chipCloudChipRenderer`. A Home chip carries `browseEndpoint{browseId, params}`; a search filter carries `searchEndpoint{query, params}`.
+- **Continuation.** The body `{"continuation": token}` works. A guest request **must carry the same `X-Goog-Visitor-Id`** as the page that issued the token; without it the response has an empty tab and no continuation. Home page 2 is under `continuationContents.sectionListContinuation`, filtered search page 2 under `continuationContents.musicShelfContinuation`. Both use `continuations[0].nextContinuationData.continuation`.
+- **More target.** `moreContentButton.buttonRenderer.navigationEndpoint` is a `browseEndpoint` (More) or a `watchEndpoint` ("Play all"). Only the first is a More target. A More page is a section list with one `gridRenderer`.
+- **Charts country.** The body `formData: {"selectedValues": ["US"]}` selects the country. Without it the country follows the caller's IP address, not `gl`. The country menu is `musicSortFilterButtonRenderer.menu.musicMultiSelectMenuRenderer.options[]`, and its options have no country code. The code (`ZZ` = Global) is only in `frameworkUpdates.entityBatchUpdate.mutations[].payload.musicFormBooleanChoice{id, opaqueToken, selected}`, joined to the option on `formItemEntityKey == id`. Ranked rows have `customIndexColumn.musicCustomIndexColumnRenderer` with the position and an `ARROW_DROP_UP`, `ARROW_DROP_DOWN` or `ARROW_CHART_NEUTRAL` icon (or none). The US page also has a podcast shelf.
+- **Search results are flat.** An unfiltered search is a `musicCardShelfRenderer` top-result card (`title`, `subtitle`, `thumbnail`, `onTap`) followed by about 28 `itemSectionRenderer`s with one `musicResponsiveListItemRenderer` each. There are no per-type sections, no "Show all" targets and no continuation. A filtered search is one `musicShelfRenderer` with a continuation. The correction line is `itemSectionRenderer.contents[0].showingResultsForRenderer{correctedQueryEndpoint, originalQueryEndpoint}`. Google returns fuzzy results for any guest query, so "no results" cannot be reproduced.
+- **Item kind** comes from the item's own endpoint, never from the localized "Song" / "Album" label and never from a search through the item (menus hold unrelated artist, album and track-credits endpoints): `browseEndpoint` page type `ALBUM`, `ARTIST` or `PLAYLIST`, or `watchEndpoint` with `musicVideoType` (`ATV` song, `OMV` and `UGC` video, `PODCAST_EPISODE` not supported). Rows without a top-level `navigationEndpoint` use the first title run's endpoint, then the overlay play endpoint, then `playlistItemData.videoId`.
+- **Suggestions.** Text suggestions are `searchSuggestionRenderer{suggestion.runs, navigationEndpoint.searchEndpoint.query}`, entities are `musicResponsiveListItemRenderer`. History entries (signed in) are `historySuggestionRenderer` with `serviceEndpoint.feedbackEndpoint.feedbackToken`; that shape was not observed as a guest and follows the public `ytmusicapi` parser.
+- **Thumbnails** come from `yt3.googleusercontent.com`, `lh3.googleusercontent.com`, `i.ytimg.com` and `yt3.ggpht.com`. Icon-like images on `www.youtube.com` and `music.youtube.com` are outside the avatar allowlist and are not used.
+- **Not supported yet.** Podcast shows, episodes and user profiles in search results, and the weekly podcast shelf on Charts, are skipped and logged (they depend on issue #7).
+
 ## 5. Limits of the analysis
 
 - REA could not build a graph of the whole ASAR: the full result needs more than
