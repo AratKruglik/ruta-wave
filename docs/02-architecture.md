@@ -77,6 +77,21 @@ Consequences we accept:
   - `customUserAgent` — a Safari string (like `overrideUserAgent` in the original);
   - a `WKUserScript` with the bridge, injected `atDocumentEnd`, main frame only.
 - Loads `https://music.youtube.com/watch?v=<id>&list=<playlistId>`.
+- **Navigation lock.** The view holds the Google-wide session, so the main frame
+  may only load `https://music.youtube.com` (plus hosts that stage 3 proves it
+  needs). Anything else is cancelled in `decidePolicyFor`; a user-clicked link is
+  dropped or opened in the browser as a rebuilt https URL; `createWebViewWith`
+  returns `nil`. `SignInView.swift` follows the same pattern. This matters once the
+  view becomes visible and clickable (video mode, [#12](https://github.com/AratKruglik/yt-music-mac/issues/12)),
+  and keeps the privacy rule that the app sends data only to Google
+  ([00](00-prd.md)) true before that.
+- **Bridge trust.** The `player` message handler accepts a message only when
+  `frameInfo.isMainFrame` and the origin is https `music.youtube.com`. Message
+  bodies are untrusted input, and a URL taken from a message is never opened.
+  `evaluateJavaScript` runs only while the host is `music.youtube.com`. The bridge
+  stays in the page world: an isolated `WKContentWorld` would break the
+  `#movie_player` methods. Stage 3 tests that a foreign-host navigation is
+  cancelled and a non-main-frame or foreign-origin message is dropped.
 
 ### 4.2. JS bridge
 
