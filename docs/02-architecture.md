@@ -81,7 +81,9 @@ Consequences we accept:
   - `websiteDataStore` — `nonPersistent()` for a guest, `.default()` when signed in (above);
   - `applicationNameForUserAgent = SignInRules.safariApplicationName` — the same Safari identity as the sign-in window;
   - a `WKUserScript` with the bridge, injected `atDocumentEnd`, main frame only.
-- Loads `https://music.youtube.com/watch?v=<id>&list=<playlistId>`, plus `authuser=<authUserIndex>` when the index is above 0.
+- A guest loads `https://music.youtube.com/watch?v=<id>&list=<playlistId>`. Signed-in playback always loads
+  `https://music.youtube.com/signin?action_handle_signin=true&authuser=<authUserIndex>&next=<encoded /watch?...>`,
+  index 0 included: the site ignores `authuser` on `/watch` and keeps the last account it switched to (MC-8, 2026-11-19).
   IDs must match `^[A-Za-z0-9_-]{1,64}$`, otherwise nothing is loaded.
 - **Navigation lock.** The view holds the Google-wide session, so the main frame
   may only load `https://music.youtube.com` (plus hosts that stage 3 proves it

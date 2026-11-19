@@ -33,8 +33,25 @@ struct PlayerRulesTests {
     @Test func watchURLShape() {
         #expect(PlayerRules.watchURL(videoId: "abc")?.absoluteString == "https://music.youtube.com/watch?v=abc")
         #expect(PlayerRules.watchURL(videoId: "abc", playlistId: "PL1")?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1")
-        #expect(PlayerRules.watchURL(videoId: "abc", playlistId: "PL1", authUserIndex: 2)?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1&authuser=2")
-        #expect(PlayerRules.watchURL(videoId: "abc", authUserIndex: 0)?.query == "v=abc")
+    }
+
+    @Test func loadURLForGuestIsWatchURL() {
+        #expect(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", authUserIndex: nil)?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1")
+    }
+
+    @Test(arguments: [0, 2])
+    func loadURLForAccountGoesThroughSignin(_ index: Int) throws {
+        let url = try #require(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", authUserIndex: index))
+        #expect(url.absoluteString == "https://music.youtube.com/signin?action_handle_signin=true&authuser=\(index)&next=/watch%3Fv%3Dabc%26list%3DPL1")
+        let items = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
+        #expect(items.map(\.name) == ["action_handle_signin", "authuser", "next"])
+        #expect(items.last?.value == "/watch?v=abc&list=PL1")
+        #expect(PlayerRules.isAllowedMainFrameNavigation(url))
+    }
+
+    @Test func loadURLRejectsNegativeIndexAndBadIDs() {
+        #expect(PlayerRules.loadURL(videoId: "abc", playlistId: nil, authUserIndex: -1) == nil)
+        #expect(PlayerRules.loadURL(videoId: "a&b", playlistId: nil, authUserIndex: 1) == nil)
     }
 
     @Test(arguments: ["a&list=evil", "a#b", "a=b", "", "a b", String(repeating: "a", count: 65)])

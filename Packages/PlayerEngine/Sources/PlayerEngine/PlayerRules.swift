@@ -19,7 +19,7 @@ enum PlayerRules {
         (1...64).contains(id.count) && id.utf8.allSatisfy { $0.isASCIIIDCharacter }
     }
 
-    static func watchURL(videoId: String, playlistId: String? = nil, authUserIndex: Int = 0) -> URL? {
+    static func watchURL(videoId: String, playlistId: String? = nil) -> URL? {
         guard isValidID(videoId), playlistId.map(isValidID) ?? true else { return nil }
         var components = URLComponents()
         components.scheme = "https"
@@ -27,7 +27,23 @@ enum PlayerRules {
         components.path = "/watch"
         components.queryItems = [URLQueryItem(name: "v", value: videoId)]
         if let playlistId { components.queryItems?.append(URLQueryItem(name: "list", value: playlistId)) }
-        if authUserIndex > 0 { components.queryItems?.append(URLQueryItem(name: "authuser", value: String(authUserIndex))) }
+        return components.url
+    }
+
+    /// `authUserIndex` is nil for a guest. The site ignores `authuser` on `/watch` and keeps the last account it
+    /// switched to, so signed-in playback always goes through `/signin`, the site's own account switch, even for index 0.
+    static func loadURL(videoId: String, playlistId: String?, authUserIndex: Int?) -> URL? {
+        guard let watch = watchURL(videoId: videoId, playlistId: playlistId) else { return nil }
+        guard let authUserIndex else { return watch }
+        guard authUserIndex >= 0, let query = watch.query else { return nil }
+        var valueAllowed = CharacterSet.urlQueryAllowed
+        valueAllowed.remove(charactersIn: "&=?+")
+        guard let next = "/watch?\(query)".addingPercentEncoding(withAllowedCharacters: valueAllowed) else { return nil }
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = playerHost
+        components.path = "/signin"
+        components.percentEncodedQuery = "action_handle_signin=true&authuser=\(authUserIndex)&next=\(next)"
         return components.url
     }
 

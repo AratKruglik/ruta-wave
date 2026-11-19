@@ -95,7 +95,7 @@ public final class PlayerEngine {
             Self.log.error("load ignored: player not started")
             return
         }
-        guard let url = PlayerRules.watchURL(videoId: videoId, playlistId: playlistId, authUserIndex: isEphemeral ? 0 : authUserIndex) else {
+        guard let url = PlayerRules.loadURL(videoId: videoId, playlistId: playlistId, authUserIndex: isEphemeral ? nil : authUserIndex) else {
             Self.log.error("load ignored: invalid id")
             return
         }
