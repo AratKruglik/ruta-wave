@@ -7,7 +7,11 @@ let package = Package(
     products: [.library(name: "PlayerEngine", targets: ["PlayerEngine"])],
     dependencies: [.package(path: "../Auth")],
     targets: [
-        .target(name: "PlayerEngine", dependencies: [.product(name: "Auth", package: "Auth")]),
-        .testTarget(name: "PlayerEngineTests", dependencies: ["PlayerEngine"]),
+        .target(
+            name: "PlayerEngine",
+            dependencies: [.product(name: "Auth", package: "Auth")],
+            resources: [.copy("Resources/bridge.js")]
+        ),
+        .testTarget(name: "PlayerEngineTests", dependencies: ["PlayerEngine"], resources: [.copy("Fixtures")]),
     ]
 )
