@@ -69,8 +69,12 @@ Consequences we accept:
   `PlayerEngine.start(_:)` does this, and the App tears the view down as soon as sign-out starts (the wipe may already be running).
 - It must be **attached to a window**, otherwise WebKit suspends timers and
   media: `PlayerHost` (App) puts it in a 1×1 container `NSView` with `alphaValue = 0`
-  in the main window background, and `preferences.inactiveSchedulingPolicy = .none`.
-  Whether this survives minimize, hide and Cmd-W is the manual check MC-1.
+  inside `PlayerWindow`, a borderless 1×1 window the app delegate creates once at launch
+  (not restorable, not in the Window menu, ignores the mouse), and
+  `preferences.inactiveSchedulingPolicy = .none`. The same hidden window runs the
+  session-driven `start`/`stop`, so playback does not depend on which app windows are
+  open: verified by hand with only the debug window open, after Close All, and with the
+  app hidden. Background audio with the screen locked remains manual check MC-1.
 - It must stay **re-parentable**: a later music video mode or picture-in-picture
   ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) moves it into a visible container without reloading the page or
   interrupting playback. The stage 3 design (#13) must not rule this out; whether
