@@ -47,10 +47,11 @@ enum Route: Hashable, Sendable {
 
     static let likedMusicBrowseId = "VLLM"
 
-    /// Dropped on sign-out; every playlist counts because an unlisted one loads for anyone holding its ID.
+    /// Dropped on sign-out; every playlist counts because an unlisted one loads for anyone holding its ID,
+    /// and a search carries the account's own results.
     var requiresAccount: Bool {
         switch self {
-        case .library, .history, .playlist, .more: true
+        case .library, .history, .playlist, .more, .search: true
         default: false
         }
     }

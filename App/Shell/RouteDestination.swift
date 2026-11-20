@@ -26,7 +26,9 @@ struct RouteScreen: View {
 
     var body: some View {
         Group {
-            if let model = store.model(for: route) {
+            if let model = store.searchModel(for: route) {
+                SearchScreen(model: model)
+            } else if let model = store.model(for: route) {
                 if case .explore(.charts) = route { ChartsScreen(model: model) } else { BrowseScreen(model: model) }
             } else {
                 PlaceholderScreen(title: route.title)

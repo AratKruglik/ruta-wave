@@ -40,6 +40,29 @@ struct SkeletonShelf: View {
     }
 }
 
+struct SkeletonRows: View {
+    let count: Int
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(0..<count, id: \.self) { _ in
+                HStack(spacing: Metrics.space12) {
+                    RoundedRectangle(cornerRadius: Metrics.radiusThumb).fill(.surfaceFill)
+                        .frame(width: Metrics.rowThumb, height: Metrics.rowThumb)
+                    VStack(alignment: .leading, spacing: Metrics.space8) {
+                        Capsule().fill(.surfaceFill).frame(width: 220, height: 12)
+                        Capsule().fill(.surfaceFill).frame(width: 140, height: 10)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, Metrics.space8)
+                .frame(height: Metrics.rowHeightDetailed)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 struct PageErrorView: View {
     let onRetry: () -> Void
 

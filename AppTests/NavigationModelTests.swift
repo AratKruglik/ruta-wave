@@ -109,4 +109,53 @@ struct NavigationModelTests {
         #expect(model.path(for: .library).isEmpty)
         #expect(!model.canGoForward)
     }
+
+    @Test func replaceLastSwapsTheTopAndClearsForward() {
+        let model = NavigationModel()
+        model.push(.album(browseId: "a"))
+        model.push(.search(query: "q", filter: nil))
+        model.replaceLast(.search(query: "q", filter: "p"))
+        #expect(model.path(for: .home) == [.album(browseId: "a"), .search(query: "q", filter: "p")])
+        model.back()
+        model.replaceLast(.artist(channelId: "b"))
+        #expect(!model.canGoForward)
+        #expect(model.path(for: .home) == [.artist(channelId: "b")])
+    }
+
+    @Test func replaceLastPushesOnAnEmptyStack() {
+        let model = NavigationModel()
+        model.replaceLast(.history)
+        #expect(model.path(for: .home) == [.history])
+    }
+
+    @Test func dropIdentityRoutesTruncatesAtTheFirstAccountRouteAndClearsForward() {
+        let model = NavigationModel()
+        model.push(.explore(.charts))
+        model.push(.search(query: "q", filter: nil))
+        model.push(.album(browseId: "a"))
+        model.push(.search(query: "r", filter: nil))
+        model.back()
+        model.dropIdentityRoutes()
+        #expect(model.path(for: .home) == [.explore(.charts)])
+        #expect(!model.canGoForward)
+    }
+
+    @Test func dropIdentityRoutesCutsForwardAtTheFirstAccountRoute() {
+        let model = NavigationModel()
+        model.push(.explore(.charts))
+        model.push(.search(query: "q", filter: nil))
+        model.push(.album(browseId: "a"))
+        model.back()
+        model.back()
+        model.dropIdentityRoutes()
+        #expect(model.path(for: .home) == [.explore(.charts)])
+        #expect(!model.canGoForward)
+    }
+
+    @Test func signOutDropsSearchRoutes() {
+        let model = NavigationModel()
+        model.push(.search(query: "q", filter: nil))
+        model.dropAccountRoutes()
+        #expect(model.path(for: .home).isEmpty)
+    }
 }

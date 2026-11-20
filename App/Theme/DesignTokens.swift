@@ -37,6 +37,7 @@ extension ShapeStyle where Self == Color {
     static var strokeSubtle: Color { Color.white.opacity(0.20) }
     static var strokeFocus: Color { Color(hex: 0xF1F1F1) }
     static var scrim: Color { Color.black.opacity(0.60) }
+    static var shadow: Color { Color.black.opacity(0.25) }
 }
 
 extension Font {
@@ -113,6 +114,11 @@ enum Metrics {
     static let quickPickRows = 4
     static let rowColumnWidth: CGFloat = 440
     static let widePageWidth: CGFloat = 1100
+    static let searchFieldHeight: CGFloat = 42
+    static let searchRowHeight: CGFloat = 48
+    static let searchEntityRowHeight: CGFloat = 56
+    static let searchSectionRows = 4
+    static let dropdownShadowRadius: CGFloat = 16
 }
 
 enum Motion {

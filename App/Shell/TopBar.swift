@@ -34,7 +34,7 @@ struct TopBar<AccountPopover: View>: View {
             .padding(.trailing, LiquidGlass.isAvailable ? Metrics.space12 : 0)
             .glassSurface(in: Capsule(), fallback: nil)
             Spacer(minLength: Metrics.space16)
-            SearchPlaceholder()
+            SearchField()
                 .frame(minWidth: 240, maxWidth: 720)
             Spacer(minLength: Metrics.space16)
             HStack(spacing: Metrics.space8) {
@@ -98,27 +98,6 @@ struct AccountAvatar: View {
     }
 }
 
-private struct SearchPlaceholder: View {
-    var body: some View {
-        HStack(spacing: Metrics.space12) {
-            Image(systemName: "magnifyingglass")
-                .font(.rwIcon(Metrics.iconBar))
-                .foregroundStyle(.textTertiary)
-            Text("Search songs, albums, artists")
-                .font(.rwBody)
-                .foregroundStyle(.textTertiary)
-                .lineLimit(1)
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, Metrics.space12)
-        .frame(height: 42)
-        .glassSurface(
-            in: RoundedRectangle(cornerRadius: LiquidGlass.isAvailable ? 21 : Metrics.radiusCard), fallback: .surfaceField)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Search")
-    }
-}
-
 struct BarIconButton: View {
     let symbol: String
     let size: CGFloat
@@ -170,6 +149,9 @@ private struct TitleBarDragArea: NSViewRepresentable {
         onToggleSidebar: {}, onHome: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
     )
     .frame(width: 1100)
+    .environment(PreviewFixtures.searchFieldModel(.empty))
+    .environment(NavigationModel())
+    .environment(PreviewFixtures.nowPlaying())
     .background(.themeBase)
 }
 
@@ -179,5 +161,8 @@ private struct TitleBarDragArea: NSViewRepresentable {
         onToggleSidebar: {}, onHome: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
     )
     .frame(width: 960)
+    .environment(PreviewFixtures.searchFieldModel(.empty))
+    .environment(NavigationModel())
+    .environment(PreviewFixtures.nowPlaying())
     .background(.themeBase)
 }

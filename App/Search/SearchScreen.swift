@@ -1,0 +1,214 @@
+import InnerTube
+import SwiftUI
+
+extension SearchSection.Kind {
+    fileprivate var title: LocalizedStringKey {
+        switch self {
+        case .songs: "Songs"
+        case .videos: "Videos"
+        case .albums: "Albums"
+        case .artists: "Artists"
+        case .playlists: "Playlists"
+        }
+    }
+}
+
+struct SearchScreen: View {
+    let model: SearchModel
+
+    @Environment(NavigationModel.self) private var navigation
+    @State private var width = Metrics.defaultWindowWidth
+
+    private var padding: CGFloat { width >= Metrics.widePageWidth ? Metrics.space32 : Metrics.space24 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Metrics.space16) {
+            if !model.chips.isEmpty {
+                ChipRow(chips: chipItems, onSelect: select)
+                    .padding(.horizontal, padding)
+                    .padding(.top, padding)
+            }
+            results
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .task(id: model.loadKey) { await model.load() }
+    }
+
+    private var chipItems: [Chip] {
+        [Chip(title: String(localized: "All"), isSelected: model.isAllSelected)]
+            + model.chips.map {
+                Chip(
+                    title: $0.title, target: $0.target, searchParams: $0.searchParams, isSelected: model.isChipSelected($0),
+                    watchTarget: $0.watchTarget)
+            }
+    }
+
+    private func select(_ chip: Chip) {
+        navigation.replaceLast(.search(query: model.query, filter: chip.isSelected ? nil : chip.searchParams))
+    }
+
+    @ViewBuilder
+    private var results: some View {
+        switch model.state {
+        case .loading:
+            ScrollView {
+                SkeletonRows(count: 8).padding(padding)
+            }
+            .scrollDisabled(true)
+        case .failed:
+            PageErrorView(onRetry: model.retry)
+        case .empty:
+            VStack(spacing: Metrics.space8) {
+                Text("No results for “\(model.query)”")
+                    .font(.rwTitle)
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(2)
+                Text("Check the spelling or try different keywords.")
+                    .font(.rwBody)
+                    .foregroundStyle(.textSecondary)
+            }
+            .multilineTextAlignment(.center)
+            .padding(padding)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .loaded(let content):
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Metrics.space32) {
+                    if let correction = content.correction { CorrectionLine(correction: correction) }
+                    if content.isFiltered { filtered(content) } else { grouped(content) }
+                }
+                .padding(padding)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func grouped(_ content: SearchModel.Content) -> some View {
+        if let top = content.topResult {
+            VStack(alignment: .leading, spacing: Metrics.space16) {
+                header("Top result")
+                MusicCard(item: top)
+            }
+        }
+        ForEach(content.sections, id: \.kind) { section in
+            VStack(alignment: .leading, spacing: Metrics.space16) {
+                HStack {
+                    header(section.kind.title)
+                    Spacer(minLength: Metrics.space16)
+                    if let params = section.showAllParams {
+                        Button { navigation.replaceLast(.search(query: model.query, filter: params)) } label: {
+                            InversePillLabel(title: "Show all")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                sectionBody(section)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func sectionBody(_ section: SearchSection) -> some View {
+        switch section.kind {
+        case .songs, .videos:
+            VStack(spacing: 0) {
+                ForEach(Array(section.items.enumerated()), id: \.offset) { _, item in
+                    if case .song(let song) = item { TrackRow(song: song, density: .detailed) }
+                }
+            }
+        case .albums, .artists, .playlists:
+            ShelfView(shelf: Shelf(title: nil, layout: .cards, items: section.items)) { navigation.push(Route(target: $0)) }
+        }
+    }
+
+    private func header(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.rwShelfTitle)
+            .foregroundStyle(.textPrimary)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    @ViewBuilder
+    private func filtered(_ content: SearchModel.Content) -> some View {
+        let items = content.items
+        let songs = items.compactMap { if case .song(let song) = $0 { song } else { nil } }
+        if songs.count == items.count {
+            LazyVStack(spacing: 0) {
+                ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
+                    TrackRow(song: song, density: .detailed)
+                        .onAppear { prefetch(index, of: items.count) }
+                }
+            }
+        } else {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: Metrics.videoCardWidth), spacing: Metrics.space16, alignment: .top)],
+                alignment: .leading, spacing: Metrics.space24
+            ) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                    MusicCard(item: item)
+                        .onAppear { prefetch(index, of: items.count) }
+                }
+            }
+        }
+        footer(content.paging)
+    }
+
+    private func prefetch(_ index: Int, of count: Int) {
+        if index >= count - 10 { model.loadMore() }
+    }
+
+    @ViewBuilder
+    private func footer(_ paging: SearchModel.Paging) -> some View {
+        switch paging {
+        case .loading: ProgressView().frame(maxWidth: .infinity).controlSize(.small)
+        case .failed: InlineErrorRow(onRetry: model.retryMore)
+        case .idle, .done: EmptyView()
+        }
+    }
+}
+
+private struct CorrectionLine: View {
+    let correction: SearchCorrection
+
+    @Environment(NavigationModel.self) private var navigation
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Metrics.space4) {
+            Text("Showing results for \(correction.correctedQuery)")
+                .font(.rwTitle)
+                .foregroundStyle(.textPrimary)
+            Button {
+                navigation.push(.search(query: correction.originalQuery, filter: correction.originalParams))
+            } label: {
+                Text("Search instead for \(correction.originalQuery)")
+                    .font(.rwBody)
+                    .foregroundStyle(.accentLink)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+
+#if DEBUG
+#Preview("All") { SearchScreenPreview(.all) }
+#Preview("Filtered") { SearchScreenPreview(.filtered) }
+#Preview("Loading") { SearchScreenPreview(.loading) }
+#Preview("Empty") { SearchScreenPreview(.empty) }
+#Preview("Error") { SearchScreenPreview(.failing) }
+
+private struct SearchScreenPreview: View {
+    @State private var model: SearchModel
+
+    init(_ variant: PreviewFixtures.SearchVariant) {
+        _model = State(initialValue: PreviewFixtures.searchModel(variant))
+    }
+
+    var body: some View {
+        SearchScreen(model: model)
+            .frame(width: 1100, height: 800)
+            .environment(NavigationModel())
+            .environment(PreviewFixtures.nowPlaying())
+            .background(.themeBase)
+    }
+}
+#endif

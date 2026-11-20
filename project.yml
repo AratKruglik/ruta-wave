@@ -47,6 +47,9 @@ targets:
       - App/Browse/BrowseRouting.swift
       - App/Browse/BrowseStore.swift
       - App/Navigation/Route.swift
+      - App/Search/SearchFieldModel.swift
+      - App/Search/SearchLoader.swift
+      - App/Search/SearchModel.swift
       - App/Navigation/NavigationModel.swift
       - App/PlayerBar/PlaybackRules.swift
       - App/PlayerBar/NowPlayingModel.swift
