@@ -1,11 +1,12 @@
 import AppKit
 import SwiftUI
 
-/// Back / forward from mouse buttons 4 and 5 and trackpad swipes, and Space as play / pause.
+/// Back / forward from mouse buttons 4 and 5 and trackpad swipes, and Space as play / pause. Left clicks are only reported.
 struct WindowEventMonitor: NSViewRepresentable {
     let onBack: @MainActor () -> Void
     let onForward: @MainActor () -> Void
     let onTogglePlay: @MainActor () -> Void
+    var onMouseDown: @MainActor () -> Void = {}
 
     func makeNSView(context: Context) -> MonitorView { MonitorView() }
 
@@ -13,12 +14,14 @@ struct WindowEventMonitor: NSViewRepresentable {
         view.onBack = onBack
         view.onForward = onForward
         view.onTogglePlay = onTogglePlay
+        view.onMouseDown = onMouseDown
     }
 
     final class MonitorView: NSView {
         var onBack: @MainActor () -> Void = {}
         var onForward: @MainActor () -> Void = {}
         var onTogglePlay: @MainActor () -> Void = {}
+        var onMouseDown: @MainActor () -> Void = {}
         private var monitor: Any?
 
         private static let spaceKeyCode: UInt16 = 49
@@ -30,7 +33,7 @@ struct WindowEventMonitor: NSViewRepresentable {
             if let monitor { NSEvent.removeMonitor(monitor) }
             monitor = nil
             guard window != nil else { return }
-            let mask: NSEvent.EventTypeMask = [.otherMouseDown, .swipe, .scrollWheel, .keyDown]
+            let mask: NSEvent.EventTypeMask = [.leftMouseDown, .otherMouseDown, .swipe, .scrollWheel, .keyDown]
             monitor = NSEvent.addLocalMonitorForEvents(matching: mask) { [weak self] event in
                 nonisolated(unsafe) let event = event
                 let isConsumed = MainActor.assumeIsolated { self?.handle(event) ?? false }
@@ -41,6 +44,9 @@ struct WindowEventMonitor: NSViewRepresentable {
         private func handle(_ event: NSEvent) -> Bool {
             guard event.window === window else { return false }
             switch event.type {
+            case .leftMouseDown:
+                onMouseDown()
+                return false
             case .otherMouseDown:
                 switch event.buttonNumber {
                 case Self.backMouseButton: onBack()

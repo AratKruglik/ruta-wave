@@ -16,6 +16,7 @@ struct ShellView<AccountPopover: View>: View {
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(ToastCenter.self) private var toasts
+    @Environment(SearchFieldModel.self) private var search
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var width = Metrics.defaultWindowWidth
     @State private var sidebarOverride: Bool?
@@ -70,9 +71,13 @@ struct ShellView<AccountPopover: View>: View {
         .windowBackdrop()
         .noInitialFocus()
         .focusedSceneValue(\.navigation, navigation)
+        .onChange(of: navigation.path(for: navigation.selection).last) { _, route in
+            if case .search(let query, _) = route { search.showQuery(query) }
+        }
         .background(
             WindowEventMonitor(
-                onBack: navigation.back, onForward: navigation.forward, onTogglePlay: nowPlaying.togglePlay))
+                onBack: navigation.back, onForward: navigation.forward, onTogglePlay: nowPlaying.togglePlay,
+                onMouseDown: search.mouseDownInWindow))
     }
 
     private var content: some View {
@@ -183,6 +188,7 @@ private struct ShellPreview: View {
         .environment(NavigationModel())
         .environment(PreviewFixtures.nowPlaying(player, signedIn: isSignedIn))
         .environment(ToastCenter())
+        .environment(PreviewFixtures.searchFieldModel(.empty))
         .frame(width: 1280, height: 800)
     }
 }

@@ -13,6 +13,7 @@ struct RootView: View {
     let toasts: ToastCenter
 
     @State private var browse: BrowseStore
+    @State private var searchField: SearchFieldModel
     @State private var navigation = NavigationModel()
     @State private var account = AccountModel()
     @State private var sidebar = SidebarModel()
@@ -27,7 +28,12 @@ struct RootView: View {
         self.session = session
         self.nowPlaying = nowPlaying
         self.toasts = toasts
-        _browse = State(initialValue: BrowseStore(loader: .live(InnerTubeClient()), credentials: { session.credentials }))
+        let client = InnerTubeClient()
+        let searchLoader = SearchLoader.live(client)
+        _browse = State(initialValue: BrowseStore(
+            loader: .live(client), searchLoader: searchLoader, credentials: { session.credentials }))
+        _searchField = State(initialValue: SearchFieldModel(
+            loader: searchLoader, credentials: { session.credentials }, toasts: toasts))
     }
 
     var body: some View {
@@ -45,6 +51,7 @@ struct RootView: View {
         .environment(nowPlaying)
         .environment(toasts)
         .environment(browse)
+        .environment(searchField)
         .environment(\.requestSignIn, SignInRequest { isSigningIn = true })
         .onChange(of: session.state.isSignedIn) { _, signedIn in
             if signedIn {
@@ -56,6 +63,8 @@ struct RootView: View {
         }
         .onChange(of: session.contentIdentity) {
             browse.reset()
+            searchField.reset()
+            navigation.dropIdentityRoutes()
             nowPlaying.resetAccountState()
             guest.reset()
         }

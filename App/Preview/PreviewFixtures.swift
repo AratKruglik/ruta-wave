@@ -107,5 +107,56 @@ enum PreviewFixtures {
             more: { _, _ in Page(items: [], continuation: nil) })
         return BrowseModel(source: .home(chipParams: nil), loader: loader, credentials: { nil }, preferences: preferences)
     }
+
+    enum SearchVariant { case all, filtered, loading, empty, failing }
+
+    static let searchChips = [
+        Chip(title: "Songs", searchParams: "EgWKAQIIAWoK"),
+        Chip(title: "Videos", searchParams: "EgWKAQIQAWoK"),
+        Chip(title: "Albums", searchParams: "EgWKAQIYAWoK"),
+        Chip(title: "Artists", searchParams: "EgWKAQIgAWoK"),
+        Chip(title: "Community playlists", searchParams: "EgeKAQQoAEABag"),
+    ]
+
+    static func searchModel(_ variant: SearchVariant) -> SearchModel {
+        let filtered = variant == .filtered
+        let chips = filtered
+            ? searchChips.enumerated().map { Chip(title: $1.title, searchParams: $1.searchParams, isSelected: $0 == 0) }
+            : searchChips
+        let items = songs.prefix(6).map(MusicItem.song) + cardItems
+        let filteredItems = songs.map(MusicItem.song)
+        let topResult = cardItems[2]
+        let loader = SearchLoader(
+            suggestions: { _, _ in SearchSuggestions() },
+            search: { _, _, _ in
+                if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
+                if variant == .failing { throw InnerTubeError.unexpectedResponse }
+                let page = variant == .empty ? [] : (filtered ? filteredItems : items)
+                return SearchResults(
+                    chips: chips, topResult: variant == .all ? topResult : nil, items: Page(items: page, continuation: nil),
+                    correction: variant == .all
+                        ? SearchCorrection(correctedQuery: "radiohead", originalQuery: "radioheed", originalParams: "EgIQAQ%3D%3D") : nil)
+            },
+            more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in })
+        return SearchModel(
+            query: "radiohead", filter: filtered ? searchChips[0].searchParams : nil, chips: variant == .loading ? searchChips : [],
+            loader: loader, credentials: { nil })
+    }
+
+    enum SearchFieldVariant { case empty, history, suggestions }
+
+    static func searchFieldModel(_ variant: SearchFieldVariant) -> SearchFieldModel {
+        let suggestions = SearchSuggestions(
+            queries: variant == .suggestions ? ["radiohead", "radio ga ga", "radio"] : [],
+            items: variant == .suggestions ? [cardItems[2], cardItems[0]] : [],
+            history: variant == .history ? ["daft punk", "boards of canada", "burial"].map { SearchHistoryEntry(query: $0, feedbackToken: $0) } : [])
+        let loader = SearchLoader(
+            suggestions: { _, _ in suggestions }, search: { _, _, _ in throw InnerTubeError.unexpectedResponse },
+            more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in })
+        let model = SearchFieldModel(
+            loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter(), sleep: { _ in })
+        model.focusChanged(true)
+        return model
+    }
 }
 #endif

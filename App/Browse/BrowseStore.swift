@@ -9,15 +9,19 @@ final class BrowseStore {
     private(set) var isReady = true
 
     @ObservationIgnored private let loader: BrowseLoader
+    @ObservationIgnored private let searchLoader: SearchLoader
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let preferences: Preferences
     // shortcut: route models are kept for the whole identity; prune by live paths if memory shows up in Instruments.
     @ObservationIgnored private var routeModels: [Route: BrowseModel] = [:]
+    @ObservationIgnored private var searchModels: [Route: SearchModel] = [:]
 
     init(
-        loader: BrowseLoader, credentials: @escaping @MainActor () -> Credentials?, preferences: Preferences = Preferences()
+        loader: BrowseLoader, searchLoader: SearchLoader, credentials: @escaping @MainActor () -> Credentials?,
+        preferences: Preferences = Preferences()
     ) {
         self.loader = loader
+        self.searchLoader = searchLoader
         self.credentials = credentials
         self.preferences = preferences
         home = BrowseModel(source: .home(chipParams: nil), loader: loader, credentials: credentials, preferences: preferences)
@@ -27,6 +31,18 @@ final class BrowseStore {
     func setReady(_ ready: Bool) {
         isReady = ready
         for model in [home, explore] + Array(routeModels.values) { model.isReady = ready }
+        for model in searchModels.values { model.isReady = ready }
+    }
+
+    /// A chip change opens a new route for the same query; the old chips seed the new model so the row stays put.
+    func searchModel(for route: Route) -> SearchModel? {
+        guard case .search(let query, let filter) = route else { return nil }
+        if let cached = searchModels[route] { return cached }
+        let chips = searchModels.first { $0.key.searchQuery == query }?.value.chips ?? []
+        let model = SearchModel(query: query, filter: filter, chips: chips, loader: searchLoader, credentials: credentials)
+        model.isReady = isReady
+        searchModels[route] = model
+        return model
     }
 
     func model(for route: Route) -> BrowseModel? {
@@ -40,7 +56,9 @@ final class BrowseStore {
     /// Called when the content identity changes: every model, continuation token and cached page is dropped.
     func reset() {
         for model in [home, explore] + Array(routeModels.values) { model.cancelInFlight() }
+        for model in searchModels.values { model.cancelInFlight() }
         routeModels = [:]
+        searchModels = [:]
         home = makeModel(.home(chipParams: nil))
         explore = makeModel(.browse(.explore))
     }
@@ -60,5 +78,11 @@ final class BrowseStore {
         case .more(let browseId, let params): .browse(BrowseTarget(browseId: browseId, params: params))
         default: nil
         }
+    }
+}
+
+private extension Route {
+    var searchQuery: String? {
+        if case .search(let query, _) = self { query } else { nil }
     }
 }
