@@ -366,13 +366,18 @@ A typed wrapper over `UserDefaults`. Mapping to the original's options:
 | `alwaysOnTop` | `alwaysOnTop` |
 | `startAtLogin` | `SMAppService` |
 | `tray`, `trayClickPlayPause`, `appVisible` | `showMenuBarExtra`, `menuBarClickTogglesPlay`, `hideDockIcon` |
-| `language` | `appLanguage` in Settings (System / English / Українська), mirrored into `AppleLanguages`; applied on relaunch |
+| `language` | `appLanguage`: `system` (default), `en`, `uk`; written as `AppleLanguages` in the app's defaults domain (removed for `system`); applies after a relaunch |
 | `proxy` | system proxy; no separate option |
 | `likeButtons`, `swapLikeButtonsOrder` | `showDislikeButton` |
 | `usePodcastParticipantAsArtist` | not needed (podcasts out of scope, #7) |
 | `autoUpdates` | arrives together with Sparkle |
 | `hideMenu`, `removeUpgradeButton`, `themes`, `disableHardwareAcceleration`, `overrideUserAgent`, `autoResetAppCache`, `restartOnConfigChanges` | not needed in a native UI |
 | `plugins.<id>` | `plugins.<id>.enabled` plus the plugin's own keys |
+
+The app language is the one setting that needs a relaunch: the bundle picks
+its localization at launch. Changing it offers **Relaunch now**. InnerTube
+sends `hl` / `gl` from `Locale.current` (§5.1), so YouTube content follows the
+same choice after the relaunch.
 
 ## 10. Plugins
 

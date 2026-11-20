@@ -11,7 +11,7 @@ and the slug breaks.
 Legend: ⛔ — decision point / manual check by the user (sign-in, listening to audio).
 
 Every open row links to its GitHub issue; the ordered list of all of them is the tracking issue [#51](https://github.com/AratKruglik/yt-music-mac/issues/51).
-Decisions on the open questions of [05](05-risks-and-scope.md#4-open-questions) have issues of their own: podcasts [#7](https://github.com/AratKruglik/yt-music-mac/issues/7) (decided: no), music videos [#12](https://github.com/AratKruglik/yt-music-mac/issues/12) (decided: later), languages [#15](https://github.com/AratKruglik/yt-music-mac/issues/15), DMG architecture [#29](https://github.com/AratKruglik/yt-music-mac/issues/29), lyrics source [#33](https://github.com/AratKruglik/yt-music-mac/issues/33), auto-update [#49](https://github.com/AratKruglik/yt-music-mac/issues/49), "If needed" plugins [#50](https://github.com/AratKruglik/yt-music-mac/issues/50); the app icon and the Rutawave name check are [#28](https://github.com/AratKruglik/yt-music-mac/issues/28).
+Decisions on the open questions of [05](05-risks-and-scope.md#4-open-questions) have issues of their own: podcasts [#7](https://github.com/AratKruglik/yt-music-mac/issues/7) (decided: no), music videos [#12](https://github.com/AratKruglik/yt-music-mac/issues/12) (decided: later), languages [#15](https://github.com/AratKruglik/yt-music-mac/issues/15) (decided: English and Ukrainian, in-app switch), DMG architecture [#29](https://github.com/AratKruglik/yt-music-mac/issues/29), lyrics source [#33](https://github.com/AratKruglik/yt-music-mac/issues/33), auto-update [#49](https://github.com/AratKruglik/yt-music-mac/issues/49), "If needed" plugins [#50](https://github.com/AratKruglik/yt-music-mac/issues/50); the app icon and the Rutawave name check are [#28](https://github.com/AratKruglik/yt-music-mac/issues/28).
 
 ## Stage 0. Preparation
 
@@ -71,7 +71,7 @@ Decisions on the open questions of [05](05-risks-and-scope.md#4-open-questions) 
 |---|---|---|---|---|
 | [ ] 5.1 ⛔ [#24](https://github.com/AratKruglik/yt-music-mac/issues/24) | `feature/now-playing` | `MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`, WebKit Media Session conflict | 4.1 | `/sdlc:start "Now Playing and media keys integration, resolve WebKit Media Session conflict" --type=feature` |
 | [ ] 5.2 [#25](https://github.com/AratKruglik/yt-music-mac/issues/25) | `feature/menus-menubar-dock` | App menu, `MenuBarExtra`, Dock menu, notifications | 5.1 | `/sdlc:start "App menus, menu bar extra, Dock menu and track-change notifications" --type=feature` |
-| [ ] 5.3 [#26](https://github.com/AratKruglik/yt-music-mac/issues/26) | `feature/settings-resume` | Settings window, `resumeOnStart`, starting page, always on top, launch at login | 5.1 | `/sdlc:start "Settings window, resume on start, starting page, always on top, launch at login" --type=feature` |
+| [ ] 5.3 [#26](https://github.com/AratKruglik/yt-music-mac/issues/26) | `feature/settings-resume` | Settings window, `resumeOnStart`, starting page, always on top, launch at login, app language (System / English / Українська) | 5.1 | `/sdlc:start "Settings window, resume on start, starting page, always on top, launch at login" --type=feature` |
 | [ ] 5.4 [#27](https://github.com/AratKruglik/yt-music-mac/issues/27) | `feature/mini-player-links` | Mini player, opening `music.youtube.com/...` links | 5.3 | `/sdlc:start "Mini player window and music.youtube.com link handling" --type=feature` |
 
 ## Stage 8 (moved up). DMG and first release

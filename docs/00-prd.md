@@ -184,7 +184,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | F-MAC-2 | App menu with every command and its shortcut; keyboard map of 08 §14.3 | P0 | 08 §14.3 | 4.7, 5.2 |
 | F-MAC-3 | Menu bar item with current track and mini controls | P1 | — | 5.2 |
 | F-MAC-4 | Dock menu; track-change notifications (can be turned off) | P1 | — | 5.2 |
-| F-MAC-5 | Settings window: General, Playback, Account (Plugins in 0.2) | P0 | — | 5.3 |
+| F-MAC-5 | Settings window: General (incl. app language), Playback, Account (Plugins in 0.2) | P0 | — | 5.3 |
 | F-MAC-6 | Resume on start: last track and position, paused | P1 | 08 §14.5 | 5.3 |
 | F-MAC-7 | Launch at login, always on top, starting page | P2 | — | 5.3 |
 | F-MAC-8 | Mini player window | P2 | — | 5.4 |
@@ -290,7 +290,12 @@ Dynamic Type is not used on macOS; text sizes follow 07 §4.
 ### 7.5. Localization
 
 English and Ukrainian strings from the first UI release, through a String
-Catalog; the system language decides by default, and Settings has an in-app override (System / English / Українська) applied on relaunch. More languages — open question #7.
+Catalog; no other languages are planned (#15). By default the app follows the
+system language order (Ukrainian if it comes before English, otherwise
+English). Settings → General lets the user pick System, English or
+Українська; the choice applies after a relaunch, and the app offers to
+relaunch right away. Content from YouTube (shelf titles, labels) is requested
+in the same language.
 
 ### 7.6. Compatibility
 
@@ -336,7 +341,7 @@ Kept in one place, [05](05-risks-and-scope.md). The ones that shape the product:
 - **Ads for guests and free accounts** — accepted, not blocked.
 
 Open questions that affect this PRD:
-#5 lyrics source, #6 optional plugins, #7 languages, #9 Intel, #10 auto-update.
+#5 lyrics source, #6 optional plugins, #9 Intel, #10 auto-update.
 Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 
 ---
@@ -349,3 +354,4 @@ Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 | 2026-11-19 | Podcasts and user uploads out of scope (open question #4, #7); F-BRW-5 dropped |
 | 2026-11-19 | Music video mode deferred to later (open question #3, #12); Song/Video toggle removed from F-PLY-5; 02 §4.1 requires a re-parentable web view |
 | 2026-11-20 | Product renamed **Rutawave** (was Redwave: too generic, nothing said music; main audience is Ukrainian); bundle ID `dev.kruhlyk.rutawave`; rename in code planned as backlog 0.4 |
+| 2026-11-20 | Localization decided (open question #7, #15): English and Ukrainian only; in-app language switch in Settings → General, system language by default; removed from non-goals |
