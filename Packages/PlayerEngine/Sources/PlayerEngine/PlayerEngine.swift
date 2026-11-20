@@ -17,6 +17,7 @@ public final class PlayerEngine {
     public private(set) var repeatMode = RepeatMode.off
     public private(set) var isShuffled = false
     public private(set) var queue: [QueueItem] = []
+    @ObservationIgnored var queueOffset = 0
     public private(set) var isAd = false
     public var authUserIndex = 0
     /// Set by the app: the engine has no InnerTube dependency, so a like is written through this closure.
@@ -33,6 +34,7 @@ public final class PlayerEngine {
     @ObservationIgnored var resumeAt: TimeInterval?
     // Every page load brings back the volume the page's player bar stored, not the one set through the player.
     @ObservationIgnored var requestedVolume: Double?
+    @ObservationIgnored var resumeQueue: [String] = []
     // InnerTube writes the like; the hidden page keeps reporting its stale status for that track.
     @ObservationIgnored var ratedLike: (videoId: String, status: LikeStatus)?
     @ObservationIgnored var watchdog: Task<Void, Never>?
@@ -109,6 +111,7 @@ public final class PlayerEngine {
         watchdog = nil
         target = nil
         resumeAt = nil
+        resumeQueue = []
         ratedLike = nil
         attempts = 0
         position = 0
@@ -122,6 +125,7 @@ public final class PlayerEngine {
         repeatMode = .off
         isShuffled = false
         queue = []
+        queueOffset = 0
         isAd = false
     }
 
@@ -137,6 +141,7 @@ public final class PlayerEngine {
         target = (videoId, playlistId)
         attempts = 0
         resumeAt = nil
+        resumeQueue = []
         navigate(to: url, in: webView)
     }
 
@@ -161,10 +166,14 @@ public final class PlayerEngine {
             Self.log.info("command ignored: ad is playing")
             return
         }
-        guard let call = PlayerRules.bridgeCall(for: command, queue: queue) else {
+        guard let call = PlayerRules.bridgeCall(for: command, queue: queue, offset: queueOffset) else {
             Self.log.info("command refused: invalid arguments")
             return
         }
+        run(call, in: webView)
+    }
+
+    private func run(_ call: (action: String, args: [Any]), in webView: WKWebView) {
         Task {
             do {
                 let result = try await webView.callAsyncJavaScript(
@@ -255,8 +264,9 @@ public final class PlayerEngine {
         case .shuffle(let enabled):
             isShuffled = enabled
             return emit(.shuffleChanged(enabled))
-        case .queue(let items):
+        case .queue(let items, let offset):
             queue = items
+            queueOffset = offset
             return emit(.queueChanged(items))
         case .ad(let playing):
             isAd = playing
@@ -290,6 +300,8 @@ public final class PlayerEngine {
         if let resume = resumeAt {
             resumeAt = nil
             if newSong.videoId == target?.videoId { send(.seek(to: resume)) }
+            if !resumeQueue.isEmpty, let webView, isReady { run(("append", [resumeQueue]), in: webView) }
+            resumeQueue = []
         } else {
             attempts = 0
         }
@@ -381,6 +393,9 @@ public final class PlayerEngine {
         Self.log.error("web content process terminated")
         isReady = false
         resumeAt = position
+        resumeQueue = PlayerRules.upcomingVideoIds(queue)
+        // The tail is re-added by hand, so reloading the playlist as well would put its tracks ahead of the user's queue.
+        if !resumeQueue.isEmpty { target?.playlistId = nil }
         isAd = false
         emit(.error(.contentProcessCrashed))
         reload()
@@ -390,6 +405,7 @@ public final class PlayerEngine {
         guard !PlayerRules.isIgnorableNavigationError(error as NSError) else { return }
         Self.log.error("navigation failed: \((error as NSError).domain, privacy: .public) \((error as NSError).code, privacy: .public)")
         emit(.error(.pageLoadFailed))
+        reload()
     }
 }
 

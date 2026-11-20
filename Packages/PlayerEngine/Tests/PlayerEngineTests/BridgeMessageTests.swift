@@ -71,7 +71,7 @@ struct NewBridgeMessageTests {
     @Test func decodesQueueFixture() throws {
         let url = try #require(Bundle.module.url(forResource: "queue", withExtension: "json", subdirectory: "Fixtures"))
         let body = try String(contentsOf: url, encoding: .utf8)
-        guard case .queue(let items) = try #require(BridgeMessage.decode(body)) else { Issue.record("not a queue"); return }
+        guard case .queue(let items, _) = try #require(BridgeMessage.decode(body)) else { Issue.record("not a queue"); return }
         #expect(items.map(\.videoId) == ["aaaaaaaaaaa", "bbbbbbbbbbb", "ccccccccccc"])
         #expect(items.map(\.isCurrent) == [true, false, false])
         #expect(items.map(\.duration) == [212, 3723, 0])
@@ -80,19 +80,35 @@ struct NewBridgeMessageTests {
     }
 
     @Test func acceptsExactlyMaxQueueRows() {
-        guard case .queue(let items)? = BridgeMessage.decode(queueBody(rows: PlayerRules.maxQueueItems)) else {
+        guard case .queue(let items, _)? = BridgeMessage.decode(queueBody(rows: PlayerRules.maxQueueItems)) else {
             Issue.record("expected queue"); return
         }
         #expect(items.count == PlayerRules.maxQueueItems)
+    }
+
+    @Test func queueOffsetIsDecodedAndValidated() {
+        let row = #"{"videoId":"abc","title":"T","artist":"A"}"#
+        #expect(BridgeMessage.decode(#"{"type":"queue","offset":700,"items":["# + row + "]}") != nil)
+        guard case .queue(_, let offset)? = BridgeMessage.decode(#"{"type":"queue","offset":700,"items":["# + row + "]}") else {
+            Issue.record("expected queue"); return
+        }
+        #expect(offset == 700)
+        #expect(BridgeMessage.decode(#"{"type":"queue","offset":-1,"items":["# + row + "]}") == nil)
     }
 
     @Test func rejectsTooManyRows() {
         #expect(BridgeMessage.decode(queueBody(rows: PlayerRules.maxQueueItems + 1)) == nil)
     }
 
+    @Test(arguments: ["x:yz", "-1:00", "LIVE"])
+    func unknownLengthKeepsTheRow(_ length: String) throws {
+        let body = #"{"type":"queue","items":[{"videoId":"abc","title":"T","artist":"A","length":""# + length + #""}]}"#
+        guard case .queue(let items, _) = try #require(BridgeMessage.decode(body)) else { Issue.record("not a queue"); return }
+        #expect(items.map(\.duration) == [0])
+    }
+
     @Test(arguments: [
-        #"{"videoId":"a&b","title":"T","artist":"A"}"#, #"{"videoId":"abc","title":"T","artist":"A","length":"x:yz"}"#,
-        #"{"videoId":"abc","title":"T","artist":"A","length":"-1:00"}"#, #"{"videoId":"abc","title":"T"}"#,
+        #"{"videoId":"a&b","title":"T","artist":"A"}"#, #"{"videoId":"abc","title":"T"}"#,
     ])
     func oneBadRowRejectsWholeQueue(_ row: String) {
         let body = #"{"type":"queue","items":[{"videoId":"abc","title":"T","artist":"A"},"# + row + "]}"
@@ -106,7 +122,7 @@ struct NewBridgeMessageTests {
 
     @Test func capsLongNamesAndDropsForeignArtwork() throws {
         let row = #"{"videoId":"abc","title":"\#(String(repeating: "x", count: 2000))","artist":"A","artwork":"https://evil.example/a.jpg"}"#
-        guard case .queue(let items)? = BridgeMessage.decode(queueBody(rows: 1, override: row)) else { Issue.record("expected queue"); return }
+        guard case .queue(let items, _)? = BridgeMessage.decode(queueBody(rows: 1, override: row)) else { Issue.record("expected queue"); return }
         #expect(items[0].title.utf8.count == 1024)
         #expect(items[0].artworkURL == nil)
     }

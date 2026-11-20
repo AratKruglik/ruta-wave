@@ -35,15 +35,28 @@
   };
   const dispatch = (action) => call(queueElement(), 'dispatch', action);
 
-  const enqueue = async (videoId, playNext) => {
+  const until = async (probe, ms) => {
+    const end = Date.now() + ms;
+    for (;;) {
+      const value = probe();
+      if (value || Date.now() > end) return value;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  };
+
+  // After a reload the page fills its own queue first; items added before that would be replaced.
+  const enqueue = async (videoIds, playNext) => {
     const app = document.querySelector('ytmusic-app');
-    const state = queueStore()?.getState?.()?.queue;
+    const state = await until(() => {
+      const queue = queueStore()?.getState?.()?.queue;
+      return queue?.items?.length ? queue : null;
+    }, 10000);
     if (!app?.networkManager?.fetch || !state) return false;
     const position = playNext ? 'INSERT_AFTER_CURRENT_VIDEO' : 'INSERT_AT_END';
     const response = await app.networkManager.fetch('/music/get_queue', {
       queueContextParams: state.queueContextParams,
       queueInsertPosition: position,
-      videoIds: [videoId],
+      videoIds,
     });
     const items = (response?.queueDatas ?? []).map((data) => data?.content).filter(Boolean);
     if (!items.length) return false;
@@ -60,7 +73,8 @@
     togglePlay: () => {
       const p = player();
       if (typeof p?.getPlayerState !== 'function') return false;
-      return call(p, p.getPlayerState() === 2 ? 'playVideo' : 'pauseVideo');
+      const state = p.getPlayerState();
+      return call(p, state === 1 || state === 3 ? 'pauseVideo' : 'playVideo');
     },
     next: () => click('.next-button.ytmusic-player-bar') || call(player(), 'nextVideo'),
     previous: () => click('.previous-button.ytmusic-player-bar') || call(player(), 'previousVideo'),
@@ -83,7 +97,8 @@
     remove: (index, videoId, setId) => rowMatches(index, videoId, setId) && dispatch({ type: 'REMOVE_ITEM', payload: index }),
     move: (from, videoId, setId, to) =>
       rowMatches(from, videoId, setId) && dispatch({ type: 'MOVE_ITEM', payload: { fromIndex: from, toIndex: to } }),
-    enqueue,
+    enqueue: (videoId, playNext) => enqueue([videoId], playNext),
+    append: (videoIds) => Array.isArray(videoIds) && videoIds.length > 0 && enqueue(videoIds, false),
   }));
 
   const run = async (action, args) => {
@@ -165,7 +180,10 @@
   const postQueue = () => {
     const items = rows();
     if (items) {
-      const projected = items.slice(0, MAX_ROWS).map((row) => {
+      // A queue longer than MAX_ROWS is reported as a window around the current row, with its page index as offset.
+      const selected = items.findIndex((row) => unwrap(row)?.selected || row?.playlistPanelVideoWrapperRenderer?.selected);
+      const offset = Math.max(0, Math.min(selected - MAX_ROWS / 2, items.length - MAX_ROWS));
+      const projected = items.slice(offset, offset + MAX_ROWS).map((row) => {
         const inner = unwrap(row);
         if (!inner) return null;
         return {
@@ -179,10 +197,10 @@
         };
       });
       // A row that cannot be read would shift every later index, so the page's queue is not reported at all.
-      const json = JSON.stringify(projected);
+      const json = JSON.stringify([offset, projected]);
       if (!projected.includes(null) && json !== lastQueue) {
         lastQueue = json;
-        post({ type: 'queue', items: projected });
+        post({ type: 'queue', items: projected, offset });
       }
     }
     const state = queueStore()?.getState?.()?.queue;

@@ -80,7 +80,7 @@ struct PlayerEngineTests {
         #expect(engine.handle(.shuffle(true)) == .shuffleChanged(true))
         #expect(engine.isShuffled)
         let items = [QueueItem(videoId: "abc", title: "T", artist: "A", artworkURL: nil, duration: 1, isCurrent: true)]
-        #expect(engine.handle(.queue(items)) == .queueChanged(items))
+        #expect(engine.handle(.queue(items, offset: 0)) == .queueChanged(items))
         #expect(engine.queue == items)
         #expect(engine.handle(.ad(true)) == .adChanged(true))
         #expect(engine.isAd)

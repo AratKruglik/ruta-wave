@@ -5,6 +5,8 @@ enum PlayerRules {
     static let maxReloadAttempts = 2
     static let playerTimeout: Duration = .seconds(15)
     static let maxQueueItems = 500
+    // shortcut: one get_queue request for the whole restored tail; split it if the endpoint caps the id count.
+    static let maxRestoredQueueItems = 200
 
     private static let allowedArtworkHostSuffixes = [".googleusercontent.com", ".ggpht.com"]
 
@@ -78,10 +80,11 @@ enum PlayerRules {
 
     /// The named page operation for a command, or nil when the command is not a page operation or is refused.
     /// A queue index travels with the identity of the row it was read from, so the page can refuse a stale index.
-    static func bridgeCall(for command: PlayerCommand, queue: [QueueItem]) -> (action: String, args: [Any])? {
+    /// `offset` is the page index of `queue[0]`, so a window into a long page queue still addresses the right row.
+    static func bridgeCall(for command: PlayerCommand, queue: [QueueItem], offset: Int = 0) -> (action: String, args: [Any])? {
         func row(_ index: Int) -> [Any]? {
             guard queue.indices.contains(index) else { return nil }
-            return [index, queue[index].videoId, queue[index].playlistSetVideoId ?? NSNull()]
+            return [offset + index, queue[index].videoId, queue[index].playlistSetVideoId ?? NSNull()]
         }
         switch command {
         case .play: return ("play", [])
@@ -107,9 +110,15 @@ enum PlayerRules {
             return row(index).map { ("remove", $0) }
         case .moveQueueItem(let from, let to):
             guard queue.indices.contains(to), let args = row(from) else { return nil }
-            return ("move", args + [to])
+            return ("move", args + [offset + to])
         case .setLike, .load: return nil
         }
+    }
+
+    /// The rows after the current one, which a reload would replace with the page's own queue.
+    static func upcomingVideoIds(_ queue: [QueueItem]) -> [String] {
+        guard let current = queue.firstIndex(where: \.isCurrent) else { return [] }
+        return Array(queue[(current + 1)...].prefix(maxRestoredQueueItems).map(\.videoId))
     }
 
     static func isAllowedArtworkHost(_ url: URL) -> Bool {

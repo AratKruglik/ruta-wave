@@ -35,11 +35,8 @@ public struct QueueItem: Sendable, Equatable {
 
     static func make(_ raw: Raw) -> QueueItem? {
         guard PlayerRules.isValidID(raw.videoId), (raw.setId?.count ?? 0) <= maxSetIdLength else { return nil }
-        var duration: TimeInterval = 0
-        if let length = raw.length {
-            guard let parsed = PlayerRules.parseDuration(length) else { return nil }
-            duration = parsed
-        }
+        // A live stream or a localized label has no m:ss length; the row still counts, or every later index would shift.
+        let duration = raw.length.flatMap(PlayerRules.parseDuration) ?? 0
         return QueueItem(
             videoId: raw.videoId,
             title: String(decoding: raw.title.utf8.prefix(maxNameBytes), as: UTF8.self),

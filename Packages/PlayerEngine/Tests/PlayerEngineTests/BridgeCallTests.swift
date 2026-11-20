@@ -54,6 +54,18 @@ struct BridgeCallTests {
         #expect(move.action == "move" && move.args[0] as? Int == 2 && move.args[3] as? Int == 0)
     }
 
+    @Test func queueWindowOffsetAddressesPageRows() throws {
+        let jump = try #require(PlayerRules.bridgeCall(for: .playQueueItem(index: 2), queue: queue, offset: 600))
+        #expect(jump.args[0] as? Int == 602)
+        let move = try #require(PlayerRules.bridgeCall(for: .moveQueueItem(from: 2, to: 1), queue: queue, offset: 600))
+        #expect(move.args[0] as? Int == 602 && move.args[3] as? Int == 601)
+    }
+
+    @Test func upcomingRowsFollowTheCurrentOne() {
+        #expect(PlayerRules.upcomingVideoIds(queue) == ["bbb", "ccc"])
+        #expect(PlayerRules.upcomingVideoIds([]) == [])
+    }
+
     @Test func staleOrCurrentQueueIndexIsRefused() {
         #expect(PlayerRules.bridgeCall(for: .playQueueItem(index: 3), queue: queue) == nil)
         #expect(PlayerRules.bridgeCall(for: .playQueueItem(index: -1), queue: queue) == nil)

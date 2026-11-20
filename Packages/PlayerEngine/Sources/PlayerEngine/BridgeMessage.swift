@@ -9,7 +9,7 @@ enum BridgeMessage: Equatable {
     case like(LikeStatus, videoId: String?)
     case repeatMode(RepeatMode)
     case shuffle(Bool)
-    case queue([QueueItem])
+    case queue([QueueItem], offset: Int)
     case ad(Bool)
     case unavailable(videoId: String)
 
@@ -25,6 +25,7 @@ enum BridgeMessage: Equatable {
         let repeatMode: String?
         let shuffle: Bool?
         let items: [QueueItem.Raw]?
+        let offset: Int?
         let ad: Bool?
         let kind: String?
         let videoId: String?
@@ -57,7 +58,9 @@ enum BridgeMessage: Equatable {
         case "shuffle":
             return envelope.shuffle.map { .shuffle($0) }
         case "queue":
-            return envelope.items.flatMap(QueueItem.parse).map { .queue($0) }
+            let offset = envelope.offset ?? 0
+            guard offset >= 0 else { return nil }
+            return envelope.items.flatMap(QueueItem.parse).map { .queue($0, offset: offset) }
         case "ad":
             return envelope.ad.map { .ad($0) }
         case "error":
