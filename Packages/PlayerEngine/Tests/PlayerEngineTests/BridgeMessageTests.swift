@@ -94,6 +94,7 @@ struct NewBridgeMessageTests {
         }
         #expect(offset == 700)
         #expect(BridgeMessage.decode(#"{"type":"queue","offset":-1,"items":["# + row + "]}") == nil)
+        #expect(BridgeMessage.decode(#"{"type":"queue","offset":9223372036854775807,"items":["# + row + "]}") == nil)
     }
 
     @Test func rejectsTooManyRows() {

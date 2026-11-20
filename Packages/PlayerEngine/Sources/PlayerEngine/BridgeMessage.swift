@@ -59,7 +59,8 @@ enum BridgeMessage: Equatable {
             return envelope.shuffle.map { .shuffle($0) }
         case "queue":
             let offset = envelope.offset ?? 0
-            guard offset >= 0 else { return nil }
+            // Swift adds this to queue indices, so an unbounded value from the page would overflow.
+            guard (0...PlayerRules.maxQueueOffset).contains(offset) else { return nil }
             return envelope.items.flatMap(QueueItem.parse).map { .queue($0, offset: offset) }
         case "ad":
             return envelope.ad.map { .ad($0) }

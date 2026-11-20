@@ -5,6 +5,7 @@ enum PlayerRules {
     static let maxReloadAttempts = 2
     static let playerTimeout: Duration = .seconds(15)
     static let maxQueueItems = 500
+    static let maxQueueOffset = 100_000
     // shortcut: one get_queue request for the whole restored tail; split it if the endpoint caps the id count.
     static let maxRestoredQueueItems = 200
 
