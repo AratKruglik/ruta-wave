@@ -16,9 +16,9 @@ final class AccountModel {
     @ObservationIgnored private let client = InnerTubeClient()
 
     func load(session: AuthSession) async {
+        state = .loading
         guard case .signedIn(let cookies) = session.state else { return }
         let index = session.authUserIndex
-        state = .loading
         // The list always uses the primary session index: its authuser tokens are session-wide, and a stale index must not break it.
         async let list = result { try await client.accountSwitcher(cookies: cookies, authUserIndex: 0) }
         async let menu = result { try await client.accountMenu(cookies: cookies, authUserIndex: index) }

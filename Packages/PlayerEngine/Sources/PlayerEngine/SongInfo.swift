@@ -12,6 +12,22 @@ public struct SongInfo: Equatable, Sendable {
     public let playlistId: String?
     public let url: URL
 
+    public init(
+        videoId: String, title: String, artist: String, album: String? = nil, artworkURL: URL? = nil,
+        duration: TimeInterval, elapsed: TimeInterval = 0, isPaused: Bool = false, playlistId: String? = nil, url: URL
+    ) {
+        self.videoId = videoId
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.artworkURL = artworkURL
+        self.duration = duration
+        self.elapsed = elapsed
+        self.isPaused = isPaused
+        self.playlistId = playlistId
+        self.url = url
+    }
+
     // Rebuilt per call because Regex is not Sendable and songs change rarely. Order matters and each pattern replaces its first match only, as in the original app.
     private static var cleanupPatterns: [Regex<AnyRegexOutput>] { ([
         #"\s*(- topic)$"#,

@@ -1,5 +1,6 @@
 name: Rutawave
 options:
+  developmentLanguage: en
   deploymentTarget:
     macOS: "14.0"
 packages:
@@ -32,6 +33,40 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_IDENTITY: "-"
         DEVELOPMENT_TEAM: ""
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
       configs:
         Release:
           CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+  RutawaveTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - AppTests
+      - App/Navigation/Route.swift
+      - App/Navigation/NavigationModel.swift
+      - App/PlayerBar/PlaybackRules.swift
+      - App/PlayerBar/NowPlayingModel.swift
+      - App/PlayerBar/PlayerControlling.swift
+      - App/Shell/SidebarModel.swift
+      - App/Shell/Toast.swift
+      - App/Theme/DesignTokens.swift
+      - App/Theme/Glass.swift
+    dependencies:
+      - package: PlayerEngine
+      - package: InnerTube
+      - package: AppSettings
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.rutawave.tests
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+schemes:
+  Rutawave:
+    build:
+      targets:
+        Rutawave: all
+    test:
+      targets: [RutawaveTests]

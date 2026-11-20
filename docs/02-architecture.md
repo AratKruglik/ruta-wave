@@ -24,7 +24,7 @@ Everything in this document is a **[decision]** unless labelled otherwise.
 ```
 Rutawave.app
 ├─ App            — entry point, scenes, routing, DI
-├─ UI             — SwiftUI screens and components (for now lives in `App/`; extraction is decided at stage 4)
+├─ UI             — SwiftUI screens and components; lives in `App/` (decided in 4.1: `Text("key")` resolves against the main bundle, so one String Catalog serves the whole UI and the in-app language override reaches every string)
 ├─ PlayerEngine   — hidden WKWebView, JS bridge, player state
 ├─ InnerTube      — HTTP client, authorization, parsers, models
 ├─ Auth           — sign-in window, cookies, Keychain, session state
@@ -203,6 +203,7 @@ Commands are ignored, with a log line and no error, while the player is not star
 seeks are refused. The only refusal that emits an error is `setLike` without a signed-in session. `SongInfo.elapsed` and `isPaused` are a snapshot
 taken at `songChanged`; the live values are `PlayerEngine.elapsed` and `isPaused`, so a 4 Hz time update never invalidates observers of `song`.
 `events()` fans out to every caller, each with a 64-event buffer.
+`PlayerEngine.isBuffering` (4.1) follows the video's `waiting` and `playing` / `pause` / `seeked` events; it is an observable property with no `PlayerEvent`, and it resets on `stop()`, a new navigation and a content-process crash.
 
 `PlayerEngine` is a `@MainActor @Observable` class: it holds the current state
 for the UI and vends an `AsyncStream<PlayerEvent>` for plugins and `SystemKit`.
@@ -424,6 +425,7 @@ yt-music-mac/
 ├─ project.yml                — XcodeGen manifest
 ├─ Rutawave.xcodeproj        — generated, in .gitignore
 ├─ App/                       — the app: scenes, resources (Info.plist is generated)
+├─ AppTests/                  — host-less unit tests of the pure App files (navigation model, playback rules)
 ├─ Packages/
 │  ├─ InnerTube/              — Sources, Tests (fixtures in Tests/InnerTubeTests/Fixtures)
 │  ├─ PlayerEngine/           — Sources, Resources/bridge.js, Tests

@@ -14,7 +14,12 @@ and their states. What every part of the interface **does** is described in
   account data and copyrighted artwork. **[decision]**
 - **Reference metrics:** CSS tokens of `music.youtube.com`, read from the live
   site on 2026-11-18 as a guest (`--ytmusic-*` custom properties). **[observed]**
-- **Functionality** is YouTube Music's; the **look** is the screenshots'.
+- **Functionality** is YouTube Music's. The **composition** — which elements
+  exist, where they sit, their proportions and text styles — is the
+  screenshots'. The **materials and controls** are Apple's: Liquid Glass and
+  the macOS Human Interface Guidelines ([§3.4](#34-materials-and-liquid-glass)).
+  Where the two disagree, the element stays and its surface follows Apple.
+  **[decision, 2026-11-20]**
 - Sizes come from the CSS metrics (1 CSS px ≈ 1 pt). The screenshots were taken
   at about 0.75 page zoom on a 2× display, so their pixels are only used for
   colour, proportions and composition, never as sizes. **[decision]**
@@ -31,6 +36,8 @@ and their states. What every part of the interface **does** is described in
 | Download button on the playlist header | not shown | downloading is excluded ([05 §3](05-risks-and-scope.md#3-what-we-deliberately-do-not-do)) |
 | Hamburger that collapses the sidebar | the system sidebar toggle of `NavigationSplitView` | native behaviour, same result |
 | "Upgrade" / Premium promos | not shown | not needed in a native UI ([02 §9](02-architecture.md#9-settings)) |
+| Opaque full-width top bar and player bar | controls grouped on floating Liquid Glass, content scrolls under them | Apple's layering: navigation and controls float above content ([§3.4](#34-materials-and-liquid-glass)) |
+| Opaque page background, flat sidebar | translucent window backdrop, the system sidebar material | native macOS window ([§3.4](#34-materials-and-liquid-glass)) |
 
 ## 2. Window anatomy
 
@@ -56,30 +63,39 @@ and their states. What every part of the interface **does** is described in
 
 | Region | Size | Source |
 |---|---|---|
-| Top bar | 64 pt high, spans the full width, traffic lights sit inside it (`.windowStyle(.hiddenTitleBar)` + full-size content) | `--ytmusic-nav-bar-height: 64px` **[observed]** |
-| Sidebar | 240 pt wide, collapsible | guide width 240 px **[observed]** |
-| Player bar | 64 pt high plus the 3 pt progress line on its top edge; hidden until the first track is loaded | `--ytmusic-player-bar-height: 64px`, `0px` when inactive **[observed]** |
+| Top bar | 64 pt high layer over both columns, no background of its own; its controls sit in glass groups; traffic lights sit inside it (`.windowStyle(.hiddenTitleBar)` + full-size content) | height `--ytmusic-nav-bar-height: 64px` **[observed]**; glass **[decision]** |
+| Sidebar | 240 pt wide, collapsible; the system sidebar of `NavigationSplitView` with its own material, no custom fill | guide width 240 px **[observed]**; material **[decision]** |
+| Player bar | 64 pt high floating glass panel, 8 pt from the window's sides and bottom, `radius.bar`; the 3 pt progress line runs along the straight part of its top edge; hidden until the first track is loaded | height `--ytmusic-player-bar-height: 64px` **[observed]**; floating glass **[decision]** |
+| Window | translucent: the desktop shows through a system material tinted with the base colour | **[decision]**, [§3.4](#34-materials-and-liquid-glass) |
 | Content bottom inset | player bar height + 48 pt, so the last row and keyboard focus are never hidden under the bar | `--ytmusic-base-page-padding-bottom: 112px` **[observed]** |
 | Content max width | 1200 pt, centred; shelves scroll horizontally inside it | **[decision]** |
 | Minimum window | 960 × 600 pt; below 1100 pt width the sidebar auto-collapses | **[decision]** |
 
 The top bar and the player bar float above the content: content scrolls under
-the top bar, which gains a 1 pt bottom separator (`border`) once content is
-scrolled or the player page is open (screenshots 1 and 6).
+both and stays visible through their glass. There is no separator line under
+the top bar; the glass edge is the boundary.
 
 ## 3. Colour
 
 ### 3.1. Model
 
-All surfaces are **the base colour plus white at a fixed opacity**. The base
-colour is the theme; everything else follows from it. Sampled pairs fit this
+The window has three layers, back to front **[decision]**:
+
+1. **Backdrop** — the window itself: a system material showing the desktop,
+   tinted with the base colour.
+2. **Content** — screens, lists, cards. Content surfaces are **the base colour
+   plus white at a fixed opacity** (the table below); content never uses glass.
+3. **Glass** — navigation and controls that float over content: top bar
+   groups, player bar, popovers, toasts, menus.
+
+The base colour is the theme; everything else follows from it. Sampled pairs fit this
 model within 1–2 % **[observed]**:
 
 | Surface | Neutral base `#313131` | Brown base `#433624` | Overlay |
 |---|---|---|---|
 | Base (window, sidebar, content) | `#313131` | `#433624` | — |
 | Chip, secondary button, selected sidebar item, hovered row | `#464646` | `#574a3a` / `#564c39` | white 10 % |
-| Player bar, menus, search dropdown | `#4a4a49` | — | white 12 % |
+| Player bar, menus, search dropdown — only where Liquid Glass is unavailable ([§3.4](#34-materials-and-liquid-glass)) | `#4a4a49` | — | white 12 % |
 | Search field | `#50504f` | — | white 15 % |
 
 ### 3.2. Theme
@@ -108,10 +124,12 @@ come from the site's tokens **[observed]** unless stated.
 
 | Token | Value | Use |
 |---|---|---|
-| `theme.base` | dynamic, `#313131` neutral | window background |
+| `theme.base` | dynamic, `#313131` neutral | tint of the window backdrop; opaque window background where the backdrop is unavailable |
+| `window.backdrop` | system ultra-thin material + `theme.base` at 55 % | the window, behind everything |
+| `glass.regular` | system Liquid Glass, regular variant, no tint | top bar groups, player bar, toasts; popovers and menus get it from the system |
 | `surface.fill` | white 10 % | chips, secondary circular buttons, selected sidebar item, hovered row, Explore tiles |
-| `surface.raised` | white 12 % | player bar, popovers, menus, search dropdown |
-| `surface.field` | white 15 % | search field |
+| `surface.raised` | white 12 % | fallback for `glass.regular` before macOS 26; search dropdown |
+| `surface.field` | white 15 % | search field before macOS 26 |
 | `surface.inverse` | `#f1f1f1` | primary play button, "Save" pill, selected chip, selected segment |
 | `text.primary` | `#f1f1f1` | titles, body |
 | `text.secondary` | white 70 % | subtitles, metadata, durations |
@@ -123,6 +141,40 @@ come from the site's tokens **[observed]** unless stated.
 | `stroke.subtle` | white 20 % | outlined pill ("More"), field border, separators |
 | `stroke.focus` | `#f1f1f1`, 2 pt | keyboard focus ring (screenshot 6) |
 | `scrim` | black 60 % | artwork overlays (play icon on hover, now-playing row) |
+
+### 3.4. Materials and Liquid Glass
+
+Rules taken from Apple's Liquid Glass guidance and the macOS HIG
+**[decision, 2026-11-20]**:
+
+- **Glass is for the layer above content only**: bars, their control groups,
+  popovers, menus, toasts. Lists, cards, rows and page backgrounds never use
+  glass.
+- **Never glass on glass.** A control inside a glass group has no fill of its
+  own; its hover and selected states are `surface.fill`.
+- **Use the system's glass, not an imitation**: `glassEffect` for custom
+  shapes, system popovers, menus and sheets as they are. No custom blur,
+  shadow or border on top.
+- **No tint on glass**, except the meaning-carrying controls that already have
+  their own fill (`surface.inverse` play button, **Sign in** pill).
+- **Shapes are capsules** for control groups and fields, and `radius.bar` for
+  the player bar; corners stay concentric with the window's.
+- **Neighbouring glass shapes share one container** so they blend and morph
+  together (`GlassEffectContainer`).
+- **Controls on glass react to the pointer** (`interactive`), like system
+  buttons.
+- **Accessibility follows the system**: Reduce Transparency and Increase
+  Contrast turn glass and the backdrop opaque without any app code; text on
+  glass still has to keep 4.5:1 over the brightest content that can scroll
+  under it.
+- **Dark only** stays ([§3.2](#32-theme)): glass and the backdrop are used in
+  their dark appearance.
+
+| macOS | Window | Sidebar | Bars, toasts | Popovers |
+|---|---|---|---|---|
+| 26 and later | `window.backdrop` | system material | `glass.regular` | system glass |
+| 15 | `window.backdrop` | system material | opaque: `theme.base` top bar, `surface.raised` player bar edge to edge | `theme.base` |
+| 14 | `theme.base`, opaque | system material | as on 15 | `theme.base` |
 
 ## 4. Typography
 
@@ -157,7 +209,8 @@ lines) and the entity description (three lines, expandable).
 | `radius.card` | 8 pt (card artwork, search field, chips, sidebar items) |
 | `radius.tile` | 12 pt (Explore tiles, hovered rows on entity pages) |
 | `radius.cover` | 12 pt (entity cover) |
-| `radius.pill` | height / 2 (buttons, segmented control) |
+| `radius.pill` | height / 2 (buttons, segmented control, glass groups, search field on glass) |
+| `radius.bar` | 20 pt (floating player bar) |
 | Icons | SF Symbols, outline at rest, filled when selected or on (sidebar, like/dislike) |
 | Icon sizes | 16 pt in rows, 20 pt in bars, 24 pt sidebar, 28 pt prev/next, 36 pt play in the player bar |
 | Hit target | at least 32 × 32 pt for every icon button (desktop pointer), focusable with Tab |
@@ -169,16 +222,23 @@ lines) and the entity description (three lines, expandable).
 Each entry: anatomy → sizes → states. Behaviour is in [08](08-ui-spec.md).
 
 ### 6.1. Top bar
-- Left: sidebar toggle (`sidebar.left`), Rutawave wordmark (title 20 / bold).
-- Centre: search field, 480–720 pt wide (flexes), 42 pt high, `radius.card`,
-  `surface.field`, magnifier icon 20 pt at 12 pt inset, placeholder in
-  `text.tertiary`. Focused: `stroke.subtle` border and the dropdown below it
-  (6.4).
-- Right: back `‹` and forward `›` (20 pt, disabled = `text.disabled`), then the
-  avatar (32 pt circle) when signed in, or a **Sign in** pill (32 pt high,
-  `surface.inverse`, `text.onInverse`) for a guest.
+The bar has no background; each group below is one `glass.regular` capsule,
+and all of them share one glass container. Before macOS 26 the groups have no
+fill and the bar is opaque `theme.base`.
+- Left group: sidebar toggle (`sidebar.left`) and the Rutawave wordmark
+  (title 20 / bold).
+- Centre: search field, 480–720 pt wide (flexes), 42 pt high, capsule,
+  `glass.regular` (`radius.card` and `surface.field` before macOS 26),
+  magnifier icon 20 pt at 12 pt inset, placeholder in `text.tertiary`.
+  Focused: `stroke.subtle` border and the dropdown below it (6.4).
+- Right group: back `‹` and forward `›` (20 pt, disabled = `text.disabled`).
+- After it, outside the glass: the avatar (32 pt circle) when signed in, or a
+  **Sign in** pill (32 pt high, `surface.inverse`, `text.onInverse`) for a
+  guest.
 
 ### 6.2. Sidebar
+- Surface: the system sidebar material of `NavigationSplitView`; no custom
+  background, divider or shadow. Its content starts below the top bar.
 - Navigation items: 48 pt high, `radius.card`, icon 24 pt + label `nav`.
   Selected: `surface.fill` background and filled icon. Focused: `stroke.focus`.
 - Divider: 1 pt `stroke.subtle`, 16 pt vertical margin.
@@ -272,6 +332,9 @@ Three tiles in a row, each ≈ 1/3 of the content width × 108 pt, `radius.tile`
 Charts (`chart.line.uptrend.xyaxis`), Moods & genres (`face.smiling`).
 
 ### 6.11. Player bar
+- Surface: one `glass.regular` panel, `radius.bar`, floating 8 pt from the
+  sides and bottom of the window. Before macOS 26: `surface.raised`, edge to
+  edge, square corners.
 - Progress line along the top edge: 3 pt track in `stroke.subtle`, played part
   `accent.progress`; on hover it grows to 5 pt and shows a 12 pt knob and a
   time tooltip over the pointer.
@@ -304,8 +367,10 @@ the player bar.
 ### 6.13. Menus and dialogs
 - Context menus are native `NSMenu` (`.contextMenu`), not custom popovers.
 - Dialogs (new playlist, delete confirmation) are native sheets.
+- Popovers (account, guest prompt) are system popovers with the system's
+  glass; their content has no background of its own.
 - Toasts ("Added to queue", "Saved to library") appear above the player bar,
-  centred, `surface.raised`, `radius.card`, 3 s, with an optional **Undo**.
+  centred, a `glass.regular` capsule, 3 s, with an optional **Undo**.
 
 ## 7. Existing screens and how they fit
 
@@ -318,6 +383,10 @@ the player bar.
 ## 8. Checklist for every new screen
 
 - Uses tokens only; no raw hex or font sizes in views.
+- No opaque page background: the screen lets the window backdrop through.
+- Glass only on floating navigation and controls, never on content and never
+  on top of other glass ([§3.4](#34-materials-and-liquid-glass)).
+- Looks right on macOS 14, 15 and 26+, and with Reduce Transparency on.
 - Every icon button has an accessibility label and a tooltip (`.help`).
 - Every hover action is also in the context menu and reachable from the
   keyboard.

@@ -30,6 +30,17 @@ struct PlayerEngineTests {
         #expect(engine.elapsed == 3)
     }
 
+    @Test func bufferingFlagFollowsMessagesAndResetsOnStop() {
+        let engine = makeEngine()
+        #expect(engine.handle(.buffering(true)) == nil)
+        #expect(engine.isBuffering)
+        _ = engine.handle(.buffering(false))
+        #expect(!engine.isBuffering)
+        _ = engine.handle(.buffering(true))
+        engine.stop()
+        #expect(!engine.isBuffering)
+    }
+
     @Test func duplicateVideoIdEmitsNothing() {
         let engine = makeEngine()
         engine.commit(makeSong("abc"))

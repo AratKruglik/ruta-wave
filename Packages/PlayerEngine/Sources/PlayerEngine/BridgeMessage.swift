@@ -11,6 +11,7 @@ enum BridgeMessage: Equatable {
     case shuffle(Bool)
     case queue([QueueItem], offset: Int)
     case ad(Bool)
+    case buffering(Bool)
     case unavailable(videoId: String)
 
     static let maxBytes = 256 * 1024
@@ -27,6 +28,7 @@ enum BridgeMessage: Equatable {
         let items: [QueueItem.Raw]?
         let offset: Int?
         let ad: Bool?
+        let buffering: Bool?
         let kind: String?
         let videoId: String?
     }
@@ -64,6 +66,8 @@ enum BridgeMessage: Equatable {
             return envelope.items.flatMap(QueueItem.parse).map { .queue($0, offset: offset) }
         case "ad":
             return envelope.ad.map { .ad($0) }
+        case "buffering":
+            return envelope.buffering.map { .buffering($0) }
         case "error":
             guard envelope.kind == "unavailable", let id = envelope.videoId, PlayerRules.isValidID(id) else { return nil }
             return .unavailable(videoId: id)

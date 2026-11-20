@@ -53,6 +53,9 @@ struct NewBridgeMessageTests {
         #expect(BridgeMessage.decode(#"{"type":"repeat","repeatMode":"ONE"}"#) == .repeatMode(.one))
         #expect(BridgeMessage.decode(#"{"type":"shuffle","shuffle":true}"#) == .shuffle(true))
         #expect(BridgeMessage.decode(#"{"type":"ad","ad":true}"#) == .ad(true))
+        #expect(BridgeMessage.decode(#"{"type":"buffering","buffering":true}"#) == .buffering(true))
+        #expect(BridgeMessage.decode(#"{"type":"buffering","buffering":false}"#) == .buffering(false))
+        #expect(BridgeMessage.decode(#"{"type":"buffering"}"#) == nil)
         #expect(BridgeMessage.decode(#"{"type":"error","kind":"unavailable","videoId":"abc"}"#) == .unavailable(videoId: "abc"))
     }
 

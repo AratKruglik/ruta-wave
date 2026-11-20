@@ -260,6 +260,8 @@
     v.addEventListener('timeupdate', () => post({ type: 'time', time: v.currentTime }));
     v.addEventListener('seeked', () => post({ type: 'time', time: v.currentTime }));
     v.addEventListener('volumechange', postVolume);
+    v.addEventListener('waiting', () => post({ type: 'buffering', buffering: true }));
+    for (const name of ['playing', 'pause', 'seeked']) v.addEventListener(name, () => post({ type: 'buffering', buffering: false }));
     new MutationObserver(watchAd).observe(p, { attributes: true, attributeFilter: ['class'] });
     post({ type: 'ready' });
     watchAd();

@@ -1,0 +1,183 @@
+import AppKit
+import SwiftUI
+
+struct TopBar<AccountPopover: View>: View {
+    let isSignedIn: Bool
+    let avatarURL: URL?
+    let canGoBack: Bool
+    let canGoForward: Bool
+    @Binding var isAccountPresented: Bool
+    let onToggleSidebar: () -> Void
+    let onHome: () -> Void
+    let onBack: () -> Void
+    let onForward: () -> Void
+    let onSignIn: () -> Void
+    @ViewBuilder let accountPopover: () -> AccountPopover
+
+    var body: some View {
+        HStack(spacing: Metrics.space8) {
+            HStack(spacing: Metrics.space4) {
+            BarIconButton(symbol: "sidebar.left", size: Metrics.iconBar, label: "Toggle sidebar", action: onToggleSidebar)
+            Button(action: onHome) {
+                Text("Rutawave")
+                    .font(.rwWordmark)
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
+                    .frame(minHeight: Metrics.hitTarget)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Home")
+            .accessibilityLabel("Rutawave, go to Home")
+            }
+            .padding(.leading, LiquidGlass.isAvailable ? Metrics.space4 : 0)
+            .padding(.trailing, LiquidGlass.isAvailable ? Metrics.space12 : 0)
+            .glassSurface(in: Capsule(), fallback: nil)
+            Spacer(minLength: Metrics.space16)
+            SearchPlaceholder()
+                .frame(minWidth: 240, maxWidth: 720)
+            Spacer(minLength: Metrics.space16)
+            HStack(spacing: Metrics.space8) {
+                BarIconButton(symbol: "chevron.left", size: Metrics.iconBar, label: "Back", action: onBack)
+                    .disabled(!canGoBack)
+                BarIconButton(symbol: "chevron.right", size: Metrics.iconBar, label: "Forward", action: onForward)
+                    .disabled(!canGoForward)
+            }
+            .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
+            .glassSurface(in: Capsule(), fallback: nil, interactive: true)
+            trailing
+        }
+        .padding(.leading, Metrics.trafficLightsInset)
+        .padding(.trailing, Metrics.space16)
+        .frame(height: Metrics.topBarHeight)
+        .glassGroup()
+        .background(TitleBarDragArea())
+        .background(backdrop)
+    }
+
+    /// Content scrolls under the bar: every control sits on glass there, older systems get the opaque bar.
+    private var backdrop: Color { LiquidGlass.isAvailable ? .clear : .themeBase }
+
+    @ViewBuilder private var trailing: some View {
+        if isSignedIn {
+            Button { isAccountPresented.toggle() } label: {
+                AccountAvatar(url: avatarURL, size: Metrics.avatarSize)
+            }
+            .buttonStyle(.plain)
+            .help("Account")
+            .accessibilityLabel("Account")
+            .popover(isPresented: $isAccountPresented) { accountPopover() }
+        } else {
+            Button(action: onSignIn) {
+                Text("Sign in")
+                    .font(.rwButton)
+                    .foregroundStyle(.textOnInverse)
+                    .lineLimit(1)
+                    .padding(.horizontal, Metrics.space16)
+                    .frame(height: Metrics.pillHeight)
+                    .background(.surfaceInverse, in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+
+struct AccountAvatar: View {
+    let url: URL?
+    let size: CGFloat
+
+    var body: some View {
+        AsyncImage(url: url) { image in
+            image.resizable().scaledToFill()
+        } placeholder: {
+            Image(systemName: "person.crop.circle").resizable().foregroundStyle(.textSecondary)
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
+    }
+}
+
+private struct SearchPlaceholder: View {
+    var body: some View {
+        HStack(spacing: Metrics.space12) {
+            Image(systemName: "magnifyingglass")
+                .font(.rwIcon(Metrics.iconBar))
+                .foregroundStyle(.textTertiary)
+            Text("Search songs, albums, artists")
+                .font(.rwBody)
+                .foregroundStyle(.textTertiary)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, Metrics.space12)
+        .frame(height: 42)
+        .glassSurface(
+            in: RoundedRectangle(cornerRadius: LiquidGlass.isAvailable ? 21 : Metrics.radiusCard), fallback: .surfaceField)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Search")
+    }
+}
+
+struct BarIconButton: View {
+    let symbol: String
+    let size: CGFloat
+    let label: LocalizedStringKey
+    var isOn = false
+    let action: () -> Void
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.rwIcon(size))
+                .foregroundStyle(isEnabled ? (isOn ? .textPrimary : .textSecondary) : .textDisabled)
+                .frame(width: max(size, Metrics.hitTarget), height: max(size, Metrics.hitTarget))
+                .background(isOn ? .surfaceFill : Color.clear, in: Circle())
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(label)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+}
+
+private struct TitleBarDragArea: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView { DragView() }
+    func updateNSView(_ view: NSView, context: Context) {}
+
+    private final class DragView: NSView {
+        override var mouseDownCanMoveWindow: Bool { true }
+
+        override func mouseDown(with event: NSEvent) {
+            guard event.clickCount == 2 else {
+                window?.performDrag(with: event)
+                return
+            }
+            switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") {
+            case "Minimize": window?.performMiniaturize(nil)
+            case "None": break
+            default: window?.performZoom(nil)
+            }
+        }
+    }
+}
+
+#Preview("Signed in") {
+    TopBar(
+        isSignedIn: true, avatarURL: nil, canGoBack: true, canGoForward: false, isAccountPresented: .constant(false),
+        onToggleSidebar: {}, onHome: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
+    )
+    .frame(width: 1100)
+    .background(.themeBase)
+}
+
+#Preview("Guest") {
+    TopBar(
+        isSignedIn: false, avatarURL: nil, canGoBack: false, canGoForward: false, isAccountPresented: .constant(false),
+        onToggleSidebar: {}, onHome: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
+    )
+    .frame(width: 960)
+    .background(.themeBase)
+}
