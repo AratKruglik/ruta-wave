@@ -51,6 +51,7 @@ final class SearchFieldModel {
     var isDropdownVisible: Bool { isOpen && !rows.isEmpty }
 
     func edit(_ newText: String) {
+        guard newText != text else { return }
         text = newText
         isOpen = true
         highlighted = nil

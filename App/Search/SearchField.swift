@@ -65,7 +65,8 @@ struct SearchField: View {
 
     private func perform(_ action: SearchFieldModel.Action?) {
         guard let action else { return }
-        isFocused = false
+        // Resign on the next turn: the field editor commits its string on resign, and must see the new query first.
+        Task { isFocused = false }
         switch action {
         case .search(let query):
             let route = Route.search(query: query, filter: nil)
@@ -106,7 +107,7 @@ private struct SearchFieldPreview: View {
             .environment(PreviewFixtures.nowPlaying())
             .background(.themeBase)
             .task {
-                if variant != .empty { model.edit(variant == .suggestions ? "rad" : "") }
+                if variant == .suggestions { model.edit("rad") } else if variant == .history { model.focusChanged(true) }
                 await model.suggest()
             }
     }

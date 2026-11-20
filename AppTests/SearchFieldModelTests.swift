@@ -129,6 +129,8 @@ struct SearchFieldModelTests {
         await model.suggest()
         model.moveHighlight(1)
         #expect(model.submit() == .search("radiohead"))
+        model.edit("radiohead")
+        #expect(!model.isOpen)
         model.edit("  rad ")
         #expect(model.submit() == .search("rad"))
         model.edit("   ")
