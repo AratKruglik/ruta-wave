@@ -1,0 +1,8 @@
+{
+  "type": "queue",
+  "items": [
+    {"videoId": "aaaaaaaaaaa", "title": "First Song", "artist": "Artist One", "artwork": "https://lh3.googleusercontent.com/example-one=w60-h60", "length": "3:32", "selected": true, "setId": "SET1"},
+    {"videoId": "bbbbbbbbbbb", "title": "Long Mix", "artist": "Artist Two", "artwork": "https://i.ytimg.com/vi/bbbbbbbbbbb/default.jpg", "length": "1:02:03", "selected": false, "setId": "SET2"},
+    {"videoId": "ccccccccccc", "title": "No Length", "artist": "", "selected": false}
+  ]
+}

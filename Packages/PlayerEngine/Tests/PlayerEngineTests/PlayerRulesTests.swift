@@ -12,6 +12,7 @@ struct PlayerRulesTests {
         "http://music.youtube.com", "https://evil.example", "https://music.youtube.com.evil.example",
         "https://music.youtube.com@evil.example", "https://user@music.youtube.com", "https://music.youtube.com:8443",
         "javascript:alert(1)", "data:text/html,x", "file:///etc/passwd",
+        "https://www.youtube.com/watch?v=x", "https://accounts.google.com/",
     ])
     func rejects(_ url: String) {
         #expect(!PlayerRules.isAllowedMainFrameNavigation(URL(string: url)))
