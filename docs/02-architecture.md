@@ -15,14 +15,14 @@ Everything in this document is a **[decision]** unless labelled otherwise.
 | Settings | `UserDefaults` / `@AppStorage` | replaces `electron-store` |
 | Secrets | Keychain | session cookies, Last.fm keys |
 | Dependencies | none at the start | everything needed is in the SDK |
-| Build | XcodeGen `project.yml` (generates `Redwave.xcodeproj`, not committed) + local Swift packages for modules | modules are tested separately with `swift test` |
+| Build | XcodeGen `project.yml` (generates `Rutawave.xcodeproj`, not committed) + local Swift packages for modules | modules are tested separately with `swift test` |
 | Distribution | DMG file outside the App Store | user's decision; see [03](03-roadmap.md#stage-8-building-the-dmg) |
 | Sandbox | off; Hardened Runtime on | the sandbox is only required for the App Store; Hardened Runtime is a notarization prerequisite |
 
 ## 2. Modules
 
 ```
-Redwave.app
+Rutawave.app
 ├─ App            — entry point, scenes, routing, DI
 ├─ UI             — SwiftUI screens and components (for now lives in `App/`; extraction is decided at stage 4)
 ├─ PlayerEngine   — hidden WKWebView, JS bridge, player state
@@ -417,7 +417,7 @@ loading of third-party code. The list and the split across stages is in
 yt-music-mac/
 ├─ docs/                      — this documentation
 ├─ project.yml                — XcodeGen manifest
-├─ Redwave.xcodeproj         — generated, in .gitignore
+├─ Rutawave.xcodeproj        — generated, in .gitignore
 ├─ App/                       — the app: scenes, resources (Info.plist is generated)
 ├─ Packages/
 │  ├─ InnerTube/              — Sources, Tests (fixtures in Tests/InnerTubeTests/Fixtures)

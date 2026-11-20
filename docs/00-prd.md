@@ -49,10 +49,10 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
 | DMG file | `Rutawave-<version>-arm64.dmg` |
 | URL scheme for links (stage 5.4) | `rutawave://` |
 
-The code still uses the Redwave identifiers (`dev.kruhlyk.redwave`, …).
-Backlog row **0.4** ([06](06-backlog.md#stage-0-preparation)) moves it to
-the ones above. The renamed build removes the session stores of the previous
-identifiers on launch, as row 0.3 did for Tunewave
+Backlog row **0.4** ([06](06-backlog.md#stage-0-preparation)) moved the code
+from the Redwave identifiers (`dev.kruhlyk.redwave`, …) to the ones above. The
+renamed build removes the session stores of the previous identifiers on launch,
+as row 0.3 did for Tunewave
 ([05 §2.4](05-risks-and-scope.md#2-legal-and-policy-constraints)).
 
 Not checked yet: whether "Rutawave" is free as a domain and as a registered

@@ -19,7 +19,7 @@ struct KeychainItem: KeychainStore {
     let service: String
     let account: String
 
-    static let session = KeychainItem(service: "dev.kruhlyk.redwave.session", account: "default")
+    static let session = KeychainItem(service: "dev.kruhlyk.rutawave.session", account: "default")
 
     private var query: [CFString: Any] {
         [kSecClass: kSecClassGenericPassword, kSecAttrService: service, kSecAttrAccount: account]
