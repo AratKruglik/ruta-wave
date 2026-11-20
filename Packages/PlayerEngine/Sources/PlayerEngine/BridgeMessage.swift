@@ -5,6 +5,13 @@ enum BridgeMessage: Equatable {
     case song(SongInfo, artworkWithQuery: URL?)
     case playback(isPaused: Bool, elapsed: Double)
     case time(Double)
+    case volume(Double, muted: Bool)
+    case like(LikeStatus, videoId: String?)
+    case repeatMode(RepeatMode)
+    case shuffle(Bool)
+    case queue([QueueItem], offset: Int)
+    case ad(Bool)
+    case unavailable(videoId: String)
 
     static let maxBytes = 256 * 1024
 
@@ -12,6 +19,16 @@ enum BridgeMessage: Equatable {
         let type: String
         let paused: Bool?
         let time: Double?
+        let volume: Double?
+        let muted: Bool?
+        let status: String?
+        let repeatMode: String?
+        let shuffle: Bool?
+        let items: [QueueItem.Raw]?
+        let offset: Int?
+        let ad: Bool?
+        let kind: String?
+        let videoId: String?
     }
 
     static func decode(_ body: Any) -> BridgeMessage? {
@@ -29,6 +46,27 @@ enum BridgeMessage: Equatable {
             return .playback(isPaused: paused, elapsed: time)
         case "time":
             return envelope.time.map { .time($0) }
+        case "volume":
+            guard let volume = envelope.volume, let muted = envelope.muted,
+                  volume.isFinite, (0...100).contains(volume) else { return nil }
+            return .volume(volume / 100, muted: muted)
+        case "like":
+            let videoId = envelope.videoId.flatMap { PlayerRules.isValidID($0) ? $0 : nil }
+            return envelope.status.flatMap(LikeStatus.init(page:)).map { .like($0, videoId: videoId) }
+        case "repeat":
+            return envelope.repeatMode.flatMap(RepeatMode.init(page:)).map { .repeatMode($0) }
+        case "shuffle":
+            return envelope.shuffle.map { .shuffle($0) }
+        case "queue":
+            let offset = envelope.offset ?? 0
+            // Swift adds this to queue indices, so an unbounded value from the page would overflow.
+            guard (0...PlayerRules.maxQueueOffset).contains(offset) else { return nil }
+            return envelope.items.flatMap(QueueItem.parse).map { .queue($0, offset: offset) }
+        case "ad":
+            return envelope.ad.map { .ad($0) }
+        case "error":
+            guard envelope.kind == "unavailable", let id = envelope.videoId, PlayerRules.isValidID(id) else { return nil }
+            return .unavailable(videoId: id)
         default:
             return nil
         }

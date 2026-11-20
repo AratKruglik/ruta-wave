@@ -60,4 +60,66 @@ struct PlayerEngineTests {
         engine.load(videoId: "abc", playlistId: nil)
         #expect(engine.webView == nil)
     }
+
+    @Test func unchangedLikeStatusEmitsNothing() {
+        let engine = makeEngine()
+        #expect(engine.handle(.like(.indifferent, videoId: nil)) == nil)
+        #expect(engine.handle(.like(.like, videoId: nil)) == .likeChanged(.like))
+        #expect(engine.handle(.like(.like, videoId: nil)) == nil)
+        #expect(engine.like == .like)
+    }
+
+    @Test func newMessagesUpdateStateAndEmitOneEvent() {
+        let engine = makeEngine()
+        #expect(engine.handle(.volume(0.4, muted: true)) == .volumeChanged(volume: 0.4, isMuted: true))
+        #expect(engine.volume == 0.4 && engine.isMuted)
+        #expect(engine.handle(.like(.like, videoId: nil)) == .likeChanged(.like))
+        #expect(engine.like == .like)
+        #expect(engine.handle(.repeatMode(.all)) == .repeatChanged(.all))
+        #expect(engine.repeatMode == .all)
+        #expect(engine.handle(.shuffle(true)) == .shuffleChanged(true))
+        #expect(engine.isShuffled)
+        let items = [QueueItem(videoId: "abc", title: "T", artist: "A", artworkURL: nil, duration: 1, isCurrent: true)]
+        #expect(engine.handle(.queue(items, offset: 0)) == .queueChanged(items))
+        #expect(engine.queue == items)
+        #expect(engine.handle(.ad(true)) == .adChanged(true))
+        #expect(engine.isAd)
+        #expect(engine.handle(.unavailable(videoId: "abc")) == .error(.unavailable(videoId: "abc")))
+    }
+
+    @Test func guestLikeIsRefusedWithoutCallingRate() async {
+        let engine = makeEngine()
+        var calls = 0
+        engine.rate = { _, _ in calls += 1 }
+        engine.commit(makeSong())
+        var iterator = engine.events().makeAsyncIterator()
+        engine.send(.setLike(.like))
+        #expect(await iterator.next() == .error(.signInRequired))
+        #expect(calls == 0)
+        #expect(engine.like == .indifferent)
+    }
+
+    @Test func signedInLikeGoesThroughRate() async {
+        let engine = makeEngine()
+        engine.isEphemeral = false
+        var rated: [String] = []
+        engine.rate = { id, _ in rated.append(id) }
+        engine.commit(makeSong("abc"))
+        var iterator = engine.events().makeAsyncIterator()
+        engine.send(.setLike(.dislike))
+        #expect(await iterator.next() == .likeChanged(.dislike))
+        #expect(rated == ["abc"])
+        #expect(engine.like == .dislike)
+        #expect(engine.handle(.like(.indifferent, videoId: "abc")) == nil)
+        #expect(engine.like == .dislike)
+        #expect(engine.handle(.like(.like, videoId: "def")) == .likeChanged(.like))
+    }
+
+    @Test func commandsBeforeStartAreIgnored() {
+        let engine = makeEngine()
+        engine.send(.play)
+        engine.send(.seek(to: 10))
+        engine.send(.removeQueueItem(index: 0))
+        #expect(engine.webView == nil)
+    }
 }

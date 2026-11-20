@@ -69,8 +69,12 @@ Consequences we accept:
   `PlayerEngine.start(_:)` does this, and the App tears the view down as soon as sign-out starts (the wipe may already be running).
 - It must be **attached to a window**, otherwise WebKit suspends timers and
   media: `PlayerHost` (App) puts it in a 1×1 container `NSView` with `alphaValue = 0`
-  in the main window background, and `preferences.inactiveSchedulingPolicy = .none`.
-  Whether this survives minimize, hide and Cmd-W is the manual check MC-1.
+  inside `PlayerWindow`, a borderless 1×1 window the app delegate creates once at launch
+  (not restorable, not in the Window menu, ignores the mouse), and
+  `preferences.inactiveSchedulingPolicy = .none`. The same hidden window runs the
+  session-driven `start`/`stop`, so playback does not depend on which app windows are
+  open: verified by hand with only the debug window open, after Close All, and with the
+  app hidden. Background audio with the screen locked remains manual check MC-1.
 - It must stay **re-parentable**: a later music video mode or picture-in-picture
   ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)) moves it into a visible container without reloading the page or
   interrupting playback. The stage 3 design (#13) must not rule this out; whether
@@ -112,14 +116,40 @@ A single `Resources/bridge.js` file in the `PlayerEngine` target. It:
 - sends events to Swift through `window.webkit.messageHandlers.player.postMessage(JSON.stringify(...))`, always a string of at most 256 KiB
   (`ready`, `song` with the `videoDetails` and `microformat` of `getPlayerResponse()`, `playback {paused, time}`, `time {time}`);
   Swift drops anything that is not a trusted-origin, well-formed message;
-- receives commands through `window.__bridge.cmd(name, ...args)`, which calls only whitelisted method names on `#movie_player`.
+- receives commands through `window.__bridge.run(action, args)`. `__bridge` is frozen and non-configurable, and `run` looks
+  the action up in a frozen table of named operations (never an arbitrary method name) and resolves to `true` or `false`;
+- pushes `volume`, `like`, `repeat`, `shuffle`, `queue` (one debounced push source: the queue store's `subscribe`, posted only
+  when the projection changes, at most 500 rows), `ad` and `error {kind: "unavailable"}` (checked from `playabilityStatus`
+  before the `videoDetails` guard, and also posted when the page leaves `/watch` before a song arrives there: a missing
+  video id makes the page drop back to the home screen with no playability error, so the requested id is read from the
+  navigation entry, which keeps the URL that was loaded). `song` is not posted while an ad shows.
 
 Site player methods **[presence verified on the live page, MC-5, 2026-11-19]**: `playVideo()`,
 `pauseVideo()`, `nextVideo()`, `previousVideo()`, `seekTo(sec)`, `setVolume(0…100)`,
 `getVolume()`, `mute()`, `unMute()`, `getCurrentTime()`, `getDuration()`,
 `getPlayerResponse()`, plus `stopVideo()`, `loadVideoById()`, `setShuffle()`, `setLoop()`,
 `isMuted()` and `getPlayerState()`. Getters were called and returned plausible values; methods with
-side effects were only checked to exist — their behaviour is verified at stage 3.2, when Swift sends commands.
+side effects were only checked to exist.
+
+Page internals added in 3.2 **[reference-only: taken from pear-desktop, not yet probed live]**. Each is behind a named
+bridge operation that returns `false` when the path is missing, and Swift logs the refusal. Status after the owner's
+Web Inspector probe replaces "reference-only" with "verified presence <date>" or "unreachable":
+
+| Item | Path | Status |
+|---|---|---|
+| next / previous | click `.next-button` / `.previous-button` on `ytmusic-player-bar`, fallback `nextVideo()` / `previousVideo()` | reference-only |
+| volume write | `#movie_player.setVolume(0…100)`, fallback `ytmusic-player-bar.updateVolume`. The bar maps its slider through a curve (50 → 20), so writing through it does not round-trip with `getVolume()` | verified (MC-A): round-trips and survives a track change |
+| shuffle / repeat | `ytmusic-player-bar.queue.shuffle()` / `onRepeatButtonClick()`, fallback a click on the button | reference-only |
+| shuffle, repeat read | `#queue.queue.store.store.getState().queue.{shuffleEnabled, repeatMode}` | reference-only. Whether shuffle is a mode or a one-shot reshuffle is unknown |
+| like read | `like-status` attribute on `#like-button-renderer` | reference-only |
+| queue read | `#queue.queue.store.store.getState().queue.items` and `.subscribe`, fallback `#queue.queue.getItems()` re-read on `videodatachange` | reference-only |
+| queue edit | `#queue.dispatch` with `SET_INDEX`, `REMOVE_ITEM`, `MOVE_ITEM`, `ADD_ITEMS` | reference-only. Whether `SET_INDEX` starts playback is unknown |
+| enqueue | `ytmusic-app.networkManager.fetch('/music/get_queue', ...)` then `ADD_ITEMS` | reference-only. If unreachable the command is refused |
+| ad | `ad-showing` / `ad-interrupting` class on `#movie_player` | unknown (general YouTube knowledge) |
+| unavailable | `getPlayerResponse().playabilityStatus.status !== 'OK'`; a missing id instead leaves `/watch` for `/` | missing id verified (MC-E); non-OK status reference-only |
+
+The fallbacks "attribute observer for shuffle/repeat" and "`getPlayerResponse().videoDetails` vs the queue's selected row for ads" are not implemented.
+The like write does not use the page: it goes through InnerTube `rate` (`PlayerEngine.rate`, set by the app).
 
 ### 4.3. Contract with Swift
 
@@ -129,11 +159,14 @@ Mirrors the original's `peard:*` channels
 ```swift
 enum PlayerCommand {
     case play, pause, togglePlay, next, previous
-    case seek(to: TimeInterval), seek(by: TimeInterval)
-    case setVolume(Double), toggleMute
-    case toggleShuffle, cycleRepeat
-    case setLike(LikeStatus)
+    case seek(to: TimeInterval), skip(by: TimeInterval)   // skip, not seek(by:): Swift cannot match two cases that differ only by label
+    case setVolume(Double)                                // 0…1, clamped; NaN refused
+    case toggleMute, toggleShuffle, cycleRepeat
+    case setLike(LikeStatus)                              // signed-in only, through PlayerEngine.rate
     case playQueueItem(index: Int)
+    case enqueue(videoId: String, playNext: Bool)
+    case removeQueueItem(index: Int)                      // the current item is refused
+    case moveQueueItem(from: Int, to: Int)
     case load(videoId: String, playlistId: String?)
 }
 
@@ -142,13 +175,13 @@ enum PlayerEvent {
     case songChanged(SongInfo)
     case playbackChanged(isPaused: Bool, elapsed: TimeInterval)
     case timeChanged(TimeInterval)
-    case seeked(TimeInterval)
-    case volumeChanged(volume: Double, isMuted: Bool)
+    case volumeChanged(volume: Double, isMuted: Bool)     // 0…1
     case likeChanged(LikeStatus)
     case repeatChanged(RepeatMode)
     case shuffleChanged(Bool)
     case queueChanged([QueueItem])
-    case error(PlayerError)
+    case adChanged(Bool)
+    case error(PlayerError)   // pageLoadFailed, playerTimeout, unavailable(videoId:), contentProcessCrashed, signInRequired
 }
 
 struct SongInfo: Equatable, Sendable {
@@ -165,8 +198,9 @@ struct SongInfo: Equatable, Sendable {
 }
 ```
 
-Stage 3.1 implements the minimum: `PlayerEvent` has `ready`, `songChanged`, `playbackChanged` and `timeChanged`,
-and the only command is `load`. The rest of the enums above arrive in 3.2. `SongInfo.elapsed` and `isPaused` are a snapshot
+Stage 3.2 completes the contract. There is no `seeked` event (the bridge turns `seeked` into `timeChanged`).
+Commands are ignored, with a log line and no error, while the player is not started or not ready; while an ad plays, `next` and the
+seeks are refused. The only refusal that emits an error is `setLike` without a signed-in session. `SongInfo.elapsed` and `isPaused` are a snapshot
 taken at `songChanged`; the live values are `PlayerEngine.elapsed` and `isPaused`, so a 4 Hz time update never invalidates observers of `song`.
 `events()` fans out to every caller, each with a 64-event buffer.
 
@@ -183,8 +217,16 @@ Rules ported from the original **[bundle]**:
 
 The queue belongs to the page (as in the original). Swift reads it through the
 bridge and displays it; changes (add, remove, move, jump) are sent as commands.
-We do not keep our own copy of the queue as a source of truth, so it cannot
-drift from the player.
+`PlayerEngine.queue` is a display mirror that each `queueChanged` replaces wholesale, so it cannot
+drift from the player. It holds the main queue only (no Autoplay section) and at most 500 rows: the page trims, and Swift
+rejects a larger message, and any message with one invalid row, because dropping a row would shift every later index.
+A queue command carries the row's index together with its `videoId` and `playlistSetVideoId`; the page refuses the
+operation when the row at that index no longer matches.
+
+**Recovery.** `PlayerEngine` keeps an in-memory snapshot (target track, position without ad time). A content process crash,
+a load failure or no `song` within 15 s (a Swift timer, because a JS timer dies with the process) reloads the target through the same URL as
+`load`, at most twice, then gives up silently; the last `error` stands. After a crash the same track is re-announced
+with `songChanged` and seeked back to the snapshot position. Skipping an unavailable track is left to the UI.
 
 ## 5. InnerTube
 

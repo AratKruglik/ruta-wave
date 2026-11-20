@@ -2,6 +2,16 @@ import Foundation
 
 enum PlayerRules {
     static let playerHost = "music.youtube.com"
+    static let maxReloadAttempts = 2
+    static let playerTimeout: Duration = .seconds(15)
+    // A failed load fails again within milliseconds while offline; the pause gives a short outage time to clear.
+    static let failedLoadRetryDelay: Duration = .seconds(5)
+    // Playback this long after a commit ends a failure streak; a track that crashes sooner keeps counting toward the cap.
+    static let stablePlayback: Duration = .seconds(30)
+    static let maxQueueItems = 500
+    static let maxQueueOffset = 100_000
+    // shortcut: one get_queue request for the whole restored tail; split it if the endpoint caps the id count.
+    static let maxRestoredQueueItems = 200
 
     private static let allowedArtworkHostSuffixes = [".googleusercontent.com", ".ggpht.com"]
 
@@ -45,6 +55,75 @@ enum PlayerRules {
         components.path = "/signin"
         components.percentEncodedQuery = "action_handle_signin=true&authuser=\(authUserIndex)&next=\(next)"
         return components.url
+    }
+
+    /// "m:ss" or "h:mm:ss" as the page prints `lengthText`.
+    static func parseDuration(_ text: String) -> TimeInterval? {
+        let parts = text.split(separator: ":", omittingEmptySubsequences: false)
+        guard (2...3).contains(parts.count) else { return nil }
+        var total = 0
+        for part in parts {
+            guard part.utf8.allSatisfy({ (UInt8(ascii: "0")...UInt8(ascii: "9")).contains($0) }),
+                  let value = Int(part), value < 100_000 else { return nil }
+            total = total * 60 + value
+        }
+        return TimeInterval(total)
+    }
+
+    static func isRefusedDuringAd(_ command: PlayerCommand) -> Bool {
+        switch command {
+        case .next, .seek(to: _), .skip(by: _): true
+        default: false
+        }
+    }
+
+    /// -999 and WebKit 102 come from a superseding `load` or the navigation lock, not from a failed page.
+    static func isIgnorableNavigationError(_ error: NSError) -> Bool {
+        (error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled)
+            || (error.domain == "WebKitErrorDomain" && error.code == 102)
+    }
+
+    /// The named page operation for a command, or nil when the command is not a page operation or is refused.
+    /// A queue index travels with the identity of the row it was read from, so the page can refuse a stale index.
+    /// `offset` is the page index of `queue[0]`, so a window into a long page queue still addresses the right row.
+    static func bridgeCall(for command: PlayerCommand, queue: [QueueItem], offset: Int = 0) -> (action: String, args: [Any])? {
+        func row(_ index: Int) -> [Any]? {
+            guard queue.indices.contains(index) else { return nil }
+            return [offset + index, queue[index].videoId, queue[index].playlistSetVideoId ?? NSNull()]
+        }
+        switch command {
+        case .play: return ("play", [])
+        case .pause: return ("pause", [])
+        case .togglePlay: return ("togglePlay", [])
+        case .next: return ("next", [])
+        case .previous: return ("previous", [])
+        case .seek(to: let time):
+            return time.isFinite && time >= 0 ? ("seekTo", [time]) : nil
+        case .skip(by: let delta):
+            return delta.isFinite ? ("seekBy", [delta]) : nil
+        case .setVolume(let volume):
+            return volume.isFinite ? ("setVolume", [(min(max(volume, 0), 1) * 100).rounded()]) : nil
+        case .toggleMute: return ("toggleMute", [])
+        case .toggleShuffle: return ("toggleShuffle", [])
+        case .cycleRepeat: return ("cycleRepeat", [])
+        case .playQueueItem(let index):
+            return row(index).map { ("jump", $0) }
+        case .enqueue(let videoId, let playNext):
+            return isValidID(videoId) ? ("enqueue", [videoId, playNext]) : nil
+        case .removeQueueItem(let index):
+            guard !queue.indices.contains(index) || !queue[index].isCurrent else { return nil }
+            return row(index).map { ("remove", $0) }
+        case .moveQueueItem(let from, let to):
+            guard queue.indices.contains(to), let args = row(from) else { return nil }
+            return ("move", args + [offset + to])
+        case .setLike, .load: return nil
+        }
+    }
+
+    /// The rows after the current one, which a reload would replace with the page's own queue.
+    static func upcomingVideoIds(_ queue: [QueueItem]) -> [String] {
+        guard let current = queue.firstIndex(where: \.isCurrent) else { return [] }
+        return Array(queue[(current + 1)...].prefix(maxRestoredQueueItems).map(\.videoId))
     }
 
     static func isAllowedArtworkHost(_ url: URL) -> Bool {

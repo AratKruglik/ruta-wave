@@ -5,8 +5,7 @@ import SwiftUI
 
 @main
 struct RedwaveApp: App {
-    @State private var session = AuthSession()
-    @State private var player = PlayerEngine()
+    @NSApplicationDelegateAdaptor private var app: AppDelegate
 
     init() {
         // SecItemDelete can block on a Keychain prompt for the old binary's item, so this must stay off the main actor.
@@ -17,52 +16,34 @@ struct RedwaveApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                switch session.state {
+                switch app.session.state {
                 case .signedOut:
-                    GuestView(session: session)
+                    GuestView(session: app.session)
                 case .signedIn:
-                    AccountView(session: session)
+                    AccountView(session: app.session)
                 case .keychainUnavailable:
                     VStack(spacing: 12) {
                         Text("Couldn't access the saved session")
-                        Button("Try again") { session.restore() }
-                        Button("Continue without signing in") { session.continueAsGuest() }
+                        Button("Try again") { app.session.restore() }
+                        Button("Continue without signing in") { app.session.continueAsGuest() }
                     }
                 }
             }
             .frame(minWidth: 520, minHeight: 640)
-            .onChange(of: session.state.isSignedIn) { InnerTubeClient.resetGuestVisitor() }
-            .background { PlayerHost(engine: player).frame(width: 1, height: 1) }
-            .onChange(of: session.authUserIndex, initial: true) { player.authUserIndex = $1 }
-            .task(id: PlayerSession(session)) { await startPlayer() }
-        }
-    }
-
-    private func startPlayer() async {
-        switch PlayerSession(session) {
-        case .off:
-            player.stop()
-            return
-        case .guest, .account:
-            await player.start(session.state)
         }
         #if DEBUG
-        if let videoId = UserDefaults.standard.string(forKey: "debugVideoId") {
-            player.load(videoId: videoId, playlistId: UserDefaults.standard.string(forKey: "debugPlaylistId"))
-        }
+        Window("Player Debug", id: "player-debug") { PlayerDebugView(player: app.player) }
         #endif
     }
 }
 
-// Tears the signed-in web view down as soon as sign-out starts; the wipe of the shared store may already be running.
-private enum PlayerSession: Equatable {
-    case guest, account, off
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    let session = AuthSession()
+    let player = PlayerEngine()
+    private var playerWindow: PlayerWindow?
 
-    @MainActor init(_ session: AuthSession) {
-        switch session.state {
-        case .keychainUnavailable: self = .off
-        case .signedIn: self = session.isSigningOut ? .off : .account
-        case .signedOut: self = .guest
-        }
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        playerWindow = PlayerWindow(session: session, player: player)
     }
 }
