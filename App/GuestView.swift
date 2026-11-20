@@ -43,7 +43,7 @@ private struct GuestContent: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("Redwave").font(.largeTitle)
+            Text("Rutawave").font(.largeTitle)
             if isSessionExpired {
                 Text("Your session expired. Sign in again.")
             }

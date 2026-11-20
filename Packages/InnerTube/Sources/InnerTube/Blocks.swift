@@ -1,6 +1,6 @@
 import os
 
-let parserLog = Logger(subsystem: "dev.kruhlyk.redwave", category: "parser")
+let parserLog = Logger(subsystem: "dev.kruhlyk.rutawave", category: "parser")
 
 func parseBlocks<T>(_ blocks: [JSONValue], _ transform: (JSONValue) -> T?) -> [T] {
     blocks.compactMap { block in

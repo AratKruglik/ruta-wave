@@ -39,50 +39,67 @@ private struct Library {
 }
 
 @Suite struct LegacyStoresTests {
-    private let redwavePaths = [
-        "HTTPStorages/dev.kruhlyk.redwave", "HTTPStorages/dev.kruhlyk.redwave.binarycookies",
-        "WebKit/dev.kruhlyk.redwave", "Caches/dev.kruhlyk.redwave",
+    private let rutawavePaths = [
+        "HTTPStorages/dev.kruhlyk.rutawave", "HTTPStorages/dev.kruhlyk.rutawave.binarycookies",
+        "WebKit/dev.kruhlyk.rutawave", "Caches/dev.kruhlyk.rutawave",
     ]
 
     @Test func removesEveryLegacyStore() throws {
         let library = try Library()
         defer { try? FileManager.default.removeItem(at: library.root) }
         for path in LegacyStores.paths { try library.make(path) }
-        let keychain = KeychainSpy()
+        let spies = [KeychainSpy(), KeychainSpy()]
 
-        LegacyStores.remove(library: library.root, keychain: keychain)
+        LegacyStores.remove(library: library.root, keychains: spies)
 
         #expect(LegacyStores.paths.allSatisfy { !library.exists($0) })
-        #expect(keychain.deleteCount == 1)
+        #expect(spies.allSatisfy { $0.deleteCount == 1 })
     }
 
-    @Test func keepsRedwaveStores() throws {
+    @Test func keepsRutawaveStores() throws {
         let library = try Library()
         defer { try? FileManager.default.removeItem(at: library.root) }
-        for path in LegacyStores.paths + redwavePaths { try library.make(path) }
+        for path in LegacyStores.paths + rutawavePaths { try library.make(path) }
 
-        LegacyStores.remove(library: library.root, keychain: KeychainSpy())
+        LegacyStores.remove(library: library.root, keychains: [KeychainSpy()])
 
-        #expect(redwavePaths.allSatisfy { library.exists($0) })
+        #expect(rutawavePaths.allSatisfy { library.exists($0) })
+    }
+
+    @Test func removesLegacyCookieJarTempCopiesOnly() throws {
+        let library = try Library()
+        defer { try? FileManager.default.removeItem(at: library.root) }
+        let legacy = ["redwave", "tunewave"].map { "HTTPStorages/dev.kruhlyk.\($0).binarycookies_tmp_1.dat" }
+        let current = "HTTPStorages/dev.kruhlyk.rutawave.binarycookies_tmp_1.dat"
+        try FileManager.default.createDirectory(at: library.root.appendingPathComponent("HTTPStorages"), withIntermediateDirectories: true)
+        for path in legacy + [current] {
+            try Data("x".utf8).write(to: library.root.appendingPathComponent(path))
+        }
+
+        LegacyStores.remove(library: library.root, keychains: [KeychainSpy()])
+
+        #expect(legacy.allSatisfy { !library.exists($0) })
+        #expect(library.exists(current))
     }
 
     @Test func emptyLibraryIsNoOp() throws {
         let library = try Library()
         defer { try? FileManager.default.removeItem(at: library.root) }
 
-        LegacyStores.remove(library: library.root, keychain: KeychainSpy())
+        LegacyStores.remove(library: library.root, keychains: [KeychainSpy()])
 
         #expect(try FileManager.default.contentsOfDirectory(atPath: library.root.path).isEmpty)
     }
 
-    @Test func sessionKeychainItemUsesRedwaveService() {
-        #expect(KeychainItem.session.service == "dev.kruhlyk.redwave.session")
+    @Test func sessionKeychainItemUsesRutawaveService() {
+        #expect(KeychainItem.session.service == "dev.kruhlyk.rutawave.session")
         #expect(KeychainItem.session.account == "default")
     }
 
-    @Test func legacyPathsAreAllUnderTunewaveID() {
-        #expect(LegacyStores.paths.count == 4)
-        #expect(LegacyStores.paths.allSatisfy { $0.contains("dev.kruhlyk.tunewave") && !$0.contains("redwave") })
+    @Test func legacyPathsCoverTunewaveAndRedwaveOnly() {
+        #expect(LegacyStores.paths.count == 8)
+        #expect(LegacyStores.paths.allSatisfy { $0.contains("dev.kruhlyk.tunewave") || $0.contains("dev.kruhlyk.redwave") })
+        #expect(LegacyStores.paths.allSatisfy { !$0.contains("rutawave") })
     }
 
     @Test func symlinkIsRemovedWithoutFollowingIt() throws {
@@ -93,13 +110,16 @@ private struct Library {
             try? FileManager.default.removeItem(at: outside.root)
         }
         try outside.make("keep")
-        let link = library.root.appendingPathComponent("Caches/dev.kruhlyk.tunewave")
-        try FileManager.default.createDirectory(at: link.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: outside.root.appendingPathComponent("keep"))
+        let links = ["Caches/dev.kruhlyk.tunewave", "Caches/dev.kruhlyk.redwave"]
+        for path in links {
+            let link = library.root.appendingPathComponent(path)
+            try FileManager.default.createDirectory(at: link.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try FileManager.default.createSymbolicLink(at: link, withDestinationURL: outside.root.appendingPathComponent("keep"))
+        }
 
-        LegacyStores.remove(library: library.root, keychain: KeychainSpy())
+        LegacyStores.remove(library: library.root, keychains: [KeychainSpy()])
 
-        #expect(!library.exists("Caches/dev.kruhlyk.tunewave"))
+        #expect(links.allSatisfy { !library.exists($0) })
         #expect(outside.exists("keep/file"))
     }
 
@@ -107,25 +127,27 @@ private struct Library {
         let library = try Library()
         defer { try? FileManager.default.removeItem(at: library.root) }
         for path in LegacyStores.paths { try library.make(path) }
-        let keychain = KeychainSpy()
+        let spies = [KeychainSpy(), KeychainSpy()]
         var filesGoneAtDelete = false
-        keychain.onDelete = { filesGoneAtDelete = LegacyStores.paths.allSatisfy { !library.exists($0) } }
+        spies[0].onDelete = { filesGoneAtDelete = LegacyStores.paths.allSatisfy { !library.exists($0) } }
 
-        LegacyStores.remove(library: library.root, keychain: keychain)
+        LegacyStores.remove(library: library.root, keychains: spies)
 
-        #expect(keychain.deleteCount == 1)
+        #expect(spies.allSatisfy { $0.deleteCount == 1 })
         #expect(filesGoneAtDelete)
     }
 
-    @Test func keychainFailureStillRemovesFiles() throws {
+    @Test func oneKeychainFailureStillDeletesTheOther() throws {
         let library = try Library()
         defer { try? FileManager.default.removeItem(at: library.root) }
         for path in LegacyStores.paths { try library.make(path) }
-        let keychain = KeychainSpy()
-        keychain.deleteError = KeychainError(status: errSecAuthFailed)
+        let failing = KeychainSpy()
+        failing.deleteError = KeychainError(status: errSecAuthFailed)
+        let other = KeychainSpy()
 
-        LegacyStores.remove(library: library.root, keychain: keychain)
+        LegacyStores.remove(library: library.root, keychains: [failing, other])
 
+        #expect(other.deleteCount == 1)
         #expect(LegacyStores.paths.allSatisfy { !library.exists($0) })
     }
 }

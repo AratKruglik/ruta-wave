@@ -4,7 +4,7 @@ import PlayerEngine
 import SwiftUI
 
 @main
-struct RedwaveApp: App {
+struct RutawaveApp: App {
     @NSApplicationDelegateAdaptor private var app: AppDelegate
 
     init() {

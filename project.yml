@@ -1,4 +1,4 @@
-name: Redwave
+name: Rutawave
 options:
   deploymentTarget:
     macOS: "14.0"
@@ -10,7 +10,7 @@ packages:
   Plugins: {path: Packages/Plugins}
   SystemKit: {path: Packages/SystemKit}
 targets:
-  Redwave:
+  Rutawave:
     type: application
     platform: macOS
     sources: [App]
@@ -23,8 +23,8 @@ targets:
       - package: SystemKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.redwave
-        PRODUCT_NAME: Redwave
+        PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.rutawave
+        PRODUCT_NAME: Rutawave
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "6.0"

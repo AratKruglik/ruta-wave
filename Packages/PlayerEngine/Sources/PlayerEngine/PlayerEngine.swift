@@ -41,7 +41,7 @@ public final class PlayerEngine {
     @ObservationIgnored var committedAt: ContinuousClock.Instant?
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private let delegate = WebDelegate()
-    @ObservationIgnored private static let log = Logger(subsystem: "dev.kruhlyk.redwave", category: "player")
+    @ObservationIgnored private static let log = Logger(subsystem: "dev.kruhlyk.rutawave", category: "player")
 
     public convenience init() {
         self.init(isReachable: Self.headCheck)

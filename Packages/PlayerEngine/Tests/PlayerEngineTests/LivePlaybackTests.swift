@@ -22,7 +22,7 @@ struct LivePlaybackTests {
         }
     }
 
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["REDWAVE_LIVE_TESTS"] == "1"))
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["RUTAWAVE_LIVE_TESTS"] == "1"))
     func guestPausesAndSeeks() async throws {
         let engine = PlayerEngine()
         await engine.start(.signedOut)
