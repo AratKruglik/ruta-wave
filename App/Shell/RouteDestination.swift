@@ -20,5 +20,6 @@ struct RouteScreen: View {
 
     var body: some View {
         PlaceholderScreen(title: route.title)
+            .navigationBarBackButtonHidden()
     }
 }

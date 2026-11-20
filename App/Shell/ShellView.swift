@@ -45,12 +45,17 @@ struct ShellView<AccountPopover: View>: View {
                     playlists: sidebar, onSelectSection: navigation.select, onSelectPlaylist: openPlaylist,
                     onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
+                .background(.themeBase)
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
                 .toolbar(removing: .sidebarToggle)
             } detail: {
                 content
             }
+            .toolbarBackground(.hidden, for: .windowToolbar)
         }
+        // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
+        // hiding the toolbar itself would also remove the window buttons.
+        .ignoresSafeArea(.container, edges: .top)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { newWidth in
             if (width < Metrics.sidebarAutoCollapseWidth) != (newWidth < Metrics.sidebarAutoCollapseWidth) { sidebarOverride = nil }
             width = newWidth
