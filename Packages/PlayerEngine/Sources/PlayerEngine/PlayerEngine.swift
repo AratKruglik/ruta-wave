@@ -31,7 +31,7 @@ public final class PlayerEngine {
     @ObservationIgnored var position: TimeInterval = 0
     @ObservationIgnored var attempts = 0
     @ObservationIgnored var resumeAt: TimeInterval?
-    @ObservationIgnored private var watchdog: Task<Void, Never>?
+    @ObservationIgnored var watchdog: Task<Void, Never>?
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private let delegate = WebDelegate()
     @ObservationIgnored private static let log = Logger(subsystem: "dev.kruhlyk.redwave", category: "player")
@@ -254,7 +254,12 @@ public final class PlayerEngine {
             watchdog?.cancel()
             return emit(.error(.unavailable(videoId: videoId)))
         case .song(let incoming, let artworkWithQuery):
-            guard incoming.videoId != song?.videoId || resumeAt != nil else { return nil }
+            if incoming.videoId == song?.videoId, resumeAt == nil {
+                // Reloading the current track: the player is up, so the load is done even though the song is unchanged.
+                watchdog?.cancel()
+                attempts = 0
+                return nil
+            }
             songTask?.cancel()
             let isReachable = isReachable
             songTask = Task { [weak self] in

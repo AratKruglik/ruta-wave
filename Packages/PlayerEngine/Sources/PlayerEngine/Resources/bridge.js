@@ -103,22 +103,38 @@
 
   let adShowing = false;
   let lastUnavailable = null;
+  const postUnavailable = (videoId) => {
+    if (!videoId || videoId === lastUnavailable) return;
+    lastUnavailable = videoId;
+    post({ type: 'error', kind: 'unavailable', videoId });
+  };
+
+  // The page may already have rewritten location by the time this script runs; the navigation entry keeps the URL that was loaded.
+  const loadedURL = new URL(performance.getEntriesByType('navigation')[0]?.name ?? location.href);
+  const requestedVideoId = loadedURL.pathname === '/watch' ? loadedURL.searchParams.get('v') : null;
+  let requestSettled = !requestedVideoId;
 
   const postSong = () => {
     if (adShowing) return;
     const response = player()?.getPlayerResponse?.();
     const status = response?.playabilityStatus?.status;
     if (status && status !== 'OK') {
-      const videoId = response.videoDetails?.videoId ?? new URL(location.href).searchParams.get('v');
-      if (videoId && videoId !== lastUnavailable) {
-        lastUnavailable = videoId;
-        post({ type: 'error', kind: 'unavailable', videoId });
-      }
+      postUnavailable(response.videoDetails?.videoId ?? new URL(location.href).searchParams.get('v'));
       return;
     }
     if (!response?.videoDetails) return;
+    if (location.pathname === '/watch') requestSettled = true;
     lastUnavailable = null;
     post({ type: 'song', videoDetails: response.videoDetails, microformat: response.microformat });
+  };
+
+  // A missing video id reports no playability error: the page drops back to the home screen and keeps whatever it played before.
+  const checkRequestDropped = () => {
+    if (requestSettled) return true;
+    if (location.pathname === '/watch') return false;
+    requestSettled = true;
+    postUnavailable(requestedVideoId);
+    return true;
   };
 
   const postVolume = () => {
@@ -228,6 +244,10 @@
     watchLike();
     // The video may have started before the bridge attached, so its 'play' event was already missed.
     post({ type: 'playback', paused: v.paused, time: v.currentTime });
+    const requestDeadline = Date.now() + 15000;
+    const requestWait = setInterval(() => {
+      if (checkRequestDropped() || Date.now() > requestDeadline) clearInterval(requestWait);
+    }, 250);
     // The queue element can appear after the player does.
     const queueDeadline = Date.now() + 30000;
     const queueWait = setInterval(() => {

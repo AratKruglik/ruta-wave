@@ -120,7 +120,9 @@ A single `Resources/bridge.js` file in the `PlayerEngine` target. It:
   the action up in a frozen table of named operations (never an arbitrary method name) and resolves to `true` or `false`;
 - pushes `volume`, `like`, `repeat`, `shuffle`, `queue` (one debounced push source: the queue store's `subscribe`, posted only
   when the projection changes, at most 500 rows), `ad` and `error {kind: "unavailable"}` (checked from `playabilityStatus`
-  before the `videoDetails` guard). `song` is not posted while an ad shows.
+  before the `videoDetails` guard, and also posted when the page leaves `/watch` before a song arrives there: a missing
+  video id makes the page drop back to the home screen with no playability error, so the requested id is read from the
+  navigation entry, which keeps the URL that was loaded). `song` is not posted while an ad shows.
 
 Site player methods **[presence verified on the live page, MC-5, 2026-11-19]**: `playVideo()`,
 `pauseVideo()`, `nextVideo()`, `previousVideo()`, `seekTo(sec)`, `setVolume(0…100)`,
@@ -144,7 +146,7 @@ Web Inspector probe replaces "reference-only" with "verified presence <date>" or
 | queue edit | `#queue.dispatch` with `SET_INDEX`, `REMOVE_ITEM`, `MOVE_ITEM`, `ADD_ITEMS` | reference-only. Whether `SET_INDEX` starts playback is unknown |
 | enqueue | `ytmusic-app.networkManager.fetch('/music/get_queue', ...)` then `ADD_ITEMS` | reference-only. If unreachable the command is refused |
 | ad | `ad-showing` / `ad-interrupting` class on `#movie_player` | unknown (general YouTube knowledge) |
-| unavailable | `getPlayerResponse().playabilityStatus.status !== 'OK'` | reference-only |
+| unavailable | `getPlayerResponse().playabilityStatus.status !== 'OK'`; a missing id instead leaves `/watch` for `/` | missing id verified (MC-E); non-OK status reference-only |
 
 The fallbacks "attribute observer for shuffle/repeat" and "`getPlayerResponse().videoDetails` vs the queue's selected row for ads" are not implemented.
 The like write does not use the page: it goes through InnerTube `rate` (`PlayerEngine.rate`, set by the app).

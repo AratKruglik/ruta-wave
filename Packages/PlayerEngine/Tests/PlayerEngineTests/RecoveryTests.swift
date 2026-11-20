@@ -49,6 +49,17 @@ struct RecoveryTests {
         #expect(engine.attempts == 1)
     }
 
+    @Test func reloadingTheCurrentSongEndsTheWatchdog() {
+        let engine = makeEngine()
+        engine.commit(makeSong())
+        _ = engine.nextRecoveryURL()
+        let watchdog = Task<Void, Never> { try? await Task.sleep(for: .seconds(60)) }
+        engine.watchdog = watchdog
+        #expect(engine.handle(.song(makeSong(), artworkWithQuery: nil)) == nil)
+        #expect(watchdog.isCancelled)
+        #expect(engine.attempts == 0)
+    }
+
     @Test func restoreBypassesTheSongDedupe() async {
         let engine = makeEngine()
         engine.commit(makeSong())
