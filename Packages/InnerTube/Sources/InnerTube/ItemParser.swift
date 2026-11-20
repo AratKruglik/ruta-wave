@@ -119,11 +119,15 @@ enum ItemParser {
     }
 
     private static func twoRow(_ renderer: JSONValue) -> MusicItem? {
-        build(
-            destination: destination(renderer["navigationEndpoint"] ?? renderer["title"]?["runs"]?[0]?["navigationEndpoint"]),
-            title: renderer["title"].flatMap(text),
+        let endpoint = renderer["navigationEndpoint"] ?? renderer["title"]?["runs"]?[0]?["navigationEndpoint"]
+        let overlay = renderer["thumbnailOverlay"]?["musicItemThumbnailOverlayRenderer"]?["content"]?["musicPlayButtonRenderer"]?["playNavigationEndpoint"]
+        // A signed-in mix card has an empty overlay: its own endpoint is the play target.
+        let playTarget = overlay.flatMap(watchTarget) ?? endpoint.flatMap { $0["watchPlaylistEndpoint"] == nil ? nil : watchTarget($0) }
+        return build(
+            destination: destination(endpoint), title: renderer["title"].flatMap(text),
             subtitleRuns: renderer["subtitle"]?["runs"]?.array ?? [],
-            thumbnail: renderer["thumbnailRenderer"]?["musicThumbnailRenderer"]?["thumbnail"], renderer: renderer)
+            thumbnail: renderer["thumbnailRenderer"]?["musicThumbnailRenderer"]?["thumbnail"], renderer: renderer,
+            playTarget: playTarget)
     }
 
     private static func listRow(_ renderer: JSONValue) -> MusicItem? {
@@ -153,12 +157,13 @@ enum ItemParser {
         guard let title = renderer["buttonText"].flatMap(text),
               let target = renderer["clickCommand"]?["browseEndpoint"].flatMap(browseTarget)
         else { return nil }
-        return .link(NavigationLink(title: title, target: target))
+        let stripe = renderer["solid"]?["leftStripeColor"]?.double.flatMap { UInt32(exactly: $0) }
+        return .link(NavigationLink(title: title, target: target, stripeColor: stripe))
     }
 
     private static func build(
         destination: Destination?, title: String?, subtitleRuns: [JSONValue], subtitle: String? = nil,
-        durationRuns: [JSONValue] = [], thumbnail: JSONValue?, renderer: JSONValue
+        durationRuns: [JSONValue] = [], thumbnail: JSONValue?, renderer: JSONValue, playTarget: WatchTarget? = nil
     ) -> MusicItem? {
         guard let destination, let title else { return nil }
         let subtitle = (subtitle ?? text(.object(["runs": .array(subtitleRuns)]))).flatMap { $0.isEmpty ? nil : $0 }
@@ -173,11 +178,12 @@ enum ItemParser {
                 duration: duration(subtitleRuns + durationRuns), thumbnailURL: url, isExplicit: isExplicit, isVideo: isVideo, rank: rank))
         case .album(let browseId):
             return .album(Album(
-                browseId: browseId, title: title, subtitle: subtitle, artists: artists, thumbnailURL: url, isExplicit: isExplicit))
+                browseId: browseId, title: title, subtitle: subtitle, artists: artists, thumbnailURL: url, isExplicit: isExplicit,
+            playTarget: playTarget))
         case .artist(let browseId):
             return .artist(Artist(browseId: browseId, name: title, subtitle: subtitle, thumbnailURL: url, rank: rank))
         case .playlist(let browseId):
-            return .playlist(Playlist(browseId: browseId, title: title, subtitle: subtitle, thumbnailURL: url))
+            return .playlist(Playlist(browseId: browseId, title: title, subtitle: subtitle, thumbnailURL: url, playTarget: playTarget))
         }
     }
 

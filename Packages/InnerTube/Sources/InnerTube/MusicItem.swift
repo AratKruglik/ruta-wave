@@ -89,10 +89,12 @@ public struct Album: Sendable, Equatable {
     public let artists: [ItemRef]
     public let thumbnailURL: URL?
     public let isExplicit: Bool
+    /// What the card's play button starts. Usually a playlist-only target: the first track is not in the card.
+    public let playTarget: WatchTarget?
 
     public init(
         browseId: String, title: String, subtitle: String? = nil, artists: [ItemRef] = [],
-        thumbnailURL: URL? = nil, isExplicit: Bool = false
+        thumbnailURL: URL? = nil, isExplicit: Bool = false, playTarget: WatchTarget? = nil
     ) {
         self.browseId = browseId
         self.title = title
@@ -100,6 +102,7 @@ public struct Album: Sendable, Equatable {
         self.artists = artists
         self.thumbnailURL = thumbnailURL
         self.isExplicit = isExplicit
+        self.playTarget = playTarget
     }
 }
 
@@ -125,12 +128,17 @@ public struct Playlist: Sendable, Equatable {
     public let title: String
     public let subtitle: String?
     public let thumbnailURL: URL?
+    /// What the card's play button starts. A radio card (`RD…`) has no page, so this is its only action.
+    public let playTarget: WatchTarget?
 
-    public init(browseId: String, title: String, subtitle: String? = nil, thumbnailURL: URL? = nil) {
+    public init(
+        browseId: String, title: String, subtitle: String? = nil, thumbnailURL: URL? = nil, playTarget: WatchTarget? = nil
+    ) {
         self.browseId = browseId
         self.title = title
         self.subtitle = subtitle
         self.thumbnailURL = thumbnailURL
+        self.playTarget = playTarget
     }
 }
 
@@ -138,10 +146,13 @@ public struct Playlist: Sendable, Equatable {
 public struct NavigationLink: Sendable, Equatable {
     public let title: String
     public let target: BrowseTarget
+    /// ARGB edge colour of a mood / genre button.
+    public let stripeColor: UInt32?
 
-    public init(title: String, target: BrowseTarget) {
+    public init(title: String, target: BrowseTarget, stripeColor: UInt32? = nil) {
         self.title = title
         self.target = target
+        self.stripeColor = stripeColor
     }
 }
 

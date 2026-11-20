@@ -10,7 +10,11 @@ struct SectionRoot: View {
             GuestPromptContent(reason: "Sign in to see your library", onSignIn: requestSignIn.perform)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            PlaceholderScreen(title: section.title)
+            switch section {
+            case .home: HomeScreen()
+            case .explore: ExploreScreen()
+            case .library: PlaceholderScreen(title: section.title)
+            }
         }
     }
 }
@@ -18,8 +22,16 @@ struct SectionRoot: View {
 struct RouteScreen: View {
     let route: Route
 
+    @Environment(BrowseStore.self) private var store
+
     var body: some View {
-        PlaceholderScreen(title: route.title)
-            .navigationBarBackButtonHidden()
+        Group {
+            if let model = store.model(for: route) {
+                if case .explore(.charts) = route { ChartsScreen(model: model) } else { BrowseScreen(model: model) }
+            } else {
+                PlaceholderScreen(title: route.title)
+            }
+        }
+        .navigationBarBackButtonHidden()
     }
 }

@@ -20,6 +20,19 @@ struct PreferencesTests {
         #expect(preferences.appLanguage == nil)
     }
 
+    @Test func chartCountryAcceptsOnlyUppercaseLetters() {
+        let (preferences, _) = makePreferences()
+        #expect(preferences.chartCountry == nil)
+        preferences.chartCountry = "de"
+        #expect(preferences.chartCountry == nil)
+        preferences.chartCountry = "DE"
+        #expect(preferences.chartCountry == "DE")
+        preferences.chartCountry = "D3"
+        #expect(preferences.chartCountry == "DE")
+        preferences.chartCountry = nil
+        #expect(preferences.chartCountry == nil)
+    }
+
     @Test func roundTrips() {
         let (preferences, _) = makePreferences()
         preferences.sidebarCollapsed = true

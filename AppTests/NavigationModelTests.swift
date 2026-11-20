@@ -95,6 +95,7 @@ struct NavigationModelTests {
     @Test func everyPlaylistIsAccountOnly() {
         #expect(Route.playlist(browseId: "VLPL123").requiresAccount)
         #expect(Route.history.requiresAccount)
+        #expect(Route.more(browseId: "FEmusic_x", params: nil).requiresAccount)
     }
 
     @Test func dropAccountRoutesClearsLibraryPlaylists() {

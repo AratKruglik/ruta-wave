@@ -19,11 +19,15 @@ final class NowPlayingModel {
     var details: TrackDetails?
     var likePrompt: LikePrompt?
     var timeShowsRemaining = false
+    private(set) var rowRatings: [String: Rating] = [:]
 
     @ObservationIgnored private let toasts: ToastCenter
     @ObservationIgnored private let preferences: Preferences
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let client: InnerTubeClient?
+    @ObservationIgnored private let resolveFirstVideo: (@MainActor (WatchTarget, Credentials?) async throws -> String?)?
+    @ObservationIgnored private var playTask: Task<Void, Never>?
+    @ObservationIgnored private var ratingGeneration = 0
     @ObservationIgnored private var skip: (videoId: String, task: Task<Void, Never>)?
     @ObservationIgnored private var unavailableStreak = 0
     @ObservationIgnored private var syncsRepeat = false
@@ -31,8 +35,10 @@ final class NowPlayingModel {
 
     init(
         player: any PlayerControlling, toasts: ToastCenter, preferences: Preferences = Preferences(),
-        credentials: @escaping @MainActor () -> Credentials?, client: InnerTubeClient? = InnerTubeClient()
+        credentials: @escaping @MainActor () -> Credentials?, client: InnerTubeClient? = InnerTubeClient(),
+        resolveFirstVideo: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil
     ) {
+        self.resolveFirstVideo = resolveFirstVideo
         self.player = player
         self.toasts = toasts
         self.preferences = preferences
@@ -134,6 +140,93 @@ final class NowPlayingModel {
         player.send(command)
     }
 
+    func play(_ item: MusicItem) {
+        switch item {
+        case .song(let song):
+            act(.load(videoId: song.videoId, playlistId: song.playlistId))
+        case .album(let album):
+            playCollection(album.playTarget)
+        case .playlist(let playlist):
+            playCollection(playlist.playTarget ?? WatchTarget(playlistId: playlist.browseId.removingPrefix("VL")))
+        case .artist, .link:
+            break
+        }
+    }
+
+    // shortcut: RDAMVM{videoId} is the community-known radio id, unverified against a fixture; parse watchEndpoint params if radio starts fail.
+    func startRadio(_ song: Song) {
+        act(.load(videoId: song.videoId, playlistId: song.playlistId ?? "RDAMVM" + song.videoId))
+    }
+
+    func isPlaying(_ item: MusicItem) -> Bool {
+        guard let current = player.song else { return false }
+        switch item {
+        case .song(let song): return current.videoId == song.videoId
+        case .album(let album): return Self.matches(current.playlistId, album.playTarget)
+        case .playlist(let playlist):
+            return Self.matches(current.playlistId, playlist.playTarget ?? WatchTarget(playlistId: playlist.browseId.removingPrefix("VL")))
+        case .artist, .link: return false
+        }
+    }
+
+    func rate(videoId: String, _ rating: Rating) {
+        guard let client, let credentials = credentials() else { return }
+        let previous = rowRatings[videoId]
+        let captured = ratingGeneration
+        rowRatings[videoId] = rating
+        Task { [weak self] in
+            do {
+                try await client.rate(videoId: videoId, rating, credentials: credentials)
+            } catch {
+                guard let self, ratingGeneration == captured else { return }
+                rowRatings[videoId] = previous
+                toasts.show("Couldn't update the rating")
+            }
+        }
+    }
+
+    /// Called when the content identity changes: ratings and a pending collection play belong to the old account.
+    func resetAccountState() {
+        playTask?.cancel()
+        playTask = nil
+        rowRatings = [:]
+        ratingGeneration += 1
+    }
+
+    private static func matches(_ playlistId: String?, _ target: WatchTarget?) -> Bool {
+        guard let playlistId, let wanted = target?.playlistId else { return false }
+        return playlistId == wanted
+    }
+
+    // A playlist-only target has no first track yet; one `next` request finds it. The latest request wins.
+    private func playCollection(_ target: WatchTarget?) {
+        playTask?.cancel()
+        guard let target else {
+            toasts.show("Couldn't play this")
+            return
+        }
+        if let videoId = target.videoId {
+            act(.load(videoId: videoId, playlistId: target.playlistId))
+            return
+        }
+        playTask = Task { [weak self] in
+            guard let self else { return }
+            let first = try? await firstVideo(of: target)
+            guard !Task.isCancelled else { return }
+            guard let first else {
+                toasts.show("Couldn't play this")
+                return
+            }
+            act(.load(videoId: first, playlistId: target.playlistId))
+        }
+    }
+
+    private func firstVideo(of target: WatchTarget) async throws -> String? {
+        let credentials = credentials()
+        if let resolveFirstVideo { return try await resolveFirstVideo(target, credentials) }
+        return try await client?.watchNext(target, credentials: credentials).queue.items.first?.song.videoId
+    }
+
     func loadDetails(for song: SongInfo) async {
         details = nil
         guard let client else { return }
@@ -143,6 +236,12 @@ final class NowPlayingModel {
               let item = next.queue.items.first(where: { $0.song.videoId == song.videoId })
         else { return }
         details = TrackDetails(videoId: song.videoId, artists: item.song.artists, album: item.song.album, isVideo: item.song.isVideo)
+    }
+}
+
+extension String {
+    fileprivate func removingPrefix(_ prefix: String) -> String {
+        hasPrefix(prefix) ? String(dropFirst(prefix.count)) : self
     }
 }
 

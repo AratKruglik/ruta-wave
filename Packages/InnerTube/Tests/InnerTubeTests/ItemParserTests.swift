@@ -52,7 +52,17 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
 
     @Test func radioCardIsAPlaylist() throws {
         let endpoint = #"{"watchPlaylistEndpoint":{"playlistId":"RD1"}}"#
-        #expect(try ItemParser.item(json(twoRow(endpoint: endpoint))) == .playlist(Playlist(browseId: "RD1", title: "Title")))
+        #expect(try ItemParser.item(json(twoRow(endpoint: endpoint))) == .playlist(Playlist(browseId: "RD1", title: "Title", playTarget: WatchTarget(playlistId: "RD1"))))
+    }
+
+    @Test func overlayPlayButtonIsTheCardsPlayTarget() throws {
+        let overlay = #","thumbnailOverlay":{"musicItemThumbnailOverlayRenderer":{"content":{"musicPlayButtonRenderer":{"playNavigationEndpoint":{"watchPlaylistEndpoint":{"playlistId":"OLAK5uy_x","params":"wAEB"}}}}}}"#
+        let album = try ItemParser.item(json(twoRow(endpoint: browse("MPREb1", "MUSIC_PAGE_TYPE_ALBUM"), extra: overlay)))
+        guard case .album(let value)? = album else {
+            Issue.record("expected album")
+            return
+        }
+        #expect(value.playTarget == WatchTarget(playlistId: "OLAK5uy_x", params: "wAEB"))
     }
 
     @Test func menuEndpointsDoNotChangeTheKind() throws {
@@ -153,6 +163,8 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
     @Test func navigationButtonBecomesALink() throws {
         let button = #"{"musicNavigationButtonRenderer":{"buttonText":{"runs":[{"text":"Chill"}]},"clickCommand":{"browseEndpoint":{"browseId":"FEmusic_moods_and_genres_category","params":"p1"}}}}"#
         #expect(try ItemParser.item(json(button)) == .link(NavigationLink(title: "Chill", target: BrowseTarget(browseId: "FEmusic_moods_and_genres_category", params: "p1"))))
+        let colored = button.replacingOccurrences(of: #""clickCommand""#, with: #""solid":{"leftStripeColor":4288988671},"clickCommand""#)
+        #expect(try ItemParser.item(json(colored)) == .link(NavigationLink(title: "Chill", target: BrowseTarget(browseId: "FEmusic_moods_and_genres_category", params: "p1"), stripeColor: 4288988671)))
     }
 
     @Test func playAllButtonIsNotAMoreTarget() throws {
