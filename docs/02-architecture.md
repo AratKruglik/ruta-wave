@@ -138,7 +138,7 @@ Web Inspector probe replaces "reference-only" with "verified presence <date>" or
 | Item | Path | Status |
 |---|---|---|
 | next / previous | click `.next-button` / `.previous-button` on `ytmusic-player-bar`, fallback `nextVideo()` / `previousVideo()` | reference-only |
-| volume write | `ytmusic-player-bar.updateVolume(0…100)`, fallback `setVolume` | reference-only |
+| volume write | `#movie_player.setVolume(0…100)`, fallback `ytmusic-player-bar.updateVolume`. The bar maps its slider through a curve (50 → 20), so writing through it does not round-trip with `getVolume()` | verified (MC-A): round-trips and survives a track change |
 | shuffle / repeat | `ytmusic-player-bar.queue.shuffle()` / `onRepeatButtonClick()`, fallback a click on the button | reference-only |
 | shuffle, repeat read | `#queue.queue.store.store.getState().queue.{shuffleEnabled, repeatMode}` | reference-only. Whether shuffle is a mode or a one-shot reshuffle is unknown |
 | like read | `like-status` attribute on `#like-button-renderer` | reference-only |

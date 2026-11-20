@@ -90,8 +90,19 @@ struct RecoveryTests {
         engine.commit(makeSong())
         _ = engine.handle(.time(77))
         #expect(engine.position == 77)
+        engine.resumeVolume = 0.5
         engine.stop()
         #expect(engine.target == nil && engine.attempts == 0 && engine.resumeAt == nil && engine.position == 0)
+        #expect(engine.resumeVolume == nil)
+    }
+
+    @Test func restoreCommitConsumesTheSavedVolume() {
+        let engine = makeEngine()
+        engine.commit(makeSong())
+        engine.resumeAt = 42
+        engine.resumeVolume = 0.5
+        engine.commit(makeSong())
+        #expect(engine.resumeVolume == nil)
     }
 
     @Test func supersededNavigationsAreNotFailures() {

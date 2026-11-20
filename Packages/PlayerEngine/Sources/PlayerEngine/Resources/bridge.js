@@ -70,7 +70,8 @@
       if (typeof p?.getCurrentTime !== 'function') return false;
       return call(p, 'seekTo', Math.max(0, p.getCurrentTime() + delta));
     },
-    setVolume: (level) => call(bar(), 'updateVolume', level) || call(player(), 'setVolume', level),
+    // The player bar maps its slider through a curve (50 → 20), while volume events report the player's linear value.
+    setVolume: (level) => call(player(), 'setVolume', level) || call(bar(), 'updateVolume', level),
     toggleMute: () => {
       const p = player();
       if (typeof p?.isMuted !== 'function') return call(bar(), 'onVolumeClick');

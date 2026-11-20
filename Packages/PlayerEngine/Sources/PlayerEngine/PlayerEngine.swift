@@ -31,6 +31,8 @@ public final class PlayerEngine {
     @ObservationIgnored var position: TimeInterval = 0
     @ObservationIgnored var attempts = 0
     @ObservationIgnored var resumeAt: TimeInterval?
+    // A reload brings back the volume the page last stored, not the one set through the player.
+    @ObservationIgnored var resumeVolume: Double?
     @ObservationIgnored var watchdog: Task<Void, Never>?
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private let delegate = WebDelegate()
@@ -105,6 +107,7 @@ public final class PlayerEngine {
         watchdog = nil
         target = nil
         resumeAt = nil
+        resumeVolume = nil
         attempts = 0
         position = 0
         isReady = false
@@ -132,6 +135,7 @@ public final class PlayerEngine {
         target = (videoId, playlistId)
         attempts = 0
         resumeAt = nil
+        resumeVolume = nil
         navigate(to: url, in: webView)
     }
 
@@ -279,6 +283,8 @@ public final class PlayerEngine {
         if let resume = resumeAt {
             resumeAt = nil
             if newSong.videoId == target?.videoId { send(.seek(to: resume)) }
+            if let level = resumeVolume { send(.setVolume(level)) }
+            resumeVolume = nil
         } else {
             attempts = 0
         }
@@ -370,6 +376,7 @@ public final class PlayerEngine {
         Self.log.error("web content process terminated")
         isReady = false
         resumeAt = position
+        resumeVolume = volume
         isAd = false
         emit(.error(.contentProcessCrashed))
         reload()
