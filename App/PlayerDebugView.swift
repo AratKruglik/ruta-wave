@@ -31,6 +31,8 @@ struct PlayerDebugView: View {
         .frame(minWidth: 760, minHeight: 560)
         .task {
             for await event in player.events() {
+                // Elapsed is already shown in the status rows; at ~4 Hz it would flood the log.
+                if case .timeChanged = event { continue }
                 log.append(String(describing: event))
                 if log.count > 500 { log.removeFirst(log.count - 500) }
             }
