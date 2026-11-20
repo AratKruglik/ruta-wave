@@ -48,5 +48,6 @@ extension EnvironmentValues {
 
 #Preview {
     GuestPromptContent(reason: "Sign in to like songs", onSignIn: {})
-        .background(.themeBase)
+        .noInitialPopoverFocus()
+        .popoverSurface()
 }

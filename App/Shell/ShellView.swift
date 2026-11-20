@@ -19,10 +19,7 @@ struct ShellView<AccountPopover: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var width = Metrics.defaultWindowWidth
     @State private var sidebarOverride: Bool?
-    @State private var sidebarEdge: CGFloat = 0
     @State private var isSidebarCollapsedPreference = Preferences().sidebarCollapsed
-
-    private static var shellSpace: String { "shell" }
 
     private var isNarrow: Bool { width < Metrics.sidebarAutoCollapseWidth }
     private var isBarVisible: Bool { nowPlaying.player.song != nil }
@@ -33,37 +30,35 @@ struct ShellView<AccountPopover: View>: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            TopBar(
-                isSignedIn: isSignedIn, avatarURL: avatarURL, canGoBack: navigation.canGoBack,
-                canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
-                onToggleSidebar: { setSidebarVisible(!isSidebarVisible) }, onHome: navigation.goHome,
-                onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
-            if guestFailed {
-                GuestBanner(onRetry: onRetryGuest)
-            }
+        Group {
             NavigationSplitView(columnVisibility: columnVisibility) {
                 SidebarView(
                     selectedSection: navigation.selection, selectedPlaylistId: selectedPlaylistId, isSignedIn: isSignedIn,
                     playlists: sidebar, onSelectSection: navigation.select, onSelectPlaylist: openPlaylist,
                     onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
-                .background(.themeBase)
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.shellSpace)).maxX } action: { sidebarEdge = $0 }
+                .safeAreaPadding(.top, Metrics.topBarHeight)
+                .ignoresSafeArea(.container, edges: .top)
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
                 .toolbar(removing: .sidebarToggle)
             } detail: {
                 content
+                    .safeAreaInset(edge: .top, spacing: 0) {
+                        if guestFailed { GuestBanner(onRetry: onRetryGuest) }
+                    }
+                    .safeAreaPadding(.top, Metrics.topBarHeight)
+                    .ignoresSafeArea(.container, edges: .top)
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
-            // NavigationSplitView has no API to hide its column divider, so it is painted over.
-            .overlay(alignment: .leading) {
-                if isSidebarVisible {
-                    Color.themeBase.frame(width: 3).offset(x: sidebarEdge - 1).allowsHitTesting(false)
-                }
+            // The bar floats over both columns so content scrolls under its glass.
+            .overlay(alignment: .top) {
+                TopBar(
+                    isSignedIn: isSignedIn, avatarURL: avatarURL, canGoBack: navigation.canGoBack,
+                    canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
+                    onToggleSidebar: { setSidebarVisible(!isSidebarVisible) }, onHome: navigation.goHome,
+                    onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
             }
         }
-        .coordinateSpace(.named(Self.shellSpace))
         // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
         // hiding the toolbar itself would also remove the window buttons.
         .ignoresSafeArea(.container, edges: .top)
@@ -72,7 +67,8 @@ struct ShellView<AccountPopover: View>: View {
             width = newWidth
         }
         .overlay(alignment: .bottom) { bottomOverlay }
-        .background(.themeBase)
+        .windowBackdrop()
+        .noInitialFocus()
         .focusedSceneValue(\.navigation, navigation)
         .background(
             WindowEventMonitor(

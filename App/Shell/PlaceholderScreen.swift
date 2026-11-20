@@ -14,7 +14,6 @@ struct PlaceholderScreen: View {
                 .foregroundStyle(.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.themeBase)
     }
 }
 

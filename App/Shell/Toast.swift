@@ -26,8 +26,7 @@ struct ToastView: View {
             .foregroundStyle(.textPrimary)
             .padding(.horizontal, Metrics.space16)
             .padding(.vertical, Metrics.space12)
-            .background(.surfaceRaised, in: RoundedRectangle(cornerRadius: Metrics.radiusCard))
-            .background(.themeBase, in: RoundedRectangle(cornerRadius: Metrics.radiusCard))
+            .glassSurface(in: Capsule())
             .accessibilityAddTraits(.updatesFrequently)
     }
 }

@@ -16,6 +16,7 @@ struct TopBar<AccountPopover: View>: View {
 
     var body: some View {
         HStack(spacing: Metrics.space8) {
+            HStack(spacing: Metrics.space4) {
             BarIconButton(symbol: "sidebar.left", size: Metrics.iconBar, label: "Toggle sidebar", action: onToggleSidebar)
             Button(action: onHome) {
                 Text("Rutawave")
@@ -28,21 +29,34 @@ struct TopBar<AccountPopover: View>: View {
             .buttonStyle(.plain)
             .help("Home")
             .accessibilityLabel("Rutawave, go to Home")
+            }
+            .padding(.leading, LiquidGlass.isAvailable ? Metrics.space4 : 0)
+            .padding(.trailing, LiquidGlass.isAvailable ? Metrics.space12 : 0)
+            .glassSurface(in: Capsule(), fallback: nil)
             Spacer(minLength: Metrics.space16)
             SearchPlaceholder()
                 .frame(minWidth: 240, maxWidth: 720)
             Spacer(minLength: Metrics.space16)
-            BarIconButton(symbol: "chevron.left", size: Metrics.iconBar, label: "Back", action: onBack)
-                .disabled(!canGoBack)
-            BarIconButton(symbol: "chevron.right", size: Metrics.iconBar, label: "Forward", action: onForward)
-                .disabled(!canGoForward)
+            HStack(spacing: Metrics.space8) {
+                BarIconButton(symbol: "chevron.left", size: Metrics.iconBar, label: "Back", action: onBack)
+                    .disabled(!canGoBack)
+                BarIconButton(symbol: "chevron.right", size: Metrics.iconBar, label: "Forward", action: onForward)
+                    .disabled(!canGoForward)
+            }
+            .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
+            .glassSurface(in: Capsule(), fallback: nil, interactive: true)
             trailing
         }
         .padding(.leading, Metrics.trafficLightsInset)
         .padding(.trailing, Metrics.space16)
         .frame(height: Metrics.topBarHeight)
+        .glassGroup()
         .background(TitleBarDragArea())
+        .background(backdrop)
     }
+
+    /// Content scrolls under the bar: every control sits on glass there, older systems get the opaque bar.
+    private var backdrop: Color { LiquidGlass.isAvailable ? .clear : .themeBase }
 
     @ViewBuilder private var trailing: some View {
         if isSignedIn {
@@ -98,7 +112,8 @@ private struct SearchPlaceholder: View {
         }
         .padding(.horizontal, Metrics.space12)
         .frame(height: 42)
-        .background(.surfaceField, in: RoundedRectangle(cornerRadius: Metrics.radiusCard))
+        .glassSurface(
+            in: RoundedRectangle(cornerRadius: LiquidGlass.isAvailable ? 21 : Metrics.radiusCard), fallback: .surfaceField)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Search")
     }

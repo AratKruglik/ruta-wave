@@ -51,6 +51,7 @@ targets:
       - App/Shell/SidebarModel.swift
       - App/Shell/Toast.swift
       - App/Theme/DesignTokens.swift
+      - App/Theme/Glass.swift
     dependencies:
       - package: PlayerEngine
       - package: InnerTube

@@ -150,7 +150,7 @@ private struct KeychainUnavailableView: View {
             Button("Continue without signing in", action: onContinue)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.themeBase)
+        .windowBackdrop()
     }
 }
 

@@ -55,7 +55,8 @@ enum Metrics {
     static let space48: CGFloat = 48
 
     static let topBarHeight: CGFloat = 64
-    static let trafficLightsInset: CGFloat = 80
+    static let radiusBar: CGFloat = 20
+    static let trafficLightsInset: CGFloat = 76
     static let playerBarHeight: CGFloat = 64
     static let progressHeight: CGFloat = 3
     static let progressHoverHeight: CGFloat = 5

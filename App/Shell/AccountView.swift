@@ -52,7 +52,8 @@ struct AccountView: View {
         }
         .padding(Metrics.space16)
         .frame(width: 280)
-        .background(.themeBase)
+        .noInitialPopoverFocus()
+        .popoverSurface()
     }
 
     private func retry(_ message: LocalizedStringKey) -> some View {

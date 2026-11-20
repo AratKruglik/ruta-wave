@@ -29,9 +29,7 @@ struct WindowEventMonitor: NSViewRepresentable {
             super.viewDidMoveToWindow()
             if let monitor { NSEvent.removeMonitor(monitor) }
             monitor = nil
-            guard let window else { return }
-            // AppKit focuses the first control on open, which draws a focus ring nobody asked for; Tab still reaches it.
-            DispatchQueue.main.async { window.makeFirstResponder(nil) }
+            guard window != nil else { return }
             let mask: NSEvent.EventTypeMask = [.otherMouseDown, .swipe, .scrollWheel, .keyDown]
             monitor = NSEvent.addLocalMonitorForEvents(matching: mask) { [weak self] event in
                 nonisolated(unsafe) let event = event

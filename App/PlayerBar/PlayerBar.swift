@@ -21,14 +21,16 @@ struct PlayerBar: View {
         }
         .padding(.horizontal, Metrics.space16)
         .frame(height: Metrics.playerBarHeight)
-        .background(.themeBase)
-        .background(.surfaceRaised)
-        .overlay(alignment: .top) { ProgressLine() }
+        .glassSurface(in: RoundedRectangle(cornerRadius: cornerRadius))
+        .overlay(alignment: .top) { ProgressLine().padding(.horizontal, cornerRadius) }
+        .padding([.horizontal, .bottom], LiquidGlass.isAvailable ? Metrics.space8 : 0)
         .task(id: player.song?.videoId) {
             guard let song = player.song else { return }
             await nowPlaying.loadDetails(for: song)
         }
     }
+
+    private var cornerRadius: CGFloat { LiquidGlass.isAvailable ? Metrics.radiusBar : 0 }
 
     private var transport: some View {
         HStack(spacing: Metrics.space4) {
