@@ -107,6 +107,43 @@ struct RecoveryTests {
         #expect(engine.nextRecoveryURL() == nil)
     }
 
+    @Test func secondCrashKeepsTheFirstSnapshot() {
+        let engine = makeEngine()
+        engine.commit(makeSong())
+        engine.position = 77
+        _ = engine.handle(.queue([
+            QueueItem(videoId: "abc", title: "T", artist: "A", artworkURL: nil, duration: 1, isCurrent: true),
+            QueueItem(videoId: "def", title: "T", artist: "A", artworkURL: nil, duration: 1, isCurrent: false),
+        ], offset: 0))
+        engine.snapshotForRestore()
+        #expect(engine.resumeAt == 77 && engine.resumeQueue == ["def"] && engine.target?.playlistId == nil)
+        engine.position = 2
+        _ = engine.handle(.queue([], offset: 0))
+        engine.snapshotForRestore()
+        #expect(engine.resumeAt == 77 && engine.resumeQueue == ["def"])
+    }
+
+    @Test func givingUpCancelsTheWatchdog() {
+        let engine = makeEngine()
+        engine.commit(makeSong())
+        engine.attempts = PlayerRules.maxReloadAttempts
+        let watchdog = Task<Void, Never> { try? await Task.sleep(for: .seconds(60)) }
+        engine.watchdog = watchdog
+        #expect(engine.nextRecoveryURL() == nil)
+        #expect(watchdog.isCancelled)
+    }
+
+    @Test func stablePlaybackEndsTheFailureStreak() {
+        let engine = makeEngine()
+        engine.commit(makeSong())
+        engine.attempts = 1
+        _ = engine.handle(.time(5))
+        #expect(engine.attempts == 1)
+        engine.committedAt = .now - PlayerRules.stablePlayback
+        _ = engine.handle(.time(6))
+        #expect(engine.attempts == 0)
+    }
+
     @Test func requestedVolumeIsRememberedAndClamped() {
         let engine = makeEngine()
         #expect(engine.requestedVolume == nil)

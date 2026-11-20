@@ -159,7 +159,9 @@
   };
 
   let likeElement = null;
+  // During an ad the page's video id is the ad's, which would tag the status with the wrong track.
   const postLike = () => {
+    if (adShowing) return;
     const status = likeElement?.getAttribute('like-status');
     if (status) post({ type: 'like', status, videoId: player()?.getVideoData?.()?.video_id });
   };
@@ -238,7 +240,10 @@
     if (showing === adShowing) return;
     adShowing = showing;
     post({ type: 'ad', ad: showing });
-    if (!showing) postSong();
+    if (!showing) {
+      postSong();
+      postLike();
+    }
   };
 
   const attach = () => {

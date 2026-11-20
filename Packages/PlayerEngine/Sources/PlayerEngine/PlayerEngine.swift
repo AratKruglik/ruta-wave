@@ -38,6 +38,7 @@ public final class PlayerEngine {
     // InnerTube writes the like; the hidden page keeps reporting its stale status for that track.
     @ObservationIgnored var ratedLike: (videoId: String, status: LikeStatus)?
     @ObservationIgnored var watchdog: Task<Void, Never>?
+    @ObservationIgnored var committedAt: ContinuousClock.Instant?
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private let delegate = WebDelegate()
     @ObservationIgnored private static let log = Logger(subsystem: "dev.kruhlyk.redwave", category: "player")
@@ -113,6 +114,7 @@ public final class PlayerEngine {
         resumeAt = nil
         resumeQueue = []
         ratedLike = nil
+        committedAt = nil
         attempts = 0
         position = 0
         isReady = false
@@ -221,6 +223,8 @@ public final class PlayerEngine {
     func nextRecoveryURL() -> URL? {
         guard attempts < PlayerRules.maxReloadAttempts, let target else {
             Self.log.error("recovery gave up")
+            // The failed navigation's own watchdog would otherwise report a second error 15 s later.
+            watchdog?.cancel()
             return nil
         }
         attempts += 1
@@ -247,6 +251,9 @@ public final class PlayerEngine {
         case .time(let time):
             elapsed = time
             if !isAd { position = time }
+            if attempts > 0, resumeAt == nil, let committedAt, ContinuousClock.now - committedAt >= PlayerRules.stablePlayback {
+                attempts = 0
+            }
             return emit(.timeChanged(time))
         case .volume(let level, let muted):
             volume = level
@@ -296,6 +303,7 @@ public final class PlayerEngine {
     func commit(_ newSong: SongInfo) {
         song = newSong
         elapsed = 0
+        committedAt = .now
         watchdog?.cancel()
         if let resume = resumeAt {
             resumeAt = nil
@@ -392,20 +400,34 @@ public final class PlayerEngine {
     fileprivate func contentProcessTerminated() {
         Self.log.error("web content process terminated")
         isReady = false
+        snapshotForRestore()
+        isAd = false
+        emit(.error(.contentProcessCrashed))
+        reload()
+    }
+
+    /// A crash before the previous restore committed would see the reloaded page's position and queue, not the user's.
+    func snapshotForRestore() {
+        guard resumeAt == nil else { return }
         resumeAt = position
         resumeQueue = PlayerRules.upcomingVideoIds(queue)
         // The tail is re-added by hand, so reloading the playlist as well would put its tracks ahead of the user's queue.
         if !resumeQueue.isEmpty { target?.playlistId = nil }
-        isAd = false
-        emit(.error(.contentProcessCrashed))
-        reload()
     }
 
     fileprivate func navigationFailed(_ error: any Error) {
         guard !PlayerRules.isIgnorableNavigationError(error as NSError) else { return }
         Self.log.error("navigation failed: \((error as NSError).domain, privacy: .public) \((error as NSError).code, privacy: .public)")
         emit(.error(.pageLoadFailed))
-        reload()
+        guard let webView else { return }
+        watchdog?.cancel()
+        let generation = loadGeneration
+        let delay = PlayerRules.failedLoadRetryDelay
+        watchdog = Task { [weak self] in
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled, let self, self.webView === webView, self.loadGeneration == generation else { return }
+            self.reload()
+        }
     }
 }
 

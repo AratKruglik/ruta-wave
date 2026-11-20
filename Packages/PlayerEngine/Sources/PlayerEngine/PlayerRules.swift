@@ -4,6 +4,10 @@ enum PlayerRules {
     static let playerHost = "music.youtube.com"
     static let maxReloadAttempts = 2
     static let playerTimeout: Duration = .seconds(15)
+    // A failed load fails again within milliseconds while offline; the pause gives a short outage time to clear.
+    static let failedLoadRetryDelay: Duration = .seconds(5)
+    // Playback this long after a commit ends a failure streak; a track that crashes sooner keeps counting toward the cap.
+    static let stablePlayback: Duration = .seconds(30)
     static let maxQueueItems = 500
     static let maxQueueOffset = 100_000
     // shortcut: one get_queue request for the whole restored tail; split it if the endpoint caps the id count.
