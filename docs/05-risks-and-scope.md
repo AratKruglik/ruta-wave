@@ -51,7 +51,6 @@
 | Dynamic third-party plugins | security and complexity; plugins are built in |
 | Themes through user CSS | a native UI has no CSS |
 | A proxy of our own | the system proxy is used |
-| An in-app language switch | the system language is used |
 | Auto-update before the first release | there is nobody to update |
 
 ## 4. Open questions
@@ -66,7 +65,7 @@ They need a decision from the user or are settled at the stage shown.
 | 4 | ~~Whether podcasts and user-uploaded music are needed~~ — **decided: no** (podcasts and user uploads, 2026-11-19, [#7](https://github.com/AratKruglik/yt-music-mac/issues/7)). The parsers skip podcast and upload items and hide the Podcasts, Episodes and Profiles search filters and the Podcasts and Uploads library sections. Known limitation: uploaded tracks and episodes inside own playlists, Liked songs and history are dropped, so a playlist's "N songs" can exceed its rows | — |
 | 5 | Source of synchronized lyrics: YouTube only, or third-party services too (LRCLIB and others) | stage 6 |
 | 6 | Which of the "If needed" plugins are actually wanted | stage 7 |
-| 7 | Localization: only Ukrainian and English, or more | stage 4 |
+| 7 | Localization: ~~only Ukrainian and English, or more~~ — **decided: English and Ukrainian, with an in-app language switch in Settings** (#16). More languages stay open | stage 4 |
 | 8 | ~~Whether there is an Apple Developer account~~ — **decided: no**, the DMG is ad-hoc signed and not notarized | — |
 | 9 | DMG for Apple Silicon only, or universal (arm64 + x86_64) | stage 8 |
 | 10 | Whether auto-update (Sparkle) is needed | before release |

@@ -19,6 +19,7 @@ public final class PlayerEngine {
     public private(set) var queue: [QueueItem] = []
     @ObservationIgnored var queueOffset = 0
     public private(set) var isAd = false
+    public private(set) var isBuffering = false
     public var authUserIndex = 0
     /// Set by the app: the engine has no InnerTube dependency, so a like is written through this closure.
     @ObservationIgnored public var rate: (@MainActor (_ videoId: String, _ status: LikeStatus) async throws -> Void)?
@@ -129,6 +130,7 @@ public final class PlayerEngine {
         queue = []
         queueOffset = 0
         isAd = false
+        isBuffering = false
     }
 
     public func load(videoId: String, playlistId: String?) {
@@ -278,6 +280,9 @@ public final class PlayerEngine {
         case .ad(let playing):
             isAd = playing
             return emit(.adChanged(playing))
+        case .buffering(let buffering):
+            isBuffering = buffering
+            return nil
         case .unavailable(let videoId):
             watchdog?.cancel()
             return emit(.error(.unavailable(videoId: videoId)))
@@ -395,6 +400,7 @@ public final class PlayerEngine {
 
     fileprivate func navigationCommitted() {
         isReady = false
+        isBuffering = false
     }
 
     fileprivate func contentProcessTerminated() {
@@ -402,6 +408,7 @@ public final class PlayerEngine {
         isReady = false
         snapshotForRestore()
         isAd = false
+        isBuffering = false
         emit(.error(.contentProcessCrashed))
         reload()
     }

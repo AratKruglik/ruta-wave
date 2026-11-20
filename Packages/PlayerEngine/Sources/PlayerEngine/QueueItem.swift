@@ -9,8 +9,8 @@ public struct QueueItem: Sendable, Equatable {
     public let isCurrent: Bool
     let playlistSetVideoId: String?
 
-    init(videoId: String, title: String, artist: String, artworkURL: URL?, duration: TimeInterval, isCurrent: Bool,
-         playlistSetVideoId: String? = nil) {
+    public init(videoId: String, title: String, artist: String, artworkURL: URL?, duration: TimeInterval, isCurrent: Bool,
+                playlistSetVideoId: String? = nil) {
         self.videoId = videoId
         self.title = title
         self.artist = artist

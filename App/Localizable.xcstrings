@@ -1,0 +1,821 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обліковий запис"
+          }
+        }
+      }
+    },
+    "Ad" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Реклама"
+          }
+        }
+      }
+    },
+    "Add account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додати обліковий запис"
+          }
+        }
+      }
+    },
+    "Album" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Альбом"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усі"
+          }
+        }
+      }
+    },
+    "Artist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виконавець"
+          }
+        }
+      }
+    },
+    "Auto-generated" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створено автоматично"
+          }
+        }
+      }
+    },
+    "Back" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скасувати"
+          }
+        }
+      }
+    },
+    "Charts" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чарти"
+          }
+        }
+      }
+    },
+    "Close player page" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрити сторінку програвача"
+          }
+        }
+      }
+    },
+    "Coming soon" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Незабаром"
+          }
+        }
+      }
+    },
+    "Continue without signing in" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжити без входу"
+          }
+        }
+      }
+    },
+    "Controls" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Керування"
+          }
+        }
+      }
+    },
+    "Couldn't access the saved session" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося отримати доступ до збереженого сеансу"
+          }
+        }
+      }
+    },
+    "Couldn't clear the saved session" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося очистити збережений сеанс"
+          }
+        }
+      }
+    },
+    "Couldn't load other accounts" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити інші облікові записи"
+          }
+        }
+      }
+    },
+    "Couldn't load playlists" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити плейлисти"
+          }
+        }
+      }
+    },
+    "Couldn't load your account" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити ваш обліковий запис"
+          }
+        }
+      }
+    },
+    "Couldn't reach YouTube Music" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося підключитися до YouTube Music"
+          }
+        }
+      }
+    },
+    "Dislike" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не подобається"
+          }
+        }
+      }
+    },
+    "Down" : {
+      "shouldTranslate" : false
+    },
+    "Event log" : {
+      "shouldTranslate" : false
+    },
+    "Explore" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Огляд"
+          }
+        }
+      }
+    },
+    "Forward" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вперед"
+          }
+        }
+      }
+    },
+    "Go" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти"
+          }
+        }
+      }
+    },
+    "Go to album" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти до альбому"
+          }
+        }
+      }
+    },
+    "Go to artist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти до виконавця"
+          }
+        }
+      }
+    },
+    "History" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Історія"
+          }
+        }
+      }
+    },
+    "Home" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Головна"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мова"
+          }
+        }
+      }
+    },
+    "Library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бібліотека"
+          }
+        }
+      }
+    },
+    "Like" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подобається"
+          }
+        }
+      }
+    },
+    "Liked music" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вподобана музика"
+          }
+        }
+      }
+    },
+    "Moods & genres" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настрої та жанри"
+          }
+        }
+      }
+    },
+    "More" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Більше"
+          }
+        }
+      }
+    },
+    "More settings are coming." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Інші налаштування з’являться згодом."
+          }
+        }
+      }
+    },
+    "Mute" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вимкнути звук"
+          }
+        }
+      }
+    },
+    "New releases" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нові релізи"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наступний"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вимкнено"
+          }
+        }
+      }
+    },
+    "One" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один трек"
+          }
+        }
+      }
+    },
+    "Open player page" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити сторінку програвача"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пауза"
+          }
+        }
+      }
+    },
+    "Play" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворити"
+          }
+        }
+      }
+    },
+    "Play / Pause" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворити / Пауза"
+          }
+        }
+      }
+    },
+    "Playback position" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позиція відтворення"
+          }
+        }
+      }
+    },
+    "Playback time" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Час відтворення"
+          }
+        }
+      }
+    },
+    "Player" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Програвач"
+          }
+        }
+      }
+    },
+    "Player Debug" : {
+      "shouldTranslate" : false
+    },
+    "Player Page" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сторінка програвача"
+          }
+        }
+      }
+    },
+    "Playlist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плейлист"
+          }
+        }
+      }
+    },
+    "Playlist ID" : {
+      "shouldTranslate" : false
+    },
+    "Previous" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попередній"
+          }
+        }
+      }
+    },
+    "Queue (%lld)" : {
+      "shouldTranslate" : false
+    },
+    "Remove" : {
+      "shouldTranslate" : false
+    },
+    "Repeat" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повтор"
+          }
+        }
+      }
+    },
+    "Restart Rutawave to apply the language." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустіть Rutawave, щоб застосувати мову."
+          }
+        }
+      }
+    },
+    "Restart now" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустити"
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторити"
+          }
+        }
+      }
+    },
+    "Rutawave" : {
+      "shouldTranslate" : false
+    },
+    "Rutawave, go to Home" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rutawave, перейти на головну"
+          }
+        }
+      }
+    },
+    "Search" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук"
+          }
+        }
+      }
+    },
+    "Search songs, albums, artists" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шукайте пісні, альбоми, виконавців"
+          }
+        }
+      }
+    },
+    "Seek Back 10 Seconds" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемотати назад на 10 секунд"
+          }
+        }
+      }
+    },
+    "Seek Forward 10 Seconds" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемотати вперед на 10 секунд"
+          }
+        }
+      }
+    },
+    "Seek to %lld s" : {
+      "shouldTranslate" : false
+    },
+    "Settings…" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Налаштування…"
+          }
+        }
+      }
+    },
+    "Show remaining time" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати час, що залишився"
+          }
+        }
+      }
+    },
+    "Shuffle" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемішати"
+          }
+        }
+      }
+    },
+    "Sign in" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійти"
+          }
+        }
+      }
+    },
+    "Sign in to create and save playlists, and to see your library." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійдіть, щоб створювати й зберігати плейлисти та бачити свою бібліотеку."
+          }
+        }
+      }
+    },
+    "Sign in to dislike songs" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійдіть, щоб позначати пісні як небажані"
+          }
+        }
+      }
+    },
+    "Sign in to like songs" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійдіть, щоб вподобати пісні"
+          }
+        }
+      }
+    },
+    "Sign in to see your library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійдіть, щоб побачити свою бібліотеку"
+          }
+        }
+      }
+    },
+    "Sign out" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вийти"
+          }
+        }
+      }
+    },
+    "Skip by %lld s" : {
+      "shouldTranslate" : false
+    },
+    "System" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Системна"
+          }
+        }
+      }
+    },
+    "This track is unavailable" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей трек недоступний"
+          }
+        }
+      }
+    },
+    "Toggle sidebar" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати або сховати бічну панель"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спробувати знову"
+          }
+        }
+      }
+    },
+    "Unmute" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкнути звук"
+          }
+        }
+      }
+    },
+    "Up" : {
+      "shouldTranslate" : false
+    },
+    "Video ID" : {
+      "shouldTranslate" : false
+    },
+    "Video ID to enqueue" : {
+      "shouldTranslate" : false
+    },
+    "Volume" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гучність"
+          }
+        }
+      }
+    },
+    "Volume Down" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тихіше"
+          }
+        }
+      }
+    },
+    "Volume Up" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гучніше"
+          }
+        }
+      }
+    },
+    "Your session expired. Sign in again." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш сеанс завершився. Увійдіть знову."
+          }
+        }
+      }
+    },
+    "playlistId" : {
+      "shouldTranslate" : false
+    },
+    "videoId" : {
+      "shouldTranslate" : false
+    },
+    "videoId to enqueue" : {
+      "shouldTranslate" : false
+    }
+  },
+  "version" : "1.0"
+}

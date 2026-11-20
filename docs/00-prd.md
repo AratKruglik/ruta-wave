@@ -101,8 +101,7 @@ they are product decisions, not just postponed work:
 - direct audio streams / `AVPlayer` (audio stays in the site player);
 - Windows, Linux, iOS, iPadOS;
 - App Store distribution; third-party plugins; user CSS themes;
-- a light theme (dark only, like the reference);
-- an in-app language switch (system language only).
+- a light theme (dark only, like the reference).
 
 ---
 
@@ -291,7 +290,7 @@ Dynamic Type is not used on macOS; text sizes follow 07 §4.
 ### 7.5. Localization
 
 English and Ukrainian strings from the first UI release, through a String
-Catalog; the system language decides. More languages — open question #7.
+Catalog; the system language decides by default, and Settings has an in-app override (System / English / Українська) applied on relaunch. More languages — open question #7.
 
 ### 7.6. Compatibility
 

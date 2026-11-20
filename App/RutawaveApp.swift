@@ -15,22 +15,15 @@ struct RutawaveApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                switch app.session.state {
-                case .signedOut:
-                    GuestView(session: app.session)
-                case .signedIn:
-                    AccountView(session: app.session)
-                case .keychainUnavailable:
-                    VStack(spacing: 12) {
-                        Text("Couldn't access the saved session")
-                        Button("Try again") { app.session.restore() }
-                        Button("Continue without signing in") { app.session.continueAsGuest() }
-                    }
-                }
-            }
-            .frame(minWidth: 520, minHeight: 640)
+            RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts)
         }
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: Metrics.defaultWindowWidth, height: Metrics.defaultWindowHeight)
+        .commands {
+            SidebarCommands()
+            AppCommands(nowPlaying: app.nowPlaying)
+        }
+        Settings { SettingsView() }
         #if DEBUG
         Window("Player Debug", id: "player-debug") { PlayerDebugView(player: app.player) }
         #endif
@@ -39,11 +32,25 @@ struct RutawaveApp: App {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let session = AuthSession()
-    let player = PlayerEngine()
+    let session: AuthSession
+    let player: PlayerEngine
+    let toasts: ToastCenter
+    let nowPlaying: NowPlayingModel
     private var playerWindow: PlayerWindow?
+
+    override init() {
+        let session = AuthSession()
+        let player = PlayerEngine()
+        let toasts = ToastCenter()
+        self.session = session
+        self.player = player
+        self.toasts = toasts
+        nowPlaying = NowPlayingModel(player: player, toasts: toasts, credentials: { session.credentials })
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         playerWindow = PlayerWindow(session: session, player: player)
+        Task { await nowPlaying.run() }
     }
 }
