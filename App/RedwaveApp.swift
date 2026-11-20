@@ -36,9 +36,22 @@ struct RedwaveApp: App {
             .onChange(of: session.authUserIndex, initial: true) { player.authUserIndex = $1 }
             .task(id: PlayerSession(session)) { await startPlayer() }
         }
+        #if DEBUG
+        Window("Player Debug", id: "player-debug") { PlayerDebugView(player: player) }
+        #endif
     }
 
     private func startPlayer() async {
+        player.rate = { [session] videoId, status in
+            guard case .signedIn(let cookies) = session.state else { throw InnerTubeError.signInRequired }
+            let rating: Rating = switch status {
+            case .like: .like
+            case .dislike: .dislike
+            case .indifferent: .indifferent
+            }
+            try await InnerTubeClient().rate(
+                videoId: videoId, rating, credentials: Credentials(cookies: cookies, authUserIndex: session.authUserIndex))
+        }
         switch PlayerSession(session) {
         case .off:
             player.stop()
