@@ -146,7 +146,7 @@
   let likeElement = null;
   const postLike = () => {
     const status = likeElement?.getAttribute('like-status');
-    if (status) post({ type: 'like', status });
+    if (status) post({ type: 'like', status, videoId: player()?.getVideoData?.()?.video_id });
   };
   const likeObserver = new MutationObserver(postLike);
   const watchLike = () => {

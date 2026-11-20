@@ -63,9 +63,9 @@ struct PlayerEngineTests {
 
     @Test func unchangedLikeStatusEmitsNothing() {
         let engine = makeEngine()
-        #expect(engine.handle(.like(.indifferent)) == nil)
-        #expect(engine.handle(.like(.like)) == .likeChanged(.like))
-        #expect(engine.handle(.like(.like)) == nil)
+        #expect(engine.handle(.like(.indifferent, videoId: nil)) == nil)
+        #expect(engine.handle(.like(.like, videoId: nil)) == .likeChanged(.like))
+        #expect(engine.handle(.like(.like, videoId: nil)) == nil)
         #expect(engine.like == .like)
     }
 
@@ -73,7 +73,7 @@ struct PlayerEngineTests {
         let engine = makeEngine()
         #expect(engine.handle(.volume(0.4, muted: true)) == .volumeChanged(volume: 0.4, isMuted: true))
         #expect(engine.volume == 0.4 && engine.isMuted)
-        #expect(engine.handle(.like(.like)) == .likeChanged(.like))
+        #expect(engine.handle(.like(.like, videoId: nil)) == .likeChanged(.like))
         #expect(engine.like == .like)
         #expect(engine.handle(.repeatMode(.all)) == .repeatChanged(.all))
         #expect(engine.repeatMode == .all)
@@ -110,6 +110,9 @@ struct PlayerEngineTests {
         #expect(await iterator.next() == .likeChanged(.dislike))
         #expect(rated == ["abc"])
         #expect(engine.like == .dislike)
+        #expect(engine.handle(.like(.indifferent, videoId: "abc")) == nil)
+        #expect(engine.like == .dislike)
+        #expect(engine.handle(.like(.like, videoId: "def")) == .likeChanged(.like))
     }
 
     @Test func commandsBeforeStartAreIgnored() {

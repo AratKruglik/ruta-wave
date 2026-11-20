@@ -57,7 +57,7 @@ struct RecoveryTests {
         engine.watchdog = watchdog
         #expect(engine.handle(.song(makeSong(), artworkWithQuery: nil)) == nil)
         #expect(watchdog.isCancelled)
-        #expect(engine.attempts == 0)
+        #expect(engine.attempts == 1)
     }
 
     @Test func restoreBypassesTheSongDedupe() async {
@@ -90,19 +90,34 @@ struct RecoveryTests {
         engine.commit(makeSong())
         _ = engine.handle(.time(77))
         #expect(engine.position == 77)
-        engine.resumeVolume = 0.5
         engine.stop()
         #expect(engine.target == nil && engine.attempts == 0 && engine.resumeAt == nil && engine.position == 0)
-        #expect(engine.resumeVolume == nil)
     }
 
-    @Test func restoreCommitConsumesTheSavedVolume() {
+    @Test func repeatedSongReportsAfterARestoreKeepTheCrashCap() {
         let engine = makeEngine()
         engine.commit(makeSong())
+        _ = engine.nextRecoveryURL()
         engine.resumeAt = 42
-        engine.resumeVolume = 0.5
         engine.commit(makeSong())
-        #expect(engine.resumeVolume == nil)
+        _ = engine.handle(.song(makeSong(), artworkWithQuery: nil))
+        _ = engine.handle(.song(makeSong(), artworkWithQuery: nil))
+        #expect(engine.attempts == 1)
+        _ = engine.nextRecoveryURL()
+        #expect(engine.nextRecoveryURL() == nil)
+    }
+
+    @Test func requestedVolumeIsRememberedAndClamped() {
+        let engine = makeEngine()
+        #expect(engine.requestedVolume == nil)
+        engine.send(.setVolume(0.5))
+        #expect(engine.requestedVolume == 0.5)
+        engine.send(.setVolume(3))
+        #expect(engine.requestedVolume == 1)
+        engine.send(.setVolume(.nan))
+        #expect(engine.requestedVolume == 1)
+        engine.stop()
+        #expect(engine.requestedVolume == 1)
     }
 
     @Test func supersededNavigationsAreNotFailures() {

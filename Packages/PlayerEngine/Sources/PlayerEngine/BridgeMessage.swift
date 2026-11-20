@@ -6,7 +6,7 @@ enum BridgeMessage: Equatable {
     case playback(isPaused: Bool, elapsed: Double)
     case time(Double)
     case volume(Double, muted: Bool)
-    case like(LikeStatus)
+    case like(LikeStatus, videoId: String?)
     case repeatMode(RepeatMode)
     case shuffle(Bool)
     case queue([QueueItem])
@@ -50,7 +50,8 @@ enum BridgeMessage: Equatable {
                   volume.isFinite, (0...100).contains(volume) else { return nil }
             return .volume(volume / 100, muted: muted)
         case "like":
-            return envelope.status.flatMap(LikeStatus.init(page:)).map { .like($0) }
+            let videoId = envelope.videoId.flatMap { PlayerRules.isValidID($0) ? $0 : nil }
+            return envelope.status.flatMap(LikeStatus.init(page:)).map { .like($0, videoId: videoId) }
         case "repeat":
             return envelope.repeatMode.flatMap(RepeatMode.init(page:)).map { .repeatMode($0) }
         case "shuffle":

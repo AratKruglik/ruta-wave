@@ -31,8 +31,10 @@ public final class PlayerEngine {
     @ObservationIgnored var position: TimeInterval = 0
     @ObservationIgnored var attempts = 0
     @ObservationIgnored var resumeAt: TimeInterval?
-    // A reload brings back the volume the page last stored, not the one set through the player.
-    @ObservationIgnored var resumeVolume: Double?
+    // Every page load brings back the volume the page's player bar stored, not the one set through the player.
+    @ObservationIgnored var requestedVolume: Double?
+    // InnerTube writes the like; the hidden page keeps reporting its stale status for that track.
+    @ObservationIgnored var ratedLike: (videoId: String, status: LikeStatus)?
     @ObservationIgnored var watchdog: Task<Void, Never>?
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private let delegate = WebDelegate()
@@ -107,7 +109,7 @@ public final class PlayerEngine {
         watchdog = nil
         target = nil
         resumeAt = nil
-        resumeVolume = nil
+        ratedLike = nil
         attempts = 0
         position = 0
         isReady = false
@@ -135,7 +137,6 @@ public final class PlayerEngine {
         target = (videoId, playlistId)
         attempts = 0
         resumeAt = nil
-        resumeVolume = nil
         navigate(to: url, in: webView)
     }
 
@@ -147,6 +148,8 @@ public final class PlayerEngine {
         case .setLike(let status):
             setLike(status)
             return
+        case .setVolume(let level) where level.isFinite:
+            requestedVolume = min(max(level, 0), 1)
         default:
             break
         }
@@ -182,6 +185,7 @@ public final class PlayerEngine {
         Task {
             do {
                 try await rate(videoId, status)
+                ratedLike = (videoId, status)
                 guard song?.videoId == videoId else { return }
                 like = status
                 emit(.likeChanged(status))
@@ -223,7 +227,9 @@ public final class PlayerEngine {
         switch message {
         case .ready:
             isReady = true
-            return emit(.ready)
+            let event = emit(.ready)
+            if let requestedVolume { send(.setVolume(requestedVolume)) }
+            return event
         case .playback(let paused, let time):
             isPaused = paused
             elapsed = time
@@ -237,7 +243,8 @@ public final class PlayerEngine {
             volume = level
             isMuted = muted
             return emit(.volumeChanged(volume: level, isMuted: muted))
-        case .like(let status):
+        case .like(let reported, let videoId):
+            let status = ratedLike.flatMap { $0.videoId == videoId ? $0.status : nil } ?? reported
             // The page re-reports the like status on every ready and track change, not only when it changes.
             guard status != like else { return nil }
             like = status
@@ -260,8 +267,8 @@ public final class PlayerEngine {
         case .song(let incoming, let artworkWithQuery):
             if incoming.videoId == song?.videoId, resumeAt == nil {
                 // Reloading the current track: the player is up, so the load is done even though the song is unchanged.
+                // The attempt count stays: the page reports the same song several times, which would undo the crash-loop cap.
                 watchdog?.cancel()
-                attempts = 0
                 return nil
             }
             songTask?.cancel()
@@ -283,8 +290,6 @@ public final class PlayerEngine {
         if let resume = resumeAt {
             resumeAt = nil
             if newSong.videoId == target?.videoId { send(.seek(to: resume)) }
-            if let level = resumeVolume { send(.setVolume(level)) }
-            resumeVolume = nil
         } else {
             attempts = 0
         }
@@ -376,7 +381,6 @@ public final class PlayerEngine {
         Self.log.error("web content process terminated")
         isReady = false
         resumeAt = position
-        resumeVolume = volume
         isAd = false
         emit(.error(.contentProcessCrashed))
         reload()

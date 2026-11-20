@@ -47,7 +47,9 @@ struct NewBridgeMessageTests {
 
     @Test func decodesNewTypes() {
         #expect(BridgeMessage.decode(#"{"type":"volume","volume":50,"muted":true}"#) == .volume(0.5, muted: true))
-        #expect(BridgeMessage.decode(#"{"type":"like","status":"DISLIKE"}"#) == .like(.dislike))
+        #expect(BridgeMessage.decode(#"{"type":"like","status":"DISLIKE"}"#) == .like(.dislike, videoId: nil))
+        #expect(BridgeMessage.decode(#"{"type":"like","status":"LIKE","videoId":"abc"}"#) == .like(.like, videoId: "abc"))
+        #expect(BridgeMessage.decode(#"{"type":"like","status":"LIKE","videoId":"a b"}"#) == .like(.like, videoId: nil))
         #expect(BridgeMessage.decode(#"{"type":"repeat","repeatMode":"ONE"}"#) == .repeatMode(.one))
         #expect(BridgeMessage.decode(#"{"type":"shuffle","shuffle":true}"#) == .shuffle(true))
         #expect(BridgeMessage.decode(#"{"type":"ad","ad":true}"#) == .ad(true))
