@@ -19,7 +19,10 @@ struct ShellView<AccountPopover: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var width = Metrics.defaultWindowWidth
     @State private var sidebarOverride: Bool?
+    @State private var sidebarEdge: CGFloat = 0
     @State private var isSidebarCollapsedPreference = Preferences().sidebarCollapsed
+
+    private static var shellSpace: String { "shell" }
 
     private var isNarrow: Bool { width < Metrics.sidebarAutoCollapseWidth }
     private var isBarVisible: Bool { nowPlaying.player.song != nil }
@@ -46,13 +49,21 @@ struct ShellView<AccountPopover: View>: View {
                     onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
                 .background(.themeBase)
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.shellSpace)).maxX } action: { sidebarEdge = $0 }
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
                 .toolbar(removing: .sidebarToggle)
             } detail: {
                 content
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
+            // NavigationSplitView has no API to hide its column divider, so it is painted over.
+            .overlay(alignment: .leading) {
+                if isSidebarVisible {
+                    Color.themeBase.frame(width: 3).offset(x: sidebarEdge - 1).allowsHitTesting(false)
+                }
+            }
         }
+        .coordinateSpace(.named(Self.shellSpace))
         // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
         // hiding the toolbar itself would also remove the window buttons.
         .ignoresSafeArea(.container, edges: .top)
