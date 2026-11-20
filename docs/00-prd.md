@@ -1,4 +1,4 @@
-# 00. Product requirements — Redwave
+# 00. Product requirements — Rutawave
 
 Status: draft 1, 2026-11-18. Owner: Oleksii Kruhlyk.
 
@@ -18,39 +18,47 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
 
 | | |
 |---|---|
-| Name | **Redwave** **[decision, 2026-11-18]** |
+| Name | **Rutawave** **[decision, 2026-11-20]** |
 | Subtitle (DMG, README, About window, GitHub description) | *A native YouTube Music client for macOS* |
 | One-liner | YouTube Music as a real Mac app: native SwiftUI interface, media keys, menu bar, plugins — no Electron. |
-| Disclaimer (README, About window) | *Redwave is an independent project and is not affiliated with, endorsed or sponsored by Google or YouTube.* |
-| Previous working name | Tunewave (used in code and docs up to backlog 1.4) |
+| Disclaimer (README, About window) | *Rutawave is an independent project and is not affiliated with, endorsed or sponsored by Google or YouTube.* |
+| Previous working names | Redwave (2026-11-18 – 2026-11-20, used in code until backlog 0.4), Tunewave (used in code and docs up to backlog 1.4) |
 
 **Why this name.**
-- "Red" points at YouTube's colour and "wave" at sound, so the link to
-  YouTube Music is clear without using Google's trademark.
+- The main audience is Ukrainian. "Ruta" comes from *Chervona Ruta* ("Red
+  Rue"), a song every Ukrainian knows: it says "music" and "red" at once,
+  and red points at YouTube's colour. "Wave" is sound.
+- Redwave was dropped because it was too generic: nothing in it said music.
+  "Wave" alone still does not, so the name always goes with the subtitle.
+- "Ruta" alone is used by too many products; "Rutawave" was free on GitHub
+  on 2026-11-20.
 - "YouTube", "YT" and "YouTube Music" are Google trademarks ([05 §2.2](05-risks-and-scope.md#2-legal-and-policy-constraints)).
   They appear only in the descriptive subtitle ("a client **for** YouTube Music"),
   never in the name, icon or bundle ID.
-- Short, easy to say in Ukrainian and English, and different from existing
+- Easy to read in Latin and Cyrillic (Рутавейв), and different from existing
   clients (Pear Desktop and others).
 
 **Identifiers that follow from the name** **[decision]**:
 
 | What | Value |
 |---|---|
-| App and product name | `Redwave` / `Redwave.app` |
-| Bundle ID | `dev.kruhlyk.redwave` |
-| Keychain service of the session | `dev.kruhlyk.redwave.session` |
-| Xcode project (generated) | `Redwave.xcodeproj` |
-| DMG file | `Redwave-<version>-arm64.dmg` |
-| URL scheme for links (stage 5.4) | `redwave://` |
+| App and product name | `Rutawave` / `Rutawave.app` |
+| Bundle ID | `dev.kruhlyk.rutawave` |
+| Keychain service of the session | `dev.kruhlyk.rutawave.session` |
+| Xcode project (generated) | `Rutawave.xcodeproj` |
+| DMG file | `Rutawave-<version>-arm64.dmg` |
+| URL scheme for links (stage 5.4) | `rutawave://` |
 
-Backlog row **0.3** ([06](06-backlog.md#stage-0-preparation)) moved the code
-to these identifiers. The renamed build removes the session stores of the
-previous identifier on launch
+The code still uses the Redwave identifiers (`dev.kruhlyk.redwave`, …).
+Backlog row **0.4** ([06](06-backlog.md#stage-0-preparation)) moves it to
+the ones above. The renamed build removes the session stores of the previous
+identifiers on launch, as row 0.3 did for Tunewave
 ([05 §2.4](05-risks-and-scope.md#2-legal-and-policy-constraints)).
 
-Not checked yet: whether "Redwave" is free on GitHub, as a domain, and as a
-registered trademark in software (class 9). Do it before the first public release.
+Not checked yet: whether "Rutawave" is free as a domain and as a registered
+trademark in software (class 9), including the Ukrainian register (УКРНОІВІ).
+"Chervona Ruta" is also the name of a well-known music festival; check that
+the name does not clash with its marks. Do it before the first public release.
 
 ---
 
@@ -181,7 +189,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | F-MAC-6 | Resume on start: last track and position, paused | P1 | 08 §14.5 | 5.3 |
 | F-MAC-7 | Launch at login, always on top, starting page | P2 | — | 5.3 |
 | F-MAC-8 | Mini player window | P2 | — | 5.4 |
-| F-MAC-9 | Opening `music.youtube.com/...` links and `redwave://` links | P2 | 08 §1.3 | 5.4 |
+| F-MAC-9 | Opening `music.youtube.com/...` links and `rutawave://` links | P2 | 08 §1.3 | 5.4 |
 
 ### 5.7. Cross-cutting UX
 
@@ -341,3 +349,4 @@ Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 | 2026-11-18 | Draft 1. Product named **Redwave** (was Tunewave); bundle ID `dev.kruhlyk.redwave`; rename in code planned as backlog 0.3 |
 | 2026-11-19 | Podcasts and user uploads out of scope (open question #4, #7); F-BRW-5 dropped |
 | 2026-11-19 | Music video mode deferred to later (open question #3, #12); Song/Video toggle removed from F-PLY-5; 02 §4.1 requires a re-parentable web view |
+| 2026-11-20 | Product renamed **Rutawave** (was Redwave: too generic, nothing said music; main audience is Ukrainian); bundle ID `dev.kruhlyk.rutawave`; rename in code planned as backlog 0.4 |

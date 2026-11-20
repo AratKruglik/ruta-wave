@@ -12,7 +12,7 @@ The order is by risk: first whatever could stop the project
 ## Stage 0. Preparation
 
 - [ ] `git init`, `.gitignore` for Xcode and Swift.
-- [x] Choose the app name and bundle ID: **Redwave**, `dev.kruhlyk.redwave` ([00](00-prd.md#1-name-and-positioning)); the icon is still open.
+- [x] Choose the app name and bundle ID: **Rutawave**, `dev.kruhlyk.rutawave` (was Redwave) ([00](00-prd.md#1-name-and-positioning)); the icon is still open.
 - [ ] Xcode project: macOS 14+, Swift 6, an empty window.
 - [ ] `Packages/` directory with empty packages from [02](02-architecture.md#12-repository-layout).
 
