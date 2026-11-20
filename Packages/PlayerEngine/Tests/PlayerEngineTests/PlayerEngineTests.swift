@@ -61,6 +61,14 @@ struct PlayerEngineTests {
         #expect(engine.webView == nil)
     }
 
+    @Test func unchangedLikeStatusEmitsNothing() {
+        let engine = makeEngine()
+        #expect(engine.handle(.like(.indifferent)) == nil)
+        #expect(engine.handle(.like(.like)) == .likeChanged(.like))
+        #expect(engine.handle(.like(.like)) == nil)
+        #expect(engine.like == .like)
+    }
+
     @Test func newMessagesUpdateStateAndEmitOneEvent() {
         let engine = makeEngine()
         #expect(engine.handle(.volume(0.4, muted: true)) == .volumeChanged(volume: 0.4, isMuted: true))

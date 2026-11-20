@@ -234,6 +234,8 @@ public final class PlayerEngine {
             isMuted = muted
             return emit(.volumeChanged(volume: level, isMuted: muted))
         case .like(let status):
+            // The page re-reports the like status on every ready and track change, not only when it changes.
+            guard status != like else { return nil }
             like = status
             return emit(.likeChanged(status))
         case .repeatMode(let mode):
