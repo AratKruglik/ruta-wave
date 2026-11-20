@@ -9,6 +9,16 @@ extension Color {
             blue: Double(hex & 0xFF) / 255,
             opacity: opacity)
     }
+
+    /// A colour from a response: 0xAARRGGBB.
+    init(argb: UInt32) {
+        self.init(
+            .sRGB,
+            red: Double((argb >> 16) & 0xFF) / 255,
+            green: Double((argb >> 8) & 0xFF) / 255,
+            blue: Double(argb & 0xFF) / 255,
+            opacity: Double(argb >> 24) / 255)
+    }
 }
 
 extension ShapeStyle where Self == Color {
@@ -86,6 +96,23 @@ enum Metrics {
     static let videoArtworkWidth: CGFloat = 71
     static let avatarSize: CGFloat = 32
     static let playerBarCenterMaxWidth: CGFloat = 560
+
+    static let chipHeight: CGFloat = 36
+    static let shelfControl: CGFloat = 36
+    static let cardSize: CGFloat = 180
+    static let videoCardWidth: CGFloat = 320
+    static let videoCardHeight: CGFloat = 180
+    static let cardPlayButton: CGFloat = 40
+    static let tileHeight: CGFloat = 108
+    static let rowThumb: CGFloat = 48
+    static let rowThumbCompact: CGFloat = 32
+    static let rowHeightCompact: CGFloat = 56
+    static let rowHeightDetailed: CGFloat = 64
+    static let rowHeightNumbered: CGFloat = 48
+    static let explicitBadge: CGFloat = 14
+    static let quickPickRows = 4
+    static let rowColumnWidth: CGFloat = 440
+    static let widePageWidth: CGFloat = 1100
 }
 
 enum Motion {

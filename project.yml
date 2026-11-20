@@ -43,6 +43,9 @@ targets:
     platform: macOS
     sources:
       - AppTests
+      - App/Browse/BrowseModel.swift
+      - App/Browse/BrowseRouting.swift
+      - App/Browse/BrowseStore.swift
       - App/Navigation/Route.swift
       - App/Navigation/NavigationModel.swift
       - App/PlayerBar/PlaybackRules.swift

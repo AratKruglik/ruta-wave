@@ -12,6 +12,7 @@ struct RootView: View {
     let nowPlaying: NowPlayingModel
     let toasts: ToastCenter
 
+    @State private var browse: BrowseStore
     @State private var navigation = NavigationModel()
     @State private var account = AccountModel()
     @State private var sidebar = SidebarModel()
@@ -21,6 +22,13 @@ struct RootView: View {
     @State private var accountAttempt = 0
     @State private var sidebarAttempt = 0
     @State private var guestAttempt = 0
+
+    init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter) {
+        self.session = session
+        self.nowPlaying = nowPlaying
+        self.toasts = toasts
+        _browse = State(initialValue: BrowseStore(loader: .live(InnerTubeClient()), credentials: { session.credentials }))
+    }
 
     var body: some View {
         Group {
@@ -36,6 +44,7 @@ struct RootView: View {
         .environment(navigation)
         .environment(nowPlaying)
         .environment(toasts)
+        .environment(browse)
         .environment(\.requestSignIn, SignInRequest { isSigningIn = true })
         .onChange(of: session.state.isSignedIn) { _, signedIn in
             if signedIn {
@@ -44,6 +53,14 @@ struct RootView: View {
                 isAccountPresented = false
                 navigation.dropAccountRoutes()
             }
+        }
+        .onChange(of: session.contentIdentity) {
+            browse.reset()
+            nowPlaying.resetAccountState()
+            guest.reset()
+        }
+        .onChange(of: session.state.isSignedIn || guest.state == .connected, initial: true) { _, ready in
+            browse.setReady(ready)
         }
         .onChange(of: session.isSessionExpired, initial: true) { _, expired in
             if expired { isSigningIn = true }

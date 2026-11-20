@@ -45,6 +45,22 @@ public struct Preferences: @unchecked Sendable {
         }
     }
 
+    /// An explicit chart country pick (ISO alpha-2 or `ZZ`); `nil` follows the system region. Anything but 1…8 uppercase ASCII letters is refused.
+    public var chartCountry: String? {
+        get { defaults.string(forKey: Key.chartCountry).flatMap(Self.isCountryCode) }
+        nonmutating set {
+            if let newValue {
+                if Self.isCountryCode(newValue) != nil { defaults.set(newValue, forKey: Key.chartCountry) }
+            } else {
+                defaults.removeObject(forKey: Key.chartCountry)
+            }
+        }
+    }
+
+    private static func isCountryCode(_ value: String) -> String? {
+        (1...8).contains(value.count) && value.allSatisfy { $0.isASCII && $0.isUppercase && $0.isLetter } ? value : nil
+    }
+
     private static let repeatModes: Set<String> = ["off", "all", "one"]
 
     private enum Key {
@@ -52,6 +68,7 @@ public struct Preferences: @unchecked Sendable {
         static let volume = "volume"
         static let repeatMode = "repeatMode"
         static let shuffle = "shuffle"
+        static let chartCountry = "chartCountry"
         static let appLanguage = "appLanguage"
         static let appleLanguages = "AppleLanguages"
     }

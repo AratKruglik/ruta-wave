@@ -161,6 +161,16 @@
         }
       }
     },
+    "Couldn't load more" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити більше"
+          }
+        }
+      }
+    },
     "Couldn't load other accounts" : {
       "localizations" : {
         "uk" : {
@@ -181,6 +191,16 @@
         }
       }
     },
+    "Couldn't load this page" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити сторінку"
+          }
+        }
+      }
+    },
     "Couldn't load your account" : {
       "localizations" : {
         "uk" : {
@@ -191,12 +211,42 @@
         }
       }
     },
+    "Couldn't play this" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося відтворити"
+          }
+        }
+      }
+    },
     "Couldn't reach YouTube Music" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося підключитися до YouTube Music"
+          }
+        }
+      }
+    },
+    "Couldn't update the rating" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося оновити оцінку"
+          }
+        }
+      }
+    },
+    "Country" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Країна"
           }
         }
       }
@@ -217,12 +267,32 @@
     "Event log" : {
       "shouldTranslate" : false
     },
+    "Explicit" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відвертий вміст"
+          }
+        }
+      }
+    },
     "Explore" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Огляд"
+          }
+        }
+      }
+    },
+    "Falling" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Падає"
           }
         }
       }
@@ -347,6 +417,16 @@
         }
       }
     },
+    "More actions" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Більше дій"
+          }
+        }
+      }
+    },
     "More settings are coming." : {
       "localizations" : {
         "uk" : {
@@ -387,6 +467,36 @@
         }
       }
     },
+    "No change" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без змін"
+          }
+        }
+      }
+    },
+    "Nothing here yet" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тут поки нічого немає"
+          }
+        }
+      }
+    },
+    "Now playing" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зараз грає"
+          }
+        }
+      }
+    },
     "Off" : {
       "localizations" : {
         "uk" : {
@@ -403,6 +513,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Один трек"
+          }
+        }
+      }
+    },
+    "Open" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити"
           }
         }
       }
@@ -559,6 +679,16 @@
         }
       }
     },
+    "Rising" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зростає"
+          }
+        }
+      }
+    },
     "Rutawave" : {
       "shouldTranslate" : false
     },
@@ -568,6 +698,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rutawave, перейти на головну"
+          }
+        }
+      }
+    },
+    "Scroll left" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прокрутити вліво"
+          }
+        }
+      }
+    },
+    "Scroll right" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прокрутити вправо"
           }
         }
       }
@@ -614,6 +764,16 @@
     },
     "Seek to %lld s" : {
       "shouldTranslate" : false
+    },
+    "Select" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрати"
+          }
+        }
+      }
     },
     "Settings…" : {
       "localizations" : {
@@ -707,6 +867,16 @@
     },
     "Skip by %lld s" : {
       "shouldTranslate" : false
+    },
+    "Start radio" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запустити радіо"
+          }
+        }
+      }
     },
     "System" : {
       "localizations" : {

@@ -50,7 +50,7 @@ enum Route: Hashable, Sendable {
     /// Dropped on sign-out; every playlist counts because an unlisted one loads for anyone holding its ID.
     var requiresAccount: Bool {
         switch self {
-        case .library, .history, .playlist: true
+        case .library, .history, .playlist, .more: true
         default: false
         }
     }

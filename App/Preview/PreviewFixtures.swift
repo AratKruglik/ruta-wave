@@ -52,5 +52,60 @@ enum PreviewFixtures {
             videoId: song.videoId, artists: [ItemRef(name: "Test Artist", browseId: "UCpreview")],
             album: ItemRef(name: "Test Album", browseId: "MPREbpreview"), isVideo: false)
     }
+
+    static let songs: [Song] = (1...8).map { index in
+        Song(
+            videoId: "preview\(index)", title: "Track \(index) With A Fairly Long Name", artists: [ItemRef(name: "Test Artist", browseId: "UCpreview")],
+            album: ItemRef(name: "Test Album", browseId: "MPREbpreview"), duration: "3:\(10 + index)", isExplicit: index % 3 == 0,
+            rank: ChartRank(position: index, trend: [.up, .down, .neutral, nil][index % 4]))
+    }
+
+    static let cardItems: [MusicItem] = [
+        .album(Album(browseId: "MPREb1", title: "Test Album", subtitle: "Album • Test Artist", playTarget: WatchTarget(playlistId: "OLAK1"))),
+        .playlist(Playlist(browseId: "RDCLAK1", title: "Test Mix", subtitle: "Mix", playTarget: WatchTarget(playlistId: "RDCLAK1"))),
+        .artist(Artist(browseId: "UC1", name: "Test Artist", subtitle: "1.2M subscribers")),
+        .song(Song(videoId: "video1", title: "Test Video", subtitle: "Video • Test Artist", isVideo: true)),
+    ]
+
+    static let shelves: [Shelf] = [
+        Shelf(
+            title: nil, layout: .grid,
+            items: [
+                .link(NavigationLink(title: "New releases", target: .newReleases)),
+                .link(NavigationLink(title: "Charts", target: .charts)),
+                .link(NavigationLink(title: "Moods & genres", target: .moodsAndGenres)),
+            ]),
+        Shelf(title: "Quick picks", strapline: "START RADIO FROM A SONG", layout: .rows, items: songs.map(MusicItem.song)),
+        Shelf(title: "Mixed for you", strapline: "TEST USER", more: BrowseTarget(browseId: "FEmusic_mixed_for_you"), layout: .cards, items: cardItems + cardItems + cardItems),
+        Shelf(title: "Moods & genres", layout: .grid, items: [
+            .link(NavigationLink(title: "Chill", target: .moodCategory(params: "p1"), stripeColor: 4288988671)),
+            .link(NavigationLink(title: "Commute", target: .moodCategory(params: "p2"), stripeColor: 4294951424)),
+            .link(NavigationLink(title: "Energize", target: .moodCategory(params: "p3"))),
+        ]),
+        Shelf(title: "Top songs", layout: .list, items: songs.map(MusicItem.song)),
+    ]
+
+    static let chips = [Chip(title: "Relax"), Chip(title: "Workout", isSelected: true), Chip(title: "Focus"), Chip(title: "Commute")]
+
+    enum BrowseVariant { case signedIn, guest, loading, failing, empty }
+
+    static func browseModel(_ variant: BrowseVariant) -> BrowseModel {
+        let items = switch variant {
+        case .signedIn: shelves
+        case .guest: Array(shelves.dropFirst())
+        default: [Shelf]()
+        }
+        let pageChips = items.isEmpty ? [] : chips
+        let loader = BrowseLoader(
+            page: { _, _ in
+                if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
+                if variant == .failing { throw InnerTubeError.unexpectedResponse }
+                return ChartsPage(
+                    page: BrowsePage(title: nil, chips: pageChips, shelves: Page(items: items, continuation: nil)),
+                    countries: [], selectedCountry: nil)
+            },
+            more: { _, _ in Page(items: [], continuation: nil) })
+        return BrowseModel(source: .home(chipParams: nil), loader: loader, credentials: { nil }, preferences: preferences)
+    }
 }
 #endif

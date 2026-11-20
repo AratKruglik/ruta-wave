@@ -40,13 +40,16 @@ private struct Harness {
     let model: NowPlayingModel
     var task: Task<Void, Never>?
 
-    init(signedIn: Bool = false, preferences: Preferences? = nil) {
+    init(
+        signedIn: Bool = false, preferences: Preferences? = nil,
+        client: InnerTubeClient? = nil, resolve: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil
+    ) {
         let prefs = preferences ?? Preferences(defaults: UserDefaults(suiteName: UUID().uuidString)!)
         self.preferences = prefs
         let credentials = Credentials(cookies: [], authUserIndex: 0)
         model = NowPlayingModel(
             player: player, toasts: toasts, preferences: prefs,
-            credentials: { signedIn ? credentials : nil }, client: nil)
+            credentials: { signedIn ? credentials : nil }, client: client, resolveFirstVideo: resolve)
     }
 
     mutating func start() async {
@@ -209,5 +212,96 @@ struct NowPlayingModelTests {
         h.player.emit(.error(.unavailable(videoId: "b")))
         await h.settle()
         #expect(await !waitUntil(timeout: .seconds(3.5)) { h.player.sent.filter { $0 == .next }.count > 1 })
+    }
+
+    @Test func songAndVideoLoadWithTheirPlaylist() {
+        let h = Harness()
+        h.model.play(.song(Song(videoId: "s1", playlistId: "PL1", title: "T")))
+        h.model.play(.song(Song(videoId: "v1", title: "V", isVideo: true)))
+        #expect(h.player.sent == [.load(videoId: "s1", playlistId: "PL1"), .load(videoId: "v1", playlistId: nil)])
+    }
+
+    @Test func startRadioFallsBackToTheSongRadioId() {
+        let h = Harness()
+        h.model.startRadio(Song(videoId: "s1", title: "T"))
+        h.model.startRadio(Song(videoId: "s2", playlistId: "RDX", title: "T"))
+        #expect(h.player.sent == [.load(videoId: "s1", playlistId: "RDAMVMs1"), .load(videoId: "s2", playlistId: "RDX")])
+    }
+
+    @Test func playlistOnlyAlbumResolvesItsFirstTrack() async {
+        var requested: WatchTarget?
+        let h = Harness(resolve: { target, _ in
+            requested = target
+            return "first"
+        })
+        h.model.play(.album(Album(browseId: "MPREb1", title: "A", playTarget: WatchTarget(playlistId: "OLAK1", params: "wAEB"))))
+        #expect(await waitUntil { !h.player.sent.isEmpty })
+        #expect(h.player.sent == [.load(videoId: "first", playlistId: "OLAK1")])
+        #expect(requested == WatchTarget(playlistId: "OLAK1", params: "wAEB"))
+    }
+
+    @Test func playlistCardFallsBackToItsBrowseId() async {
+        var requested: WatchTarget?
+        let h = Harness(resolve: { target, _ in
+            requested = target
+            return "first"
+        })
+        h.model.play(.playlist(Playlist(browseId: "VLPL1", title: "P")))
+        #expect(await waitUntil { !h.player.sent.isEmpty })
+        #expect(requested == WatchTarget(playlistId: "PL1"))
+    }
+
+    @Test func resetClearsRowRatings() {
+        let h = Harness(signedIn: true, client: InnerTubeClient())
+        h.model.rate(videoId: "v1", .like)
+        #expect(h.model.rowRatings["v1"] == .like)
+        h.model.resetAccountState()
+        #expect(h.model.rowRatings.isEmpty)
+    }
+
+    @Test func rateWithoutCredentialsDoesNotWrite() {
+        let h = Harness(signedIn: false, client: InnerTubeClient())
+        h.model.rate(videoId: "v1", .like)
+        #expect(h.model.rowRatings.isEmpty)
+    }
+
+    @Test func resetCancelsAPendingCollectionPlay() async {
+        let h = Harness(resolve: { _, _ in
+            try? await Task.sleep(for: .milliseconds(50))
+            return "first"
+        })
+        h.model.play(.album(Album(browseId: "MPREb1", title: "A", playTarget: WatchTarget(playlistId: "OLAK1"))))
+        h.model.resetAccountState()
+        try? await Task.sleep(for: .milliseconds(200))
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func targetWithAVideoLoadsDirectly() {
+        let h = Harness(resolve: { _, _ in Issue.record("resolver must not run"); return nil })
+        h.model.play(.playlist(Playlist(browseId: "RD1", title: "Mix", playTarget: WatchTarget(videoId: "v9", playlistId: "RD1"))))
+        #expect(h.player.sent == [.load(videoId: "v9", playlistId: "RD1")])
+    }
+
+    @Test func failedOrEmptyResolveShowsAToastAndSendsNothing() async {
+        let empty = Harness(resolve: { _, _ in nil })
+        empty.model.play(.album(Album(browseId: "MPREb1", title: "A", playTarget: WatchTarget(playlistId: "OLAK1"))))
+        #expect(await waitUntil { empty.toasts.message != nil })
+        #expect(empty.player.sent.isEmpty)
+
+        let failing = Harness(resolve: { _, _ in throw URLError(.notConnectedToInternet) })
+        failing.model.play(.album(Album(browseId: "MPREb1", title: "A", playTarget: WatchTarget(playlistId: "OLAK1"))))
+        #expect(await waitUntil { failing.toasts.message != nil })
+        #expect(failing.player.sent.isEmpty)
+
+        let noTarget = Harness()
+        noTarget.model.play(.album(Album(browseId: "MPREb1", title: "A")))
+        #expect(noTarget.toasts.message != nil)
+    }
+
+    @Test func artistAndLinkDoNotPlay() {
+        let h = Harness()
+        h.model.play(.artist(Artist(browseId: "UC1", name: "N")))
+        h.model.play(.link(NavigationLink(title: "L", target: BrowseTarget(browseId: "FEx"))))
+        #expect(h.player.sent.isEmpty)
     }
 }

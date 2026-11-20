@@ -20,6 +20,30 @@ private func shelf(_ page: BrowsePage, _ title: String) throws -> Shelf {
         #expect(home.shelves.continuation == "PLACEHOLDER_CONTINUATION_1")
     }
 
+    @Test func homeMixCardPlaysThroughItsOverlay() throws {
+        let mix = try shelf(page("home"), "It's autumn")
+        guard case .playlist(let playlist) = mix.items[0] else {
+            Issue.record("expected playlist")
+            return
+        }
+        #expect(playlist.playTarget?.playlistId?.hasPrefix("RDCLAK") == true)
+        #expect(playlist.playTarget?.videoId == nil)
+    }
+
+    @Test func newReleaseAlbumsCarryAPlaylistPlayTarget() throws {
+        let releases = try page("new-releases").shelves.items.flatMap(\.items)
+        let albums = releases.compactMap { item -> Album? in if case .album(let album) = item { album } else { nil } }
+        #expect(!albums.isEmpty)
+        #expect(albums.allSatisfy { $0.playTarget?.playlistId?.hasPrefix("OLAK5uy") == true })
+    }
+
+    @Test func moodLinksCarryStripeColors() throws {
+        let moods = try shelf(page("explore"), "Moods & genres")
+        let colors = moods.items.compactMap { item -> UInt32? in if case .link(let link) = item { link.stripeColor } else { nil } }
+        #expect(colors.count == moods.items.count)
+        #expect(colors.first == 4288988671)
+    }
+
     @Test func homeShelfSubtitleAndStrapline() throws {
         let autumn = try shelf(page("home"), "It's autumn")
         #expect(autumn.strapline == "SWEATER WEATHER")
@@ -47,7 +71,7 @@ private func shelf(_ page: BrowsePage, _ title: String) throws -> Shelf {
         #expect(listenAgain.items.count == 2)
         let mixed = try shelf(home, "Mixed for you")
         #expect(mixed.more == BrowseTarget(browseId: "FEmusic_mixed_for_you"))
-        #expect(mixed.items == [.playlist(Playlist(browseId: "RDPLACEHOLDERMIX0001", title: "Placeholder Mix", subtitle: "Placeholder Artist", thumbnailURL: URL(string: "https://lh3.googleusercontent.com/placeholder-mix=w226-h226")))])
+        #expect(mixed.items == [.playlist(Playlist(browseId: "RDPLACEHOLDERMIX0001", title: "Placeholder Mix", subtitle: "Placeholder Artist", thumbnailURL: URL(string: "https://lh3.googleusercontent.com/placeholder-mix=w226-h226"), playTarget: WatchTarget(playlistId: "RDPLACEHOLDERMIX0001", params: "wAEB")))])
     }
 
     @Test func homeContinuationPageParsesWithoutChips() throws {
