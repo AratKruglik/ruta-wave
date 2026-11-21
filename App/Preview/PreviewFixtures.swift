@@ -108,6 +108,59 @@ enum PreviewFixtures {
         return BrowseModel(source: .home(chipParams: nil), loader: loader, credentials: { nil }, preferences: preferences)
     }
 
+    enum EntityVariant { case album, artist, playlist, ownPlaylist, guest, loading, notAvailable, partialError }
+
+    static func entityModel(_ variant: EntityVariant) -> EntityModel {
+        let kind: EntityModel.Kind = switch variant {
+        case .album: .album(BrowseTarget(browseId: "MPREb1"))
+        case .artist: .artist(browseId: "UCpreview")
+        default: .playlist(browseId: "VLPL1")
+        }
+        let tracks = songs
+        let cards = cardItems
+        let header = PageHeader(
+            title: "Test Playlist With A Fairly Long Title", subtitle: "Playlist • 2026", secondSubtitle: "8 songs • 31 minutes",
+            description: String(repeating: "A long description sentence. ", count: 12),
+            artists: [ItemRef(name: "Test Owner", browseId: "UCpreview")], play: WatchTarget(playlistId: "PL1"))
+        let isOwned = variant == .ownPlaylist
+        let isPartial = variant == .partialError
+        let loader = EntityLoader(
+            album: { _, _ in
+                AlbumPage(
+                    header: header, type: "Album", year: "1997", audioPlaylistId: "OLAK1",
+                    tracks: tracks.enumerated().map { AlbumTrack(number: $0 + 1, song: $1) },
+                    shelves: [Shelf(title: "Other versions", layout: .cards, items: cards)])
+            },
+            artist: { _, _ in
+                ArtistPage(
+                    name: "Test Artist", thumbnailURL: nil, subscriberCountText: "1.2M subscribers", isSubscribed: false,
+                    channelId: "UCpreview", shuffle: WatchTarget(playlistId: "RDshuffle"), radio: WatchTarget(playlistId: "RDradio"),
+                    shelves: [
+                        Shelf(title: "Top songs", more: BrowseTarget(browseId: "VLOLAK1"), layout: .list, items: tracks.prefix(5).map(MusicItem.song)),
+                        Shelf(title: "Albums", more: BrowseTarget(browseId: "UCpreview", params: "p"), layout: .cards, items: cards),
+                    ],
+                    description: String(repeating: "A long description sentence. ", count: 12), viewCountText: "12,345,678 views")
+            },
+            playlist: { _, _ in
+                switch variant {
+                case .loading: try await Task.sleep(for: .seconds(3600))
+                case .notAvailable: throw InnerTubeError.notAvailable
+                default: break
+                }
+                return PlaylistPage(
+                    header: header, tracks: Page(items: tracks, continuation: isPartial ? "t1" : nil), sectionsContinuation: "s1",
+                    isOwned: isOwned)
+            },
+            moreTracks: { _, _ in throw InnerTubeError.unexpectedResponse },
+            sections: { _, _ in
+                Page(items: [Shelf(title: "Suggestions", layout: .list, items: tracks.suffix(3).map(MusicItem.song))], continuation: nil)
+            },
+            save: { _, _, _ in }, subscribe: { _, _, _ in }, add: { _, _, _ in })
+        let isGuest = variant == .guest
+        return EntityModel(
+            kind: kind, loader: loader, credentials: { isGuest ? nil : Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
+    }
+
     enum SearchVariant { case all, filtered, loading, empty, failing }
 
     static let searchChips = [

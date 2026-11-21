@@ -10,18 +10,24 @@ final class BrowseStore {
 
     @ObservationIgnored private let loader: BrowseLoader
     @ObservationIgnored private let searchLoader: SearchLoader
+    @ObservationIgnored private let entityLoader: EntityLoader
+    @ObservationIgnored private let toasts: ToastCenter
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let preferences: Preferences
     // shortcut: route models are kept for the whole identity; prune by live paths if memory shows up in Instruments.
     @ObservationIgnored private var routeModels: [Route: BrowseModel] = [:]
     @ObservationIgnored private var searchModels: [Route: SearchModel] = [:]
+    @ObservationIgnored private var entityModels: [Route: EntityModel] = [:]
+    private(set) var generation = 0
 
     init(
-        loader: BrowseLoader, searchLoader: SearchLoader, credentials: @escaping @MainActor () -> Credentials?,
-        preferences: Preferences = Preferences()
+        loader: BrowseLoader, searchLoader: SearchLoader, entityLoader: EntityLoader, toasts: ToastCenter,
+        credentials: @escaping @MainActor () -> Credentials?, preferences: Preferences = Preferences()
     ) {
         self.loader = loader
         self.searchLoader = searchLoader
+        self.entityLoader = entityLoader
+        self.toasts = toasts
         self.credentials = credentials
         self.preferences = preferences
         home = BrowseModel(source: .home(chipParams: nil), loader: loader, credentials: credentials, preferences: preferences)
@@ -32,6 +38,22 @@ final class BrowseStore {
         isReady = ready
         for model in [home, explore] + Array(routeModels.values) { model.isReady = ready }
         for model in searchModels.values { model.isReady = ready }
+        for model in entityModels.values { model.isReady = ready }
+    }
+
+    func entityModel(for route: Route) -> EntityModel? {
+        if let cached = entityModels[route] { return cached }
+        let kind: EntityModel.Kind
+        switch route {
+        case .album(let browseId, let params): kind = .album(BrowseTarget(browseId: browseId, params: params))
+        case .artist(let channelId): kind = .artist(browseId: channelId)
+        case .playlist(let browseId): kind = .playlist(browseId: browseId)
+        default: return nil
+        }
+        let model = EntityModel(kind: kind, loader: entityLoader, credentials: credentials, toasts: toasts)
+        model.isReady = isReady
+        entityModels[route] = model
+        return model
     }
 
     /// A chip change opens a new route for the same query; the old chips seed the new model so the row stays put.
@@ -57,8 +79,11 @@ final class BrowseStore {
     func reset() {
         for model in [home, explore] + Array(routeModels.values) { model.cancelInFlight() }
         for model in searchModels.values { model.cancelInFlight() }
+        for model in entityModels.values { model.cancelInFlight() }
         routeModels = [:]
         searchModels = [:]
+        entityModels = [:]
+        generation += 1
         home = makeModel(.home(chipParams: nil))
         explore = makeModel(.browse(.explore))
     }

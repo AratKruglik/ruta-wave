@@ -1,3 +1,4 @@
+import AppKit
 import AppSettings
 import Foundation
 import InnerTube
@@ -26,7 +27,9 @@ final class NowPlayingModel {
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let client: InnerTubeClient?
     @ObservationIgnored private let resolveFirstVideo: (@MainActor (WatchTarget, Credentials?) async throws -> String?)?
+    @ObservationIgnored private let now: @MainActor () -> ContinuousClock.Instant
     @ObservationIgnored private var playTask: Task<Void, Never>?
+    @ObservationIgnored private var lastLoad: (key: String, at: ContinuousClock.Instant)?
     @ObservationIgnored private var ratingGeneration = 0
     @ObservationIgnored private var skip: (videoId: String, task: Task<Void, Never>)?
     @ObservationIgnored private var unavailableStreak = 0
@@ -36,8 +39,10 @@ final class NowPlayingModel {
     init(
         player: any PlayerControlling, toasts: ToastCenter, preferences: Preferences = Preferences(),
         credentials: @escaping @MainActor () -> Credentials?, client: InnerTubeClient? = InnerTubeClient(),
-        resolveFirstVideo: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil
+        resolveFirstVideo: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil,
+        now: @escaping @MainActor () -> ContinuousClock.Instant = { .now }
     ) {
+        self.now = now
         self.resolveFirstVideo = resolveFirstVideo
         self.player = player
         self.toasts = toasts
@@ -143,11 +148,16 @@ final class NowPlayingModel {
     func play(_ item: MusicItem) {
         switch item {
         case .song(let song):
+            // A row is a plain button, so a double-click would send the load twice.
+            let key = song.videoId + (song.playlistId ?? "")
+            let instant = now()
+            if let lastLoad, lastLoad.key == key, instant - lastLoad.at < .seconds(NSEvent.doubleClickInterval) { return }
+            lastLoad = (key, instant)
             act(.load(videoId: song.videoId, playlistId: song.playlistId))
         case .album(let album):
-            playCollection(album.playTarget)
+            play(album.playTarget)
         case .playlist(let playlist):
-            playCollection(playlist.playTarget ?? WatchTarget(playlistId: playlist.browseId.removingPrefix("VL")))
+            play(playlist.playTarget ?? WatchTarget(playlistId: playlist.browseId.removingPrefix("VL")))
         case .artist, .link:
             break
         }
@@ -199,7 +209,7 @@ final class NowPlayingModel {
     }
 
     // A playlist-only target has no first track yet; one `next` request finds it. The latest request wins.
-    private func playCollection(_ target: WatchTarget?) {
+    func play(_ target: WatchTarget?) {
         playTask?.cancel()
         guard let target else {
             toasts.show("Couldn't play this")

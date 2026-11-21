@@ -35,6 +35,15 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
         #expect(try ItemParser.item(json(twoRow(endpoint: browse("VLPL1", "MUSIC_PAGE_TYPE_PLAYLIST")))) == .playlist(Playlist(browseId: "VLPL1", title: "Title")))
     }
 
+    @Test func albumCardKeepsItsBrowseParams() throws {
+        let endpoint = #"{"browseEndpoint":{"browseId":"MPREb_1","params":"p1","browseEndpointContextSupportedConfigs":{"browseEndpointContextMusicConfig":{"pageType":"MUSIC_PAGE_TYPE_ALBUM"}}}}"#
+        guard case .album(let album)? = try ItemParser.item(json(twoRow(endpoint: endpoint))) else {
+            Issue.record("expected album")
+            return
+        }
+        #expect(album.params == "p1")
+    }
+
     @Test func unsupportedBrowseTargetsAreSkipped() throws {
         for type in ["MUSIC_PAGE_TYPE_USER_CHANNEL", "MUSIC_PAGE_TYPE_PODCAST_SHOW_DETAIL_PAGE", "MUSIC_PAGE_TYPE_NON_MUSIC_AUDIO_TRACK_PAGE"] {
             #expect(try ItemParser.item(json(twoRow(endpoint: browse("X", type)))) == nil)

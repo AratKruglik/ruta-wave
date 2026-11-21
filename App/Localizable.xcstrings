@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "About" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Про виконавця"
+          }
+        }
+      }
+    },
     "Account" : {
       "localizations" : {
         "uk" : {
@@ -21,12 +31,42 @@
         }
       }
     },
+    "Add" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додати"
+          }
+        }
+      }
+    },
+    "Add %@" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додати %@"
+          }
+        }
+      }
+    },
     "Add account" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Додати обліковий запис"
+          }
+        }
+      }
+    },
+    "Added to playlist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додано до плейлиста"
           }
         }
       }
@@ -181,6 +221,16 @@
         }
       }
     },
+    "Couldn't add to the playlist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося додати до плейлиста"
+          }
+        }
+      }
+    },
     "Couldn't clear the saved session" : {
       "localizations" : {
         "uk" : {
@@ -277,6 +327,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося оновити оцінку"
+          }
+        }
+      }
+    },
+    "Couldn't update the subscription" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося оновити підписку"
+          }
+        }
+      }
+    },
+    "Couldn't update your library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося оновити бібліотеку"
           }
         }
       }
@@ -417,6 +487,16 @@
         }
       }
     },
+    "Less" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Менше"
+          }
+        }
+      }
+    },
     "Library" : {
       "localizations" : {
         "uk" : {
@@ -443,6 +523,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вподобана музика"
+          }
+        }
+      }
+    },
+    "Link copied" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посилання скопійовано"
           }
         }
       }
@@ -617,6 +707,16 @@
         }
       }
     },
+    "Play (⌥-click to shuffle)" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворити (⌥-клік — перемішати)"
+          }
+        }
+      }
+    },
     "Play / Pause" : {
       "localizations" : {
         "uk" : {
@@ -706,8 +806,28 @@
     "Queue (%lld)" : {
       "shouldTranslate" : false
     },
+    "Radio" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Радіо"
+          }
+        }
+      }
+    },
     "Remove" : {
       "shouldTranslate" : false
+    },
+    "Remove from library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити з бібліотеки"
+          }
+        }
+      }
     },
     "Remove from recent searches" : {
       "localizations" : {
@@ -778,6 +898,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rutawave, перейти на головну"
+          }
+        }
+      }
+    },
+    "Save to library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зберегти в бібліотеку"
           }
         }
       }
@@ -875,6 +1005,16 @@
         }
       }
     },
+    "Share" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поділитися"
+          }
+        }
+      }
+    },
     "Show all" : {
       "localizations" : {
         "uk" : {
@@ -955,12 +1095,32 @@
         }
       }
     },
+    "Sign in to save to your library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійдіть, щоб зберегти в бібліотеку"
+          }
+        }
+      }
+    },
     "Sign in to see your library" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Увійдіть, щоб побачити свою бібліотеку"
+          }
+        }
+      }
+    },
+    "Sign in to subscribe" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увійдіть, щоб підписатися"
           }
         }
       }
@@ -998,12 +1158,82 @@
         }
       }
     },
+    "Subscribe" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підписатися"
+          }
+        }
+      }
+    },
+    "Subscribed" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ви підписані"
+          }
+        }
+      }
+    },
+    "Suggestions" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропозиції"
+          }
+        }
+      }
+    },
     "System" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Системна"
+          }
+        }
+      }
+    },
+    "This album isn't available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей альбом недоступний"
+          }
+        }
+      }
+    },
+    "This artist isn't available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей виконавець недоступний"
+          }
+        }
+      }
+    },
+    "This playlist has no songs yet" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У цьому плейлисті ще немає пісень"
+          }
+        }
+      }
+    },
+    "This playlist isn't available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей плейлист недоступний"
           }
         }
       }

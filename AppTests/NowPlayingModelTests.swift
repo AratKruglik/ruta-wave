@@ -33,6 +33,12 @@ private final class FakePlayer: PlayerControlling {
 }
 
 @MainActor
+private final class TestClock {
+    var instant = ContinuousClock.now
+    func advance(_ duration: Duration) { instant += duration }
+}
+
+@MainActor
 private struct Harness {
     let player = FakePlayer()
     let toasts = ToastCenter()
@@ -42,14 +48,16 @@ private struct Harness {
 
     init(
         signedIn: Bool = false, preferences: Preferences? = nil,
-        client: InnerTubeClient? = nil, resolve: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil
+        client: InnerTubeClient? = nil, resolve: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil,
+        clock: TestClock = TestClock()
     ) {
         let prefs = preferences ?? Preferences(defaults: UserDefaults(suiteName: UUID().uuidString)!)
         self.preferences = prefs
         let credentials = Credentials(cookies: [], authUserIndex: 0)
         model = NowPlayingModel(
             player: player, toasts: toasts, preferences: prefs,
-            credentials: { signedIn ? credentials : nil }, client: client, resolveFirstVideo: resolve)
+            credentials: { signedIn ? credentials : nil }, client: client, resolveFirstVideo: resolve,
+            now: { clock.instant })
     }
 
     mutating func start() async {
@@ -226,6 +234,39 @@ struct NowPlayingModelTests {
         h.model.startRadio(Song(videoId: "s1", title: "T"))
         h.model.startRadio(Song(videoId: "s2", playlistId: "RDX", title: "T"))
         #expect(h.player.sent == [.load(videoId: "s1", playlistId: "RDAMVMs1"), .load(videoId: "s2", playlistId: "RDX")])
+    }
+
+    @Test func doubleClickOnARowLoadsOnce() {
+        let clock = TestClock()
+        let h = Harness(clock: clock)
+        let song = Song(videoId: "s1", playlistId: "PL1", title: "T")
+        h.model.play(.song(song))
+        clock.advance(.milliseconds(100))
+        h.model.play(.song(song))
+        #expect(h.player.sent == [.load(videoId: "s1", playlistId: "PL1")])
+        clock.advance(.seconds(10))
+        h.model.play(.song(song))
+        #expect(h.player.sent.count == 2)
+    }
+
+    @Test func aDifferentRowIsNeverSuppressed() {
+        let h = Harness()
+        h.model.play(.song(Song(videoId: "s1", playlistId: "PL1", title: "T")))
+        h.model.play(.song(Song(videoId: "s2", playlistId: "PL1", title: "T")))
+        #expect(h.player.sent.count == 2)
+    }
+
+    @Test func watchTargetWithAVideoLoadsDirectly() {
+        let h = Harness()
+        h.model.play(WatchTarget(videoId: "v1", playlistId: "PL1"))
+        #expect(h.player.sent == [.load(videoId: "v1", playlistId: "PL1")])
+    }
+
+    @Test func playlistOnlyWatchTargetResolvesItsFirstTrack() async {
+        let h = Harness(resolve: { _, _ in "first" })
+        h.model.play(WatchTarget(playlistId: "PL1"))
+        #expect(await waitUntil { !h.player.sent.isEmpty })
+        #expect(h.player.sent == [.load(videoId: "first", playlistId: "PL1")])
     }
 
     @Test func playlistOnlyAlbumResolvesItsFirstTrack() async {

@@ -20,7 +20,8 @@ extension PlaylistPage {
         self.init(
             header: header,
             tracks: Page(items: parseBlocks(shelf?["contents"]?.array ?? [], ItemParser.playlistRow), continuation: shelf?.nextContinuation),
-            sectionsContinuation: sectionsContinuation)
+            sectionsContinuation: sectionsContinuation,
+            isOwned: json.twoColumnFirstItem?["musicEditablePlaylistDetailHeaderRenderer"] != nil)
     }
 }
 

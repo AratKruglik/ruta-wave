@@ -7,6 +7,8 @@ struct TrackRow: View {
     let song: Song
     let density: Density
     var isSelected: Binding<Bool>?
+    /// Replaces the chart rank in the leading column (an album's track number).
+    var number: Int?
     var onPlay: (() -> Void)?
 
     private enum Field: Hashable { case main, like, dislike, menu, select }
@@ -111,7 +113,7 @@ struct TrackRow: View {
             if isCurrent {
                 Image(systemName: "waveform")
                     .symbolEffect(.variableColor.iterative, isActive: !reduceMotion && !nowPlaying.player.isPaused)
-            } else if let position = song.rank?.position {
+            } else if let position = number ?? song.rank?.position {
                 Text("\(position)").monospacedDigit()
             }
             if let trend = song.rank?.trend {
@@ -175,7 +177,7 @@ struct TrackRow: View {
     }
 
     private var accessibilityLabel: String {
-        var parts = [song.title, artistLine, song.album?.name, song.duration]
+        var parts = [number.map(String.init), song.title, artistLine, song.album?.name, song.duration]
         if isCurrent { parts.append(String(localized: "Now playing")) }
         return parts.compactMap { $0 }.joined(separator: ", ")
     }

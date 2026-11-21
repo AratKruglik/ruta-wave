@@ -31,7 +31,8 @@ struct RootView: View {
         let client = InnerTubeClient()
         let searchLoader = SearchLoader.live(client)
         _browse = State(initialValue: BrowseStore(
-            loader: .live(client), searchLoader: searchLoader, credentials: { session.credentials }))
+            loader: .live(client), searchLoader: searchLoader, entityLoader: .live(client), toasts: toasts,
+            credentials: { session.credentials }))
         _searchField = State(initialValue: SearchFieldModel(
             loader: searchLoader, credentials: { session.credentials }, toasts: toasts))
     }

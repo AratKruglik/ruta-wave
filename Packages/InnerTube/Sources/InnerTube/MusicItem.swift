@@ -91,10 +91,12 @@ public struct Album: Sendable, Equatable {
     public let isExplicit: Bool
     /// What the card's play button starts. Usually a playlist-only target: the first track is not in the card.
     public let playTarget: WatchTarget?
+    /// The `browseEndpoint.params` the card carries ("Other versions" cards do).
+    public let params: String?
 
     public init(
         browseId: String, title: String, subtitle: String? = nil, artists: [ItemRef] = [],
-        thumbnailURL: URL? = nil, isExplicit: Bool = false, playTarget: WatchTarget? = nil
+        thumbnailURL: URL? = nil, isExplicit: Bool = false, playTarget: WatchTarget? = nil, params: String? = nil
     ) {
         self.browseId = browseId
         self.title = title
@@ -103,6 +105,7 @@ public struct Album: Sendable, Equatable {
         self.thumbnailURL = thumbnailURL
         self.isExplicit = isExplicit
         self.playTarget = playTarget
+        self.params = params
     }
 }
 

@@ -24,6 +24,25 @@ import Testing
         #expect(next.items.map(\.playlistSetVideoId) == ["780605BC69C6C250", "4949B9D0837AA5B0", "BC50DB7391B7A3A4"])
     }
 
+    @Test func ownershipComesFromTheEditableHeader() throws {
+        #expect(try PlaylistPage(playlist: Fixture.json("playlist")).isOwned == false)
+        #expect(try PlaylistPage(playlist: Fixture.json("playlist-own")).isOwned == true)
+    }
+
+    @Test func savedStateIsTheBookmarkToggle() throws {
+        #expect(try PlaylistPage(playlist: Fixture.json("playlist")).header.isSaved == false)
+        let text = String(decoding: try Fixture.data("playlist"), as: UTF8.self)
+        let bookmark = try #require(text.range(of: "BOOKMARK_BORDER"))
+        let toggle = try #require(text.range(of: #""isToggled": false"#, range: bookmark.upperBound..<text.endIndex))
+        let saved = text.replacingCharacters(in: toggle, with: #""isToggled": true"#)
+        #expect(try PlaylistPage(playlist: JSONValue(response: Data(saved.utf8))).header.isSaved)
+    }
+
+    @Test func rowsCarryTheCollectionPlaylistId() throws {
+        let page = try PlaylistPage(playlist: Fixture.json("playlist"))
+        #expect(page.tracks.items.allSatisfy { $0.playlistId == "RDCLAK5uy_nZiG9ehz_MQoWQxY5yElsLHCcG0tv9PRg" })
+    }
+
     @Test func singleColumnTopSongsIsAPlaylist() throws {
         let page = try PlaylistPage(playlist: Fixture.json("playlist-top-songs"))
         #expect(page.header.title == "Top songs")

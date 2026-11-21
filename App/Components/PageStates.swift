@@ -79,6 +79,23 @@ struct PageErrorView: View {
     }
 }
 
+struct UnavailableView: View {
+    let title: LocalizedStringKey
+    let onBack: () -> Void
+
+    var body: some View {
+        VStack(spacing: Metrics.space12) {
+            Text(title)
+                .font(.rwTitle)
+                .foregroundStyle(.textPrimary)
+            Button(action: onBack) { InversePillLabel(title: "Back") }
+                .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
+    }
+}
+
 struct InlineErrorRow: View {
     let onRetry: () -> Void
 
@@ -112,6 +129,7 @@ struct EmptyPageView: View {
         SkeletonShelf()
         InlineErrorRow(onRetry: {})
         PageErrorView(onRetry: {}).frame(height: 120)
+        UnavailableView(title: "This album isn't available", onBack: {}).frame(height: 120)
         EmptyPageView().frame(height: 80)
     }
     .padding()

@@ -3,7 +3,7 @@ import Foundation
 enum ItemParser {
     private enum Destination {
         case song(videoId: String, playlistId: String?, isVideo: Bool)
-        case album(String)
+        case album(browseId: String, params: String?)
         case artist(String)
         case playlist(String)
     }
@@ -176,10 +176,10 @@ enum ItemParser {
             return .song(Song(
                 videoId: videoId, playlistId: playlistId, title: title, subtitle: subtitle, artists: artists, album: album,
                 duration: duration(subtitleRuns + durationRuns), thumbnailURL: url, isExplicit: isExplicit, isVideo: isVideo, rank: rank))
-        case .album(let browseId):
+        case .album(let browseId, let params):
             return .album(Album(
                 browseId: browseId, title: title, subtitle: subtitle, artists: artists, thumbnailURL: url, isExplicit: isExplicit,
-            playTarget: playTarget))
+                playTarget: playTarget, params: params))
         case .artist(let browseId):
             return .artist(Artist(browseId: browseId, name: title, subtitle: subtitle, thumbnailURL: url, rank: rank))
         case .playlist(let browseId):
@@ -190,7 +190,7 @@ enum ItemParser {
     private static func destination(_ endpoint: JSONValue?) -> Destination? {
         if let browse = endpoint?["browseEndpoint"], let browseId = browse["browseId"]?.string, !browseId.isEmpty {
             switch pageType(browse) {
-            case "MUSIC_PAGE_TYPE_ALBUM": return .album(browseId)
+            case "MUSIC_PAGE_TYPE_ALBUM": return .album(browseId: browseId, params: browse["params"]?.string)
             case "MUSIC_PAGE_TYPE_ARTIST": return .artist(browseId)
             case "MUSIC_PAGE_TYPE_PLAYLIST": return .playlist(browseId)
             default: return nil

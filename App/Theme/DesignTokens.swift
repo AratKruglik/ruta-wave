@@ -117,6 +117,10 @@ enum Metrics {
     static let searchFieldHeight: CGFloat = 42
     static let searchRowHeight: CGFloat = 48
     static let searchEntityRowHeight: CGFloat = 56
+    static let entityCover: CGFloat = 240
+    static let artistHeroHeight: CGFloat = 360
+    static let actionButton: CGFloat = 40
+    static let playButton: CGFloat = 64
     static let searchSectionRows = 4
     static let dropdownShadowRadius: CGFloat = 16
 }
