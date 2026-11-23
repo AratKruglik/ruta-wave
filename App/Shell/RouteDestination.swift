@@ -30,10 +30,13 @@ struct RouteScreen: View {
                 SearchScreen(model: model)
             } else if let model = store.model(for: route) {
                 if case .explore(.charts) = route { ChartsScreen(model: model) } else { BrowseScreen(model: model) }
+            } else if let model = store.entityModel(for: route) {
+                EntityScreen(model: model)
             } else {
                 PlaceholderScreen(title: route.title)
             }
         }
+        .id(store.generation)
         .navigationBarBackButtonHidden()
     }
 }

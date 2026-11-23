@@ -26,11 +26,13 @@ public struct PageHeader: Sendable, Equatable {
     public let shuffle: WatchTarget?
     public let radio: WatchTarget?
     public let isExplicit: Bool
+    /// Whether the signed-in account has the page in its library (the bookmark toggle). A guest gets `false`.
+    public let isSaved: Bool
 
     public init(
         title: String, subtitle: String? = nil, secondSubtitle: String? = nil, description: String? = nil,
         thumbnailURL: URL? = nil, artists: [ItemRef] = [], play: WatchTarget? = nil, shuffle: WatchTarget? = nil,
-        radio: WatchTarget? = nil, isExplicit: Bool = false
+        radio: WatchTarget? = nil, isExplicit: Bool = false, isSaved: Bool = false
     ) {
         self.title = title
         self.subtitle = subtitle
@@ -42,6 +44,7 @@ public struct PageHeader: Sendable, Equatable {
         self.shuffle = shuffle
         self.radio = radio
         self.isExplicit = isExplicit
+        self.isSaved = isSaved
     }
 }
 
@@ -115,11 +118,14 @@ public struct PlaylistPage: Sendable, Equatable {
     public let tracks: Page<Song>
     /// Pass to `InnerTubeClient.browseContinuation(_:credentials:)` for Suggestions or Related playlists.
     public let sectionsContinuation: String?
+    /// The signed-in account owns and can edit the playlist.
+    public let isOwned: Bool
 
-    public init(header: PageHeader, tracks: Page<Song>, sectionsContinuation: String?) {
+    public init(header: PageHeader, tracks: Page<Song>, sectionsContinuation: String?, isOwned: Bool = false) {
         self.header = header
         self.tracks = tracks
         self.sectionsContinuation = sectionsContinuation
+        self.isOwned = isOwned
     }
 }
 

@@ -20,8 +20,9 @@ extension Route {
         case BrowseTarget.charts.browseId: self = .explore(.charts)
         case BrowseTarget.moodsAndGenres.browseId: self = .explore(.moods)
         case _ where id.hasPrefix("VL"): self = .playlist(browseId: id)
-        case _ where id.hasPrefix("MPREb"): self = .album(browseId: id)
-        case _ where id.hasPrefix("UC"): self = .artist(channelId: id)
+        case _ where id.hasPrefix("MPREb"): self = .album(browseId: id, params: target.params)
+        // "Live performances" and "Playlists by …" Show all carry params and are browse pages, not the artist page.
+        case _ where id.hasPrefix("UC") && target.params == nil: self = .artist(channelId: id)
         default: self = .more(browseId: id, params: target.params)
         }
     }
@@ -32,7 +33,7 @@ extension MusicItem {
     var route: Route? {
         switch self {
         case .song: nil
-        case .album(let album): .album(browseId: album.browseId)
+        case .album(let album): .album(browseId: album.browseId, params: album.params)
         case .artist(let artist): .artist(channelId: artist.browseId)
         case .playlist(let playlist): playlist.browseId.hasPrefix("VL") ? .playlist(browseId: playlist.browseId) : nil
         case .link(let link): Route(target: link.target)

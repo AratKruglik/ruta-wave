@@ -46,6 +46,8 @@ targets:
       - App/Browse/BrowseModel.swift
       - App/Browse/BrowseRouting.swift
       - App/Browse/BrowseStore.swift
+      - App/Entity/EntityLoader.swift
+      - App/Entity/EntityModel.swift
       - App/Navigation/Route.swift
       - App/Search/SearchFieldModel.swift
       - App/Search/SearchLoader.swift

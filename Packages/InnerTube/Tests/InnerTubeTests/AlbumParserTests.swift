@@ -40,6 +40,16 @@ import Testing
         #expect(shelves.allSatisfy { $0.layout == .cards && !$0.items.isEmpty && $0.title != nil })
     }
 
+    @Test func rowsCarryTheAudioPlaylistAndOtherVersionsCarryParams() throws {
+        let album = try AlbumPage(album: Fixture.json("album"))
+        #expect(album.header.isSaved == false)
+        #expect(album.tracks.allSatisfy { $0.song.playlistId == album.audioPlaylistId })
+        let versions = album.shelves.flatMap(\.items).compactMap { item -> Album? in
+            if case .album(let value) = item, value.browseId == "MPREb_b9Yfli6Cg79" { value } else { nil }
+        }
+        #expect(versions.first?.params != nil)
+    }
+
     @Test func unknownShelfIsSkipped() throws {
         let before = try AlbumPage(album: Fixture.json("album"))
         let text = String(decoding: try Fixture.data("album"), as: UTF8.self).replacingOccurrences(

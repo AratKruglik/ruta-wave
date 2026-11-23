@@ -226,7 +226,9 @@ struct BrowseModelTests {
     }
 
     @Test func storeResetReplacesEveryModelAndKeepsTheGate() async {
-        let store = BrowseStore(loader: loader(Calls(), page: { _ in page(["a"]) }), searchLoader: .stub, credentials: { nil })
+        let store = BrowseStore(
+            loader: loader(Calls(), page: { _ in page(["a"]) }), searchLoader: .stub, entityLoader: .stub, toasts: ToastCenter(),
+            credentials: { nil })
         store.setReady(false)
         let oldHome = store.home
         let route = Route.explore(.newReleases)

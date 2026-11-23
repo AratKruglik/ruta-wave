@@ -222,7 +222,8 @@ struct SearchModelTests {
     @Test func storeSeedsANewModelWithTheChipsOfTheSameQuery() async {
         let store = BrowseStore(
             loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
-            searchLoader: loader(Calls(), search: { _, _ in results([song("a")], chips: allChips) }), credentials: { nil })
+            searchLoader: loader(Calls(), search: { _, _ in results([song("a")], chips: allChips) }), entityLoader: .stub,
+            toasts: ToastCenter(), credentials: { nil })
         let first = store.searchModel(for: .search(query: "q", filter: nil))
         await first?.load()
         let second = store.searchModel(for: .search(query: "q", filter: allChips[0].searchParams))

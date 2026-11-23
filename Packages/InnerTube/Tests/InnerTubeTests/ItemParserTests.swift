@@ -25,6 +25,21 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
 }
 
 @Suite struct ItemParserTests {
+    @Test func greyedOutRowIsKeptButUnavailable() throws {
+        let policy = #","musicItemRendererDisplayPolicy":"MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT""#
+        let ids = #","playlistItemData":{"videoId":"v9","playlistSetVideoId":"s9"}"#
+        guard case .song(let grey)? = try ItemParser.item(json(row(extra: ids + policy))) else {
+            Issue.record("expected song")
+            return
+        }
+        #expect(grey.videoId == "v9" && !grey.isAvailable)
+        guard case .song(let normal)? = try ItemParser.item(json(row(endpoint: watch("v1")))) else {
+            Issue.record("expected song")
+            return
+        }
+        #expect(normal.isAvailable)
+    }
+
     @Test func browsePageTypeDecidesAlbumArtistPlaylist() throws {
         guard case .album(let album) = try ItemParser.item(json(twoRow(endpoint: browse("MPREb_1", "MUSIC_PAGE_TYPE_ALBUM")))) else {
             Issue.record("expected album")
@@ -33,6 +48,15 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
         #expect(album.browseId == "MPREb_1")
         #expect(try ItemParser.item(json(twoRow(endpoint: browse("UC1", "MUSIC_PAGE_TYPE_ARTIST")))) == .artist(Artist(browseId: "UC1", name: "Title")))
         #expect(try ItemParser.item(json(twoRow(endpoint: browse("VLPL1", "MUSIC_PAGE_TYPE_PLAYLIST")))) == .playlist(Playlist(browseId: "VLPL1", title: "Title")))
+    }
+
+    @Test func albumCardKeepsItsBrowseParams() throws {
+        let endpoint = #"{"browseEndpoint":{"browseId":"MPREb_1","params":"p1","browseEndpointContextSupportedConfigs":{"browseEndpointContextMusicConfig":{"pageType":"MUSIC_PAGE_TYPE_ALBUM"}}}}"#
+        guard case .album(let album)? = try ItemParser.item(json(twoRow(endpoint: endpoint))) else {
+            Issue.record("expected album")
+            return
+        }
+        #expect(album.params == "p1")
     }
 
     @Test func unsupportedBrowseTargetsAreSkipped() throws {

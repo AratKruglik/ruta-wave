@@ -61,12 +61,15 @@ public struct Song: Sendable, Equatable {
     /// The row's id inside its playlist, needed to remove or move it. Only rows from `playlist(_:)` and `playlistContinuation(_:)` carry it
     /// (also on Liked music, which cannot be edited). Only valid for the account that fetched the playlist.
     public internal(set) var playlistSetVideoId: String?
+    /// False for a greyed-out row: shown dimmed, never played.
+    public let isAvailable: Bool
 
     public init(
         videoId: String, playlistId: String? = nil, title: String, subtitle: String? = nil,
         artists: [ItemRef] = [], album: ItemRef? = nil, duration: String? = nil, thumbnailURL: URL? = nil,
-        isExplicit: Bool = false, isVideo: Bool = false, rank: ChartRank? = nil
+        isExplicit: Bool = false, isVideo: Bool = false, rank: ChartRank? = nil, isAvailable: Bool = true
     ) {
+        self.isAvailable = isAvailable
         self.videoId = videoId
         self.playlistId = playlistId
         self.title = title
@@ -91,10 +94,12 @@ public struct Album: Sendable, Equatable {
     public let isExplicit: Bool
     /// What the card's play button starts. Usually a playlist-only target: the first track is not in the card.
     public let playTarget: WatchTarget?
+    /// The `browseEndpoint.params` the card carries ("Other versions" cards do).
+    public let params: String?
 
     public init(
         browseId: String, title: String, subtitle: String? = nil, artists: [ItemRef] = [],
-        thumbnailURL: URL? = nil, isExplicit: Bool = false, playTarget: WatchTarget? = nil
+        thumbnailURL: URL? = nil, isExplicit: Bool = false, playTarget: WatchTarget? = nil, params: String? = nil
     ) {
         self.browseId = browseId
         self.title = title
@@ -103,6 +108,7 @@ public struct Album: Sendable, Equatable {
         self.thumbnailURL = thumbnailURL
         self.isExplicit = isExplicit
         self.playTarget = playTarget
+        self.params = params
     }
 }
 

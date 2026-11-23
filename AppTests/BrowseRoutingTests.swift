@@ -10,7 +10,10 @@ struct BrowseRoutingTests {
         (BrowseTarget(browseId: "FEmusic_moods_and_genres_category", params: "p"), Route.explore(.mood(params: "p"))),
         (BrowseTarget(browseId: "VLPL1"), Route.playlist(browseId: "VLPL1")),
         (BrowseTarget(browseId: "MPREb_x"), Route.album(browseId: "MPREb_x")),
+        (BrowseTarget(browseId: "MPREb_x", params: "p"), Route.album(browseId: "MPREb_x", params: "p")),
         (BrowseTarget(browseId: "UCx"), Route.artist(channelId: "UCx")),
+        (BrowseTarget(browseId: "UCx", params: "p"), Route.more(browseId: "UCx", params: "p")),
+        (BrowseTarget(browseId: "VLOLAK1", params: "ggMCCAI="), Route.playlist(browseId: "VLOLAK1")),
         (BrowseTarget(browseId: "FEmusic_new_releases_videos"), Route.more(browseId: "FEmusic_new_releases_videos", params: nil)),
         (BrowseTarget(browseId: "FEmusic_moods_and_genres_category"), Route.more(browseId: "FEmusic_moods_and_genres_category", params: nil)),
         (BrowseTarget(browseId: "FEmusic_x", params: "q"), Route.more(browseId: "FEmusic_x", params: "q")),
@@ -24,6 +27,8 @@ struct BrowseRoutingTests {
         #expect(MusicItem.playlist(Playlist(browseId: "RDCLAK1", title: "Mix")).route == nil)
         #expect(MusicItem.playlist(Playlist(browseId: "VLPL1", title: "List")).route == .playlist(browseId: "VLPL1"))
         #expect(MusicItem.album(Album(browseId: "MPREb1", title: "A")).route == .album(browseId: "MPREb1"))
+        #expect(
+            MusicItem.album(Album(browseId: "MPREb1", title: "A", params: "p")).route == .album(browseId: "MPREb1", params: "p"))
         #expect(MusicItem.artist(Artist(browseId: "UC1", name: "N")).route == .artist(channelId: "UC1"))
     }
 

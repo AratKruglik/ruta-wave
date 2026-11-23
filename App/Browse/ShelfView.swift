@@ -4,6 +4,7 @@ import SwiftUI
 struct ShelfView: View {
     let shelf: Shelf
     let onMore: (BrowseTarget) -> Void
+    var moreTitle: LocalizedStringKey = "More"
 
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
@@ -56,7 +57,7 @@ struct ShelfView: View {
             }
             Spacer(minLength: Metrics.space16)
             if let more = shelf.more {
-                Button { onMore(more) } label: { InversePillLabel(title: "More") }
+                Button { onMore(more) } label: { InversePillLabel(title: moreTitle) }
                     .buttonStyle(.plain)
             }
             if isCarousel {

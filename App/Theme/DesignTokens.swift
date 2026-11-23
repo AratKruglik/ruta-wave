@@ -57,6 +57,7 @@ extension Font {
 }
 
 enum Metrics {
+    static let unavailableOpacity = 0.4
     static let space4: CGFloat = 4
     static let space8: CGFloat = 8
     static let space12: CGFloat = 12
@@ -117,6 +118,10 @@ enum Metrics {
     static let searchFieldHeight: CGFloat = 42
     static let searchRowHeight: CGFloat = 48
     static let searchEntityRowHeight: CGFloat = 56
+    static let entityCover: CGFloat = 240
+    static let artistHeroHeight: CGFloat = 360
+    static let actionButton: CGFloat = 40
+    static let playButton: CGFloat = 64
     static let searchSectionRows = 4
     static let dropdownShadowRadius: CGFloat = 16
 }

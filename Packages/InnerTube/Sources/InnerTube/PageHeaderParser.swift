@@ -2,8 +2,12 @@ import Foundation
 
 extension JSONValue {
     // An own playlist wraps the header in `musicEditablePlaylistDetailHeaderRenderer`.
+    var twoColumnFirstItem: JSONValue? {
+        self["contents"]?["twoColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?["sectionListRenderer"]?["contents"]?[0]
+    }
+
     var twoColumnHeader: JSONValue? {
-        let first = self["contents"]?["twoColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?["sectionListRenderer"]?["contents"]?[0]
+        let first = twoColumnFirstItem
         return first?["musicResponsiveHeaderRenderer"]
             ?? first?["musicEditablePlaylistDetailHeaderRenderer"]?["header"]?["musicResponsiveHeaderRenderer"]
     }
@@ -40,6 +44,10 @@ extension PageHeader {
             }.first,
             shuffle: menuTarget("MUSIC_SHUFFLE"),
             radio: menuTarget("MIX"),
-            isExplicit: ItemParser.isExplicit(header))
+            isExplicit: ItemParser.isExplicit(header),
+            isSaved: buttons.contains {
+                $0["toggleButtonRenderer"]?["defaultIcon"]?["iconType"]?.string == "BOOKMARK_BORDER"
+                    && $0["toggleButtonRenderer"]?["isToggled"]?.bool == true
+            })
     }
 }

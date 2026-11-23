@@ -39,7 +39,7 @@ enum Route: Hashable, Sendable {
     case explore(ExploreRoute)
     case library(section: String?)
     case search(query: String, filter: String?)
-    case album(browseId: String)
+    case album(browseId: String, params: String? = nil)
     case artist(channelId: String)
     case playlist(browseId: String)
     case more(browseId: String, params: String?)
