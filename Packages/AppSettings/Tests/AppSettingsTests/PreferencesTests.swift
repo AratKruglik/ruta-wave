@@ -69,4 +69,28 @@ struct PreferencesTests {
         #expect(preferences.appLanguage == nil)
         #expect(defaults.persistentDomain(forName: suite)?["AppleLanguages"] == nil)
     }
+
+    @Test func librarySectionAcceptsOnlyMusicBrowseIds() {
+        let (preferences, _) = makePreferences()
+        #expect(preferences.librarySection == nil)
+        preferences.librarySection = "VLLM"
+        #expect(preferences.librarySection == nil)
+        preferences.librarySection = "FEmusic_liked_albums"
+        #expect(preferences.librarySection == "FEmusic_liked_albums")
+        preferences.librarySection = nil
+        #expect(preferences.librarySection == nil)
+    }
+
+    @Test func librarySortIsStoredPerSection() {
+        let (preferences, _) = makePreferences()
+        preferences.setLibrarySort("A to Z", for: "FEmusic_liked_albums")
+        preferences.setLibrarySort("local.za", for: "FEmusic_liked_videos")
+        #expect(preferences.librarySort(for: "FEmusic_liked_albums") == "A to Z")
+        #expect(preferences.librarySort(for: "FEmusic_liked_videos") == "local.za")
+        #expect(preferences.librarySort(for: "FEmusic_liked_playlists") == nil)
+        preferences.setLibrarySort(nil, for: "FEmusic_liked_albums")
+        #expect(preferences.librarySort(for: "FEmusic_liked_albums") == nil)
+        preferences.setLibrarySort("x", for: "bogus")
+        #expect(preferences.librarySort(for: "bogus") == nil)
+    }
 }

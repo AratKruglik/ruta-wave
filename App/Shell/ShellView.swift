@@ -5,10 +5,12 @@ struct ShellView<AccountPopover: View>: View {
     let isSignedIn: Bool
     let identity: ContentIdentity
     let avatarURL: URL?
-    let sidebar: SidebarModel.State
+    let sidebar: SidebarModel
     let guestFailed: Bool
     @Binding var isAccountPresented: Bool
     let onRetrySidebar: () -> Void
+    let onNewPlaylist: () -> Void
+    let onPlaylistRemoved: (String, Bool) -> Void
     let onRetryGuest: () -> Void
     let onSignIn: () -> Void
     @ViewBuilder let accountPopover: () -> AccountPopover
@@ -35,9 +37,10 @@ struct ShellView<AccountPopover: View>: View {
             NavigationSplitView(columnVisibility: columnVisibility) {
                 SidebarView(
                     selectedSection: navigation.selection, selectedPlaylistId: selectedPlaylistId, isSignedIn: isSignedIn,
-                    playlists: sidebar, onSelectSection: navigation.select, onSelectPlaylist: openPlaylist,
-                    onRetry: onRetrySidebar, onSignIn: onSignIn
+                    model: sidebar, onSelectSection: navigation.select, onSelectPlaylist: openPlaylist,
+                    onNewPlaylist: onNewPlaylist, onPlaylistRemoved: onPlaylistRemoved, onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
+                .id(identity)
                 .safeAreaPadding(.top, Metrics.topBarHeight)
                 .ignoresSafeArea(.container, edges: .top)
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
@@ -177,18 +180,27 @@ extension FocusedValues {
 private struct ShellPreview: View {
     let isSignedIn: Bool
     let player: PreviewPlayer
+    @State private var sidebar: SidebarModel
+
+    init(isSignedIn: Bool, player: PreviewPlayer) {
+        self.isSignedIn = isSignedIn
+        self.player = player
+        _sidebar = State(initialValue: PreviewFixtures.sidebarModel(isSignedIn ? .loaded : .guest))
+    }
 
     var body: some View {
         ShellView(
             isSignedIn: isSignedIn, identity: ContentIdentity(isSignedIn: isSignedIn, authUserIndex: 0), avatarURL: nil,
-            sidebar: .loaded(isSignedIn ? PreviewFixtures.playlists : []), guestFailed: false,
-            isAccountPresented: .constant(false), onRetrySidebar: {}, onRetryGuest: {}, onSignIn: {},
+            sidebar: sidebar, guestFailed: false,
+            isAccountPresented: .constant(false), onRetrySidebar: {}, onNewPlaylist: {}, onPlaylistRemoved: { _, _ in },
+            onRetryGuest: {}, onSignIn: {},
             accountPopover: { EmptyView() }
         )
         .environment(NavigationModel())
         .environment(PreviewFixtures.nowPlaying(player, signedIn: isSignedIn))
         .environment(ToastCenter())
         .environment(PreviewFixtures.searchFieldModel(.empty))
+        .task { await sidebar.load() }
         .frame(width: 1280, height: 800)
     }
 }

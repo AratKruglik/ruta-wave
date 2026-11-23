@@ -39,14 +39,35 @@ private func library(_ name: String) throws -> LibraryPage {
         #expect(ids[0] == BrowseTarget.likedMusic.browseId)
     }
 
-    @Test func sectionsAndSortOptionsAreChips() throws {
+    @Test func aSectionPageOffersOnlyItsOwnChipAndItsServerOrders() throws {
         let page = try library("library-playlists")
-        #expect(page.sections.map(\.title) == ["Playlists", "Songs", "Albums", "Artists", "Subscriptions"])
-        #expect(page.sections.map(\.target) == [.likedPlaylists, .likedSongs, .likedAlbums, .libraryArtists, .librarySubscriptions])
-        #expect(page.sections.map(\.isSelected) == [true, false, false, false, false])
-        #expect(page.sortOptions.map(\.title) == ["Recent activity", "A to Z"])
-        #expect(page.sortOptions.map(\.isSelected) == [true, false])
-        #expect(page.sortOptions.allSatisfy { $0.target?.browseId == "FEmusic_liked_playlists" && $0.target?.params != nil })
+        #expect(page.sections.map(\.title) == ["Playlists"])
+        #expect(page.sections.map(\.target) == [.likedPlaylists])
+        #expect(page.sortOptions.map(\.title) == ["Recently saved", "A to Z", "Z to A"])
+        #expect(page.sortOptions.map(\.isSelected) == [true, false, false])
+        #expect(page.sortOptions.map(\.continuation) == ["PLACEHOLDER_SORT_0", "PLACEHOLDER_SORT_1", "PLACEHOLDER_SORT_2"])
+    }
+
+    @Test func theLandingPageListsEverySectionButPodcastsAndProfiles() throws {
+        let page = try library("library-landing")
+        #expect(page.sections.map(\.title) == ["Playlists", "Songs", "Albums", "Artists"])
+        #expect(page.sections.map(\.target) == [.likedPlaylists, .likedSongs, .likedAlbums, .libraryArtists])
+    }
+
+    @Test func artistsOfferSubscriptionsAndOpenThePublicArtistPage() throws {
+        let page = try library("library-artists")
+        #expect(page.sections.map(\.target) == [.libraryArtists, .librarySubscriptions])
+        let ids = page.items.items.compactMap { item -> String? in
+            if case .artist(let artist) = item { artist.browseId } else { nil }
+        }
+        #expect(!ids.isEmpty)
+        #expect(ids.allSatisfy { $0.hasPrefix("UC") })
+    }
+
+    @Test func aSortReloadIsASectionListContinuationWithItsHeader() throws {
+        let page = try library("library-reload")
+        #expect(page.sortOptions.first(where: \.isSelected)?.title == "A to Z")
+        #expect(page.items.items.count == 1)
     }
 
     @Test func albumsSkipThePodcastShow() throws {

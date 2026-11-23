@@ -18,6 +18,12 @@ final class EntityModel {
 
     enum Paging: Equatable { case idle, loading, failed, done }
 
+    /// A successful save or unsave, for the sidebar and the Library.
+    enum LibraryChange: Equatable {
+        case playlist(Playlist, saved: Bool)
+        case album
+    }
+
     struct Content {
         var entity: Entity
         /// The playlist rows; empty for an album and an artist.
@@ -50,6 +56,7 @@ final class EntityModel {
     @ObservationIgnored private let loader: EntityLoader
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let toasts: ToastCenter
+    @ObservationIgnored private let onLibraryChange: @MainActor (LibraryChange) -> Void
     @ObservationIgnored private var attempt = 0
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var isRetired = false
@@ -62,11 +69,15 @@ final class EntityModel {
     @ObservationIgnored private var saveIntent = 0
     @ObservationIgnored private var subscribeIntent = 0
 
-    init(kind: Kind, loader: EntityLoader, credentials: @escaping @MainActor () -> Credentials?, toasts: ToastCenter) {
+    init(
+        kind: Kind, loader: EntityLoader, credentials: @escaping @MainActor () -> Credentials?, toasts: ToastCenter,
+        onLibraryChange: @escaping @MainActor (LibraryChange) -> Void = { _ in }
+    ) {
         self.kind = kind
         self.loader = loader
         self.credentials = credentials
         self.toasts = toasts
+        self.onLibraryChange = onLibraryChange
     }
 
     var loadKey: LoadKey { LoadKey(kind: kind, attempt: attempt, isReady: isReady) }
@@ -148,14 +159,28 @@ final class EntityModel {
         saveIntent += 1
         let intent = saveIntent
         let captured = generation
+        let change = libraryChange(saved: saved)
         Task { [loader] in
             do {
                 try await loader.save(id, saved, credentials)
+                guard generation == captured, saveIntent == intent, let change else { return }
+                onLibraryChange(change)
             } catch {
                 guard generation == captured, saveIntent == intent else { return }
                 update { $0.isSaved = !saved }
                 toasts.show("Couldn't update your library")
             }
+        }
+    }
+
+    /// The playlist was deleted or removed from the library elsewhere (the sidebar).
+    func playlistRemoved(deleted: Bool) {
+        guard case .playlist = kind else { return }
+        if deleted {
+            cancelInFlight()
+            state = .notAvailable
+        } else {
+            update { $0.isSaved = false }
         }
     }
 
@@ -209,6 +234,15 @@ final class EntityModel {
         }
     }
 
+    private func libraryChange(saved: Bool) -> LibraryChange? {
+        switch (kind, page) {
+        case (.album, _): return .album
+        case (.playlist(let browseId), .playlist(let playlist)?):
+            return .playlist(Playlist(browseId: browseId, title: playlist.header.title, thumbnailURL: playlist.header.thumbnailURL), saved: saved)
+        default: return nil
+        }
+    }
+
     private var playlistId: String? {
         if case .playlist(let browseId) = kind { browseId.hasPrefix("VL") ? String(browseId.dropFirst(2)) : browseId } else { nil }
     }
@@ -254,9 +288,7 @@ final class EntityModel {
             components?.path = "/playlist"
             components?.queryItems = [URLQueryItem(name: "list", value: id)]
         case .playlist(let browseId):
-            guard browseId != Route.likedMusicBrowseId, let id = playlistId else { return nil }
-            components?.path = "/playlist"
-            components?.queryItems = [URLQueryItem(name: "list", value: id)]
+            return PlaylistLink.shareURL(browseId: browseId)
         }
         return components?.url
     }
@@ -321,5 +353,17 @@ private extension [Shelf] {
                 title: shelf.title, strapline: shelf.strapline, more: shelf.more, layout: shelf.layout,
                 items: shelf.items.filter { if case .song(let song) = $0 { song.videoId != videoId } else { true } })
         }
+    }
+}
+
+enum PlaylistLink {
+    /// Nil for Liked music, which has no public URL.
+    static func shareURL(browseId: String) -> URL? {
+        guard browseId != Route.likedMusicBrowseId else { return nil }
+        let id = browseId.hasPrefix("VL") ? String(browseId.dropFirst(2)) : browseId
+        var components = URLComponents(string: "https://music.youtube.com")
+        components?.path = "/playlist"
+        components?.queryItems = [URLQueryItem(name: "list", value: id)]
+        return components?.url
     }
 }

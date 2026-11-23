@@ -129,13 +129,25 @@ public struct PlaylistPage: Sendable, Equatable {
     }
 }
 
+/// A server order of a library section. Choosing it reloads the section with `continuation`.
+public struct LibrarySort: Sendable, Equatable {
+    public let title: String
+    public let continuation: String
+    public let isSelected: Bool
+
+    public init(title: String, continuation: String, isSelected: Bool = false) {
+        self.title = title
+        self.continuation = continuation
+        self.isSelected = isSelected
+    }
+}
+
 public struct LibraryPage: Sendable, Equatable {
     public let sections: [Chip]
-    /// `isSelected` marks the current order.
-    public let sortOptions: [Chip]
+    public let sortOptions: [LibrarySort]
     public let items: Page<MusicItem>
 
-    public init(sections: [Chip], sortOptions: [Chip], items: Page<MusicItem>) {
+    public init(sections: [Chip], sortOptions: [LibrarySort], items: Page<MusicItem>) {
         self.sections = sections
         self.sortOptions = sortOptions
         self.items = items

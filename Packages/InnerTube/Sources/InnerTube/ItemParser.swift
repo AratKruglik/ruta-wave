@@ -193,6 +193,8 @@ enum ItemParser {
             switch pageType(browse) {
             case "MUSIC_PAGE_TYPE_ALBUM": return .album(browseId: browseId, params: browse["params"]?.string)
             case "MUSIC_PAGE_TYPE_ARTIST": return .artist(browseId)
+            // A library artist (`MPLA` + channel id) opens the public artist page.
+            case "MUSIC_PAGE_TYPE_LIBRARY_ARTIST" where browseId.hasPrefix("MPLAUC"): return .artist(String(browseId.dropFirst(4)))
             case "MUSIC_PAGE_TYPE_PLAYLIST": return .playlist(browseId)
             default: return nil
             }

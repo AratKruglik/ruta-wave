@@ -57,6 +57,34 @@ public struct Preferences: @unchecked Sendable {
         }
     }
 
+    /// The last Library section's browse id; anything but an `FEmusic_` id is refused.
+    public var librarySection: String? {
+        get { defaults.string(forKey: Key.librarySection).flatMap(Self.isLibrarySection) }
+        nonmutating set {
+            if let newValue {
+                if Self.isLibrarySection(newValue) != nil { defaults.set(newValue, forKey: Key.librarySection) }
+            } else {
+                defaults.removeObject(forKey: Key.librarySection)
+            }
+        }
+    }
+
+    /// A sort option's label (or a local id), never the opaque request params.
+    public func librarySort(for section: String) -> String? {
+        (defaults.dictionary(forKey: Key.librarySorts) as? [String: String])?[section]
+    }
+
+    public func setLibrarySort(_ sort: String?, for section: String) {
+        guard Self.isLibrarySection(section) != nil else { return }
+        var sorts = defaults.dictionary(forKey: Key.librarySorts) as? [String: String] ?? [:]
+        sorts[section] = sort
+        defaults.set(sorts, forKey: Key.librarySorts)
+    }
+
+    private static func isLibrarySection(_ value: String) -> String? {
+        value.hasPrefix("FEmusic_") ? value : nil
+    }
+
     private static func isCountryCode(_ value: String) -> String? {
         (1...8).contains(value.count) && value.allSatisfy { $0.isASCII && $0.isUppercase && $0.isLetter } ? value : nil
     }
@@ -69,6 +97,8 @@ public struct Preferences: @unchecked Sendable {
         static let repeatMode = "repeatMode"
         static let shuffle = "shuffle"
         static let chartCountry = "chartCountry"
+        static let librarySection = "librarySection"
+        static let librarySorts = "librarySorts"
         static let appLanguage = "appLanguage"
         static let appleLanguages = "AppleLanguages"
     }

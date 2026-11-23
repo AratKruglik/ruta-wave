@@ -48,6 +48,10 @@ targets:
       - App/Browse/BrowseStore.swift
       - App/Entity/EntityLoader.swift
       - App/Entity/EntityModel.swift
+      - App/Library/HistoryModel.swift
+      - App/Library/LibraryLoader.swift
+      - App/Library/LibraryModel.swift
+      - App/Library/NewPlaylistDraft.swift
       - App/Navigation/Route.swift
       - App/Search/SearchFieldModel.swift
       - App/Search/SearchLoader.swift
@@ -56,6 +60,7 @@ targets:
       - App/PlayerBar/PlaybackRules.swift
       - App/PlayerBar/NowPlayingModel.swift
       - App/PlayerBar/PlayerControlling.swift
+      - App/Shell/SidebarLoader.swift
       - App/Shell/SidebarModel.swift
       - App/Shell/Toast.swift
       - App/Theme/DesignTokens.swift

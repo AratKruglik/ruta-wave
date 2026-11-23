@@ -54,10 +54,12 @@ These shapes only occur when signed in or could not be reproduced as a guest. Th
 | `playlist-own.json` | An own playlist: the header wrapped in `musicEditablePlaylistDetailHeaderRenderer`, 2 tracks and a section-list continuation. Shape after `ytmusicapi` (`get_playlist`). |
 | `playlist-suggestions.json` | The section-list continuation of an own playlist: `sectionListContinuation` holding a "Suggestions" `musicShelfRenderer`. Shape after `ytmusicapi`. |
 | `liked-music.json` | `VLLM` signed in: two-column "Liked music" header without an owner link, 2 tracks and a trailing continuation |
-| `library-playlists.json` | `FEmusic_liked_playlists`: section chips, a sort dropdown (`itemSectionTabbedHeaderRenderer`), a grid with the "New playlist" card, Liked music (`VLLM`), a playlist and a continuation. Shape after `ytmusicapi` (`get_library_playlists`, `prepare_order_params`), plus a Podcasts and an Uploads chip (dropped, #7). |
+| `library-playlists.json` | `FEmusic_liked_playlists`: the header of a signed-in capture (2026-11-23): a `musicSideAlignedItemRenderer` with an icon-only chip back to `FEmusic_library_landing`, the section's own chip and a `musicSortFilterButtonRenderer` whose options reload by `browseSectionListReloadEndpoint`; a grid with the "New playlist" card, Liked music (`VLLM`), a playlist and a continuation. Placeholder data. |
+| `library-landing.json` | `FEmusic_library_landing`: the same header shape with every section chip, Podcasts and Profiles included (both dropped). Placeholder data. |
+| `library-reload.json` | A sort reload (`browse` with the option's `continuation`): `sectionListContinuation` that repeats the header with the chosen order as the button title, and a grid. Placeholder data. |
 | `library-songs.json` | `FEmusic_liked_videos`: a `musicShelfRenderer` directly in the section list with a song, a video and a continuation |
 | `library-albums.json` | `FEmusic_liked_albums`: a grid of 2 albums and a podcast show (skipped) |
-| `library-artists.json` | `FEmusic_library_corpus_track_artists`: a shelf of 2 artist rows in an `itemSectionRenderer` |
+| `library-artists.json` | `FEmusic_library_corpus_track_artists`: a shelf of 2 artist rows in an `itemSectionRenderer`. As in a signed-in capture, rows open `MUSIC_PAGE_TYPE_LIBRARY_ARTIST` with `MPLA` + channel id, and the header adds a Subscriptions chip. |
 | `library-subscriptions.json` | `FEmusic_library_corpus_artists`: a shelf of 2 artist rows |
 | `library-continuation.json` | A library continuation: `gridContinuation` with one playlist and no token |
 | `guide.json` | `guide` signed in: Home, Explore and Library, then Liked music (`VLLM`) and 2 placeholder playlists. Shape after `youtubei.js` (`GuideSection`, `GuideEntry`). It has no owner field. |

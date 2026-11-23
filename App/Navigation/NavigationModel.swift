@@ -7,6 +7,7 @@ final class NavigationModel {
     var isPlayerPagePresented = false
     private(set) var scrollToTopRequests: [SidebarSection: Int] = [:]
     private(set) var searchFocusRequests = 0
+    private(set) var newPlaylistRequests = 0
     var isSearchFocused = false
     private var paths: [SidebarSection: [Route]] = [:]
     /// The first route is the next one forward.
@@ -61,6 +62,10 @@ final class NavigationModel {
 
     func requestSearchFocus() {
         searchFocusRequests += 1
+    }
+
+    func requestNewPlaylist() {
+        newPlaylistRequests += 1
     }
 
     func back() {

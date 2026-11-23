@@ -231,223 +231,208 @@
               ]
              }
             }
-           ],
-           "header": {
-            "itemSectionTabbedHeaderRenderer": {
-             "endItems": [
-              {
-               "dropdownRenderer": {
-                "entries": [
-                 {
-                  "dropdownItemRenderer": {
-                   "isSelected": true,
-                   "label": {
-                    "runs": [
-                     {
-                      "text": "Recent activity"
-                     }
-                    ]
-                   },
-                   "onSelectCommand": {
-                    "browseEndpoint": {
-                     "browseEndpointContextSupportedConfigs": {
-                      "browseEndpointContextMusicConfig": {
-                       "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                      }
-                     },
-                     "browseId": "FEmusic_liked_playlists",
-                     "params": "PLACEHOLDER_SORT_1"
-                    }
-                   }
-                  }
-                 },
-                 {
-                  "dropdownItemRenderer": {
-                   "isSelected": false,
-                   "label": {
-                    "runs": [
-                     {
-                      "text": "A to Z"
-                     }
-                    ]
-                   },
-                   "onSelectCommand": {
-                    "browseEndpoint": {
-                     "browseEndpointContextSupportedConfigs": {
-                      "browseEndpointContextMusicConfig": {
-                       "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                      }
-                     },
-                     "browseId": "FEmusic_liked_playlists",
-                     "params": "PLACEHOLDER_SORT_2"
-                    }
-                   }
-                  }
-                 }
-                ]
-               }
-              }
-             ]
-            }
-           }
+           ]
           }
          }
         ],
         "header": {
-         "chipCloudRenderer": {
-          "chips": [
+         "musicSideAlignedItemRenderer": {
+          "endItems": [
            {
-            "chipCloudChipRenderer": {
-             "isSelected": true,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
+            "musicSortFilterButtonRenderer": {
+             "icon": {
+              "iconType": "CHEVRON_DOWN"
+             },
+             "menu": {
+              "musicMultiSelectMenuRenderer": {
+               "options": [
+                {
+                 "musicMultiSelectMenuItemRenderer": {
+                  "formItemEntityKey": "PLACEHOLDER_FORM_KEY_0",
+                  "selectedCommand": {
+                   "commandExecutorCommand": {
+                    "commands": [
+                     {
+                      "musicCheckboxFormItemMutatedCommand": {
+                       "formItemEntityKey": "PLACEHOLDER_FORM_KEY_0",
+                       "newCheckedState": true
+                      }
+                     },
+                     {
+                      "browseSectionListReloadEndpoint": {
+                       "continuation": {
+                        "reloadContinuationData": {
+                         "continuation": "PLACEHOLDER_SORT_0"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  "selectedIcon": {
+                   "iconType": "CHECK"
+                  },
+                  "title": {
+                   "runs": [
+                    {
+                     "text": "Recently saved"
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "musicMultiSelectMenuItemRenderer": {
+                  "formItemEntityKey": "PLACEHOLDER_FORM_KEY_1",
+                  "selectedCommand": {
+                   "commandExecutorCommand": {
+                    "commands": [
+                     {
+                      "musicCheckboxFormItemMutatedCommand": {
+                       "formItemEntityKey": "PLACEHOLDER_FORM_KEY_1",
+                       "newCheckedState": true
+                      }
+                     },
+                     {
+                      "browseSectionListReloadEndpoint": {
+                       "continuation": {
+                        "reloadContinuationData": {
+                         "continuation": "PLACEHOLDER_SORT_1"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  "selectedIcon": {
+                   "iconType": "CHECK"
+                  },
+                  "title": {
+                   "runs": [
+                    {
+                     "text": "A to Z"
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "musicMultiSelectMenuItemRenderer": {
+                  "formItemEntityKey": "PLACEHOLDER_FORM_KEY_2",
+                  "selectedCommand": {
+                   "commandExecutorCommand": {
+                    "commands": [
+                     {
+                      "musicCheckboxFormItemMutatedCommand": {
+                       "formItemEntityKey": "PLACEHOLDER_FORM_KEY_2",
+                       "newCheckedState": true
+                      }
+                     },
+                     {
+                      "browseSectionListReloadEndpoint": {
+                       "continuation": {
+                        "reloadContinuationData": {
+                         "continuation": "PLACEHOLDER_SORT_2"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  "selectedIcon": {
+                   "iconType": "CHECK"
+                  },
+                  "title": {
+                   "runs": [
+                    {
+                     "text": "Z to A"
+                    }
+                   ]
+                  }
+                 }
                 }
-               },
-               "browseId": "FEmusic_liked_playlists"
+               ],
+               "title": {
+                "musicMenuTitleRenderer": {
+                 "primaryText": {
+                  "runs": [
+                   {
+                    "text": "Sort by"
+                   }
+                  ]
+                 }
+                }
+               }
               }
              },
-             "text": {
+             "title": {
               "runs": [
                {
-                "text": "Playlists"
+                "text": "Recently saved"
                }
               ]
              }
             }
-           },
+           }
+          ],
+          "startItems": [
            {
-            "chipCloudChipRenderer": {
-             "isSelected": false,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                }
-               },
-               "browseId": "FEmusic_liked_videos"
-              }
-             },
-             "text": {
-              "runs": [
-               {
-                "text": "Songs"
+            "chipCloudRenderer": {
+             "chips": [
+              {
+               "chipCloudChipRenderer": {
+                "icon": {
+                 "iconType": "CLOSE"
+                },
+                "isSelected": true,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_library_landing"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "uniqueId": "FEmusic_library_landing"
                }
-              ]
-             }
-            }
-           },
-           {
-            "chipCloudChipRenderer": {
-             "isSelected": false,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                }
-               },
-               "browseId": "FEmusic_library_non_music_audio_list"
-              }
-             },
-             "text": {
-              "runs": [
-               {
-                "text": "Podcasts"
+              },
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": true,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_liked_playlists"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Playlists"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_liked_playlists"
                }
-              ]
-             }
-            }
-           },
-           {
-            "chipCloudChipRenderer": {
-             "isSelected": false,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                }
-               },
-               "browseId": "FEmusic_liked_albums"
               }
-             },
-             "text": {
-              "runs": [
-               {
-                "text": "Albums"
-               }
-              ]
-             }
-            }
-           },
-           {
-            "chipCloudChipRenderer": {
-             "isSelected": false,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                }
-               },
-               "browseId": "FEmusic_library_privately_owned_landing"
-              }
-             },
-             "text": {
-              "runs": [
-               {
-                "text": "Uploads"
-               }
-              ]
-             }
-            }
-           },
-           {
-            "chipCloudChipRenderer": {
-             "isSelected": false,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                }
-               },
-               "browseId": "FEmusic_library_corpus_track_artists"
-              }
-             },
-             "text": {
-              "runs": [
-               {
-                "text": "Artists"
-               }
-              ]
-             }
-            }
-           },
-           {
-            "chipCloudChipRenderer": {
-             "isSelected": false,
-             "navigationEndpoint": {
-              "browseEndpoint": {
-               "browseEndpointContextSupportedConfigs": {
-                "browseEndpointContextMusicConfig": {
-                 "pageType": "MUSIC_PAGE_TYPE_LIBRARY_CONTENT_LANDING_PAGE"
-                }
-               },
-               "browseId": "FEmusic_library_corpus_artists"
-              }
-             },
-             "text": {
-              "runs": [
-               {
-                "text": "Subscriptions"
-               }
-              ]
-             }
+             ]
             }
            }
           ]

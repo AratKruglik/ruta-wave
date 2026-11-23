@@ -223,7 +223,7 @@ struct SearchModelTests {
         let store = BrowseStore(
             loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
             searchLoader: loader(Calls(), search: { _, _ in results([song("a")], chips: allChips) }), entityLoader: .stub,
-            toasts: ToastCenter(), credentials: { nil })
+            libraryLoader: .stub, toasts: ToastCenter(), credentials: { nil })
         let first = store.searchModel(for: .search(query: "q", filter: nil))
         await first?.load()
         let second = store.searchModel(for: .search(query: "q", filter: allChips[0].searchParams))

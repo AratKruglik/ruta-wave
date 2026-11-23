@@ -10,6 +10,8 @@ struct TrackRow: View {
     /// Replaces the chart rank in the leading column (an album's track number).
     var number: Int?
     var onPlay: (() -> Void)?
+    /// A History row: adds "Remove from history" to the context menu and the ⋮ menu.
+    var onRemoveFromHistory: (() -> Void)?
 
     private enum Field: Hashable { case main, like, dislike, menu, select }
 
@@ -76,10 +78,18 @@ struct TrackRow: View {
         .opacity(song.isAvailable ? 1 : Metrics.unavailableOpacity)
         .onHover { isHovering = $0 }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: showsActions)
-        .contextMenu { ItemMenu(item: item) }
+        .contextMenu { menu }
         .guestPrompt(
             isPresented: Binding(get: { prompt != nil }, set: { if !$0 { prompt = nil } }),
             reason: prompt == .dislike ? "Sign in to dislike songs" : "Sign in to like songs", onSignIn: requestSignIn.perform)
+    }
+
+    @ViewBuilder private var menu: some View {
+        ItemMenu(item: item)
+        if let onRemoveFromHistory {
+            Divider()
+            Button("Remove from history", action: onRemoveFromHistory)
+        }
     }
 
     private func play() {
@@ -139,7 +149,7 @@ struct TrackRow: View {
             }
             actionButton(rating == .like ? "hand.thumbsup.fill" : "hand.thumbsup", label: "Like", field: .like) { rate(.like) }
             actionButton(rating == .dislike ? "hand.thumbsdown.fill" : "hand.thumbsdown", label: "Dislike", field: .dislike) { rate(.dislike) }
-            Menu { ItemMenu(item: item) } label: {
+            Menu { menu } label: {
                 Image(systemName: "ellipsis")
                     .font(.rwIcon(Metrics.iconRow))
                     .foregroundStyle(.textPrimary)

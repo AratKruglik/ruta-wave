@@ -1,7 +1,8 @@
 extension LibraryPage {
-    // podcasts and uploads sections are out of scope (#7)
+    // Podcasts and uploads are out of scope (#7); profiles are user channels, which have no page here.
     private static func isHiddenSection(_ browseId: String) -> Bool {
-        browseId == "FEmusic_library_non_music_audio_list" || browseId.hasPrefix("FEmusic_library_privately_owned_")
+        ["FEmusic_library_non_music_audio_list", "FEmusic_library_user_profile_channels_list"].contains(browseId)
+            || browseId.hasPrefix("FEmusic_library_privately_owned_")
     }
 
     private struct Container {
@@ -21,20 +22,39 @@ extension LibraryPage {
 
     init(library json: JSONValue) throws(InnerTubeError) {
         guard let list = json.sectionList else { throw .unexpectedResponse }
-        let blocks = list["contents"]?.array ?? []
-        let container = Self.container(blocks)
-        let sortEntries = blocks.lazy.compactMap {
-            $0["itemSectionRenderer"]?["header"]?["itemSectionTabbedHeaderRenderer"]?["endItems"]?.array
-        }.first?.flatMap { $0["dropdownRenderer"]?["entries"]?.array ?? [] } ?? []
+        let container = Self.container(list["contents"]?.array ?? [])
+        let header = list["header"]?["musicSideAlignedItemRenderer"]
         self.init(
-            sections: ItemParser.chips(list["header"]?["chipCloudRenderer"]).filter { $0.target.map { !Self.isHiddenSection($0.browseId) } ?? false },
-            sortOptions: sortEntries.compactMap { entry in
-                guard let item = entry["dropdownItemRenderer"], let title = item["label"].flatMap(text) ?? item["label"]?.string,
-                      let target = item["onSelectCommand"]?["browseEndpoint"].flatMap(ItemParser.browseTarget)
-                else { return nil }
-                return Chip(title: title, target: target, isSelected: item["isSelected"]?.bool ?? false)
-            },
+            sections: (header?["startItems"]?.array ?? []).flatMap { Self.chips($0["chipCloudRenderer"]) },
+            sortOptions: (header?["endItems"]?.array ?? []).flatMap { Self.sorts($0["musicSortFilterButtonRenderer"]) },
             items: Page(items: parseBlocks(container?.rows ?? [], ItemParser.item), continuation: container?.node.nextContinuation))
+    }
+
+    // A chip runs a `commandExecutorCommand` whose first `browseEndpoint` is the section. The icon-only chip (back to the landing page) has no title.
+    private static func chips(_ chipCloud: JSONValue?) -> [Chip] {
+        (chipCloud?["chips"]?.array ?? []).compactMap { block in
+            guard let chip = block["chipCloudChipRenderer"], let title = chip["text"].flatMap(text) else { return nil }
+            let endpoint = chip["navigationEndpoint"]
+            let commands = endpoint?["commandExecutorCommand"]?["commands"]?.array ?? endpoint.map { [$0] } ?? []
+            guard let target = commands.lazy.compactMap({ $0["browseEndpoint"].flatMap(ItemParser.browseTarget) }).first,
+                  !isHiddenSection(target.browseId)
+            else { return nil }
+            return Chip(title: title, target: target, isSelected: chip["isSelected"]?.bool ?? false)
+        }
+    }
+
+    // Every option carries a check icon, so the button title is what names the current order.
+    private static func sorts(_ button: JSONValue?) -> [LibrarySort] {
+        guard let button else { return [] }
+        let current = button["title"].flatMap(text)
+        return (button["menu"]?["musicMultiSelectMenuRenderer"]?["options"]?.array ?? []).compactMap { option in
+            guard let item = option["musicMultiSelectMenuItemRenderer"], let title = item["title"].flatMap(text),
+                  let token = (item["selectedCommand"]?["commandExecutorCommand"]?["commands"]?.array ?? []).lazy.compactMap({
+                      $0["browseSectionListReloadEndpoint"]?["continuation"]?["reloadContinuationData"]?["continuation"]?.string
+                  }).first
+            else { return nil }
+            return LibrarySort(title: title, continuation: token, isSelected: title == current)
+        }
     }
 }
 

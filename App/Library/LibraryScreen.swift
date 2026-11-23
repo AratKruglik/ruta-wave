@@ -1,0 +1,270 @@
+import InnerTube
+import SwiftUI
+
+struct LibraryScreen: View {
+    let model: LibraryModel
+
+    @Environment(NavigationModel.self) private var navigation
+    @State private var width = Metrics.defaultWindowWidth
+
+    private var padding: CGFloat { width >= Metrics.widePageWidth ? Metrics.space32 : Metrics.space24 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Metrics.space16) {
+            header
+            if !model.sections.isEmpty {
+                ChipRow(chips: model.sections, onSelect: model.selectSection)
+            } else if case .loading = model.state {
+                SkeletonChips()
+            }
+            pageBody
+        }
+        .padding([.horizontal, .top], padding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .task(id: model.loadKey) { await model.load() }
+    }
+
+    private var header: some View {
+        HStack(spacing: Metrics.space12) {
+            Text("Library")
+                .font(.rwShelfTitle)
+                .foregroundStyle(.textPrimary)
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: Metrics.space16)
+            if !model.sortOptions.isEmpty { sortMenu }
+            Button { navigation.push(.history) } label: { HeaderIcon(symbol: "clock") }
+                .buttonStyle(.plain)
+                .help("History")
+                .accessibilityLabel("History")
+        }
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            ForEach(model.sortOptions) { option in
+                Button { model.selectSort(option) } label: {
+                    if option.isSelected { Label(option.title, systemImage: "checkmark") } else { Text(option.title) }
+                }
+            }
+        } label: {
+            HeaderIcon(symbol: "arrow.up.arrow.down")
+        }
+        .menuStyle(.button)
+        .menuIndicator(.hidden)
+        .buttonStyle(.plain)
+        .fixedSize()
+        .help("Sort")
+        .accessibilityLabel("Sort")
+    }
+
+    @ViewBuilder
+    private var pageBody: some View {
+        switch model.state {
+        case .loading:
+            ScrollView {
+                switch LibraryModel.kind(of: model.section) {
+                case .songs, .artists: SkeletonRows(count: 8)
+                case .playlists, .albums: SkeletonCards()
+                }
+            }
+            .scrollDisabled(true)
+        case .failed:
+            PageErrorView(onRetry: model.retry)
+        case .loaded(let content):
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Metrics.space16) {
+                    loaded(content)
+                    footer(content.paging)
+                }
+                .padding(.bottom, padding)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func loaded(_ content: LibraryModel.Content) -> some View {
+        switch content.kind {
+        case .playlists, .albums:
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
+                alignment: .leading, spacing: Metrics.space24
+            ) {
+                if content.kind == .playlists { NewPlaylistCard(action: navigation.requestNewPlaylist) }
+                if let liked = content.likedMusic { MusicCard(item: .playlist(liked)) }
+                ForEach(Array(content.items.enumerated()), id: \.element.libraryKey) { index, item in
+                    MusicCard(item: item).onAppear { prefetch(index, of: content.items.count) }
+                }
+            }
+            if content.kind == .albums, content.items.isEmpty { hint("Albums you save appear here") }
+        case .songs:
+            LazyVStack(spacing: 0) {
+                ForEach(Array(content.items.enumerated()), id: \.element.libraryKey) { index, item in
+                    if case .song(let song) = item {
+                        TrackRow(song: song, density: .detailed).onAppear { prefetch(index, of: content.items.count) }
+                    }
+                }
+            }
+            if content.items.isEmpty { hint("Songs you like appear here") }
+        case .artists:
+            LazyVStack(spacing: 0) {
+                ForEach(Array(content.items.enumerated()), id: \.element.libraryKey) { index, item in
+                    if case .artist(let artist) = item {
+                        ArtistRow(artist: artist).onAppear { prefetch(index, of: content.items.count) }
+                    }
+                }
+            }
+            if content.items.isEmpty {
+                if model.section == BrowseTarget.librarySubscriptions.browseId {
+                    hint("Artists you subscribe to appear here")
+                } else {
+                    hint("Artists you listen to appear here")
+                }
+            }
+        }
+    }
+
+    private func hint(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.rwBody)
+            .foregroundStyle(.textSecondary)
+            .padding(.vertical, Metrics.space16)
+    }
+
+    private func prefetch(_ index: Int, of count: Int) {
+        if index >= count - 10 { model.loadMore() }
+    }
+
+    @ViewBuilder
+    private func footer(_ paging: LibraryModel.Paging) -> some View {
+        switch paging {
+        case .loading: ProgressView().frame(maxWidth: .infinity).controlSize(.small)
+        case .failed: InlineErrorRow(onRetry: model.retryMore)
+        case .idle: Color.clear.frame(height: 1).onAppear { model.loadMore() }
+        case .done: EmptyView()
+        }
+    }
+}
+
+private struct HeaderIcon: View {
+    let symbol: String
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.rwIcon(Metrics.iconRow))
+            .foregroundStyle(.textPrimary)
+            .frame(width: Metrics.shelfControl, height: Metrics.shelfControl)
+            .background(.surfaceFill, in: Circle())
+            .contentShape(Circle())
+    }
+}
+
+private struct SkeletonCards: View {
+    var body: some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
+            alignment: .leading, spacing: Metrics.space24
+        ) {
+            ForEach(0..<8, id: \.self) { _ in
+                RoundedRectangle(cornerRadius: Metrics.radiusCard).fill(.surfaceFill)
+                    .frame(width: Metrics.cardSize, height: Metrics.cardSize)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct NewPlaylistCard: View {
+    let action: () -> Void
+
+    @State private var isHovering = false
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: Metrics.space8) {
+                Image(systemName: "plus")
+                    .font(.rwIcon(Metrics.iconPlay))
+                    .foregroundStyle(.textPrimary)
+                    .frame(width: Metrics.cardSize, height: Metrics.cardSize)
+                    .background(isHovering || isFocused ? Color.surfaceRaised : .surfaceFill, in: RoundedRectangle(cornerRadius: Metrics.radiusCard))
+                    .overlay { RoundedRectangle(cornerRadius: Metrics.radiusCard).stroke(.strokeFocus, lineWidth: isFocused ? 2 : 0) }
+                Text("New playlist")
+                    .font(.rwTitle)
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
+            }
+            .frame(width: Metrics.cardSize, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .focused($isFocused)
+        .onHover { isHovering = $0 }
+        .accessibilityLabel("New playlist")
+    }
+}
+
+struct LibraryGuestView: View {
+    let onSignIn: () -> Void
+
+    var body: some View {
+        VStack(spacing: Metrics.space12) {
+            Text("Enjoy your favourite music")
+                .font(.rwShelfTitle)
+                .foregroundStyle(.textPrimary)
+                .accessibilityAddTraits(.isHeader)
+            Text("Sign in to see your playlists, songs, albums and artists in one place.")
+                .font(.rwBody)
+                .foregroundStyle(.textSecondary)
+                .multilineTextAlignment(.center)
+            Button(action: onSignIn) { InversePillLabel(title: "Sign in") }
+                .buttonStyle(.plain)
+        }
+        .padding(Metrics.space24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private extension MusicItem {
+    var libraryKey: String {
+        switch self {
+        case .song(let song): song.videoId
+        case .album(let album): album.browseId
+        case .playlist(let playlist): playlist.browseId
+        case .artist(let artist): artist.browseId
+        case .link(let link): link.title
+        }
+    }
+}
+
+#if DEBUG
+#Preview("Playlists") { LibraryPreview(.playlists) }
+#Preview("Songs") { LibraryPreview(.songs) }
+#Preview("Albums") { LibraryPreview(.albums) }
+#Preview("Artists") { LibraryPreview(.artists) }
+#Preview("Empty section") { LibraryPreview(.empty) }
+#Preview("Loading") { LibraryPreview(.loading) }
+#Preview("Failed") { LibraryPreview(.failed) }
+#Preview("Guest") {
+    LibraryGuestView(onSignIn: {}).frame(width: 900, height: 500).background(.themeBase)
+}
+
+private struct LibraryPreview: View {
+    let variant: PreviewFixtures.LibraryVariant
+    @State private var model: LibraryModel
+
+    init(_ variant: PreviewFixtures.LibraryVariant) {
+        self.variant = variant
+        _model = State(initialValue: PreviewFixtures.libraryModel(variant))
+    }
+
+    var body: some View {
+        LibraryScreen(model: model)
+            .frame(width: 1100, height: 800)
+            .environment(NavigationModel())
+            .environment(PreviewFixtures.nowPlaying())
+            .environment(ToastCenter())
+            .background(.themeBase)
+    }
+}
+#endif
