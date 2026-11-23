@@ -65,9 +65,9 @@ struct ArtistHeader: View {
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(isSubscribed ? .isSelected : [])
                 .guestPrompt(isPresented: $isSubscribePromptShown, reason: "Sign in to subscribe", onSignIn: requestSignIn.perform)
-                if let count = artist.subscriberCountText {
-                    Text(count).font(.rwCaption).foregroundStyle(.textSecondary)
-                }
+            }
+            if let count = artist.subscriberCountText {
+                Text(count).font(.rwCaption).foregroundStyle(.textSecondary)
             }
             Spacer(minLength: 0)
             ShareButtons(url: model.shareURL)

@@ -229,6 +229,14 @@ struct NowPlayingModelTests {
         #expect(h.player.sent == [.load(videoId: "s1", playlistId: "PL1"), .load(videoId: "v1", playlistId: nil)])
     }
 
+    @Test func unavailableSongNeverLoads() {
+        let h = Harness()
+        let song = Song(videoId: "x", title: "x", isAvailable: false)
+        h.model.play(.song(song))
+        h.model.startRadio(song)
+        #expect(h.player.sent.isEmpty)
+    }
+
     @Test func startRadioFallsBackToTheSongRadioId() {
         let h = Harness()
         h.model.startRadio(Song(videoId: "s1", title: "T"))

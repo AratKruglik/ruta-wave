@@ -116,7 +116,9 @@ enum PreviewFixtures {
         case .artist: .artist(browseId: "UCpreview")
         default: .playlist(browseId: "VLPL1")
         }
-        let tracks = songs
+        let tracks = songs.enumerated().map { index, song in
+            index == 2 ? Song(videoId: song.videoId, title: song.title, artists: song.artists, album: song.album, duration: song.duration, isAvailable: false) : song
+        }
         let cards = cardItems
         let header = PageHeader(
             title: "Test Playlist With A Fairly Long Title", subtitle: "Playlist • 2026", secondSubtitle: "8 songs • 31 minutes",

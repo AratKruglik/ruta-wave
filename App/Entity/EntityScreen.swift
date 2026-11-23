@@ -80,12 +80,6 @@ struct EntityScreen: View {
             }
         }
         .padding(.horizontal, padding)
-        if let summary = album.header.secondSubtitle {
-            Text(summary)
-                .font(.rwBody)
-                .foregroundStyle(.textSecondary)
-                .padding(.horizontal, padding)
-        }
         shelves(album.shelves)
     }
 
@@ -104,7 +98,7 @@ struct EntityScreen: View {
     private func playlistBody(_ playlist: PlaylistPage, _ content: EntityModel.Content) -> some View {
         EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, showsShuffle: false, isWide: isWide)
             .padding(.horizontal, padding)
-        VStack(spacing: 0) {
+        LazyVStack(spacing: 0) {
             ForEach(content.tracks.indices, id: \.self) { index in
                 TrackRow(song: content.tracks[index], density: .detailed, isSelected: selection(index))
                     .onAppear { if index >= content.tracks.count - 10 { model.loadMore() } }

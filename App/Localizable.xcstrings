@@ -1278,6 +1278,16 @@
         }
       }
     },
+    "Unavailable" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недоступно"
+          }
+        }
+      }
+    },
     "Unmute" : {
       "localizations" : {
         "uk" : {

@@ -145,6 +145,22 @@ struct EntityModelTests {
         #expect(trackIds(model) == ["a", "b", "c"])
     }
 
+    @Test func aBurstOfLoadMoreSendsOneRequest() async {
+        let calls = Calls()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a"], next: "t1") }
+        loader.moreTracks = { _, _ in
+            calls.record("more")
+            try? await Task.sleep(for: .milliseconds(50))
+            return Page(items: [song("b")], continuation: nil)
+        }
+        let model = makeModel(loader: loader)
+        await model.load()
+        for _ in 0..<10 { model.loadMore() }
+        #expect(await waitUntil { content(model)?.paging == .done })
+        #expect(calls.all == ["more"])
+    }
+
     @Test func guestPageOneRepeatEndsPaging() async {
         var loader = EntityLoader.stub
         loader.playlist = { _, _ in playlistPage(["a", "b"], next: "t1") }

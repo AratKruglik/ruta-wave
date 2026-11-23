@@ -175,7 +175,8 @@ enum ItemParser {
         case .song(let videoId, let playlistId, let isVideo):
             return .song(Song(
                 videoId: videoId, playlistId: playlistId, title: title, subtitle: subtitle, artists: artists, album: album,
-                duration: duration(subtitleRuns + durationRuns), thumbnailURL: url, isExplicit: isExplicit, isVideo: isVideo, rank: rank))
+                duration: duration(subtitleRuns + durationRuns), thumbnailURL: url, isExplicit: isExplicit, isVideo: isVideo, rank: rank,
+                isAvailable: renderer["musicItemRendererDisplayPolicy"]?.string != "MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT"))
         case .album(let browseId, let params):
             return .album(Album(
                 browseId: browseId, title: title, subtitle: subtitle, artists: artists, thumbnailURL: url, isExplicit: isExplicit,

@@ -25,6 +25,21 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
 }
 
 @Suite struct ItemParserTests {
+    @Test func greyedOutRowIsKeptButUnavailable() throws {
+        let policy = #","musicItemRendererDisplayPolicy":"MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT""#
+        let ids = #","playlistItemData":{"videoId":"v9","playlistSetVideoId":"s9"}"#
+        guard case .song(let grey)? = try ItemParser.item(json(row(extra: ids + policy))) else {
+            Issue.record("expected song")
+            return
+        }
+        #expect(grey.videoId == "v9" && !grey.isAvailable)
+        guard case .song(let normal)? = try ItemParser.item(json(row(endpoint: watch("v1")))) else {
+            Issue.record("expected song")
+            return
+        }
+        #expect(normal.isAvailable)
+    }
+
     @Test func browsePageTypeDecidesAlbumArtistPlaylist() throws {
         guard case .album(let album) = try ItemParser.item(json(twoRow(endpoint: browse("MPREb_1", "MUSIC_PAGE_TYPE_ALBUM")))) else {
             Issue.record("expected album")

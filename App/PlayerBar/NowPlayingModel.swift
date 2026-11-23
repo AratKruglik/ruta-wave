@@ -148,6 +148,7 @@ final class NowPlayingModel {
     func play(_ item: MusicItem) {
         switch item {
         case .song(let song):
+            guard song.isAvailable else { return }
             // A row is a plain button, so a double-click would send the load twice.
             let key = song.videoId + (song.playlistId ?? "")
             let instant = now()
@@ -165,6 +166,7 @@ final class NowPlayingModel {
 
     // shortcut: RDAMVM{videoId} is the community-known radio id, unverified against a fixture; parse watchEndpoint params if radio starts fail.
     func startRadio(_ song: Song) {
+        guard song.isAvailable else { return }
         act(.load(videoId: song.videoId, playlistId: song.playlistId ?? "RDAMVM" + song.videoId))
     }
 

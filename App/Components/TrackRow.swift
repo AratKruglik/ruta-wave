@@ -65,6 +65,7 @@ struct TrackRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .disabled(!song.isAvailable)
             .focused($focus, equals: .main)
             .accessibilityLabel(accessibilityLabel)
 
@@ -72,6 +73,7 @@ struct TrackRow: View {
                 .opacity(showsActions ? 1 : 0)
                 .padding(.trailing, Metrics.space8)
         }
+        .opacity(song.isAvailable ? 1 : Metrics.unavailableOpacity)
         .onHover { isHovering = $0 }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: showsActions)
         .contextMenu { ItemMenu(item: item) }
@@ -179,6 +181,7 @@ struct TrackRow: View {
     private var accessibilityLabel: String {
         var parts = [number.map(String.init), song.title, artistLine, song.album?.name, song.duration]
         if isCurrent { parts.append(String(localized: "Now playing")) }
+        if !song.isAvailable { parts.append(String(localized: "Unavailable")) }
         return parts.compactMap { $0 }.joined(separator: ", ")
     }
 }
