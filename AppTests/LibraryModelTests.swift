@@ -16,16 +16,16 @@ private func playlist(_ id: String) -> MusicItem { .playlist(Playlist(browseId: 
 private func album(_ id: String) -> MusicItem { .album(Album(browseId: id, title: id)) }
 
 private func page(
-    _ items: [MusicItem], next: String? = nil, sections: [Chip] = sectionChips, sorts: [Chip] = []
+    _ items: [MusicItem], next: String? = nil, sections: [Chip] = sectionChips, sorts: [LibrarySort] = []
 ) -> LibraryPage {
     LibraryPage(sections: sections, sortOptions: sorts, items: Page(items: items, continuation: next))
 }
 
-private func serverSorts(selected: Int = 0) -> [Chip] {
-    ["Recent activity", "A to Z", "Z to A"].enumerated().map {
-        Chip(title: $1, target: BrowseTarget(browseId: "FEmusic_liked_playlists", params: "p\($0)"), isSelected: $0 == selected)
-    }
+private func serverSorts(selected: Int = 0) -> [LibrarySort] {
+    ["Recent activity", "A to Z", "Z to A"].enumerated().map { LibrarySort(title: $1, continuation: "p\($0)", isSelected: $0 == selected) }
 }
+
+private let landing = BrowseTarget.libraryLanding.browseId
 
 private let credentials = Credentials(cookies: [], authUserIndex: 0)
 
@@ -95,7 +95,7 @@ struct LibraryModelTests {
         }
         let model = makeModel(loader, preferences: preferences)
         await model.load()
-        #expect(calls.all == ["FEmusic_liked_albums"])
+        #expect(calls.all == ["FEmusic_liked_albums", landing])
         #expect(content(model)?.kind == .albums)
         #expect(model.sections.map(\.isSelected) == [false, false, true, false])
     }
@@ -111,7 +111,7 @@ struct LibraryModelTests {
         }
         let model = makeModel(loader, preferences: preferences)
         await model.load()
-        #expect(calls.all == ["FEmusic_library_corpus_artists", "FEmusic_liked_playlists"])
+        #expect(calls.all == ["FEmusic_library_corpus_artists", landing, "FEmusic_liked_playlists"])
         #expect(content(model)?.kind == .playlists)
     }
 
@@ -128,7 +128,7 @@ struct LibraryModelTests {
         model.selectSection(sectionChips[2])
         guard case .loading = model.state else { Issue.record("expected loading"); return }
         await model.load()
-        #expect(calls.all == ["FEmusic_liked_playlists", "FEmusic_liked_albums"])
+        #expect(calls.all == ["FEmusic_liked_playlists", landing, "FEmusic_liked_albums"])
         #expect(preferences.librarySection == "FEmusic_liked_albums")
         #expect(titles(model) == ["FEmusic_liked_albums"])
     }
@@ -144,23 +144,40 @@ struct LibraryModelTests {
         #expect(titles(model) == ["FEmusic_liked_playlists"])
     }
 
-    @Test func serverSortRequestsTheOptionsTargetAndIsRememberedByLabel() async {
+    @Test func serverSortReloadsWithTheOptionsTokenAndIsRememberedByLabel() async {
         let preferences = makePreferences()
         let calls = CallLog()
         var loader = LibraryLoader.stub
         loader.page = { target, _ in
-            calls.record(target.params ?? "none")
-            let index = target.params.flatMap { Int($0.dropFirst()) } ?? 0
-            return page([playlist("a")], sorts: serverSorts(selected: index))
+            calls.record(target.browseId)
+            return page([playlist("a")], sorts: serverSorts())
+        }
+        loader.reload = { token, _ in
+            calls.record(token)
+            return page([playlist("b")], sorts: serverSorts(selected: Int(token.dropFirst()) ?? 0))
         }
         let model = makeModel(loader, preferences: preferences)
         await model.load()
         #expect(model.sortOptions.map(\.title) == ["Recent activity", "A to Z", "Z to A"])
         model.selectSort(model.sortOptions[1])
         await model.load()
-        #expect(calls.all == ["none", "p1"])
+        #expect(calls.all == ["FEmusic_liked_playlists", landing, "p1"])
         #expect(model.sortOptions.map(\.isSelected) == [false, true, false])
+        #expect(titles(model) == ["b"])
         #expect(preferences.librarySort(for: "FEmusic_liked_playlists") == "A to Z")
+    }
+
+    @Test func aReloadWithoutAHeaderKeepsTheOrdersAndMarksTheChosenOne() async {
+        var loader = LibraryLoader.stub
+        loader.page = { _, _ in page([playlist("a")], sorts: serverSorts()) }
+        loader.reload = { _, _ in page([playlist("b")], sections: []) }
+        let model = makeModel(loader)
+        await model.load()
+        model.selectSort(model.sortOptions[2])
+        await model.load()
+        #expect(model.sortOptions.map(\.title) == ["Recent activity", "A to Z", "Z to A"])
+        #expect(model.sortOptions.map(\.isSelected) == [false, false, true])
+        #expect(model.sections.count == sectionChips.count)
     }
 
     @Test func rememberedServerSortIsRequestedOnFirstLoad() async {
@@ -169,13 +186,16 @@ struct LibraryModelTests {
         let calls = CallLog()
         var loader = LibraryLoader.stub
         loader.page = { target, _ in
-            calls.record(target.params ?? "none")
-            let index = target.params.flatMap { Int($0.dropFirst()) } ?? 0
-            return page([playlist("a")], sorts: serverSorts(selected: index))
+            calls.record(target.browseId)
+            return page([playlist("a")], sorts: serverSorts())
+        }
+        loader.reload = { token, _ in
+            calls.record(token)
+            return page([playlist("a")], sorts: serverSorts(selected: Int(token.dropFirst()) ?? 0))
         }
         let model = makeModel(loader, preferences: preferences)
         await model.load()
-        #expect(calls.all == ["none", "p2"])
+        #expect(calls.all == ["FEmusic_liked_playlists", landing, "p2"])
         #expect(model.sortOptions.map(\.isSelected) == [false, false, true])
     }
 
@@ -185,13 +205,29 @@ struct LibraryModelTests {
         let calls = CallLog()
         var loader = LibraryLoader.stub
         loader.page = { target, _ in
-            calls.record(target.params ?? "none")
+            calls.record(target.browseId)
             return page([playlist("a")], sorts: serverSorts())
         }
         let model = makeModel(loader, preferences: preferences)
         await model.load()
-        #expect(calls.all == ["none"])
+        #expect(calls.all == ["FEmusic_liked_playlists", landing])
         #expect(model.sortOptions.map(\.isSelected) == [true, false, false])
+    }
+
+    @Test func sectionChipsComeFromTheLandingPageWithSubFiltersAfterTheirSibling() async {
+        let subscriptions = Chip(title: "Subscriptions", target: .librarySubscriptions)
+        let preferences = makePreferences()
+        preferences.librarySection = BrowseTarget.libraryArtists.browseId
+        var loader = LibraryLoader.stub
+        loader.page = { target, _ in
+            target == .libraryLanding
+                ? page([], sections: sectionChips)
+                : page([], sections: [Chip(title: "Artists", target: .libraryArtists, isSelected: true), subscriptions])
+        }
+        let model = makeModel(loader, preferences: preferences)
+        await model.load()
+        #expect(model.sections.map(\.title) == ["Playlists", "Songs", "Albums", "Artists", "Subscriptions"])
+        #expect(model.sections.map(\.isSelected) == [false, false, false, true, false])
     }
 
     @Test func localSortOrdersLoadedItemsAndTogglesOff() async {
@@ -316,7 +352,8 @@ struct LibraryModelTests {
     @Test func invalidateReloadsWhileTheContentStaysVisible() async {
         let calls = CallLog()
         var loader = LibraryLoader.stub
-        loader.page = { _, _ in
+        loader.page = { target, _ in
+            if target == .libraryLanding { return page([]) }
             calls.record("page")
             if calls.all.count > 1 { try await Task.sleep(for: .milliseconds(50)) }
             return page([album("a\(calls.all.count)")])
@@ -334,7 +371,8 @@ struct LibraryModelTests {
     @Test func aFailedRefreshKeepsTheContent() async {
         let calls = CallLog()
         var loader = LibraryLoader.stub
-        loader.page = { _, _ in
+        loader.page = { target, _ in
+            if target == .libraryLanding { return page([]) }
             calls.record("page")
             if calls.all.count > 1 { throw Failure() }
             return page([album("a")])

@@ -134,6 +134,11 @@ public actor InnerTubeClient {
         try LibraryPage(library: await fetchBrowse(target, credentials: credentials))
     }
 
+    /// The section in the order of a `LibrarySort`.
+    public func libraryReload(_ token: String, credentials: Credentials?) async throws -> LibraryPage {
+        try LibraryPage(library: await fetch("browse", body: ["continuation": token], credentials: credentials))
+    }
+
     public func libraryContinuation(_ token: String, credentials: Credentials?) async throws -> Page<MusicItem> {
         try Page<MusicItem>(libraryContinuation: await fetch("browse", body: ["continuation": token], credentials: credentials))
     }

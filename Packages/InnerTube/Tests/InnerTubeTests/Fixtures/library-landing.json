@@ -1,0 +1,338 @@
+{
+ "contents": {
+  "singleColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "content": {
+       "sectionListRenderer": {
+        "contents": [
+         {
+          "gridRenderer": {
+           "items": []
+          }
+         }
+        ],
+        "header": {
+         "musicSideAlignedItemRenderer": {
+          "endItems": [
+           {
+            "musicSortFilterButtonRenderer": {
+             "icon": {
+              "iconType": "CHEVRON_DOWN"
+             },
+             "menu": {
+              "musicMultiSelectMenuRenderer": {
+               "options": [
+                {
+                 "musicMultiSelectMenuItemRenderer": {
+                  "formItemEntityKey": "PLACEHOLDER_FORM_KEY_0",
+                  "selectedCommand": {
+                   "commandExecutorCommand": {
+                    "commands": [
+                     {
+                      "musicCheckboxFormItemMutatedCommand": {
+                       "formItemEntityKey": "PLACEHOLDER_FORM_KEY_0",
+                       "newCheckedState": true
+                      }
+                     },
+                     {
+                      "browseSectionListReloadEndpoint": {
+                       "continuation": {
+                        "reloadContinuationData": {
+                         "continuation": "PLACEHOLDER_SORT_0"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  "selectedIcon": {
+                   "iconType": "CHECK"
+                  },
+                  "title": {
+                   "runs": [
+                    {
+                     "text": "Recent activity"
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "musicMultiSelectMenuItemRenderer": {
+                  "formItemEntityKey": "PLACEHOLDER_FORM_KEY_1",
+                  "selectedCommand": {
+                   "commandExecutorCommand": {
+                    "commands": [
+                     {
+                      "musicCheckboxFormItemMutatedCommand": {
+                       "formItemEntityKey": "PLACEHOLDER_FORM_KEY_1",
+                       "newCheckedState": true
+                      }
+                     },
+                     {
+                      "browseSectionListReloadEndpoint": {
+                       "continuation": {
+                        "reloadContinuationData": {
+                         "continuation": "PLACEHOLDER_SORT_1"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  "selectedIcon": {
+                   "iconType": "CHECK"
+                  },
+                  "title": {
+                   "runs": [
+                    {
+                     "text": "Recently saved"
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "musicMultiSelectMenuItemRenderer": {
+                  "formItemEntityKey": "PLACEHOLDER_FORM_KEY_2",
+                  "selectedCommand": {
+                   "commandExecutorCommand": {
+                    "commands": [
+                     {
+                      "musicCheckboxFormItemMutatedCommand": {
+                       "formItemEntityKey": "PLACEHOLDER_FORM_KEY_2",
+                       "newCheckedState": true
+                      }
+                     },
+                     {
+                      "browseSectionListReloadEndpoint": {
+                       "continuation": {
+                        "reloadContinuationData": {
+                         "continuation": "PLACEHOLDER_SORT_2"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  },
+                  "selectedIcon": {
+                   "iconType": "CHECK"
+                  },
+                  "title": {
+                   "runs": [
+                    {
+                     "text": "Recently played"
+                    }
+                   ]
+                  }
+                 }
+                }
+               ],
+               "title": {
+                "musicMenuTitleRenderer": {
+                 "primaryText": {
+                  "runs": [
+                   {
+                    "text": "Sort by"
+                   }
+                  ]
+                 }
+                }
+               }
+              }
+             },
+             "title": {
+              "runs": [
+               {
+                "text": "Recent activity"
+               }
+              ]
+             }
+            }
+           }
+          ],
+          "startItems": [
+           {
+            "chipCloudRenderer": {
+             "chips": [
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": false,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_liked_playlists"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Playlists"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_liked_playlists"
+               }
+              },
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": false,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_library_non_music_audio_list"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Podcasts"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_library_non_music_audio_list"
+               }
+              },
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": false,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_liked_videos"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Songs"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_liked_videos"
+               }
+              },
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": false,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_liked_albums"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Albums"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_liked_albums"
+               }
+              },
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": false,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_library_corpus_track_artists"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Artists"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_library_corpus_track_artists"
+               }
+              },
+              {
+               "chipCloudChipRenderer": {
+                "isSelected": false,
+                "navigationEndpoint": {
+                 "commandExecutorCommand": {
+                  "commands": [
+                   {
+                    "browseEndpoint": {
+                     "browseId": "FEmusic_library_user_profile_channels_list"
+                    }
+                   },
+                   {
+                    "musicLibraryPersistLaunchNavigationCommand": {}
+                   }
+                  ]
+                 }
+                },
+                "text": {
+                 "runs": [
+                  {
+                   "text": "Profiles"
+                  }
+                 ]
+                },
+                "uniqueId": "FEmusic_library_user_profile_channels_list"
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

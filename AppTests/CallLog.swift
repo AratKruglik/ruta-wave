@@ -13,6 +13,6 @@ struct LibraryStubFailure: Error {}
 
 extension LibraryLoader {
     static let stub = LibraryLoader(
-        page: { _, _ in throw LibraryStubFailure() }, more: { _, _ in throw LibraryStubFailure() }, history: { _ in [] },
+        page: { _, _ in throw LibraryStubFailure() }, reload: { _, _ in throw LibraryStubFailure() }, more: { _, _ in throw LibraryStubFailure() }, history: { _ in [] },
         feedback: { _, _ in })
 }

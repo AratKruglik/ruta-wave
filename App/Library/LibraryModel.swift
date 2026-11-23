@@ -58,7 +58,7 @@ final class LibraryModel {
     @ObservationIgnored private var seen: Set<String> = []
     @ObservationIgnored private var rawItems: [MusicItem] = []
     @ObservationIgnored private var appliedSort: String?
-    @ObservationIgnored private var serverSortTargets: [String: BrowseTarget] = [:]
+    @ObservationIgnored private var serverSorts: [LibrarySort] = []
     @ObservationIgnored private var moreTask: Task<Void, Never>?
 
     init(loader: LibraryLoader, credentials: @escaping @MainActor () -> Credentials?, preferences: Preferences = Preferences()) {
@@ -177,7 +177,8 @@ final class LibraryModel {
         let section: String
         let page: LibraryPage
         let appliedSort: String?
-        let sortTargets: [String: BrowseTarget]
+        let sorts: [LibrarySort]
+        let sections: [Chip]
     }
 
     private func restart() {
@@ -192,33 +193,63 @@ final class LibraryModel {
         let credentials = credentials()
         let isExplicit = requestedSection != nil
         var section = requestedSection ?? preferences.librarySection ?? Self.defaultSection
-        var target = BrowseTarget(browseId: section)
-        if let id = requestedSort, let sortTarget = serverSortTargets[id] { target = sortTarget }
-        var page = try await loader.page(target, credentials)
-        if !isExplicit, !page.sections.isEmpty, !page.sections.contains(where: { $0.target?.browseId == section }) {
+        var page: LibraryPage
+        if let id = requestedSort, let sort = serverSorts.first(where: { $0.title == id }) {
+            page = Self.keepingSorts(of: try await loader.reload(sort.continuation, credentials), selected: id, from: serverSorts)
+        } else {
+            page = try await loader.page(BrowseTarget(browseId: section), credentials)
+        }
+        // A section page offers only its own chips (Artists adds Subscriptions); the landing page lists every section.
+        var sections = sectionChips
+        if sections.isEmpty {
+            sections = try await loader.page(.libraryLanding, credentials).sections
+        }
+        sections = Self.merge(sections, page.sections)
+        if !isExplicit, !sections.isEmpty, !sections.contains(where: { $0.target?.browseId == section }) {
             section = Self.defaultSection
             page = try await loader.page(BrowseTarget(browseId: section), credentials)
         }
         let remembered = preferences.librarySort(for: section)
         var applied: String?
-        var targets: [String: BrowseTarget] = [:]
         if page.sortOptions.isEmpty {
             applied = remembered.flatMap { [Self.localAscending, Self.localDescending].contains($0) ? $0 : nil }
         } else {
             if requestedSort == nil, let remembered,
-               let chip = page.sortOptions.first(where: { $0.title == remembered }), !chip.isSelected, let rememberedTarget = chip.target {
-                page = try await loader.page(rememberedTarget, credentials)
+               let sort = page.sortOptions.first(where: { $0.title == remembered }), !sort.isSelected {
+                page = Self.keepingSorts(of: try await loader.reload(sort.continuation, credentials), selected: remembered, from: page.sortOptions)
             }
-            for chip in page.sortOptions { targets[chip.title] = chip.target }
             applied = page.sortOptions.first(where: \.isSelected)?.title
         }
-        return Fetched(section: section, page: page, appliedSort: applied, sortTargets: targets)
+        return Fetched(section: section, page: page, appliedSort: applied, sorts: page.sortOptions, sections: sections)
+    }
+
+    // A reload may come without the header; the order chosen is then the selected one.
+    private static func keepingSorts(of page: LibraryPage, selected: String, from previous: [LibrarySort]) -> LibraryPage {
+        guard page.sortOptions.isEmpty else { return page }
+        let sorts = previous.map { LibrarySort(title: $0.title, continuation: $0.continuation, isSelected: $0.title == selected) }
+        return LibraryPage(sections: page.sections, sortOptions: sorts, items: page.items)
+    }
+
+    // Sub-filters a section page adds (Artists offers Subscriptions) go right after their sibling.
+    static func merge(_ base: [Chip], _ extra: [Chip]) -> [Chip] {
+        var merged = base
+        var anchor: Int?
+        for chip in extra {
+            if let index = merged.firstIndex(where: { $0.target?.browseId == chip.target?.browseId }) {
+                anchor = index
+            } else {
+                let position = anchor.map { $0 + 1 } ?? merged.endIndex
+                merged.insert(chip, at: position)
+                anchor = position
+            }
+        }
+        return merged
     }
 
     private func apply(_ fetched: Fetched) {
         section = fetched.section
-        if !fetched.page.sections.isEmpty { sectionChips = fetched.page.sections }
-        serverSortTargets = fetched.sortTargets
+        if !fetched.sections.isEmpty { sectionChips = fetched.sections }
+        serverSorts = fetched.sorts
         appliedSort = fetched.appliedSort
         sortOptions = fetched.page.sortOptions.isEmpty
             ? Self.localOptions(selected: fetched.appliedSort)

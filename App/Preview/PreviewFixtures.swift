@@ -258,7 +258,7 @@ enum PreviewFixtures {
         }
         let sorts = variant == .playlists
             ? ["Recent activity", "A to Z", "Z to A"].enumerated().map {
-                Chip(title: $1, target: BrowseTarget(browseId: section.browseId, params: "p\($0)"), isSelected: $0 == 0)
+                LibrarySort(title: $1, continuation: "p\($0)", isSelected: $0 == 0)
             } : []
         let loader = LibraryLoader(
             page: { _, _ in
@@ -266,6 +266,7 @@ enum PreviewFixtures {
                 if variant == .failed { throw InnerTubeError.unexpectedResponse }
                 return LibraryPage(sections: chips, sortOptions: sorts, items: Page(items: items, continuation: nil))
             },
+            reload: { _, _ in LibraryPage(sections: chips, sortOptions: sorts, items: Page(items: items, continuation: nil)) },
             more: { _, _ in Page(items: [], continuation: nil) }, history: { _ in [] }, feedback: { _, _ in })
         preferences.librarySection = section.browseId
         return LibraryModel(loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, preferences: preferences)
@@ -279,7 +280,7 @@ enum PreviewFixtures {
             HistoryDay(title: "Yesterday", entries: songs.dropFirst(3).prefix(3).map { HistoryEntry(song: $0, feedbackToken: nil) }),
         ]
         let loader = LibraryLoader(
-            page: { _, _ in throw InnerTubeError.unexpectedResponse }, more: { _, _ in throw InnerTubeError.unexpectedResponse },
+            page: { _, _ in throw InnerTubeError.unexpectedResponse }, reload: { _, _ in throw InnerTubeError.unexpectedResponse }, more: { _, _ in throw InnerTubeError.unexpectedResponse },
             history: { _ in
                 if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
                 if variant == .failed { throw InnerTubeError.unexpectedResponse }

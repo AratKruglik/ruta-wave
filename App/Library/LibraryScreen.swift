@@ -12,10 +12,10 @@ struct LibraryScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.space16) {
             header
-            if model.sections.isEmpty {
-                SkeletonChips()
-            } else {
+            if !model.sections.isEmpty {
                 ChipRow(chips: model.sections, onSelect: model.selectSection)
+            } else if case .loading = model.state {
+                SkeletonChips()
             }
             pageBody
         }
