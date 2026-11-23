@@ -213,5 +213,80 @@ enum PreviewFixtures {
         model.focusChanged(true)
         return model
     }
+
+    enum SidebarVariant { case loaded, loading, failed, guest }
+
+    static func sidebarModel(_ variant: SidebarVariant) -> SidebarModel {
+        let list = playlists
+        let loader = SidebarLoader(
+            playlists: { _ in
+                if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
+                if variant == .failed { throw InnerTubeError.unexpectedResponse }
+                return list
+            },
+            create: { _, _ in "VLNEW" }, delete: { _, _ in }, removeFromLibrary: { _, _ in }, isOwned: { _, _ in false })
+        return SidebarModel(
+            loader: loader, credentials: { variant == .guest ? nil : Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
+    }
+
+    enum LibraryVariant { case playlists, songs, albums, artists, empty, loading, failed }
+
+    static func libraryModel(_ variant: LibraryVariant) -> LibraryModel {
+        let chips = [
+            Chip(title: "Playlists", target: .likedPlaylists), Chip(title: "Songs", target: .likedSongs),
+            Chip(title: "Albums", target: .likedAlbums), Chip(title: "Artists", target: .libraryArtists),
+            Chip(title: "Subscriptions", target: .librarySubscriptions),
+        ]
+        let section: BrowseTarget
+        let items: [MusicItem]
+        switch variant {
+        case .playlists, .loading, .failed:
+            section = .likedPlaylists
+            items = (1...6).map { .playlist(Playlist(browseId: "VLPL\($0)", title: "Test Playlist \($0)", subtitle: "Test Owner")) }
+        case .songs:
+            section = .likedSongs
+            items = songs.map(MusicItem.song)
+        case .albums:
+            section = .likedAlbums
+            items = (1...6).map { .album(Album(browseId: "MPREb\($0)", title: "Test Album \($0)", subtitle: "Album • Test Artist")) }
+        case .artists:
+            section = .libraryArtists
+            items = (1...6).map { .artist(Artist(browseId: "UC\($0)", name: "Test Artist \($0)", subtitle: "\($0)M subscribers")) }
+        case .empty:
+            section = .likedSongs
+            items = []
+        }
+        let sorts = variant == .playlists
+            ? ["Recent activity", "A to Z", "Z to A"].enumerated().map {
+                Chip(title: $1, target: BrowseTarget(browseId: section.browseId, params: "p\($0)"), isSelected: $0 == 0)
+            } : []
+        let loader = LibraryLoader(
+            page: { _, _ in
+                if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
+                if variant == .failed { throw InnerTubeError.unexpectedResponse }
+                return LibraryPage(sections: chips, sortOptions: sorts, items: Page(items: items, continuation: nil))
+            },
+            more: { _, _ in Page(items: [], continuation: nil) }, history: { _ in [] }, feedback: { _, _ in })
+        preferences.librarySection = section.browseId
+        return LibraryModel(loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, preferences: preferences)
+    }
+
+    enum HistoryVariant { case loaded, empty, loading, failed }
+
+    static func historyModel(_ variant: HistoryVariant) -> HistoryModel {
+        let days = [
+            HistoryDay(title: "Today", entries: songs.prefix(3).map { HistoryEntry(song: $0, feedbackToken: "tok-\($0.videoId)") }),
+            HistoryDay(title: "Yesterday", entries: songs.dropFirst(3).prefix(3).map { HistoryEntry(song: $0, feedbackToken: nil) }),
+        ]
+        let loader = LibraryLoader(
+            page: { _, _ in throw InnerTubeError.unexpectedResponse }, more: { _, _ in throw InnerTubeError.unexpectedResponse },
+            history: { _ in
+                if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
+                if variant == .failed { throw InnerTubeError.unexpectedResponse }
+                return variant == .empty ? [] : days
+            },
+            feedback: { _, _ in })
+        return HistoryModel(loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
+    }
 }
 #endif

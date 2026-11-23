@@ -45,10 +45,11 @@ private func artistPage(subscribed: Bool? = false, channel: String? = "UCchan") 
 @MainActor
 private func makeModel(
     _ kind: EntityModel.Kind = .playlist(browseId: "VLPL1"), loader: EntityLoader, signedIn: Bool = true,
-    toasts: ToastCenter = ToastCenter()
+    toasts: ToastCenter = ToastCenter(), onLibraryChange: @escaping @MainActor (EntityModel.LibraryChange) -> Void = { _ in }
 ) -> EntityModel {
     EntityModel(
-        kind: kind, loader: loader, credentials: { signedIn ? Credentials(cookies: [], authUserIndex: 0) : nil }, toasts: toasts)
+        kind: kind, loader: loader, credentials: { signedIn ? Credentials(cookies: [], authUserIndex: 0) : nil }, toasts: toasts,
+        onLibraryChange: onLibraryChange)
 }
 
 @MainActor
@@ -383,7 +384,7 @@ struct EntityModelTests {
     @Test func storeCachesResetsAndPropagatesReadiness() {
         let store = BrowseStore(
             loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
-            searchLoader: .stub, entityLoader: .stub, toasts: ToastCenter(), credentials: { nil })
+            searchLoader: .stub, entityLoader: .stub, libraryLoader: .stub, toasts: ToastCenter(), credentials: { nil })
         let route = Route.album(browseId: "MPREb1")
         let model = store.entityModel(for: route)
         #expect(model != nil)
@@ -398,7 +399,7 @@ struct EntityModelTests {
     @Test func resetBumpsTheStoreGeneration() {
         let store = BrowseStore(
             loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
-            searchLoader: .stub, entityLoader: .stub, toasts: ToastCenter(), credentials: { nil })
+            searchLoader: .stub, entityLoader: .stub, libraryLoader: .stub, toasts: ToastCenter(), credentials: { nil })
         let before = store.generation
         store.reset()
         #expect(store.generation == before + 1)
@@ -427,4 +428,99 @@ struct EntityModelTests {
         }
         #expect(calls.all.isEmpty)
     }
+
+    @Test func savingAPlaylistReportsTheChangeOnlyAfterSuccess() async {
+        let changes = Changes()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage() }
+        let model = makeModel(loader: loader, onLibraryChange: { changes.record($0) })
+        await model.load()
+        model.toggleSaved()
+        #expect(await waitUntil { changes.all.count == 1 })
+        #expect(changes.all == [.playlist(Playlist(browseId: "VLPL1", title: "P"), saved: true)])
+    }
+
+    @Test func savingAnAlbumReportsAnAlbumChange() async {
+        let changes = Changes()
+        var loader = EntityLoader.stub
+        loader.album = { _, _ in albumPage() }
+        let model = makeModel(.album(BrowseTarget(browseId: "MPREb1")), loader: loader, onLibraryChange: { changes.record($0) })
+        await model.load()
+        model.toggleSaved()
+        #expect(await waitUntil { changes.all == [.album] })
+    }
+
+    @Test func aFailedSaveReportsNothing() async {
+        let changes = Changes()
+        let toasts = ToastCenter()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage() }
+        loader.save = { _, _, _ in throw Failure() }
+        let model = makeModel(loader: loader, toasts: toasts, onLibraryChange: { changes.record($0) })
+        await model.load()
+        model.toggleSaved()
+        #expect(await waitUntil { toasts.message != nil })
+        #expect(changes.all.isEmpty)
+    }
+
+    @Test func aDeletedPlaylistIsNotAvailableAndCannotBeEdited() async {
+        let calls = Calls()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage() }
+        loader.save = { id, _, _ in calls.record(id) }
+        let model = makeModel(loader: loader)
+        await model.load()
+        model.playlistRemoved(deleted: true)
+        guard case .notAvailable = model.state else { Issue.record("expected notAvailable"); return }
+        model.toggleSaved()
+        model.add(song("z"))
+        try? await Task.sleep(for: .milliseconds(30))
+        #expect(calls.all.isEmpty)
+    }
+
+    @Test func aRemovedPlaylistShowsAsUnsaved() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(saved: true) }
+        let model = makeModel(loader: loader)
+        await model.load()
+        model.playlistRemoved(deleted: false)
+        guard case .loaded(let content) = model.state else { Issue.record("expected loaded"); return }
+        #expect(!content.isSaved)
+    }
+
+    @Test func storeReplacesAndCancelsTheLibraryModelsOnReset() {
+        let store = BrowseStore(
+            loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
+            searchLoader: .stub, entityLoader: .stub, libraryLoader: .stub, toasts: ToastCenter(), credentials: { nil })
+        let library = store.library
+        let history = store.history
+        store.reset()
+        #expect(store.library !== library)
+        #expect(store.history !== history)
+    }
+
+    @Test func storeForwardsAPlaylistSaveAndRemovalToTheSidebarChannel() async {
+        var entityLoader = EntityLoader.stub
+        entityLoader.playlist = { _, _ in playlistPage() }
+        let store = BrowseStore(
+            loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
+            searchLoader: .stub, entityLoader: entityLoader, libraryLoader: .stub, toasts: ToastCenter(),
+            credentials: { Credentials(cookies: [], authUserIndex: 0) })
+        let route = Route.playlist(browseId: "VLPL1")
+        let model = store.entityModel(for: route)
+        await model?.load()
+        model?.toggleSaved()
+        #expect(await waitUntil { store.lastPlaylistChange?.saved == true })
+        let first = store.lastPlaylistChange?.id
+        model?.toggleSaved()
+        #expect(await waitUntil { store.lastPlaylistChange?.id != first })
+        store.playlistRemoved("VLPL1", deleted: true)
+        guard case .notAvailable = model?.state else { Issue.record("expected notAvailable"); return }
+    }
+}
+
+@MainActor
+private final class Changes {
+    private(set) var all: [EntityModel.LibraryChange] = []
+    func record(_ change: EntityModel.LibraryChange) { all.append(change) }
 }

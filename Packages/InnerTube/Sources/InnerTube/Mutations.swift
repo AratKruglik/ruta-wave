@@ -28,10 +28,10 @@ public enum PlaylistEdit: Sendable, Equatable {
     case setDescription(String)
     case setPrivacy(PlaylistPrivacy)
 
-    static let maxTitleLength = 150
+    public static let maxTitleLength = 150
 
     /// The trimmed title, or `nil` when it is empty or longer than 150 characters.
-    static func validTitle(_ title: String) -> String? {
+    public static func validTitle(_ title: String) -> String? {
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty || trimmed.count > maxTitleLength ? nil : trimmed
     }

@@ -9,6 +9,11 @@ struct AppCommands: Commands {
     private var isEditingText: Bool { navigation?.isSearchFocused == true }
 
     var body: some Commands {
+        CommandGroup(replacing: .newItem) {
+            Button("New Playlist…") { navigation?.requestNewPlaylist() }
+                .keyboardShortcut("n")
+                .disabled(navigation == nil)
+        }
         CommandGroup(replacing: .printItem) {}
         CommandGroup(replacing: .saveItem) {}
         CommandMenu("Go") {

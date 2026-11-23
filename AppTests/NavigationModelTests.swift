@@ -158,4 +158,12 @@ struct NavigationModelTests {
         model.dropAccountRoutes()
         #expect(model.path(for: .home).isEmpty)
     }
+
+    @Test func requestingANewPlaylistCountsEveryRequest() {
+        let model = NavigationModel()
+        #expect(model.newPlaylistRequests == 0)
+        model.requestNewPlaylist()
+        model.requestNewPlaylist()
+        #expect(model.newPlaylistRequests == 2)
+    }
 }

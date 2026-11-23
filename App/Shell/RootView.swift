@@ -16,10 +16,13 @@ struct RootView: View {
     @State private var searchField: SearchFieldModel
     @State private var navigation = NavigationModel()
     @State private var account = AccountModel()
-    @State private var sidebar = SidebarModel()
+    @State private var sidebar: SidebarModel
     @State private var guest = GuestModel()
     @State private var isSigningIn = false
     @State private var isAccountPresented = false
+    @State private var isNewPlaylistPresented = false
+    @State private var isCreatingPlaylist = false
+    @State private var sidebarIdentity: ContentIdentity?
     @State private var accountAttempt = 0
     @State private var sidebarAttempt = 0
     @State private var guestAttempt = 0
@@ -31,8 +34,10 @@ struct RootView: View {
         let client = InnerTubeClient()
         let searchLoader = SearchLoader.live(client)
         _browse = State(initialValue: BrowseStore(
-            loader: .live(client), searchLoader: searchLoader, entityLoader: .live(client), toasts: toasts,
-            credentials: { session.credentials }))
+            loader: .live(client), searchLoader: searchLoader, entityLoader: .live(client), libraryLoader: .live(client),
+            toasts: toasts, credentials: { session.credentials }))
+        _sidebar = State(initialValue: SidebarModel(
+            loader: .live(client), credentials: { session.credentials }, toasts: toasts))
         _searchField = State(initialValue: SearchFieldModel(
             loader: searchLoader, credentials: { session.credentials }, toasts: toasts))
     }
@@ -68,6 +73,15 @@ struct RootView: View {
             navigation.dropIdentityRoutes()
             nowPlaying.resetAccountState()
             guest.reset()
+            isNewPlaylistPresented = false
+        }
+        .onChange(of: navigation.newPlaylistRequests) {
+            if session.state.isSignedIn { isNewPlaylistPresented = true } else { isSigningIn = true }
+        }
+        .onChange(of: browse.lastPlaylistChange) { _, change in
+            guard let change else { return }
+            sidebar.applyLibraryChange(change.playlist, saved: change.saved)
+            Task { await sidebar.load() }
         }
         .onChange(of: session.state.isSignedIn || guest.state == .connected, initial: true) { _, ready in
             browse.setReady(ready)
@@ -81,6 +95,10 @@ struct RootView: View {
         .sheet(isPresented: Binding(get: { isSigningIn }, set: { if !$0 { cancelSignIn() } })) {
             SignInSheet(session: session, onCancel: cancelSignIn)
         }
+        .sheet(isPresented: $isNewPlaylistPresented) {
+            NewPlaylistSheet(
+                isCreating: isCreatingPlaylist, onCancel: { isNewPlaylistPresented = false }, onCreate: createPlaylist)
+        }
         .sheet(isPresented: Binding(get: { session.isAddingAccount }, set: { if !$0 { session.cancelAddAccount() } })) {
             AddAccountSheet(session: session)
         }
@@ -89,8 +107,10 @@ struct RootView: View {
     private var shell: some View {
         ShellView(
             isSignedIn: session.state.isSignedIn, identity: session.contentIdentity, avatarURL: avatarURL,
-            sidebar: sidebar.state, guestFailed: !session.state.isSignedIn && guest.state == .failed,
+            sidebar: sidebar, guestFailed: !session.state.isSignedIn && guest.state == .failed,
             isAccountPresented: $isAccountPresented, onRetrySidebar: { sidebarAttempt += 1 },
+            onNewPlaylist: { navigation.requestNewPlaylist() },
+            onPlaylistRemoved: { browse.playlistRemoved($0, deleted: $1) },
             onRetryGuest: { guestAttempt += 1 }, onSignIn: { isSigningIn = true }
         ) {
             AccountView(
@@ -112,7 +132,12 @@ struct RootView: View {
             await account.load(session: session)
         }
         .task(id: ReloadKey(identity: session.contentIdentity, attempt: sidebarAttempt)) {
-            await sidebar.load(credentials: session.credentials)
+            // Reset here rather than in `onChange`: a reset that lands after this load started would drop its result.
+            if sidebarIdentity != session.contentIdentity {
+                sidebar.reset()
+                sidebarIdentity = session.contentIdentity
+            }
+            await sidebar.load()
         }
         .task(id: ReloadKey(identity: session.contentIdentity, attempt: guestAttempt)) {
             guard !session.state.isSignedIn else { return }
@@ -122,6 +147,30 @@ struct RootView: View {
 
     private var avatarURL: URL? {
         if case .loaded(let info, _) = account.state { info.avatarURL } else { nil }
+    }
+
+    private func createPlaylist(_ draft: NewPlaylistDraft) {
+        guard !isCreatingPlaylist else { return }
+        isCreatingPlaylist = true
+        Task {
+            let result = await sidebar.create(draft)
+            isCreatingPlaylist = false
+            switch result {
+            case .created(let browseId):
+                isNewPlaylistPresented = false
+                browse.libraryChanged()
+                navigation.push(.playlist(browseId: browseId))
+            case .mayExist:
+                isNewPlaylistPresented = false
+                browse.libraryChanged()
+                toasts.show("The playlist may have been created")
+                await sidebar.load()
+            case .failed:
+                toasts.show("Couldn't create the playlist")
+            case .discarded:
+                break
+            }
+        }
     }
 
     private func cancelSignIn() {
