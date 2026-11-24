@@ -1,6 +1,6 @@
 import Foundation
 
-enum SidebarSection: CaseIterable, Hashable, Sendable {
+enum SidebarSection: CaseIterable, Hashable, Sendable, Codable {
     case home, explore, library
 
     var title: LocalizedStringResource {
@@ -30,12 +30,12 @@ enum SidebarSection: CaseIterable, Hashable, Sendable {
     }
 }
 
-enum ExploreRoute: Hashable, Sendable {
+enum ExploreRoute: Hashable, Sendable, Codable {
     case newReleases, charts, moods
     case mood(params: String)
 }
 
-enum Route: Hashable, Sendable {
+enum Route: Hashable, Sendable, Codable {
     case explore(ExploreRoute)
     case library(section: String?)
     case search(query: String, filter: String?)

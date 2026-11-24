@@ -14,6 +14,8 @@ struct TopBar<AccountPopover: View>: View {
     let onSignIn: () -> Void
     @ViewBuilder let accountPopover: () -> AccountPopover
 
+    @Environment(\.themeBase) private var themeBase
+
     var body: some View {
         HStack(spacing: Metrics.space8) {
             HStack(spacing: Metrics.space4) {
@@ -56,7 +58,7 @@ struct TopBar<AccountPopover: View>: View {
     }
 
     /// Content scrolls under the bar: every control sits on glass there, older systems get the opaque bar.
-    private var backdrop: Color { LiquidGlass.isAvailable ? .clear : .themeBase }
+    private var backdrop: Color { LiquidGlass.isAvailable ? .clear : themeBase }
 
     @ViewBuilder private var trailing: some View {
         if isSignedIn {

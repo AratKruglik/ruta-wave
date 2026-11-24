@@ -58,6 +58,7 @@ final class EntityModel {
     @ObservationIgnored private let toasts: ToastCenter
     @ObservationIgnored private let onLibraryChange: @MainActor (LibraryChange) -> Void
     @ObservationIgnored private var attempt = 0
+    @ObservationIgnored private var lastLoadFailed = false
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var isRetired = false
     @ObservationIgnored private var loadedKey: LoadKey?
@@ -95,14 +96,20 @@ final class EntityModel {
             prime(content)
             state = .loaded(content)
             loadedKey = key
+            lastLoadFailed = false
         } catch {
             guard !Task.isCancelled, generation == captured else { return }
-            if case InnerTubeError.notAvailable = error { state = .notAvailable } else { state = .failed }
+            if case InnerTubeError.notAvailable = error { state = .notAvailable } else if case .loaded = state { lastLoadFailed = true } else { state = .failed }
         }
     }
 
     func retry() {
         attempt += 1
+    }
+
+    /// Called when the network comes back: reloads a failed page, or lets the footer retry a failed continuation.
+    func reloadIfFailed() {
+        if case .failed = state { attempt += 1 } else if lastLoadFailed { attempt += 1 } else { if case .loaded(let content) = state, content.paging == .failed { update { $0.paging = .idle } } }
     }
 
     func loadMore() {

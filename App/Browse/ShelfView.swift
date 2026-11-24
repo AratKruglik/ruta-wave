@@ -33,12 +33,16 @@ struct ShelfView: View {
     private var visibleCount: Int { max(1, Int((width + Metrics.space16) / (itemWidth + Metrics.space16))) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Metrics.space16) {
+        let content = VStack(alignment: .leading, spacing: Metrics.space16) {
             if shelf.title != nil || shelf.strapline != nil { header }
             shelfBody
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(shelf.title ?? "")
+        if let label = shelf.title ?? shelf.strapline {
+            content.accessibilityLabel(label)
+        } else {
+            content
+        }
     }
 
     private var header: some View {

@@ -643,3 +643,80 @@ struct NowPlayingModelTests {
         #expect(!h.model.detailsFailed && h.model.details != nil)
     }
 }
+
+
+@MainActor
+struct NetworkRecoveryTests {
+    private func harness(paused: Bool, clock: TestClock = TestClock()) -> Harness {
+        let harness = Harness(clock: clock)
+        harness.player.song = song("a")
+        harness.player.isPaused = paused
+        return harness
+    }
+
+    @Test func playbackResumesOnceAfterAnOutage() {
+        let harness = harness(paused: false)
+        harness.model.networkChanged(isOnline: false)
+        harness.model.networkChanged(isOnline: true)
+        harness.model.networkChanged(isOnline: true)
+        #expect(harness.player.sent == [.recover])
+    }
+
+    @Test func aPausedPlayerStaysPaused() {
+        let harness = harness(paused: true)
+        harness.model.networkChanged(isOnline: false)
+        harness.model.networkChanged(isOnline: true)
+        #expect(harness.player.sent.isEmpty)
+    }
+
+    @Test func nothingLoadedMeansNothingToRecover() {
+        let harness = Harness()
+        harness.model.networkChanged(isOnline: false)
+        harness.model.networkChanged(isOnline: true)
+        #expect(harness.player.sent.isEmpty)
+    }
+
+    @Test func aSecondOutageRecoversAgain() {
+        let clock = TestClock()
+        let harness = harness(paused: false, clock: clock)
+        for _ in 0..<2 {
+            harness.model.networkChanged(isOnline: false)
+            harness.model.networkChanged(isOnline: true)
+            clock.advance(.seconds(31))
+        }
+        #expect(harness.player.sent == [.recover, .recover])
+    }
+
+    @Test func reconnectsWithinThirtySecondsRecoverOnce() {
+        let clock = TestClock()
+        let harness = harness(paused: false, clock: clock)
+        for _ in 0..<2 {
+            harness.model.networkChanged(isOnline: false)
+            harness.model.networkChanged(isOnline: true)
+            clock.advance(.seconds(5))
+        }
+        #expect(harness.player.sent == [.recover])
+    }
+
+    @Test func pausingDuringTheOutageSendsNothing() {
+        let harness = harness(paused: false)
+        harness.model.networkChanged(isOnline: false)
+        harness.player.isPaused = true
+        harness.model.networkChanged(isOnline: true)
+        #expect(harness.player.sent.isEmpty)
+    }
+
+    @Test func anAccountSwitchDuringTheOutageSendsNothing() {
+        let harness = harness(paused: false)
+        harness.model.networkChanged(isOnline: false)
+        harness.model.resetAccountState()
+        harness.model.networkChanged(isOnline: true)
+        #expect(harness.player.sent.isEmpty)
+    }
+
+    @Test func goingOnlineWithoutAnOutageSendsNothing() {
+        let harness = harness(paused: false)
+        harness.model.networkChanged(isOnline: true)
+        #expect(harness.player.sent.isEmpty)
+    }
+}

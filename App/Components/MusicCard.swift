@@ -83,6 +83,7 @@ struct MusicCard: View {
             }
             .buttonStyle(.plain)
             .focused($focus, equals: .main)
+            .onReturn { activate(item, navigation: navigation, nowPlaying: nowPlaying) }
             .accessibilityLabel(accessibilityLabel)
 
             if item.canPlay {

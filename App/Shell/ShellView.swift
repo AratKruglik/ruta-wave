@@ -7,6 +7,7 @@ struct ShellView<AccountPopover: View>: View {
     let avatarURL: URL?
     let sidebar: SidebarModel
     let guestFailed: Bool
+    let isOffline: Bool
     @Binding var isAccountPresented: Bool
     let onRetrySidebar: () -> Void
     let onNewPlaylist: () -> Void
@@ -41,6 +42,8 @@ struct ShellView<AccountPopover: View>: View {
                     onNewPlaylist: onNewPlaylist, onPlaylistRemoved: onPlaylistRemoved, onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
                 .id(identity)
+                .disabled(navigation.isPlayerPagePresented)
+                .accessibilityHidden(navigation.isPlayerPagePresented)
                 .safeAreaPadding(.top, Metrics.topBarHeight)
                 .ignoresSafeArea(.container, edges: .top)
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
@@ -48,7 +51,11 @@ struct ShellView<AccountPopover: View>: View {
             } detail: {
                 content
                     .safeAreaInset(edge: .top, spacing: 0) {
-                        if guestFailed { GuestBanner(onRetry: onRetryGuest) }
+                        if isOffline {
+                            OfflineBanner().transition(.opacity)
+                        } else if guestFailed {
+                            GuestBanner(onRetry: onRetryGuest)
+                        }
                     }
                     .safeAreaPadding(.top, Metrics.topBarHeight)
                     .ignoresSafeArea(.container, edges: .top)
@@ -61,6 +68,8 @@ struct ShellView<AccountPopover: View>: View {
                     canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
                     onToggleSidebar: { setSidebarVisible(!isSidebarVisible) }, onHome: navigation.goHome,
                     onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
+                    .disabled(navigation.isPlayerPagePresented)
+                    .accessibilityHidden(navigation.isPlayerPagePresented)
             }
         }
         // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
@@ -74,7 +83,7 @@ struct ShellView<AccountPopover: View>: View {
         .windowBackdrop()
         .noInitialFocus()
         .focusedSceneValue(\.navigation, navigation)
-        .onChange(of: navigation.path(for: navigation.selection).last) { _, route in
+        .onChange(of: navigation.path(for: navigation.selection).last, initial: true) { _, route in
             if case .search(let query, _) = route { search.showQuery(query) }
         }
         .background(
@@ -102,6 +111,7 @@ struct ShellView<AccountPopover: View>: View {
             }
         }
         .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
+        .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: isOffline)
     }
 
     private var bottomOverlay: some View {
@@ -164,6 +174,24 @@ private struct GuestBanner: View {
     }
 }
 
+private struct OfflineBanner: View {
+    var body: some View {
+        VStack(spacing: Metrics.space4) {
+            Text("You're offline")
+                .font(.rwBody)
+                .foregroundStyle(.textPrimary)
+            Text("Pages you've opened stay available. Everything reloads when you're back online.")
+                .font(.rwCaption)
+                .foregroundStyle(.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Metrics.space8)
+        .background(.surfaceFill)
+        .accessibilityElement(children: .combine)
+        .onAppear { AccessibilityNotification.Announcement(String(localized: "You're offline")).post() }
+    }
+}
+
 extension FocusedValues {
     @Entry var navigation: NavigationModel?
 }
@@ -193,7 +221,7 @@ private struct ShellPreview: View {
     var body: some View {
         ShellView(
             isSignedIn: isSignedIn, identity: ContentIdentity(isSignedIn: isSignedIn, authUserIndex: 0), avatarURL: nil,
-            sidebar: sidebar, guestFailed: false,
+            sidebar: sidebar, guestFailed: false, isOffline: false,
             isAccountPresented: .constant(false), onRetrySidebar: {}, onNewPlaylist: {}, onPlaylistRemoved: { _, _ in },
             onRetryGuest: {}, onSignIn: {},
             accountPopover: { EmptyView() }

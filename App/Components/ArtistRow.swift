@@ -10,8 +10,10 @@ struct ArtistRow: View {
     @State private var popover: ItemPopover?
     @FocusState private var isFocused: Bool
 
+    private func open() { navigation.push(.artist(channelId: artist.browseId)) }
+
     var body: some View {
-        Button { navigation.push(.artist(channelId: artist.browseId)) } label: {
+        Button(action: open) {
             HStack(spacing: Metrics.space12) {
                 ArtworkImage(url: artist.thumbnailURL, width: Metrics.rowThumb, height: Metrics.rowThumb, isCircle: true)
                 VStack(alignment: .leading, spacing: 2) {
@@ -36,6 +38,7 @@ struct ArtistRow: View {
         }
         .buttonStyle(.plain)
         .focused($isFocused)
+        .onReturn(open)
         .onHover { isHovering = $0 }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: isHovering)
         .contextMenu { ItemMenu(item: .artist(artist), popover: $popover) }

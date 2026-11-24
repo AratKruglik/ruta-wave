@@ -17,6 +17,7 @@ struct BrowseScreen<Header: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .task(id: model.loadKey) { await model.load() }
+            .onReconnect { model.reloadIfFailed() }
             .onChange(of: navigation.scrollToTopRequests[navigation.selection]) { model.scrollAnchor = topAnchor }
     }
 
@@ -25,17 +26,14 @@ struct BrowseScreen<Header: View>: View {
         switch model.state {
         case .loading:
             ScrollView {
-                VStack(alignment: .leading, spacing: Metrics.space48) {
-                    SkeletonChips()
-                    ForEach(0..<3, id: \.self) { _ in SkeletonShelf() }
-                }
-                .padding(padding)
+                model.source.skeleton
+                    .padding(padding)
             }
             .scrollDisabled(true)
         case .failed:
             PageErrorView(onRetry: model.retry)
         case .empty:
-            EmptyPageView()
+            model.source.emptyPage
         case .loaded(let page):
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Metrics.space48) {
@@ -58,6 +56,7 @@ struct BrowseScreen<Header: View>: View {
                 }
                 .scrollTargetLayout()
                 .padding(padding)
+                .background(alignment: .top) { if model.source.isMoodSelected { ThemeHeaderGradient() } }
             }
             .scrollPosition(id: $model.scrollAnchor, anchor: .top)
         }
@@ -70,6 +69,57 @@ struct BrowseScreen<Header: View>: View {
         case .loading: ProgressView().frame(maxWidth: .infinity).controlSize(.small)
         case .failed: InlineErrorRow(onRetry: model.retryMore)
         case .done: EmptyView()
+        }
+    }
+}
+
+@MainActor private extension BrowseModel.Source {
+    var isMoodSelected: Bool {
+        if case .home(let params) = self { params != nil } else { false }
+    }
+
+    @ViewBuilder var skeleton: some View {
+        VStack(alignment: .leading, spacing: Metrics.space48) {
+            switch self {
+            case .home:
+                SkeletonChips()
+                ForEach(0..<3, id: \.self) { _ in SkeletonShelf() }
+            case .browse(let target):
+                switch target.browseId {
+                case BrowseTarget.explore.browseId:
+                    SkeletonTiles()
+                    ForEach(0..<2, id: \.self) { _ in SkeletonShelf() }
+                case BrowseTarget.moodsAndGenres.browseId, BrowseTarget.moodCategoryId:
+                    SkeletonTitle()
+                    SkeletonGrid(count: 12)
+                default:
+                    SkeletonTitle()
+                    SkeletonGrid(count: 12)
+                }
+            case .charts:
+                SkeletonTitle()
+                Capsule().fill(.surfaceFill).frame(width: 160, height: Metrics.chipHeight)
+                SkeletonRows(count: 10)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    var emptyPage: EmptyPageView {
+        switch self {
+        case .home: EmptyPageView(title: "Your home page is empty", message: "Play a few songs and recommendations will show up here.")
+        case .charts: EmptyPageView(title: "No charts for this country", message: "Pick another country above.")
+        case .browse(let target):
+            switch target.browseId {
+            case BrowseTarget.explore.browseId:
+                EmptyPageView(title: "Nothing to explore right now", message: "New releases, charts and moods will show up here. Try again later.")
+            case BrowseTarget.newReleases.browseId:
+                EmptyPageView(title: "No new releases right now", message: "New albums and singles will show up here as they come out.")
+            case BrowseTarget.moodsAndGenres.browseId, BrowseTarget.moodCategoryId:
+                EmptyPageView(title: "Nothing in this category yet", message: "Playlists for this mood will show up here.")
+            default:
+                EmptyPageView(title: "Nothing more here", message: "This list has no items yet.")
+            }
         }
     }
 }

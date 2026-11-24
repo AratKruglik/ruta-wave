@@ -3,6 +3,7 @@ import SwiftUI
 struct AppCommands: Commands {
     let nowPlaying: NowPlayingModel
     @FocusedValue(\.navigation) private var navigation: NavigationModel?
+    @FocusedValue(\.reorderSelection) private var reorder: ReorderAction?
 
     private var hasSong: Bool { nowPlaying.player.song != nil }
     /// A disabled item does not take its key, so the text field gets ⌘←, ⌘→ and friends.
@@ -59,8 +60,10 @@ struct AppCommands: Commands {
                 Button("Volume Down") { nowPlaying.adjustVolume(steps: -1) }
                     .keyboardShortcut(.downArrow)
                     .disabled(isEditingText)
+                // A disabled item does not take its key, so ⌥⌘↓ moves rows while a list has a reorderable selection.
                 Button("Mute", action: nowPlaying.toggleMute)
                     .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+                    .disabled(reorder != nil)
                 Divider()
                 Button("Repeat", action: nowPlaying.cycleRepeat)
                     .keyboardShortcut("r")
@@ -72,6 +75,13 @@ struct AppCommands: Commands {
                     .keyboardShortcut("d", modifiers: [.command, .option])
             }
             .disabled(!hasSong)
+            Divider()
+            Button("Move Up") { reorder?.up() }
+                .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+                .disabled(reorder == nil)
+            Button("Move Down") { reorder?.down() }
+                .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+                .disabled(reorder == nil)
             Divider()
             Button("Player Page") { navigation?.isPlayerPagePresented.toggle() }
                 .keyboardShortcut("p")

@@ -1,6 +1,13 @@
+import AppSettings
 import Auth
 import InnerTube
 import SwiftUI
+import SystemKit
+
+private struct ThemeKey: Equatable {
+    let artworkURL: URL?
+    let isEnabled: Bool
+}
 
 private struct ReloadKey: Equatable {
     let identity: ContentIdentity
@@ -11,11 +18,12 @@ struct RootView: View {
     let session: AuthSession
     let nowPlaying: NowPlayingModel
     let toasts: ToastCenter
+    let network: NetworkMonitor
 
     @State private var browse: BrowseStore
     @State private var searchField: SearchFieldModel
     @State private var trackTabs: TrackTabsModel
-    @State private var navigation = NavigationModel()
+    @State private var navigation: NavigationModel
     @State private var account = AccountModel()
     @State private var sidebar: SidebarModel
     @State private var guest = GuestModel()
@@ -27,11 +35,17 @@ struct RootView: View {
     @State private var accountAttempt = 0
     @State private var sidebarAttempt = 0
     @State private var guestAttempt = 0
+    @State private var theme = ArtworkTheme()
+    @State private var useArtworkColors = Preferences().useArtworkColors
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter) {
+    init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor) {
         self.session = session
         self.nowPlaying = nowPlaying
         self.toasts = toasts
+        self.network = network
+        _navigation = State(initialValue: .restored(
+            from: Preferences().navigationState, isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex))
         let client = InnerTubeClient()
         let searchLoader = SearchLoader.live(client)
         _browse = State(initialValue: BrowseStore(
@@ -59,10 +73,20 @@ struct RootView: View {
         .environment(nowPlaying)
         .environment(trackTabs)
         .environment(toasts)
+        .environment(network)
         .environment(sidebar)
         .environment(browse)
         .environment(searchField)
         .environment(\.requestSignIn, SignInRequest { isSigningIn = true })
+        .environment(\.themeBase, theme.base)
+        .environment(\.themeHeaderTop, theme.headerTop)
+        .animation(reduceMotion ? nil : .easeInOut(duration: Motion.theme), value: theme.base)
+        .task(id: ThemeKey(artworkURL: nowPlaying.player.song?.artworkURL, isEnabled: useArtworkColors)) {
+            await theme.update(artworkURL: useArtworkColors ? nowPlaying.player.song?.artworkURL : nil)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification).receive(on: DispatchQueue.main)) { _ in
+            useArtworkColors = Preferences().useArtworkColors
+        }
         .onChange(of: session.state.isSignedIn) { _, signedIn in
             if signedIn {
                 isSigningIn = false
@@ -81,6 +105,11 @@ struct RootView: View {
             toasts.reset()
             isNewPlaylistPresented = false
         }
+        .onChange(of: navigation.snapshot(isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex)) { _, snapshot in
+            Preferences().navigationState = try? JSONEncoder().encode(snapshot)
+        }
+        .onChange(of: network.reconnects) { retryFailedLoads() }
+        .onChange(of: network.isOnline) { _, online in nowPlaying.networkChanged(isOnline: online) }
         .onChange(of: navigation.newPlaylistRequests) {
             if session.state.isSignedIn { isNewPlaylistPresented = true } else { isSigningIn = true }
         }
@@ -114,7 +143,7 @@ struct RootView: View {
     private var shell: some View {
         ShellView(
             isSignedIn: session.state.isSignedIn, identity: session.contentIdentity, avatarURL: avatarURL,
-            sidebar: sidebar, guestFailed: !session.state.isSignedIn && guest.state == .failed,
+            sidebar: sidebar, guestFailed: !session.state.isSignedIn && guest.state == .failed, isOffline: !network.isOnline,
             isAccountPresented: $isAccountPresented, onRetrySidebar: { sidebarAttempt += 1 },
             onNewPlaylist: { navigation.requestNewPlaylist() },
             onPlaylistRemoved: { browse.playlistRemoved($0, deleted: $1) },
@@ -154,6 +183,12 @@ struct RootView: View {
 
     private var avatarURL: URL? {
         if case .loaded(let info, _) = account.state { info.avatarURL } else { nil }
+    }
+
+    private func retryFailedLoads() {
+        if case .failed = sidebar.state { sidebarAttempt += 1 }
+        if !session.state.isSignedIn, guest.state == .failed { guestAttempt += 1 }
+        if case .failed = account.state { accountAttempt += 1 }
     }
 
     private func createPlaylist(_ draft: NewPlaylistDraft) {

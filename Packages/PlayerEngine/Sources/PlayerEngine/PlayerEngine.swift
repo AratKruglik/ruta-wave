@@ -157,6 +157,9 @@ public final class PlayerEngine {
         case .setLike(let status):
             setLike(status)
             return
+        case .recover:
+            recover()
+            return
         case .setVolume(let level) where level.isFinite:
             requestedVolume = min(max(level, 0), 1)
         default:
@@ -231,6 +234,23 @@ public final class PlayerEngine {
         }
         attempts += 1
         return PlayerRules.loadURL(videoId: target.videoId, playlistId: target.playlistId, authUserIndex: isEphemeral ? nil : authUserIndex)
+    }
+
+    /// A page that stalled and came back resumes on its own; one that gave up is reloaded where it was.
+    private func recover() {
+        guard target != nil else { return }
+        if let webView, isReady, webView.url?.host()?.lowercased() == PlayerRules.playerHost {
+            send(.play)
+        } else {
+            prepareRecovery()
+            reload()
+        }
+    }
+
+    /// Not `load`, which would drop the position and queue the reload restores.
+    func prepareRecovery() {
+        snapshotForRestore()
+        attempts = 0
     }
 
     private func reload() {

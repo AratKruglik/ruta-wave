@@ -14,6 +14,7 @@ struct HistoryScreen: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .task(id: model.loadKey) { await model.load() }
+            .onReconnect { model.reloadIfFailed() }
     }
 
     @ViewBuilder

@@ -17,6 +17,7 @@ final class HistoryModel {
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let toasts: ToastCenter
     @ObservationIgnored private var attempt = 0
+    @ObservationIgnored private var lastLoadFailed = false
     @ObservationIgnored private var loadedAttempt: Int?
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var isRetired = false
@@ -40,14 +41,20 @@ final class HistoryModel {
             guard !Task.isCancelled, !isRetired, generation == captured else { return }
             state = days.isEmpty ? .empty : .loaded(days)
             loadedAttempt = key
+            lastLoadFailed = false
         } catch {
             guard !Task.isCancelled, !isRetired, generation == captured else { return }
-            state = .failed
+            if case .loaded = state { lastLoadFailed = true } else { state = .failed }
         }
     }
 
     func retry() {
         attempt += 1
+    }
+
+    /// Called when the network comes back.
+    func reloadIfFailed() {
+        if case .failed = state { attempt += 1 } else if lastLoadFailed { attempt += 1 }
     }
 
     /// Optimistic. The credentials are captured now, so a queued removal is never sent with another account.

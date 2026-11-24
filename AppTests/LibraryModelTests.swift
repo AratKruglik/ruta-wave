@@ -71,6 +71,24 @@ struct LibraryModelTests {
         #expect(model.sections.map(\.isSelected) == [true, false, false, false])
     }
 
+    @Test func reconnectResetsFailedPagingAndReloadsAFailedRefresh() async {
+        var loader = LibraryLoader.stub
+        loader.page = { _, _ in page([playlist("a")], next: "t1") }
+        loader.more = { _, _ in throw URLError(.notConnectedToInternet) }
+        let model = makeModel(loader)
+        await model.load()
+        model.loadMore()
+        #expect(await waitUntil { content(model)?.paging == .failed })
+        model.reloadIfFailed()
+        #expect(content(model)?.paging == .idle)
+        loader.page = { _, _ in throw URLError(.notConnectedToInternet) }
+        let failing = makeModel(loader)
+        await failing.load()
+        let before = failing.loadKey
+        failing.reloadIfFailed()
+        #expect(failing.loadKey != before)
+    }
+
     @Test func likedMusicFromTheResponseIsNotDuplicatedInTheItems() async {
         var loader = LibraryLoader.stub
         let liked = MusicItem.playlist(Playlist(browseId: "VLLM", title: "Server liked"))

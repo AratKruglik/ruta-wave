@@ -163,3 +163,35 @@ struct RecoveryTests {
         #expect(!PlayerRules.isIgnorableNavigationError(NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)))
     }
 }
+
+@MainActor
+struct OutageRecoveryTests {
+    private func makeSong() -> SongInfo {
+        SongInfo(videoId: "abc", title: "T", artist: "A", album: nil, artworkURL: nil, duration: 100,
+                 elapsed: 0, isPaused: false, playlistId: nil, url: URL(string: "https://music.youtube.com/watch?v=abc")!)
+    }
+
+    @Test func recoveryRestartsAfterTheEngineGaveUp() {
+        let engine = PlayerEngine { _ in true }
+        engine.commit(makeSong())
+        for _ in 0..<PlayerRules.maxReloadAttempts { _ = engine.nextRecoveryURL() }
+        #expect(engine.nextRecoveryURL() == nil)
+        engine.prepareRecovery()
+        #expect(engine.nextRecoveryURL()?.absoluteString == "https://music.youtube.com/watch?v=abc")
+    }
+
+    @Test func recoveryKeepsAPendingSnapshot() {
+        let engine = PlayerEngine { _ in true }
+        engine.commit(makeSong())
+        engine.resumeAt = 42
+        engine.prepareRecovery()
+        #expect(engine.resumeAt == 42)
+    }
+
+    @Test func recoveryWithoutATargetDoesNothing() {
+        let engine = PlayerEngine { _ in true }
+        engine.send(.recover)
+        #expect(engine.attempts == 0)
+        #expect(engine.nextRecoveryURL() == nil)
+    }
+}

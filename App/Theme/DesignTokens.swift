@@ -132,9 +132,15 @@ enum Metrics {
 enum Motion {
     static let hover = 0.12
     static let panel = 0.2
+    static let theme = 0.6
     static let toastDuration: Duration = .seconds(3)
 
     static func animation(_ duration: Double, reduceMotion: Bool) -> Animation? {
         reduceMotion ? nil : .easeOut(duration: duration)
     }
+}
+
+extension EnvironmentValues {
+    /// The window's base colour: neutral, or tinted by the playing artwork. Previews fall back to the neutral token.
+    @Entry var themeBase: Color = .themeBase
 }

@@ -77,8 +77,11 @@ targets:
       - App/Shell/SidebarLoader.swift
       - App/Shell/SidebarModel.swift
       - App/Shell/Toast.swift
+      - App/Components/ArtworkImage.swift
+      - App/Theme/ArtworkTheme.swift
       - App/Theme/DesignTokens.swift
       - App/Theme/Glass.swift
+      - App/Theme/ThemeColor.swift
     dependencies:
       - package: PlayerEngine
       - package: InnerTube

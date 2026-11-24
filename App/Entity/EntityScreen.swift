@@ -16,6 +16,7 @@ struct EntityScreen: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .task(id: model.loadKey) { await model.load() }
+            .onReconnect { model.reloadIfFailed() }
     }
 
     @ViewBuilder
@@ -44,8 +45,11 @@ struct EntityScreen: View {
                     }
                 }
                 .padding(.vertical, padding)
+                .background(alignment: .top) { if !isArtist { ThemeHeaderGradient() } }
             }
-            .trackSelection($selection, songs: selectableSongs(content), onRemove: model.canEdit ? { model.removeRows($0) } : nil)
+            .trackSelection(
+                $selection, songs: selectableSongs(content), onRemove: model.canEdit ? { model.removeRows($0) } : nil,
+                onMove: model.canEdit ? { from, to in moveRows(from: from, to: to, in: content.tracks.map(\.rowKey)) } : nil)
         }
     }
 
@@ -84,6 +88,7 @@ struct EntityScreen: View {
             }
         }
         .padding(.horizontal, padding)
+        if album.tracks.isEmpty { emptyNote("This album has no songs available") }
         shelves(album.shelves)
     }
 
@@ -92,6 +97,7 @@ struct EntityScreen: View {
     @ViewBuilder
     private func artistBody(_ artist: ArtistPage, _ content: EntityModel.Content) -> some View {
         ArtistHeader(model: model, artist: artist, isSubscribed: content.isSubscribed, width: width, inset: padding)
+        if artist.shelves.isEmpty { emptyNote("Nothing from this artist yet") }
         shelves(artist.shelves, moreTitle: "Show all")
         ArtistAbout(artist: artist).padding(.horizontal, padding)
     }
@@ -126,6 +132,16 @@ struct EntityScreen: View {
         }
     }
 
+    /// A neighbour hops over the selected block: up lands it after the block, down lands it before the block.
+    private func moveRows(from: Int, to: Int, in order: [String]) {
+        guard order.indices.contains(from), order.indices.contains(to) else { return }
+        if from < to {
+            model.moveRow(order[from], before: to + 1 < order.count ? order[to + 1] : nil)
+        } else {
+            model.moveRow(order[from], before: order[to])
+        }
+    }
+
     /// Only rows dragged from this same own playlist reorder it; the drop lands before the row it is released on.
     private func reorder(_ drags: [TrackDrag], before song: Song) -> Bool {
         guard model.canEdit, let id = model.playlistBrowseId else { return false }
@@ -142,14 +158,25 @@ struct EntityScreen: View {
         case .loading: ProgressView().frame(maxWidth: .infinity).controlSize(.small)
         case .failed: InlineErrorRow(onRetry: model.retryMore)
         case .done:
-            if content.tracks.isEmpty && isOwned {
-                Text("This playlist has no songs yet")
-                    .font(.rwBody)
-                    .foregroundStyle(.textSecondary)
-                    .padding(.vertical, Metrics.space16)
+            if content.tracks.isEmpty {
+                if isOwned {
+                    emptyNote("This playlist has no songs yet")
+                } else {
+                    emptyNote("This playlist is empty", message: "Songs added to it will show up here.")
+                }
             }
             Color.clear.frame(height: 1).onAppear { model.loadSections() }
         }
+    }
+
+    private func emptyNote(_ title: LocalizedStringKey, message: LocalizedStringKey? = nil) -> some View {
+        VStack(spacing: Metrics.space4) {
+            Text(title).font(.rwBody).foregroundStyle(.textPrimary)
+            if let message { Text(message).font(.rwCaption).foregroundStyle(.textSecondary) }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Metrics.space16)
+        .accessibilityElement(children: .combine)
     }
 
     private func shelves(_ shelves: [Shelf], moreTitle: LocalizedStringKey = "More") -> some View {

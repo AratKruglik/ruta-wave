@@ -36,6 +36,10 @@ struct PlayerRulesTests {
         #expect(PlayerRules.watchURL(videoId: "abc", playlistId: "PL1")?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1")
     }
 
+    @Test func recoverHasNoBridgeCall() {
+        #expect(PlayerRules.bridgeCall(for: .recover, queue: []) == nil)
+    }
+
     @Test func loadURLForGuestIsWatchURL() {
         #expect(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", authUserIndex: nil)?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1")
     }

@@ -46,6 +46,17 @@ struct HistoryModelTests {
         return model
     }
 
+    @Test func reconnectReloadsAFailedHistory() async {
+        var loader = LibraryLoader.stub
+        loader.history = { _ in throw Failure() }
+        let model = makeModel(loader)
+        await model.load()
+        guard case .failed = model.state else { Issue.record("expected failed"); return }
+        let before = model.loadKey
+        model.reloadIfFailed()
+        #expect(model.loadKey != before)
+    }
+
     @Test func daysWithoutEntriesAreDropped() async {
         let model = await loaded()
         #expect(days(model).map(\.title) == ["Today", "Yesterday"])

@@ -24,6 +24,7 @@ struct ArtistHeader: View {
 
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(\.requestSignIn) private var requestSignIn
+    @Environment(\.themeBase) private var themeBase
     @State private var isSubscribePromptShown = false
 
     var body: some View {
@@ -41,7 +42,7 @@ struct ArtistHeader: View {
                     .foregroundStyle(.textPrimary)
                     .padding(Metrics.space24)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(LinearGradient(colors: [.clear, .themeBase], startPoint: .top, endPoint: .bottom))
+                    .background(LinearGradient(colors: [.clear, themeBase], startPoint: .top, endPoint: .bottom))
                     .accessibilityAddTraits(.isHeader)
             }
     }

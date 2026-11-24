@@ -83,6 +83,7 @@ final class SearchModel {
     @ObservationIgnored private let loader: SearchLoader
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private var attempt = 0
+    @ObservationIgnored private var lastLoadFailed = false
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var loadedKey: LoadKey?
     @ObservationIgnored private var continuation: String?
@@ -120,14 +121,20 @@ final class SearchModel {
             guard !Task.isCancelled, generation == captured else { return }
             apply(results)
             loadedKey = key
+            lastLoadFailed = false
         } catch {
             guard !Task.isCancelled, generation == captured else { return }
-            state = .failed
+            if case .loaded = state { lastLoadFailed = true } else { state = .failed }
         }
     }
 
     func retry() {
         attempt += 1
+    }
+
+    /// Called when the network comes back: reloads a failed page, or lets the footer retry a failed continuation.
+    func reloadIfFailed() {
+        if case .failed = state { attempt += 1 } else if lastLoadFailed { attempt += 1 } else { if case .loaded(let content) = state, content.paging == .failed { setPaging(.idle) } }
     }
 
     func loadMore() {

@@ -47,6 +47,26 @@ struct TrackSelection: Equatable {
         if let anchor, !valid.contains(anchor) { self.anchor = nil }
     }
 
+    /// The one neighbour move that shifts the selected block a step up or down: `from` is the row jumping over the block
+    /// and `to` is where it lands. Nil at an edge, or when the selection is not one contiguous block.
+    func blockMove(in order: [String], up: Bool) -> (from: Int, to: Int)? {
+        let indices = order.indices.filter { keys.contains(order[$0]) }
+        guard let first = indices.first, let last = indices.last, indices.count == keys.count, last - first + 1 == indices.count
+        else { return nil }
+        if up { return first > 0 ? (first - 1, last) : nil }
+        return last < order.count - 1 ? (last + 1, first) : nil
+    }
+
+    /// Moves queue keys (`q<index>`) with their rows after a queue move.
+    mutating func shiftQueueKeys(by delta: Int) {
+        func shifted(_ key: String) -> String {
+            guard key.hasPrefix("q"), let index = Int(key.dropFirst()) else { return key }
+            return "q\(index + delta)"
+        }
+        keys = Set(keys.map(shifted))
+        anchor = anchor.map(shifted)
+    }
+
     /// The selected keys in list order.
     func ordered(in order: [String]) -> [String] { order.filter(keys.contains) }
 }

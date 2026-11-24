@@ -3,11 +3,11 @@ import SwiftUI
 
 struct UpNextView: View {
     let onClose: () -> Void
+    @Binding var selection: TrackSelection
 
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(NavigationModel.self) private var navigation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var selection = TrackSelection()
     @State private var popover: ItemPopover?
 
     private var songs: [Song] { nowPlaying.queueSongs }
@@ -51,6 +51,9 @@ struct UpNextView: View {
             } else {
                 Text(verbatim: name).font(.rwTitle).foregroundStyle(.textPrimary).lineLimit(1)
             }
+        } else if isLoadingDetails {
+            Capsule().fill(.surfaceFill).frame(width: 160, height: 16)
+                .accessibilityHidden(true)
         }
     }
 
@@ -72,6 +75,8 @@ struct UpNextView: View {
         .buttonStyle(.plain)
         .fixedSize()
         .itemPopover($popover)
+        .help("Save the queue as a playlist")
+        .accessibilityLabel("Save the queue as a playlist")
         .disabled(songs.isEmpty)
     }
 
@@ -85,7 +90,23 @@ struct UpNextView: View {
         if newPlaylist { navigation.requestNewPlaylist(videoIds: ids) } else { popover = .addToPlaylist(videoIds: ids) }
     }
 
-    private var queue: some View {
+    private var isLoadingDetails: Bool {
+        nowPlaying.queueInfo == nil && nowPlaying.player.song != nil && !nowPlaying.detailsFailed
+    }
+
+    @ViewBuilder private var queue: some View {
+        if songs.isEmpty {
+            if isLoadingDetails {
+                SkeletonRows(count: 6)
+            } else {
+                PanelMessage(text: "Your queue is empty", message: "Play a song, or use Play next or Add to queue.")
+            }
+        } else {
+            queueList
+        }
+    }
+
+    private var queueList: some View {
         let songs = songs
         let order = songs.map(\.rowKey)
         return ScrollViewReader { proxy in
@@ -107,9 +128,9 @@ struct UpNextView: View {
                 for drag in drags { nowPlaying.enqueue(drag, playNext: false) }
                 return !drags.isEmpty
             }
-            .trackSelection($selection, songs: songs) { keys in
+            .trackSelection($selection, songs: songs, onRemove: { keys in
                 nowPlaying.removeQueueItems(at: keys.compactMap(NowPlayingModel.queueIndex))
-            }
+            }, onMove: moveSelected)
             .onChange(of: currentIndex) { _, index in
                 guard let index else { return }
                 if reduceMotion {
@@ -128,6 +149,12 @@ struct UpNextView: View {
         case .removeFromQueue: nowPlaying.removeQueueItem(at: index)
         default: break
         }
+    }
+
+    private func moveSelected(from: Int, to: Int) {
+        guard nowPlaying.canEditQueue else { return }
+        nowPlaying.moveQueueItem(from: from, to: to)
+        selection.shiftQueueKeys(by: from < to ? -1 : 1)
     }
 
     private func move(from source: IndexSet, to destination: Int) {

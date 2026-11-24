@@ -20,6 +20,39 @@ struct PreferencesTests {
         #expect(preferences.appLanguage == nil)
     }
 
+    @Test func navigationStateRoundTripsAndRefusesOversize() {
+        let (preferences, _) = makePreferences()
+        #expect(preferences.navigationState == nil)
+        preferences.navigationState = Data([1, 2, 3])
+        #expect(preferences.navigationState == Data([1, 2, 3]))
+        preferences.navigationState = Data(count: Preferences.maxNavigationStateBytes + 1)
+        #expect(preferences.navigationState == nil)
+        preferences.navigationState = nil
+        #expect(preferences.navigationState == nil)
+    }
+
+    @Test func artworkColoursDefaultOn() {
+        let (preferences, _) = makePreferences()
+        #expect(preferences.useArtworkColors)
+        preferences.useArtworkColors = false
+        #expect(!preferences.useArtworkColors)
+    }
+
+    @Test func artworkColoursOffSurvivesANewInstance() {
+        let (preferences, defaults) = makePreferences()
+        preferences.useArtworkColors = false
+        #expect(!Preferences(defaults: defaults).useArtworkColors)
+        preferences.useArtworkColors = true
+        #expect(Preferences(defaults: defaults).useArtworkColors)
+    }
+
+    @Test func navigationStateAtTheCapIsAccepted() {
+        let (preferences, _) = makePreferences()
+        let atCap = Data(count: Preferences.maxNavigationStateBytes)
+        preferences.navigationState = atCap
+        #expect(preferences.navigationState == atCap)
+    }
+
     @Test func chartCountryAcceptsOnlyUppercaseLetters() {
         let (preferences, _) = makePreferences()
         #expect(preferences.chartCountry == nil)

@@ -9,7 +9,7 @@ struct ExploreTiles: View {
     var body: some View {
         HStack(spacing: Metrics.space16) {
             ForEach(Array(links.enumerated()), id: \.offset) { _, link in
-                Button { navigation.push(Route(target: link.target)) } label: {
+                Button(action: { navigation.push(Route(target: link.target)) }) {
                     VStack(spacing: Metrics.space8) {
                         Image(systemName: ExploreTile.symbol(for: link.target.browseId) ?? "music.note")
                             .font(.rwIcon(Metrics.iconSidebar))
@@ -24,6 +24,7 @@ struct ExploreTiles: View {
                     .contentShape(RoundedRectangle(cornerRadius: Metrics.radiusTile))
                 }
                 .buttonStyle(.plain)
+                .onReturn { navigation.push(Route(target: link.target)) }
             }
         }
     }

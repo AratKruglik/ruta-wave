@@ -69,6 +69,26 @@ public struct Preferences: @unchecked Sendable {
         }
     }
 
+    /// An opaque navigation snapshot, owned and validated by the app. Anything over `maxNavigationStateBytes` is removed.
+    public var navigationState: Data? {
+        get { defaults.data(forKey: Key.navigationState).flatMap { $0.count <= Self.maxNavigationStateBytes ? $0 : nil } }
+        nonmutating set {
+            if let newValue, newValue.count <= Self.maxNavigationStateBytes {
+                defaults.set(newValue, forKey: Key.navigationState)
+            } else {
+                defaults.removeObject(forKey: Key.navigationState)
+            }
+        }
+    }
+
+    /// Tints the window with the playing track's artwork. On unless switched off.
+    public var useArtworkColors: Bool {
+        get { defaults.object(forKey: Key.useArtworkColors) == nil ? true : defaults.bool(forKey: Key.useArtworkColors) }
+        nonmutating set { defaults.set(newValue, forKey: Key.useArtworkColors) }
+    }
+
+    public static let maxNavigationStateBytes = 64 * 1024
+
     /// A sort option's label (or a local id), never the opaque request params.
     public func librarySort(for section: String) -> String? {
         (defaults.dictionary(forKey: Key.librarySorts) as? [String: String])?[section]
@@ -101,5 +121,7 @@ public struct Preferences: @unchecked Sendable {
         static let librarySorts = "librarySorts"
         static let appLanguage = "appLanguage"
         static let appleLanguages = "AppleLanguages"
+        static let navigationState = "navigationState"
+        static let useArtworkColors = "useArtworkColors"
     }
 }

@@ -147,6 +147,47 @@ struct BrowseModelTests {
         #expect(shelfTitles(model) == ["a"])
     }
 
+    @Test func reconnectReloadsAFailedPage() async {
+        let calls = Calls()
+        let model = makeModel(loader: loader(calls, page: { _ in
+            if calls.sources.count == 1 { throw Failure() }
+            return page(["a"])
+        }))
+        await model.load()
+        let before = model.loadKey
+        model.reloadIfFailed()
+        #expect(model.loadKey != before)
+        await model.load()
+        #expect(shelfTitles(model) == ["a"])
+    }
+
+    @Test func reconnectResetsFailedPagingWithoutRequesting() async {
+        let calls = Calls()
+        let model = makeModel(loader: loader(
+            calls, page: { _ in page(["a"], next: "t1") }, more: { _ in throw Failure() }))
+        await model.load()
+        model.loadMore()
+        #expect(await waitUntil { paging(model) == .failed })
+        model.reloadIfFailed()
+        #expect(paging(model) == .idle)
+        #expect(calls.tokens.count == 1)
+    }
+
+    @Test func failedRefreshKeepsContentAndReconnectReloads() async {
+        let calls = Calls()
+        let model = makeModel(.charts(country: "US"), loader: loader(calls, page: { _ in
+            if calls.sources.count > 1 { throw Failure() }
+            return page(["a"])
+        }))
+        await model.load()
+        model.selectCountry("DE")
+        await model.load()
+        #expect(shelfTitles(model) == ["a"])
+        let before = model.loadKey
+        model.reloadIfFailed()
+        #expect(model.loadKey != before)
+    }
+
     @Test func noShelvesIsEmpty() async {
         let model = makeModel(loader: loader(Calls(), page: { _ in page([]) }))
         await model.load()
