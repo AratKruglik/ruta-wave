@@ -277,6 +277,10 @@ private struct LinkText: View {
     return PlayerBarPreview(player: player)
 }
 
+#Preview("Minimum window width") {
+    PlayerBarPreview(player: PreviewPlayer(), width: Metrics.minWindowWidth)
+}
+
 #Preview("Guest") {
     PlayerBarPreview(player: PreviewPlayer(), signedIn: false)
 }
@@ -284,6 +288,7 @@ private struct LinkText: View {
 private struct PlayerBarPreview: View {
     let player: PreviewPlayer
     var signedIn = true
+    var width: CGFloat = 1100
 
     var body: some View {
         let model = PreviewFixtures.nowPlaying(player, signedIn: signedIn)
@@ -291,7 +296,7 @@ private struct PlayerBarPreview: View {
         return PlayerBar(isPlayerPagePresented: .constant(false))
             .environment(model)
             .environment(NavigationModel())
-            .frame(width: 1100)
+            .frame(width: width)
     }
 }
 #endif

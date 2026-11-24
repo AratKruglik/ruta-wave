@@ -19,6 +19,7 @@ struct RutawaveApp: App {
             RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts, network: app.network)
         }
         .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentMinSize)
         .defaultSize(width: Metrics.defaultWindowWidth, height: Metrics.defaultWindowHeight)
         .commands {
             SidebarCommands()
