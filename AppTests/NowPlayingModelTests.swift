@@ -221,6 +221,17 @@ struct NowPlayingModelTests {
         #expect(h.player.sent.contains(.togglePlay))
     }
 
+    @Test func performCancelsPendingSkip() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false)]
+        await h.start()
+        h.player.emit(.error(.unavailable(videoId: "a")))
+        await h.settle()
+        h.model.perform(.next)
+        #expect(await !waitUntil(timeout: .seconds(3.5)) { h.player.sent.filter { $0 == .next }.count > 1 })
+        #expect(h.player.sent.filter { $0 == .next }.count == 1)
+    }
+
     @Test func differentSongCancelsPendingSkip() async {
         var h = Harness()
         h.player.queue = [item("a", current: true), item("b", current: false)]

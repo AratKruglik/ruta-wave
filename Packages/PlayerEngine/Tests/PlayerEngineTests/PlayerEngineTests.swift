@@ -41,6 +41,13 @@ struct PlayerEngineTests {
         #expect(!engine.isBuffering)
     }
 
+    @Test func stopEmitsStopped() async {
+        let engine = makeEngine()
+        var iterator = engine.events().makeAsyncIterator()
+        engine.stop()
+        #expect(await iterator.next() == .stopped)
+    }
+
     @Test func duplicateVideoIdEmitsNothing() {
         let engine = makeEngine()
         engine.commit(makeSong("abc"))

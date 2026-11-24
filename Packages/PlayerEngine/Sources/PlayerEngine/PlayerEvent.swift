@@ -13,4 +13,5 @@ public enum PlayerEvent: Sendable, Equatable {
     case queueChanged([QueueItem])
     case adChanged(Bool)
     case error(PlayerError)
+    case stopped
 }

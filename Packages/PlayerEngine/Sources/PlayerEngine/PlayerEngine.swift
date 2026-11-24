@@ -131,6 +131,7 @@ public final class PlayerEngine {
         queueOffset = 0
         isAd = false
         isBuffering = false
+        emit(.stopped)
     }
 
     public func load(videoId: String, playlistId: String?) {

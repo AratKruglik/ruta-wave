@@ -258,7 +258,7 @@
     v.addEventListener('play', () => post({ type: 'playback', paused: false, time: v.currentTime }));
     v.addEventListener('pause', () => post({ type: 'playback', paused: true, time: v.currentTime }));
     v.addEventListener('timeupdate', () => post({ type: 'time', time: v.currentTime }));
-    v.addEventListener('seeked', () => post({ type: 'time', time: v.currentTime }));
+    v.addEventListener('seeked', () => post({ type: 'playback', paused: v.paused, time: v.currentTime }));
     v.addEventListener('volumechange', postVolume);
     v.addEventListener('waiting', () => post({ type: 'buffering', buffering: true }));
     for (const name of ['playing', 'pause', 'seeked']) v.addEventListener(name, () => post({ type: 'buffering', buffering: false }));

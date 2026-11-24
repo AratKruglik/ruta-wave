@@ -1,6 +1,6 @@
 import Foundation
 
-enum PlayerRules {
+public enum PlayerRules {
     static let playerHost = "music.youtube.com"
     static let maxReloadAttempts = 2
     static let playerTimeout: Duration = .seconds(15)
@@ -70,7 +70,7 @@ enum PlayerRules {
         return TimeInterval(total)
     }
 
-    static func isRefusedDuringAd(_ command: PlayerCommand) -> Bool {
+    public static func isRefusedDuringAd(_ command: PlayerCommand) -> Bool {
         switch command {
         case .next, .seek(to: _), .skip(by: _): true
         default: false
@@ -127,7 +127,7 @@ enum PlayerRules {
         return Array(queue[(current + 1)...].prefix(maxRestoredQueueItems).map(\.videoId))
     }
 
-    static func isAllowedArtworkHost(_ url: URL) -> Bool {
+    public static func isAllowedArtworkHost(_ url: URL) -> Bool {
         guard url.scheme == "https", let host = url.host?.lowercased() else { return false }
         return host == "i.ytimg.com" || allowedArtworkHostSuffixes.contains { host.hasSuffix($0) }
     }
