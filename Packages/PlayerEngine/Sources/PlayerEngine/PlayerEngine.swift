@@ -367,6 +367,8 @@ public final class PlayerEngine {
         configuration.mediaTypesRequiringUserActionForPlayback = []
         configuration.applicationNameForUserAgent = SignInRules.safariApplicationName
         configuration.preferences.inactiveSchedulingPolicy = .none
+        configuration.userContentController.addUserScript(
+            WKUserScript(source: Self.mediaSessionNeutraliser, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         if let script = Self.bridgeSource {
             configuration.userContentController.addUserScript(
                 WKUserScript(source: script, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
@@ -380,6 +382,22 @@ public final class PlayerEngine {
         #endif
         return view
     }
+
+    // The page's Media Session made WebKit publish a second Now Playing entry; SystemKit owns it (risk 5).
+    // Runs at document start so the page never registers handlers; navigator.mediaSession stays defined.
+    private static let mediaSessionNeutraliser = """
+        (() => {
+          const session = navigator.mediaSession;
+          if (!session) return;
+          const proto = Object.getPrototypeOf(session);
+          for (const action of ['play', 'pause', 'stop', 'previoustrack', 'nexttrack', 'seekto', 'seekbackward', 'seekforward']) {
+            try { proto.setActionHandler.call(session, action, null); } catch {}
+          }
+          proto.setActionHandler = () => {};
+          proto.setPositionState = () => {};
+          Object.defineProperty(proto, 'metadata', { get: () => null, set: () => {}, configurable: false });
+        })();
+        """
 
     private static let bridgeSource: String? = {
         do {
