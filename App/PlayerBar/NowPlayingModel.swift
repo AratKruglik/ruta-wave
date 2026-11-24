@@ -51,6 +51,8 @@ final class NowPlayingModel {
     private(set) var queueRefs: [String: QueueRef] = [:]
 
     @ObservationIgnored private let toasts: ToastCenter
+    @ObservationIgnored private var resumesOnReconnect = false
+    @ObservationIgnored private var lastRecoverAt: ContinuousClock.Instant?
     @ObservationIgnored private let preferences: Preferences
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let client: InnerTubeClient?
@@ -291,10 +293,24 @@ final class NowPlayingModel {
         }
     }
 
+    /// Playback that was running when the network dropped is reloaded where it was once the network is back.
+    func networkChanged(isOnline: Bool) {
+        if !isOnline {
+            resumesOnReconnect = player.song != nil && !player.isPaused
+        } else if resumesOnReconnect {
+            resumesOnReconnect = false
+            let instant = now()
+            guard !player.isPaused, lastRecoverAt.map({ instant - $0 >= .seconds(30) }) ?? true else { return }
+            lastRecoverAt = instant
+            player.send(.recover)
+        }
+    }
+
     /// Called when the content identity changes: ratings and a pending collection play belong to the old account.
     func resetAccountState() {
         playTask?.cancel()
         playTask = nil
+        resumesOnReconnect = false
         rowRatings = [:]
         queueInfo = nil
         queueRefs = [:]

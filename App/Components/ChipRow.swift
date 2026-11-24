@@ -17,6 +17,7 @@ struct ChipView: View {
                 .fixedSize()
         }
         .buttonStyle(.plain)
+        .onReturn(action)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
@@ -75,6 +76,7 @@ struct LinkChipGrid: View {
                     .contentShape(RoundedRectangle(cornerRadius: Metrics.radiusCard))
                 }
                 .buttonStyle(.plain)
+                .onReturn { onOpen(link) }
             }
         }
     }

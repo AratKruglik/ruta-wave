@@ -5,6 +5,8 @@ struct SearchDropdown: View {
     let model: SearchFieldModel
     let onAction: (SearchFieldModel.Action) -> Void
 
+    @Environment(\.themeBase) private var themeBase
+
     private var typed: String { model.text.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     var body: some View {
@@ -14,7 +16,7 @@ struct SearchDropdown: View {
             }
         }
         .padding(.vertical, Metrics.space8)
-        .background(Color.themeBase)
+        .background(themeBase)
         .background(Color.surfaceRaised)
         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: Metrics.radiusCard, bottomTrailingRadius: Metrics.radiusCard))
         .shadow(color: .shadow, radius: Metrics.dropdownShadowRadius, y: Metrics.space4)

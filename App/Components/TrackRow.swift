@@ -32,6 +32,7 @@ struct TrackRow: View {
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.themeBase) private var themeBase
     @State private var isHovering = false
     @State private var popover: ItemPopover?
     @FocusState private var focus: Field?
@@ -84,6 +85,7 @@ struct TrackRow: View {
             .buttonStyle(.plain)
             .disabled(!song.isAvailable)
             .focused($focus, equals: .main)
+            .onReturn(play)
             .accessibilityLabel(accessibilityLabel)
             .accessibilityAddTraits(selection?.isSelected == true ? .isSelected : [])
 
@@ -167,12 +169,12 @@ struct TrackRow: View {
     private var actions: some View {
         HStack(spacing: Metrics.space4) {
             if let selection {
-                actionButton(selection.isSelected ? "checkmark.square.fill" : "square", label: "Select", field: .select) {
+                actionButton(selection.isSelected ? "checkmark.square.fill" : "square", label: "Select", field: .select, isOn: selection.isSelected) {
                     selection.onSelect(.command)
                 }
             }
-            actionButton(rating == .like ? "hand.thumbsup.fill" : "hand.thumbsup", label: "Like", field: .like) { rate(.like) }
-            actionButton(rating == .dislike ? "hand.thumbsdown.fill" : "hand.thumbsdown", label: "Dislike", field: .dislike) { rate(.dislike) }
+            actionButton(rating == .like ? "hand.thumbsup.fill" : "hand.thumbsup", label: "Like", field: .like, isOn: rating == .like) { rate(.like) }
+            actionButton(rating == .dislike ? "hand.thumbsdown.fill" : "hand.thumbsdown", label: "Dislike", field: .dislike, isOn: rating == .dislike) { rate(.dislike) }
             Menu { menu } label: {
                 Image(systemName: "ellipsis")
                     .font(.rwIcon(Metrics.iconRow))
@@ -187,10 +189,10 @@ struct TrackRow: View {
             .accessibilityLabel("More actions")
         }
         .padding(.leading, Metrics.space8)
-        .background(.themeBase.opacity(0.9), in: Capsule())
+        .background(themeBase.opacity(0.9), in: Capsule())
     }
 
-    private func actionButton(_ symbol: String, label: LocalizedStringKey, field: Field, action: @escaping () -> Void) -> some View {
+    private func actionButton(_ symbol: String, label: LocalizedStringKey, field: Field, isOn: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.rwIcon(Metrics.iconRow))
@@ -202,6 +204,7 @@ struct TrackRow: View {
         .focused($focus, equals: field)
         .help(label)
         .accessibilityLabel(label)
+        .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
     private func rate(_ target: Rating) {

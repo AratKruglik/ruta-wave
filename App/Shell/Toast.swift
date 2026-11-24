@@ -57,6 +57,9 @@ struct ToastView: View {
         .glassSurface(in: Capsule())
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.updatesFrequently)
+        .onChange(of: String(localized: toast.message), initial: true) { _, text in
+            AccessibilityNotification.Announcement(text).post()
+        }
     }
 }
 

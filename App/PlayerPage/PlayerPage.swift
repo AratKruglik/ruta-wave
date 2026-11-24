@@ -26,7 +26,10 @@ struct PlayerPage: View {
     }
 
     @Environment(NowPlayingModel.self) private var nowPlaying
+    @Environment(\.themeBase) private var themeBase
     @State private var selection: Tab = .upNext
+    /// Lives here so Esc can clear it before it closes the page.
+    @State private var upNextSelection = TrackSelection()
 
     private var currentDetails: TrackDetails? {
         nowPlaying.details.flatMap { $0.videoId == nowPlaying.player.song?.videoId ? $0 : nil }
@@ -67,13 +70,17 @@ struct PlayerPage: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .keyboardShortcut(.cancelAction)
+            .cancelShortcut(if: upNextSelection.isEmpty)
             .help("Close player page")
             .accessibilityLabel("Close player page")
             .padding(Metrics.space12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.themeBase)
+        .background(themeBase)
+        .onReconnect {
+            if nowPlaying.detailsFailed, let song = nowPlaying.player.song { Task { await nowPlaying.loadDetails(for: song) } }
+        }
+        .onChange(of: selection) { upNextSelection.clear() }
         .onChange(of: isLyricsUnavailable) {
             if isLyricsUnavailable, selection == .lyrics { selection = .upNext }
         }
@@ -83,7 +90,7 @@ struct PlayerPage: View {
     private var tabContent: some View {
         switch selection {
         case .upNext, .comments:
-            UpNextView(onClose: onClose)
+            UpNextView(onClose: onClose, selection: $upNextSelection)
         case .lyrics:
             detailsGated(\.lyricsBrowseId, unavailable: "Lyrics aren't available") { LyricsView(browseId: $0) }
         case .related:

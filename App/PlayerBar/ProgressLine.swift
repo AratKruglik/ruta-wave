@@ -3,6 +3,7 @@ import SwiftUI
 struct ProgressLine: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.themeBase) private var themeBase
     @State private var hoverX: CGFloat?
     @State private var dragFraction: Double?
 
@@ -41,7 +42,7 @@ struct ProgressLine: View {
                         .padding(.horizontal, Metrics.space8)
                         .padding(.vertical, Metrics.space4)
                         .background(.surfaceRaised, in: RoundedRectangle(cornerRadius: Metrics.radiusThumb))
-                        .background(.themeBase, in: RoundedRectangle(cornerRadius: Metrics.radiusThumb))
+                        .background(themeBase, in: RoundedRectangle(cornerRadius: Metrics.radiusThumb))
                         .fixedSize()
                         .offset(x: min(max(hoverX - 20, 0), max(width - 48, 0)), y: -28)
                         .allowsHitTesting(false)

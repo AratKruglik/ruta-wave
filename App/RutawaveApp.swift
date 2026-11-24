@@ -2,6 +2,7 @@ import Auth
 import InnerTube
 import PlayerEngine
 import SwiftUI
+import SystemKit
 
 @main
 struct RutawaveApp: App {
@@ -15,7 +16,7 @@ struct RutawaveApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts)
+            RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts, network: app.network)
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: Metrics.defaultWindowWidth, height: Metrics.defaultWindowHeight)
@@ -36,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let player: PlayerEngine
     let toasts: ToastCenter
     let nowPlaying: NowPlayingModel
+    let network = NetworkMonitor()
     private var playerWindow: PlayerWindow?
 
     override init() {
@@ -51,6 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         playerWindow = PlayerWindow(session: session, player: player)
+        network.start()
         Task { await nowPlaying.run() }
     }
 }

@@ -18,6 +18,7 @@ struct RelatedView: View {
             .task(id: TabLoadKey(id: browseId, generation: trackTabs.generation, attempt: attempt)) {
                 await trackTabs.loadRelated(browseId)
             }
+            .onReconnect { if case .failed = phase { attempt += 1 } }
     }
 
     @ViewBuilder

@@ -9,12 +9,22 @@ struct TabLoadKey: Hashable {
 
 struct PanelMessage: View {
     let text: LocalizedStringKey
+    var message: LocalizedStringKey?
 
     var body: some View {
-        Text(text)
-            .font(.rwTitle)
-            .foregroundStyle(.textSecondary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: Metrics.space8) {
+            Text(text)
+                .font(.rwTitle)
+                .foregroundStyle(.textSecondary)
+            if let message {
+                Text(message)
+                    .font(.rwBody)
+                    .foregroundStyle(.textTertiary)
+            }
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -34,6 +44,7 @@ struct LyricsView: View {
             .task(id: TabLoadKey(id: browseId, generation: trackTabs.generation, attempt: attempt)) {
                 await trackTabs.loadLyrics(browseId)
             }
+            .onReconnect { if case .failed = phase { attempt += 1 } }
     }
 
     @ViewBuilder

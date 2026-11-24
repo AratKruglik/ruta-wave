@@ -7,6 +7,7 @@ struct ShellView<AccountPopover: View>: View {
     let avatarURL: URL?
     let sidebar: SidebarModel
     let guestFailed: Bool
+    let isOffline: Bool
     @Binding var isAccountPresented: Bool
     let onRetrySidebar: () -> Void
     let onNewPlaylist: () -> Void
@@ -41,6 +42,7 @@ struct ShellView<AccountPopover: View>: View {
                     onNewPlaylist: onNewPlaylist, onPlaylistRemoved: onPlaylistRemoved, onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
                 .id(identity)
+                .accessibilityHidden(navigation.isPlayerPagePresented)
                 .safeAreaPadding(.top, Metrics.topBarHeight)
                 .ignoresSafeArea(.container, edges: .top)
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
@@ -48,12 +50,30 @@ struct ShellView<AccountPopover: View>: View {
             } detail: {
                 content
                     .safeAreaInset(edge: .top, spacing: 0) {
-                        if guestFailed { GuestBanner(onRetry: onRetryGuest) }
+                        if isOffline {
+                            OfflineBanner()
+                        } else if guestFailed {
+                            GuestBanner(onRetry: onRetryGuest)
+                        }
                     }
                     .safeAreaPadding(.top, Metrics.topBarHeight)
                     .ignoresSafeArea(.container, edges: .top)
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
+            // Pushed pages are hosted by the split view itself and draw above anything inside the detail column,
+            // so the player page sits over the whole split view, inset past the sidebar.
+            .overlay {
+                // The animation stays inside the overlay: an animated transaction over the split view re-shows the stack's root page.
+                ZStack {
+                    if navigation.isPlayerPagePresented {
+                        PlayerPage { navigation.isPlayerPagePresented = false }
+                            .safeAreaPadding(.top, Metrics.topBarHeight)
+                            .padding(.leading, isSidebarVisible ? Metrics.sidebarWidth : 0)
+                            .transition(.move(edge: .bottom))
+                    }
+                }
+                .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
+            }
             // The bar floats over both columns so content scrolls under its glass.
             .overlay(alignment: .top) {
                 TopBar(
@@ -61,6 +81,7 @@ struct ShellView<AccountPopover: View>: View {
                     canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
                     onToggleSidebar: { setSidebarVisible(!isSidebarVisible) }, onHome: navigation.goHome,
                     onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
+                    .accessibilityHidden(navigation.isPlayerPagePresented)
             }
         }
         // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
@@ -74,7 +95,7 @@ struct ShellView<AccountPopover: View>: View {
         .windowBackdrop()
         .noInitialFocus()
         .focusedSceneValue(\.navigation, navigation)
-        .onChange(of: navigation.path(for: navigation.selection).last) { _, route in
+        .onChange(of: navigation.path(for: navigation.selection).last, initial: true) { _, route in
             if case .search(let query, _) = route { search.showQuery(query) }
         }
         .background(
@@ -95,13 +116,6 @@ struct ShellView<AccountPopover: View>: View {
         .contentMargins(.bottom, isBarVisible ? Metrics.playerBarHeight + Metrics.contentBottomMargin : 0, for: .scrollContent)
         .disabled(navigation.isPlayerPagePresented)
         .accessibilityHidden(navigation.isPlayerPagePresented)
-        .overlay {
-            if navigation.isPlayerPagePresented {
-                PlayerPage { navigation.isPlayerPagePresented = false }
-                    .transition(.move(edge: .bottom))
-            }
-        }
-        .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
     }
 
     private var bottomOverlay: some View {
@@ -134,7 +148,10 @@ struct ShellView<AccountPopover: View>: View {
     }
 
     private func openPlaylist(_ browseId: String) {
-        guard selectedPlaylistId != browseId else { return }
+        guard selectedPlaylistId != browseId else {
+            navigation.isPlayerPagePresented = false
+            return
+        }
         navigation.push(.playlist(browseId: browseId))
     }
 }
@@ -161,6 +178,24 @@ private struct GuestBanner: View {
         .padding(.vertical, Metrics.space8)
         .background(.surfaceFill)
         .accessibilityElement(children: .combine)
+    }
+}
+
+private struct OfflineBanner: View {
+    var body: some View {
+        VStack(spacing: Metrics.space4) {
+            Text("You're offline")
+                .font(.rwBody)
+                .foregroundStyle(.textPrimary)
+            Text("Pages you've opened stay available. Everything reloads when you're back online.")
+                .font(.rwCaption)
+                .foregroundStyle(.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Metrics.space8)
+        .background(.surfaceFill)
+        .accessibilityElement(children: .combine)
+        .onAppear { AccessibilityNotification.Announcement(String(localized: "You're offline")).post() }
     }
 }
 
@@ -193,7 +228,7 @@ private struct ShellPreview: View {
     var body: some View {
         ShellView(
             isSignedIn: isSignedIn, identity: ContentIdentity(isSignedIn: isSignedIn, authUserIndex: 0), avatarURL: nil,
-            sidebar: sidebar, guestFailed: false,
+            sidebar: sidebar, guestFailed: false, isOffline: false,
             isAccountPresented: .constant(false), onRetrySidebar: {}, onNewPlaylist: {}, onPlaylistRemoved: { _, _ in },
             onRetryGuest: {}, onSignIn: {},
             accountPopover: { EmptyView() }

@@ -14,6 +14,37 @@ final class NavigationModel {
     /// The first route is the next one forward.
     private var forwardRoutes: [SidebarSection: [Route]] = [:]
 
+    /// What survives a relaunch: the section and each section's back stack. Forward stacks and the player page do not.
+    struct Snapshot: Codable, Equatable {
+        var version = 1
+        var section: SidebarSection
+        var paths: [SidebarSection: [Route]]
+        var isSignedIn: Bool
+        var authUserIndex: Int
+    }
+
+    static let maxRestoredDepth = 32
+
+    func snapshot(isSignedIn: Bool, authUserIndex: Int) -> Snapshot {
+        Snapshot(section: selection, paths: paths.filter { !$0.value.isEmpty }, isSignedIn: isSignedIn, authUserIndex: authUserIndex)
+    }
+
+    /// Anything unreadable, of another version or implausibly deep starts at Home. Routes that belonged to another
+    /// identity than the current one are dropped with the same rules sign-out and account switching use.
+    static func restored(from data: Data?, isSignedIn: Bool, authUserIndex: Int) -> NavigationModel {
+        let model = NavigationModel()
+        guard let data, let saved = try? JSONDecoder().decode(Snapshot.self, from: data), saved.version == 1,
+              saved.paths.values.allSatisfy({ $0.count <= maxRestoredDepth }) else { return model }
+        model.selection = saved.section
+        model.paths = saved.paths
+        if saved.isSignedIn, !isSignedIn {
+            model.dropAccountRoutes()
+        } else if saved.isSignedIn != isSignedIn || saved.authUserIndex != authUserIndex {
+            model.dropIdentityRoutes()
+        }
+        return model
+    }
+
     var canGoBack: Bool { !path(for: selection).isEmpty }
     var canGoForward: Bool { !(forwardRoutes[selection] ?? []).isEmpty }
 
@@ -32,6 +63,7 @@ final class NavigationModel {
     }
 
     func select(_ section: SidebarSection) {
+        isPlayerPagePresented = false
         if section == selection {
             popToRoot(section)
         } else {
@@ -40,6 +72,7 @@ final class NavigationModel {
     }
 
     func goHome() {
+        isPlayerPagePresented = false
         selection = .home
         popToRoot(.home)
     }
@@ -64,6 +97,7 @@ final class NavigationModel {
     }
 
     func requestSearchFocus() {
+        isPlayerPagePresented = false
         searchFocusRequests += 1
     }
 
@@ -72,12 +106,18 @@ final class NavigationModel {
         newPlaylistRequests += 1
     }
 
+    /// With the player page open, Back only closes it.
     func back() {
+        if isPlayerPagePresented {
+            isPlayerPagePresented = false
+            return
+        }
         guard let route = paths[selection]?.popLast() else { return }
         forwardRoutes[selection, default: []].insert(route, at: 0)
     }
 
     func forward() {
+        isPlayerPagePresented = false
         guard var queued = forwardRoutes[selection], !queued.isEmpty else { return }
         let route = queued.removeFirst()
         forwardRoutes[selection] = queued

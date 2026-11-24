@@ -15,7 +15,13 @@ struct SidebarView: View {
     let onSignIn: () -> Void
 
     @Environment(ToastCenter.self) private var toasts
-    @State private var pendingDelete: Playlist?
+    @State private var pendingRemoval: Removal?
+
+    /// Deleting an own playlist and removing someone else's from the library both ask first when started from the keyboard.
+    private struct Removal {
+        let playlist: Playlist
+        let deletes: Bool
+    }
 
     var body: some View {
         ScrollView {
@@ -32,7 +38,8 @@ struct SidebarView: View {
                 if isSignedIn {
                     PlaylistList(
                         model: model, selectedId: selectedPlaylistId, onSelect: onSelectPlaylist, onRetry: onRetry,
-                        onRequestDelete: { pendingDelete = $0 }, onRemove: removeFromLibrary, onResolve: resolveAndAct)
+                        onRequestDelete: { pendingRemoval = Removal(playlist: $0, deletes: true) }, onRemove: removeFromLibrary,
+                        onResolve: resolveAndAct, onConfirmRemoval: confirmRemoval)
                 } else {
                     GuestCard(onSignIn: onSignIn)
                 }
@@ -42,13 +49,22 @@ struct SidebarView: View {
         }
         .contentMargins(.bottom, Metrics.contentBottomMargin, for: .scrollContent)
         .confirmationDialog(
-            "Delete this playlist?", isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
-            presenting: pendingDelete
-        ) { playlist in
-            Button("Delete", role: .destructive) { delete(playlist) }
+            pendingRemoval?.deletes == false ? "Remove this playlist from your library?" : "Delete this playlist?",
+            isPresented: Binding(get: { pendingRemoval != nil }, set: { if !$0 { pendingRemoval = nil } }),
+            presenting: pendingRemoval
+        ) { removal in
+            if removal.deletes {
+                Button("Delete", role: .destructive) { delete(removal.playlist) }
+            } else {
+                Button("Remove", role: .destructive) { removeFromLibrary(removal.playlist) }
+            }
             Button("Cancel", role: .cancel) {}
-        } message: { playlist in
-            Text("“\(playlist.title)” will be deleted for good.")
+        } message: { removal in
+            if removal.deletes {
+                Text("“\(removal.playlist.title)” will be deleted for good.")
+            } else {
+                Text("“\(removal.playlist.title)” will be removed from your library. You can save it again later.")
+            }
         }
     }
 
@@ -69,8 +85,19 @@ struct SidebarView: View {
         Task {
             await model.resolveOwnership(playlist.browseId)
             switch model.ownership(of: playlist.browseId) {
-            case true?: pendingDelete = playlist
+            case true?: pendingRemoval = Removal(playlist: playlist, deletes: true)
             case false?: removeFromLibrary(playlist)
+            case nil: toasts.show("Couldn't update your library")
+            }
+        }
+    }
+
+    private func confirmRemoval(_ playlist: Playlist) {
+        Task {
+            await model.resolveOwnership(playlist.browseId)
+            switch model.ownership(of: playlist.browseId) {
+            case true?: pendingRemoval = Removal(playlist: playlist, deletes: true)
+            case false?: pendingRemoval = Removal(playlist: playlist, deletes: false)
             case nil: toasts.show("Couldn't update your library")
             }
         }
@@ -132,6 +159,7 @@ private struct NavItem: View {
             .contentShape(RoundedRectangle(cornerRadius: Metrics.radiusCard))
         }
         .buttonStyle(.plain)
+        .onReturn(action)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
@@ -144,6 +172,7 @@ private struct PlaylistList: View {
     let onRequestDelete: (Playlist) -> Void
     let onRemove: (Playlist) -> Void
     let onResolve: (Playlist) -> Void
+    let onConfirmRemoval: (Playlist) -> Void
 
     @Environment(NowPlayingModel.self) private var nowPlaying
 
@@ -157,12 +186,20 @@ private struct PlaylistList: View {
                     .accessibilityHidden(true)
             }
         case .loaded(let playlists):
+            if playlists.isEmpty {
+                Text("Your playlists will show up here.")
+                    .font(.rwCaption)
+                    .foregroundStyle(.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Metrics.space12)
+            }
             ForEach(playlists, id: \.browseId) { playlist in
                 PlaylistRow(
                     title: playlist.browseId == Route.likedMusicBrowseId ? String(localized: "Liked music") : playlist.title,
                     subtitle: subtitle(for: playlist), isSelected: selectedId == playlist.browseId,
                     onPrefetch: playlist.browseId == Route.likedMusicBrowseId ? nil : { await model.resolveOwnership(playlist.browseId) }
                 ) { onSelect(playlist.browseId) }
+                .onDeleteCommand(perform: playlist.browseId == Route.likedMusicBrowseId ? nil : { onConfirmRemoval(playlist) })
                 .contextMenu { menu(for: playlist) }
                 .dropDestination(for: TrackDrag.self) { drags, _ in drop(drags, on: playlist) }
             }
@@ -248,6 +285,7 @@ private struct PlaylistRow: View {
         }
         .buttonStyle(.plain)
         .focused($isFocused)
+        .onReturn(action)
         .onHover { isHovering = $0 }
         .task(id: isHovering || isFocused) {
             guard isHovering || isFocused, let onPrefetch else { return }

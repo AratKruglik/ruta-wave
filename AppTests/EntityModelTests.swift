@@ -95,6 +95,39 @@ struct EntityModelTests {
         #expect(content(playlist)?.paging == .idle)
     }
 
+    @Test func reconnectReloadsAFailedPageButNotAnUnavailableOne() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in throw InnerTubeError.notAvailable }
+        let gone = makeModel(loader: loader)
+        await gone.load()
+        let goneKey = gone.loadKey
+        gone.reloadIfFailed()
+        #expect(gone.loadKey == goneKey)
+        loader.playlist = { _, _ in throw Failure() }
+        let failed = makeModel(loader: loader)
+        await failed.load()
+        let failedKey = failed.loadKey
+        failed.reloadIfFailed()
+        #expect(failed.loadKey != failedKey)
+    }
+
+    @Test func reconnectResetsFailedTrackPagingWithoutRequesting() async {
+        let calls = Calls()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(next: "t1") }
+        loader.moreTracks = { _, _ in
+            calls.record("more")
+            throw Failure()
+        }
+        let model = makeModel(loader: loader)
+        await model.load()
+        model.loadMore()
+        #expect(await waitUntil { content(model)?.paging == .failed })
+        model.reloadIfFailed()
+        #expect(content(model)?.paging == .idle)
+        #expect(calls.all == ["more"])
+    }
+
     @Test func unavailableAndFailedPagesAreDistinctAndRetryReloads() async {
         let calls = Calls()
         var loader = EntityLoader.stub
@@ -294,6 +327,7 @@ struct EntityModelTests {
         await model.load()
         model.toggleSubscribed()
         #expect(content(model)?.isSubscribed == true)
+        #expect(await waitUntil { calls.all.count == 1 })
         model.toggleSubscribed()
         #expect(await waitUntil { calls.all.count == 2 && toasts.message != nil })
         #expect(calls.all == ["UCchan true", "UCchan false"])

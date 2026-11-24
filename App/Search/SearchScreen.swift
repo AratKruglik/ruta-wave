@@ -28,12 +28,17 @@ struct SearchScreen: View {
                 ChipRow(chips: chipItems, onSelect: select)
                     .padding(.horizontal, padding)
                     .padding(.top, padding)
+            } else if case .loading = model.state {
+                SkeletonChips()
+                    .padding(.horizontal, padding)
+                    .padding(.top, padding)
             }
             results
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         .task(id: model.loadKey) { await model.load() }
+        .onReconnect { model.reloadIfFailed() }
     }
 
     private var chipItems: [Chip] {
@@ -54,7 +59,16 @@ struct SearchScreen: View {
         switch model.state {
         case .loading:
             ScrollView {
-                SkeletonRows(count: 8).padding(padding)
+                if model.isAllSelected {
+                    VStack(alignment: .leading, spacing: Metrics.space24) {
+                        SkeletonTopResult()
+                        SkeletonRows(count: 4)
+                        SkeletonShelf()
+                    }
+                    .padding(padding)
+                } else {
+                    SkeletonRows(count: 8).padding(padding)
+                }
             }
             .scrollDisabled(true)
         case .failed:
@@ -170,7 +184,8 @@ struct SearchScreen: View {
         switch paging {
         case .loading: ProgressView().frame(maxWidth: .infinity).controlSize(.small)
         case .failed: InlineErrorRow(onRetry: model.retryMore)
-        case .idle, .done: EmptyView()
+        case .idle: Color.clear.frame(height: 1).onAppear { model.loadMore() }
+        case .done: EmptyView()
         }
     }
 }

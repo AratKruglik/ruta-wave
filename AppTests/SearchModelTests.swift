@@ -138,6 +138,27 @@ struct SearchModelTests {
         #expect(calls.tokens == ["t1"])
     }
 
+    @Test func reconnectReloadsAFailedSearchAndResetsFailedPaging() async {
+        let calls = Calls()
+        let attempts = Counter()
+        let model = makeModel(loader(
+            calls, search: { _, _ in
+                if attempts.next() == 1 { throw Failure() }
+                return results([song("a")], chips: [Chip(title: "Songs", searchParams: "EgWKAQII", isSelected: true)], next: "t1")
+            },
+            more: { _ in throw Failure() }), filter: "EgWKAQII")
+        await model.load()
+        let before = model.loadKey
+        model.reloadIfFailed()
+        #expect(model.loadKey != before)
+        await model.load()
+        model.loadMore()
+        #expect(await waitUntil { content(model)?.paging == .failed })
+        model.reloadIfFailed()
+        #expect(content(model)?.paging == .idle)
+        #expect(calls.tokens.count == 1)
+    }
+
     @Test func loadMoreFailureCanBeRetried() async {
         let chips = [Chip(title: "Songs", searchParams: "EgWKAQII", isSelected: true)]
         let attempts = Counter()

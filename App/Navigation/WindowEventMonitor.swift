@@ -41,6 +41,12 @@ struct WindowEventMonitor: NSViewRepresentable {
             }
         }
 
+        /// A focused control presses itself on Space; only a window with no first responder plays or pauses.
+        private var isNothingFocused: Bool {
+            guard let window else { return false }
+            return window.firstResponder == nil || window.firstResponder === window
+        }
+
         private func handle(_ event: NSEvent) -> Bool {
             guard event.window === window else { return false }
             switch event.type {
@@ -63,7 +69,7 @@ struct WindowEventMonitor: NSViewRepresentable {
             case .keyDown:
                 guard event.keyCode == Self.spaceKeyCode, !event.isARepeat,
                       event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty,
-                      !(window?.firstResponder is NSTextView) else { return false }
+                      isNothingFocused else { return false }
                 onTogglePlay()
                 return true
             default:

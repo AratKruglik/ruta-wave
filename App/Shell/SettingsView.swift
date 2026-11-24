@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var language: String?
     @State private var launchLanguage: String?
+    @State private var useArtworkColors = Preferences().useArtworkColors
 
     private let preferences = Preferences()
 
@@ -29,6 +30,7 @@ struct SettingsView: View {
                     Button("Restart now", action: restart)
                 }
             }
+            Toggle("Use artwork colours", isOn: $useArtworkColors)
             Text("More settings are coming.")
                 .font(.rwCaption)
                 .foregroundStyle(.textSecondary)
@@ -37,6 +39,7 @@ struct SettingsView: View {
         .frame(width: 440)
         .fixedSize(horizontal: false, vertical: true)
         .onChange(of: language) { _, newValue in preferences.appLanguage = newValue }
+        .onChange(of: useArtworkColors) { _, newValue in preferences.useArtworkColors = newValue }
     }
 
     private func restart() {

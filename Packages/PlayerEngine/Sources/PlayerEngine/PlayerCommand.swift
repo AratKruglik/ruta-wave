@@ -16,4 +16,6 @@ public enum PlayerCommand: Sendable, Equatable {
     case removeQueueItem(index: Int)
     case moveQueueItem(from: Int, to: Int)
     case load(videoId: String, playlistId: String?)
+    /// Reloads the current target after a network outage, keeping position and queue. Does nothing without a target.
+    case recover
 }

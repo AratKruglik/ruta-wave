@@ -18,11 +18,24 @@ extension Binding where Value == TrackSelection {
     }
 }
 
+/// Moves the focused list's selected rows one step. Published only while a reorderable selection exists.
+struct ReorderAction {
+    let up: () -> Void
+    let down: () -> Void
+}
+
+extension FocusedValues {
+    @Entry var reorderSelection: ReorderAction?
+}
+
 extension View {
     /// Makes a track list selectable from the keyboard (⌘A, ⌫, Esc) and pins the selection bar above it.
-    /// `onRemove` is set only where the rows belong to an own playlist.
-    func trackSelection(_ selection: Binding<TrackSelection>, songs: [Song], onRemove: (([String]) -> Void)? = nil) -> some View {
-        modifier(TrackSelectionModifier(selection: selection, songs: songs, onRemove: onRemove))
+    /// `onRemove` is set only where the rows belong to an own playlist; `onMove(from, to)` only where they can be reordered.
+    func trackSelection(
+        _ selection: Binding<TrackSelection>, songs: [Song], onRemove: (([String]) -> Void)? = nil,
+        onMove: ((_ from: Int, _ to: Int) -> Void)? = nil
+    ) -> some View {
+        modifier(TrackSelectionModifier(selection: selection, songs: songs, onRemove: onRemove, onMove: onMove))
     }
 }
 
@@ -30,8 +43,10 @@ private struct TrackSelectionModifier: ViewModifier {
     @Binding var selection: TrackSelection
     let songs: [Song]
     let onRemove: (([String]) -> Void)?
+    let onMove: ((_ from: Int, _ to: Int) -> Void)?
 
     @Environment(NowPlayingModel.self) private var nowPlaying
+    @Environment(NavigationModel.self) private var navigation
     @State private var popover: ItemPopover?
 
     private var order: [String] { songs.map(\.rowKey) }
@@ -43,6 +58,11 @@ private struct TrackSelectionModifier: ViewModifier {
             .focusEffectDisabled()
             .onDeleteCommand { remove() }
             .onExitCommand { selection.clear() }
+            .onKeyPress(.space) {
+                nowPlaying.togglePlay()
+                return .handled
+            }
+            .focusedValue(\.reorderSelection, reorderAction)
             .onKeyPress("a", phases: .down) { press in
                 guard press.modifiers == .command, !songs.isEmpty else { return .ignored }
                 selection.selectAll(order)
@@ -52,6 +72,16 @@ private struct TrackSelectionModifier: ViewModifier {
             .safeAreaInset(edge: .top, spacing: 0) {
                 if !selection.isEmpty { bar }
             }
+    }
+
+    private var reorderAction: ReorderAction? {
+        guard onMove != nil, !selection.isEmpty else { return nil }
+        return ReorderAction(up: { moveSelection(up: true) }, down: { moveSelection(up: false) })
+    }
+
+    private func moveSelection(up: Bool) {
+        guard let move = selection.blockMove(in: order, up: up) else { return }
+        onMove?(move.from, move.to)
     }
 
     private func remove() {
@@ -76,6 +106,7 @@ private struct TrackSelectionModifier: ViewModifier {
             .itemPopover($popover)
             if onRemove != nil { barButton("Remove from playlist", disabled: false, action: remove) }
             barButton("Clear", disabled: false) { selection.clear() }
+                .cancelShortcut(if: !navigation.isSearchFocused)
         }
         .padding(.horizontal, Metrics.space16)
         .frame(height: Metrics.topBarHeight - Metrics.space16)

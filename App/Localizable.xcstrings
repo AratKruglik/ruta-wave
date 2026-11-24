@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "“%@” will be removed from your library. You can save it again later." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%@» буде прибрано з вашої бібліотеки. Ви зможете зберегти його знову пізніше."
+          }
+        }
+      }
+    },
     "%lld selected" : {
       "localizations" : {
         "uk" : {
@@ -927,6 +937,26 @@
         }
       }
     },
+    "Move Down" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемістити вниз"
+          }
+        }
+      }
+    },
+    "Move Up" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемістити вгору"
+          }
+        }
+      }
+    },
     "Moved in playlist" : {
       "localizations" : {
         "uk" : {
@@ -953,6 +983,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вимкнути звук"
+          }
+        }
+      }
+    },
+    "New albums and singles will show up here as they come out." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нові альбоми й сингли з’являтимуться тут, щойно вийдуть."
           }
         }
       }
@@ -997,6 +1037,16 @@
         }
       }
     },
+    "New releases, charts and moods will show up here. Try again later." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тут з’являтимуться новинки, чарти й настрої. Спробуйте пізніше."
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "uk" : {
@@ -1017,6 +1067,26 @@
         }
       }
     },
+    "No charts for this country" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для цієї країни немає чартів"
+          }
+        }
+      }
+    },
+    "No new releases right now" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наразі немає новинок"
+          }
+        }
+      }
+    },
     "No results for “%@”" : {
       "localizations" : {
         "uk" : {
@@ -1027,12 +1097,52 @@
         }
       }
     },
+    "Nothing from this artist yet" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Від цього виконавця поки нічого немає"
+          }
+        }
+      }
+    },
     "Nothing here yet" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тут поки нічого немає"
+          }
+        }
+      }
+    },
+    "Nothing in this category yet" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У цій категорії поки нічого немає"
+          }
+        }
+      }
+    },
+    "Nothing more here" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Більше тут нічого немає"
+          }
+        }
+      }
+    },
+    "Nothing to explore right now" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наразі нічого переглядати"
           }
         }
       }
@@ -1087,6 +1197,16 @@
         }
       }
     },
+    "Pages you've opened stay available. Everything reloads when you're back online." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкриті сторінки залишаються доступними. Усе оновиться, щойно з’явиться мережа."
+          }
+        }
+      }
+    },
     "Pause" : {
       "localizations" : {
         "uk" : {
@@ -1097,12 +1217,42 @@
         }
       }
     },
+    "Pick another country above." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть іншу країну вгорі."
+          }
+        }
+      }
+    },
     "Play" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Відтворити"
+          }
+        }
+      }
+    },
+    "Play a few songs and recommendations will show up here." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкніть кілька пісень, і тут з’являться рекомендації."
+          }
+        }
+      }
+    },
+    "Play a song, or use Play next or Add to queue." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкніть пісню або скористайтеся «Грати наступним» чи «Додати до черги»."
           }
         }
       }
@@ -1233,6 +1383,16 @@
         }
       }
     },
+    "Playlists for this mood will show up here." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тут з’являться добірки для цього настрою."
+          }
+        }
+      }
+    },
     "Previous" : {
       "localizations" : {
         "uk" : {
@@ -1359,6 +1519,16 @@
         }
       }
     },
+    "Remove this playlist from your library?" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прибрати цей плейлист із бібліотеки?"
+          }
+        }
+      }
+    },
     "Removed %lld songs" : {
       "localizations" : {
         "uk" : {
@@ -1458,6 +1628,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Зберегти"
+          }
+        }
+      }
+    },
+    "Save the queue as a playlist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зберегти чергу як плейлист"
           }
         }
       }
@@ -1768,6 +1948,16 @@
         }
       }
     },
+    "Songs added to it will show up here." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додані до нього пісні з’являться тут."
+          }
+        }
+      }
+    },
     "Songs you like appear here" : {
       "localizations" : {
         "uk" : {
@@ -1858,6 +2048,16 @@
         }
       }
     },
+    "This album has no songs available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У цьому альбомі немає доступних пісень"
+          }
+        }
+      }
+    },
     "This album isn't available" : {
       "localizations" : {
         "uk" : {
@@ -1878,12 +2078,32 @@
         }
       }
     },
+    "This list has no items yet." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У цьому списку поки немає елементів."
+          }
+        }
+      }
+    },
     "This playlist has no songs yet" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "У цьому плейлисті ще немає пісень"
+          }
+        }
+      }
+    },
+    "This playlist is empty" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей плейлист порожній"
           }
         }
       }
@@ -2011,6 +2231,16 @@
         }
       }
     },
+    "Use artwork colours" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовувати кольори обкладинок"
+          }
+        }
+      }
+    },
     "Video ID" : {
       "shouldTranslate" : false
     },
@@ -2057,12 +2287,52 @@
         }
       }
     },
+    "Your home page is empty" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша головна сторінка порожня"
+          }
+        }
+      }
+    },
+    "Your playlists will show up here." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тут з’являтимуться ваші плейлисти."
+          }
+        }
+      }
+    },
+    "Your queue is empty" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша черга порожня"
+          }
+        }
+      }
+    },
     "Your session expired. Sign in again." : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваш сеанс завершився. Увійдіть знову."
+          }
+        }
+      }
+    },
+    "You're offline" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Немає з’єднання"
           }
         }
       }
