@@ -48,7 +48,7 @@ Labels in the "Decision" column:
 | 31 | `skip-disliked-songs` | skips disliked tracks | S6 | `next` after `songChanged` if the status is dislike |
 | 32 | `skip-silences` | skips silence | S7 | Web Audio analyser in the page |
 | 33 | `sponsorblock` | skips segments using SponsorBlock data | S7 | request to `sponsor.ajay.app`, seek on a timer |
-| 34 | `synced-lyrics` | synchronized lyrics with romanization | S6 | a separate screen; romanization later |
+| 34 | `synced-lyrics` | synchronized lyrics with romanization | Built in | part of the player page Lyrics tab (stage 6, [#34](https://github.com/AratKruglik/yt-music-mac/issues/34)); romanization later |
 | 35 | `taskbar-mediacontrol` | buttons on the Windows taskbar | No | Windows only |
 | 36 | `touchbar` | Touch Bar controls | S7 | `NSTouchBar`; low priority |
 | 37 | `transparent-player` | transparent player window | Built in | window materials |
@@ -61,9 +61,9 @@ Labels in the "Decision" column:
 
 | Decision | Count |
 |---|---|
-| S5–S6 (first wave) | 11 |
+| S5–S6 (first wave) | 10 |
 | S7 (second wave) | 11 |
-| Built into the native UI | 6 |
+| Built into the native UI | 7 |
 | If needed | 5 |
 | Not ported | 5 |
 | Later (music video mode, #12) | 3 |
@@ -79,5 +79,5 @@ Labels in the "Decision" column:
   the settings interface is native. Risk: several such plugins must share one
   graph, so `bridge.js` needs a common "audio chain".
 - **Lyrics romanization** in the original pulls in heavy dictionaries (kuromoji,
-  pinyin-pro and others). The first version of `synced-lyrics` has none; if
+  pinyin-pro and others). The first version of synced lyrics has none; if
   needed, `CFStringTransform` from the system SDK can be used.
