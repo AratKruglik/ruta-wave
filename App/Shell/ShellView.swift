@@ -104,16 +104,21 @@ struct ShellView<AccountPopover: View>: View {
                 onMouseDown: search.mouseDownInWindow))
     }
 
+    private var barInset: CGFloat { isBarVisible ? Metrics.playerBarHeight + Metrics.contentBottomMargin : 0 }
+
     private var content: some View {
         NavigationStack(path: Binding(
             get: { navigation.path(for: navigation.selection) },
             set: { navigation.setPath($0, for: navigation.selection) })
         ) {
             SectionRoot(section: navigation.selection, isSignedIn: isSignedIn)
-                .navigationDestination(for: Route.self) { RouteScreen(route: $0) }
+                .navigationDestination(for: Route.self) {
+                    // Pushed pages are hosted outside the stack's modifiers, so they need the bar inset of their own.
+                    RouteScreen(route: $0).contentMargins(.bottom, barInset, for: .scrollContent)
+                }
         }
         .id(StackIdentity(section: navigation.selection, content: identity))
-        .contentMargins(.bottom, isBarVisible ? Metrics.playerBarHeight + Metrics.contentBottomMargin : 0, for: .scrollContent)
+        .contentMargins(.bottom, barInset, for: .scrollContent)
         .disabled(navigation.isPlayerPagePresented)
         .accessibilityHidden(navigation.isPlayerPagePresented)
     }
