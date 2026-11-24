@@ -1,5 +1,4 @@
 import Foundation
-import MediaPlayer
 import PlayerEngine
 import Testing
 
@@ -26,21 +25,14 @@ struct NowPlayingRulesTests {
         #expect(result.state?.isPaused == true)
     }
 
-    @Test func zeroDurationIsOmittedFromInfo() {
-        let state = NowPlayingRules.reduce(nil, .songChanged(Self.song(duration: 0))).state!
-        #expect(NowPlayingRules.info(state)[MPMediaItemPropertyPlaybackDuration] == nil)
-    }
-
     @Test func playbackChangedSetsRateAndElapsed() {
         let playing = NowPlayingRules.reduce(Self.playing(), .playbackChanged(isPaused: false, elapsed: 12))
         let info = NowPlayingRules.info(playing.state!)
         #expect(playing.publish)
-        #expect(info[MPNowPlayingInfoPropertyPlaybackRate] as? Double == 1)
-        #expect(info[MPNowPlayingInfoPropertyElapsedPlaybackTime] as? Double == 12)
-        #expect(NowPlayingRules.playbackState(playing.state) == .playing)
+        #expect(info.isPlaying)
+        #expect(info.elapsed == 12)
         let paused = NowPlayingRules.reduce(playing.state, .playbackChanged(isPaused: true, elapsed: 13))
-        #expect(NowPlayingRules.info(paused.state!)[MPNowPlayingInfoPropertyPlaybackRate] as? Double == 0)
-        #expect(NowPlayingRules.playbackState(paused.state) == .paused)
+        #expect(!NowPlayingRules.info(paused.state!).isPlaying)
     }
 
     @Test func plainTimeTickDoesNotPublishButUpdatesElapsed() {
@@ -56,19 +48,18 @@ struct NowPlayingRulesTests {
         state = NowPlayingRules.reduce(state, .playbackChanged(isPaused: false, elapsed: 3)).state
         let info = NowPlayingRules.info(state!)
         #expect(state?.elapsed == 30)
-        #expect(info[MPNowPlayingInfoPropertyPlaybackRate] as? Double == 0)
-        #expect(info[MPMediaItemPropertyTitle] as? String == "T")
+        #expect(!info.isPlaying)
+        #expect(info.title == "T")
         state = NowPlayingRules.reduce(state, .adChanged(false)).state
         state = NowPlayingRules.reduce(state, .playbackChanged(isPaused: false, elapsed: 31)).state
         #expect(state?.elapsed == 31)
-        #expect(NowPlayingRules.info(state!)[MPNowPlayingInfoPropertyPlaybackRate] as? Double == 1)
+        #expect(NowPlayingRules.info(state!).isPlaying)
     }
 
     @Test func stoppedClearsState() {
         let result = NowPlayingRules.reduce(Self.playing(), .stopped)
         #expect(result.state == nil)
         #expect(result.publish)
-        #expect(NowPlayingRules.playbackState(nil) == .stopped)
     }
 
     @Test func eventsBeforeAnySongStayCleared() {
@@ -84,13 +75,13 @@ struct NowPlayingRulesTests {
         let playing = NowPlayingRules.reduce(Self.playing(), .playbackChanged(isPaused: false, elapsed: 4)).state
         let result = NowPlayingRules.reduce(playing, .error(error))
         #expect(result.publish)
-        #expect(NowPlayingRules.info(result.state!)[MPNowPlayingInfoPropertyPlaybackRate] as? Double == 0)
+        #expect(!NowPlayingRules.info(result.state!).isPlaying)
     }
 
     @Test func albumOnlyWhenPresent() {
         var state = Self.playing()
-        #expect(NowPlayingRules.info(state)[MPMediaItemPropertyAlbumTitle] == nil)
+        #expect(NowPlayingRules.info(state).album == nil)
         state.album = "Al"
-        #expect(NowPlayingRules.info(state)[MPMediaItemPropertyAlbumTitle] as? String == "Al")
+        #expect(NowPlayingRules.info(state).album == "Al")
     }
 }

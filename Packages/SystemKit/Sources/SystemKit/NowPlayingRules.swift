@@ -1,5 +1,4 @@
 import Foundation
-import MediaPlayer
 import PlayerEngine
 
 struct NowPlayingState: Equatable, Sendable {
@@ -15,8 +14,6 @@ struct NowPlayingState: Equatable, Sendable {
 }
 
 enum NowPlayingRules {
-    static let skipInterval: TimeInterval = 10
-
     /// The new state, plus whether the system needs a push. A plain time tick updates `elapsed` silently.
     static func reduce(_ state: NowPlayingState?, _ event: PlayerEvent) -> (state: NowPlayingState?, publish: Bool) {
         if case .songChanged(let song) = event {
@@ -46,21 +43,9 @@ enum NowPlayingRules {
         }
     }
 
-    static func info(_ state: NowPlayingState) -> [String: Any] {
-        var info: [String: Any] = [
-            MPMediaItemPropertyTitle: state.title,
-            MPMediaItemPropertyArtist: state.artist,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: state.elapsed,
-            MPNowPlayingInfoPropertyPlaybackRate: state.isPaused || state.isAd ? 0.0 : 1.0,
-            MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
-        ]
-        if let album = state.album { info[MPMediaItemPropertyAlbumTitle] = album }
-        if state.duration > 0 { info[MPMediaItemPropertyPlaybackDuration] = state.duration }
-        return info
-    }
-
-    static func playbackState(_ state: NowPlayingState?) -> MPNowPlayingPlaybackState {
-        guard let state else { return .stopped }
-        return state.isPaused ? .paused : .playing
+    static func info(_ state: NowPlayingState) -> NowPlayingInfo {
+        NowPlayingInfo(
+            title: state.title, artist: state.artist, album: state.album, artworkURL: state.artworkURL,
+            duration: state.duration, elapsed: state.elapsed, isPlaying: !state.isPaused && !state.isAd)
     }
 }

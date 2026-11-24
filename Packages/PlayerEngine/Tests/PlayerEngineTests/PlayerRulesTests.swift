@@ -73,4 +73,42 @@ struct PlayerRulesTests {
         #expect(!PlayerRules.isAllowedArtworkHost(URL(string: "https://googleusercontent.com.evil.example/a")!))
         #expect(!PlayerRules.isAllowedArtworkHost(URL(string: "https://evilggpht.com/a")!))
     }
+
+    @Test func remoteCommandMapsKnownActions() {
+        #expect(PlayerRules.remoteCommand(from: ["action": "play"]) == .play)
+        #expect(PlayerRules.remoteCommand(from: ["action": "pause"]) == .pause)
+        #expect(PlayerRules.remoteCommand(from: ["action": "nexttrack"]) == .next)
+        #expect(PlayerRules.remoteCommand(from: ["action": "previoustrack"]) == .previous)
+        #expect(PlayerRules.remoteCommand(from: ["action": "seekto", "time": 42.5]) == .seek(to: 42.5))
+    }
+
+    @Test(arguments: [
+        ["action": "seekforward"], ["action": "seekto"], ["action": "seekto", "time": -1.0],
+        ["action": "seekto", "time": Double.infinity], ["action": "seekto", "time": "5"], ["time": 1.0],
+    ] as [[String: any Sendable]])
+    func remoteCommandRefusesUnknownOrInvalid(_ body: [String: any Sendable]) {
+        #expect(PlayerRules.remoteCommand(from: body) == nil)
+    }
+
+    @Test func remoteCommandRefusesNonDictionary() {
+        #expect(PlayerRules.remoteCommand(from: "play") == nil)
+    }
+
+    @Test func nowPlayingArgumentsCarryFieldsAndDropForeignArtwork() {
+        var info = NowPlayingInfo(
+            title: "T", artist: "A", album: "Al", artworkURL: URL(string: "https://i.ytimg.com/x.jpg"), duration: 100,
+            elapsed: 5, isPlaying: true)
+        let fields = PlayerRules.nowPlayingArguments(info)["info"] as? [String: Any]
+        #expect(fields?["title"] as? String == "T")
+        #expect(fields?["album"] as? String == "Al")
+        #expect(fields?["artwork"] as? String == "https://i.ytimg.com/x.jpg")
+        #expect(fields?["elapsed"] as? Double == 5)
+        #expect(fields?["playing"] as? Bool == true)
+        info.artworkURL = URL(string: "https://evil.example/x.jpg")
+        info.album = nil
+        let foreign = PlayerRules.nowPlayingArguments(info)["info"] as? [String: Any]
+        #expect(foreign?["artwork"] == nil)
+        #expect(foreign?["album"] == nil)
+        #expect(PlayerRules.nowPlayingArguments(nil)["info"] is NSNull)
+    }
 }

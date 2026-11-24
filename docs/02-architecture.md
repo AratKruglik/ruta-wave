@@ -345,8 +345,8 @@ Principles:
 
 | Capability | API |
 |---|---|
-| Now Playing in Control Centre | `MPNowPlayingInfoCenter` |
-| Media keys, headphones | `MPRemoteCommandCenter` |
+| Now Playing in Control Centre | page Media Session, driven from an isolated `WKContentWorld` |
+| Media keys, headphones | Media Session action handlers → `PlayerEvent.remoteCommand` |
 | Track-change notifications | `UNUserNotificationCenter` with artwork |
 | App menu | SwiftUI `Commands` |
 | Menu bar item | `MenuBarExtra` |
@@ -355,10 +355,13 @@ Principles:
 | Launch at login | `SMAppService.mainApp` |
 | Always on top | `NSWindow.level = .floating` |
 
-Known complication: WebKit itself registers a page with media as a Now Playing
-source. Stage 5 must check whether that conflicts with our
-`MPNowPlayingInfoCenter` and, if it does, disable Media Session on the page
-through the bridge.
+WebKit registers the page's media element as a Now Playing source and offers no
+public way to remove it; publishing through `MPNowPlayingInfoCenter` as well gave
+two entries (stage 5). So the app owns WebKit's entry instead: a document-start
+script blocks the page's own Media Session calls, and `nowplaying.js`, injected
+into an isolated content world the page cannot reach, sets the metadata,
+position and handlers. `SystemNowPlaying` reduces `PlayerEvent`s to that state
+and routes the handlers' commands through `NowPlayingModel.perform`.
 
 ## 9. Settings
 
