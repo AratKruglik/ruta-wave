@@ -164,7 +164,7 @@ enum PlayerCommand {
     case toggleMute, toggleShuffle, cycleRepeat
     case setLike(LikeStatus)                              // signed-in only, through PlayerEngine.rate
     case playQueueItem(index: Int)
-    case enqueue(videoId: String, playNext: Bool)
+    case enqueue(videoIds: [String], playNext: Bool)   // 1…200 valid ids, one batched call
     case removeQueueItem(index: Int)                      // the current item is refused
     case moveQueueItem(from: Int, to: Int)
     case load(videoId: String, playlistId: String?)
@@ -223,6 +223,12 @@ drift from the player. It holds the main queue only (no Autoplay section) and at
 rejects a larger message, and any message with one invalid row, because dropping a row would shift every later index.
 A queue command carries the row's index together with its `videoId` and `playlistSetVideoId`; the page refuses the
 operation when the row at that index no longer matches.
+
+**Undo.** The page has no insert-at-index, so Swift undoes a queue edit by matching rows in the latest mirror, never by a stored
+index. Undo of "Play next" / "Add to queue" finds the inserted rows by video id (after the current row, or at the end) and sends
+the removals in descending index order, so the earlier indices stay valid against the same mirror. Undo of a remove appends the
+video id, and once the next `queueChanged` shows it as the last row, moves it back to its old index. A toast is shown only after
+the `queueChanged` that confirms the change, so a refused command shows nothing.
 
 **Recovery.** `PlayerEngine` keeps an in-memory snapshot (target track, position without ad time). A content process crash,
 a load failure or no `song` within 15 s (a Swift timer, because a JS timer dies with the process) reloads the target through the same URL as

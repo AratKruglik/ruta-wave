@@ -108,6 +108,42 @@ final class SidebarModel {
         }
     }
 
+    /// Adds songs to one of the user's playlists. The server refuses a playlist the user does not own, which shows as an error toast.
+    func add(videoIds: [String], to browseId: String) async {
+        guard !videoIds.isEmpty, let credentials = credentials() else { return }
+        let captured = generation
+        let title = playlistTitle(browseId)
+        do {
+            let added = try await loader.edit(browseId, videoIds.map { .add(videoId: $0) }, credentials)
+            guard generation == captured else { return }
+            ownership[browseId] = true
+            guard !added.isEmpty else {
+                toasts.show("Already in \(title)")
+                return
+            }
+            toasts.show("Added to \(title)", undo: { [weak self] in self?.undoAdd(added, from: browseId, title: title) })
+        } catch {
+            guard generation == captured else { return }
+            toasts.show("Couldn't add to \(title)")
+        }
+    }
+
+    private func undoAdd(_ added: [AddedPlaylistRow], from browseId: String, title: String) {
+        guard let credentials = credentials() else { return }
+        let captured = generation
+        Task {
+            do {
+                _ = try await loader.edit(browseId, added.map { .remove(videoId: $0.videoId, setVideoId: $0.setVideoId) }, credentials)
+            } catch {
+                if generation == captured { toasts.show("Couldn't undo") }
+            }
+        }
+    }
+
+    private func playlistTitle(_ browseId: String) -> String {
+        (pendingInserts + serverList).first { $0.browseId == browseId }?.title ?? String(localized: "the playlist")
+    }
+
     func delete(_ browseId: String) async -> Bool {
         await remove(browseId) { [loader] credentials in try await loader.delete(browseId, credentials) }
     }

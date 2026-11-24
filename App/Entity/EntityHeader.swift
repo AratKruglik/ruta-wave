@@ -87,6 +87,10 @@ struct EntityHeader: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(\.requestSignIn) private var requestSignIn
     @State private var isSavePromptShown = false
+    @State private var popover: ItemPopover?
+    @State private var isEditing = false
+    @State private var isSavingEdit = false
+    @Environment(ToastCenter.self) private var toasts
 
     var body: some View {
         let layout = isWide
@@ -157,9 +161,60 @@ struct EntityHeader: View {
             if showsShuffle {
                 CircleIconButton(symbol: "shuffle", label: "Shuffle") { nowPlaying.play(model.shuffleTarget) }
             }
-            ShareButtons(url: model.shareURL)
+            if let url = model.shareURL {
+                CircleIconButton(symbol: "link", label: "Share") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(url.absoluteString, forType: .string)
+                    toasts.show("Link copied")
+                }
+            }
+            moreMenu
         }
         .padding(.top, Metrics.space8)
+        .itemPopover($popover)
+        .sheet(isPresented: $isEditing) {
+            NewPlaylistSheet(
+                title: "Edit playlist", confirmTitle: "Save", initial: model.editDraft ?? NewPlaylistDraft(),
+                showsPrivacy: model.canEditPrivacy, isCreating: isSavingEdit, onCancel: { isEditing = false },
+                onCreate: { draft in
+                    isSavingEdit = true
+                    Task {
+                        if await model.editDetails(draft) { isEditing = false }
+                        isSavingEdit = false
+                    }
+                })
+        }
+    }
+
+    private var pageItem: MusicItem? {
+        switch model.kind {
+        case .album(let target): .album(Album(browseId: target.browseId, title: header.title, playTarget: model.playTarget))
+        case .playlist(let browseId): .playlist(Playlist(browseId: browseId, title: header.title, playTarget: model.playTarget))
+        case .artist: nil
+        }
+    }
+
+    @ViewBuilder private var moreMenu: some View {
+        if let item = pageItem {
+            Menu {
+                ItemMenu(item: item, place: .entityHeader(isOwned: model.canEdit), popover: $popover, onHostAction: hostAction)
+            } label: { CircleIcon(symbol: "ellipsis") }
+                .menuStyle(.button)
+                .menuIndicator(.hidden)
+                .buttonStyle(.plain)
+                .help("More actions")
+                .accessibilityLabel("More actions")
+        }
+    }
+
+    private func hostAction(_ action: ItemAction) {
+        switch action {
+        case .edit: isEditing = true
+        case .likeAll, .dislikeAll:
+            let rating: Rating = action == .likeAll ? .like : .dislike
+            nowPlaying.rateAll(rating) { await model.allTrackIds() }
+        default: break
+        }
     }
 
     private func play() {

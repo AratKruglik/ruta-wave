@@ -108,8 +108,8 @@ private struct CommandGrid: View {
             }
             HStack {
                 TextField("videoId to enqueue", text: $enqueueId).accessibilityLabel("Video ID to enqueue")
-                button("Play next") { .enqueue(videoId: enqueueId, playNext: true) }
-                button("Add to end") { .enqueue(videoId: enqueueId, playNext: false) }
+                button("Play next") { .enqueue(videoIds: [enqueueId], playNext: true) }
+                button("Add to end") { .enqueue(videoIds: [enqueueId], playNext: false) }
             }
         }
         .textFieldStyle(.roundedBorder)

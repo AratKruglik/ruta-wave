@@ -1,38 +1,67 @@
 import Observation
 import SwiftUI
 
+struct Toast {
+    let message: LocalizedStringResource
+    let undo: (@MainActor () -> Void)?
+}
+
 @MainActor @Observable
 final class ToastCenter {
-    private(set) var message: LocalizedStringResource?
+    private(set) var toast: Toast?
     @ObservationIgnored private var dismissal: Task<Void, Never>?
 
-    func show(_ message: LocalizedStringResource) {
+    var message: LocalizedStringResource? { toast?.message }
+
+    /// A new toast replaces the visible one together with its Undo, so only the latest action can be undone.
+    func show(_ message: LocalizedStringResource, undo: (@MainActor () -> Void)? = nil) {
         dismissal?.cancel()
-        self.message = message
+        toast = Toast(message: message, undo: undo)
         dismissal = Task { [weak self] in
             try? await Task.sleep(for: Motion.toastDuration)
             guard !Task.isCancelled else { return }
-            self?.message = nil
+            self?.toast = nil
         }
+    }
+
+    func undo() {
+        guard let action = toast?.undo else { return }
+        reset()
+        action()
+    }
+
+    func reset() {
+        dismissal?.cancel()
+        toast = nil
     }
 }
 
 struct ToastView: View {
-    let message: LocalizedStringResource
+    let toast: Toast
+    var onUndo: () -> Void = {}
 
     var body: some View {
-        Text(message)
-            .font(.rwBody)
-            .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Metrics.space16)
-            .padding(.vertical, Metrics.space12)
-            .glassSurface(in: Capsule())
-            .accessibilityAddTraits(.updatesFrequently)
+        HStack(spacing: Metrics.space12) {
+            Text(toast.message)
+            if toast.undo != nil {
+                Button("Undo", action: onUndo)
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.accentLink)
+                    .help("Undo")
+            }
+        }
+        .font(.rwBody)
+        .foregroundStyle(.textPrimary)
+        .padding(.horizontal, Metrics.space16)
+        .padding(.vertical, Metrics.space12)
+        .glassSurface(in: Capsule())
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.updatesFrequently)
     }
 }
 
 #Preview {
-    ToastView(message: "This track is unavailable")
+    ToastView(toast: Toast(message: "This track is unavailable", undo: {}))
         .padding()
         .background(.themeBase)
 }

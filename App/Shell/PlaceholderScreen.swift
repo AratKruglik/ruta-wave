@@ -17,33 +17,6 @@ struct PlaceholderScreen: View {
     }
 }
 
-struct PlayerPagePlaceholder: View {
-    let onClose: () -> Void
-
-    var body: some View {
-        ZStack(alignment: .topTrailing) {
-            PlaceholderScreen(title: "Player")
-            Button(action: onClose) {
-                Image(systemName: "chevron.down")
-                    .font(.rwIcon(Metrics.iconBar))
-                    .foregroundStyle(.textPrimary)
-                    .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .keyboardShortcut(.cancelAction)
-            .help("Close player page")
-            .accessibilityLabel("Close player page")
-            .padding(Metrics.space16)
-        }
-        .background(.themeBase)
-    }
-}
-
 #Preview("Placeholder") {
     PlaceholderScreen(title: "Home").background(.themeBase)
-}
-
-#Preview("Player page") {
-    PlayerPagePlaceholder(onClose: {}).frame(width: 600, height: 400)
 }

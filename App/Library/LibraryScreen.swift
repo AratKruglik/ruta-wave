@@ -6,6 +6,7 @@ struct LibraryScreen: View {
 
     @Environment(NavigationModel.self) private var navigation
     @State private var width = Metrics.defaultWindowWidth
+    @State private var selection = TrackSelection()
 
     private var padding: CGFloat { width >= Metrics.widePageWidth ? Metrics.space32 : Metrics.space24 }
 
@@ -90,7 +91,7 @@ struct LibraryScreen: View {
                 columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
                 alignment: .leading, spacing: Metrics.space24
             ) {
-                if content.kind == .playlists { NewPlaylistCard(action: navigation.requestNewPlaylist) }
+                if content.kind == .playlists { NewPlaylistCard { navigation.requestNewPlaylist() } }
                 if let liked = content.likedMusic { MusicCard(item: .playlist(liked)) }
                 ForEach(Array(content.items.enumerated()), id: \.element.libraryKey) { index, item in
                     MusicCard(item: item).onAppear { prefetch(index, of: content.items.count) }
@@ -98,13 +99,17 @@ struct LibraryScreen: View {
             }
             if content.kind == .albums, content.items.isEmpty { hint("Albums you save appear here") }
         case .songs:
+            let songs = content.items.compactMap { if case .song(let song) = $0 { song } else { nil } }
+            let order = songs.map(\.rowKey)
             LazyVStack(spacing: 0) {
                 ForEach(Array(content.items.enumerated()), id: \.element.libraryKey) { index, item in
                     if case .song(let song) = item {
-                        TrackRow(song: song, density: .detailed).onAppear { prefetch(index, of: content.items.count) }
+                        TrackRow(song: song, density: .detailed, selection: $selection.row(for: song, order: order, songs: songs))
+                            .onAppear { prefetch(index, of: content.items.count) }
                     }
                 }
             }
+            .trackSelection($selection, songs: songs)
             if content.items.isEmpty { hint("Songs you like appear here") }
         case .artists:
             LazyVStack(spacing: 0) {

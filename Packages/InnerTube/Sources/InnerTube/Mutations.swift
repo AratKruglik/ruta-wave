@@ -68,6 +68,11 @@ public enum PlaylistEdit: Sendable, Equatable {
 public struct AddedPlaylistRow: Sendable, Equatable {
     public let videoId: String
     public let setVideoId: String
+
+    public init(videoId: String, setVideoId: String) {
+        self.videoId = videoId
+        self.setVideoId = setVideoId
+    }
 }
 
 extension [AddedPlaylistRow] {

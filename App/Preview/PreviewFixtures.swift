@@ -157,7 +157,7 @@ enum PreviewFixtures {
             sections: { _, _ in
                 Page(items: [Shelf(title: "Suggestions", layout: .list, items: tracks.suffix(3).map(MusicItem.song))], continuation: nil)
             },
-            save: { _, _, _ in }, subscribe: { _, _, _ in }, add: { _, _, _ in })
+            save: { _, _, _ in }, subscribe: { _, _, _ in }, edit: { _, _, _ in [] })
         let isGuest = variant == .guest
         return EntityModel(
             kind: kind, loader: loader, credentials: { isGuest ? nil : Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
@@ -224,7 +224,7 @@ enum PreviewFixtures {
                 if variant == .failed { throw InnerTubeError.unexpectedResponse }
                 return list
             },
-            create: { _, _ in "VLNEW" }, delete: { _, _ in }, removeFromLibrary: { _, _ in }, isOwned: { _, _ in false })
+            create: { _, _ in "VLNEW" }, edit: { _, _, _ in [] }, delete: { _, _ in }, removeFromLibrary: { _, _ in }, isOwned: { _, _ in false })
         return SidebarModel(
             loader: loader, credentials: { variant == .guest ? nil : Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
     }

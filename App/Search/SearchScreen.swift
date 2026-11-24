@@ -18,6 +18,7 @@ struct SearchScreen: View {
 
     @Environment(NavigationModel.self) private var navigation
     @State private var width = Metrics.defaultWindowWidth
+    @State private var selection = TrackSelection()
 
     private var padding: CGFloat { width >= Metrics.widePageWidth ? Metrics.space32 : Metrics.space24 }
 
@@ -111,11 +112,16 @@ struct SearchScreen: View {
     private func sectionBody(_ section: SearchSection) -> some View {
         switch section.kind {
         case .songs, .videos:
+            let songs = section.items.compactMap { if case .song(let song) = $0 { song } else { nil } }
+            let order = songs.map(\.rowKey)
             VStack(spacing: 0) {
-                ForEach(Array(section.items.enumerated()), id: \.offset) { _, item in
-                    if case .song(let song) = item { TrackRow(song: song, density: .detailed) }
+                ForEach(Array(songs.enumerated()), id: \.offset) { _, song in
+                    TrackRow(
+                        song: song, density: .detailed,
+                        selection: section.kind == .songs ? $selection.row(for: song, order: order, songs: songs) : nil)
                 }
             }
+            .trackSelection($selection, songs: section.kind == .songs ? songs : [])
         case .albums, .artists, .playlists:
             ShelfView(shelf: Shelf(title: nil, layout: .cards, items: section.items)) { navigation.push(Route(target: $0)) }
         }
@@ -133,12 +139,14 @@ struct SearchScreen: View {
         let items = content.items
         let songs = items.compactMap { if case .song(let song) = $0 { song } else { nil } }
         if songs.count == items.count {
+            let order = songs.map(\.rowKey)
             LazyVStack(spacing: 0) {
                 ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
-                    TrackRow(song: song, density: .detailed)
+                    TrackRow(song: song, density: .detailed, selection: $selection.row(for: song, order: order, songs: songs))
                         .onAppear { prefetch(index, of: items.count) }
                 }
             }
+            .trackSelection($selection, songs: songs)
         } else {
             LazyVGrid(
                 columns: [GridItem(.adaptive(minimum: Metrics.videoCardWidth), spacing: Metrics.space16, alignment: .top)],

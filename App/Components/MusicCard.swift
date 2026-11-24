@@ -58,6 +58,7 @@ struct MusicCard: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
+    @State private var popover: ItemPopover?
     @FocusState private var focus: Field?
 
     private var width: CGFloat { item.isVideoCard ? Metrics.videoCardWidth : Metrics.cardSize }
@@ -101,7 +102,7 @@ struct MusicCard: View {
                 .accessibilityLabel("Play")
             }
 
-            Menu { ItemMenu(item: item) } label: {
+            Menu { ItemMenu(item: item, popover: $popover) } label: {
                 Image(systemName: "ellipsis")
                     .font(.rwIcon(Metrics.iconRow))
                     .foregroundStyle(.textPrimary)
@@ -131,7 +132,9 @@ struct MusicCard: View {
             }
         }
         .frame(width: width, height: height)
-        .contextMenu { ItemMenu(item: item) }
+        .draggable(dragPayload)
+        .contextMenu { ItemMenu(item: item, popover: $popover) }
+        .itemPopover($popover)
     }
 
     private var texts: some View {
@@ -154,6 +157,15 @@ struct MusicCard: View {
         .contentShape(Rectangle())
         .onTapGesture { activate(item, navigation: navigation, nowPlaying: nowPlaying) }
         .accessibilityHidden(true)
+    }
+
+    private var dragPayload: TrackDrag {
+        switch item {
+        case .song(let song): TrackDrag(videoIds: [song.videoId])
+        case .album(let album): TrackDrag(playlistId: album.playTarget?.playlistId)
+        case .playlist(let playlist): TrackDrag(playlistId: playlist.playTarget?.playlistId ?? playlist.browseId.removingVLPrefix)
+        case .artist, .link: TrackDrag()
+        }
     }
 
     private var accessibilityLabel: String {
@@ -181,6 +193,11 @@ struct ExplicitBadge: View {
     .padding()
     .environment(NavigationModel())
     .environment(PreviewFixtures.nowPlaying())
+    .environment(ToastCenter())
     .background(.themeBase)
 }
 #endif
+
+extension String {
+    fileprivate var removingVLPrefix: String { hasPrefix("VL") ? String(dropFirst(2)) : self }
+}

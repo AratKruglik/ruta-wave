@@ -7,6 +7,7 @@ struct ArtistRow: View {
     @Environment(NavigationModel.self) private var navigation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
+    @State private var popover: ItemPopover?
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -37,7 +38,8 @@ struct ArtistRow: View {
         .focused($isFocused)
         .onHover { isHovering = $0 }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: isHovering)
-        .contextMenu { ItemMenu(item: .artist(artist)) }
+        .contextMenu { ItemMenu(item: .artist(artist), popover: $popover) }
+        .itemPopover($popover)
         .accessibilityLabel([artist.name, artist.subtitle].compactMap { $0 }.joined(separator: ", "))
     }
 }
@@ -53,6 +55,7 @@ struct ArtistRow: View {
     .frame(width: 600)
     .environment(NavigationModel())
     .environment(PreviewFixtures.nowPlaying())
+    .environment(ToastCenter())
     .background(.themeBase)
 }
 #endif

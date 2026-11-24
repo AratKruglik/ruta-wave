@@ -12,7 +12,7 @@ public enum PlayerCommand: Sendable, Equatable {
     case setLike(LikeStatus)
     /// An index refers to a position in the last `queueChanged`.
     case playQueueItem(index: Int)
-    case enqueue(videoId: String, playNext: Bool)
+    case enqueue(videoIds: [String], playNext: Bool)
     case removeQueueItem(index: Int)
     case moveQueueItem(from: Int, to: Int)
     case load(videoId: String, playlistId: String?)

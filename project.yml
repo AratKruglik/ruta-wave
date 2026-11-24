@@ -15,6 +15,15 @@ targets:
     type: application
     platform: macOS
     sources: [App]
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: dev.kruhlyk.rutawave.tracks
+            UTTypeDescription: Rutawave tracks
+            UTTypeConformsTo: [public.data]
     dependencies:
       - package: Auth
       - package: AppSettings
@@ -46,6 +55,9 @@ targets:
       - App/Browse/BrowseModel.swift
       - App/Browse/BrowseRouting.swift
       - App/Browse/BrowseStore.swift
+      - App/Components/ItemActions.swift
+      - App/Components/TrackDrag.swift
+      - App/Components/TrackSelection.swift
       - App/Entity/EntityLoader.swift
       - App/Entity/EntityModel.swift
       - App/Library/HistoryModel.swift

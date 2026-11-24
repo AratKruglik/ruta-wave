@@ -166,4 +166,12 @@ struct NavigationModelTests {
         model.requestNewPlaylist()
         #expect(model.newPlaylistRequests == 2)
     }
+
+    @Test func newPlaylistRequestCarriesTheSongsAndResets() {
+        let model = NavigationModel()
+        model.requestNewPlaylist(videoIds: ["a", "b"])
+        #expect(model.pendingPlaylistVideoIds == ["a", "b"] && model.newPlaylistRequests == 1)
+        model.requestNewPlaylist()
+        #expect(model.pendingPlaylistVideoIds.isEmpty)
+    }
 }

@@ -21,7 +21,9 @@ extension PlaylistPage {
             header: header,
             tracks: Page(items: parseBlocks(shelf?["contents"]?.array ?? [], ItemParser.playlistRow), continuation: shelf?.nextContinuation),
             sectionsContinuation: sectionsContinuation,
-            isOwned: json.twoColumnFirstItem?["musicEditablePlaylistDetailHeaderRenderer"] != nil)
+            isOwned: json.twoColumnFirstItem?["musicEditablePlaylistDetailHeaderRenderer"] != nil,
+            privacy: json.twoColumnFirstItem?["musicEditablePlaylistDetailHeaderRenderer"]?["editHeader"]?["musicPlaylistEditHeaderRenderer"]?["privacy"]?
+                .string.flatMap(PlaylistPrivacy.init(rawValue:)))
     }
 }
 

@@ -115,6 +115,9 @@ enum Metrics {
     static let quickPickRows = 4
     static let rowColumnWidth: CGFloat = 440
     static let widePageWidth: CGFloat = 1100
+    static let playerArtworkMax: CGFloat = 560
+    static let playerPanelMinWidth: CGFloat = 360
+    static let playerPanelMaxWidth: CGFloat = 420
     static let searchFieldHeight: CGFloat = 42
     static let searchRowHeight: CGFloat = 48
     static let searchEntityRowHeight: CGFloat = 56

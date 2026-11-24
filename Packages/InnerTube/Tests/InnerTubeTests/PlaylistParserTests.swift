@@ -29,6 +29,17 @@ import Testing
         #expect(try PlaylistPage(playlist: Fixture.json("playlist-own")).isOwned == true)
     }
 
+    @Test func privacyComesFromTheEditHeaderAndIsNilWhenAbsent() throws {
+        #expect(try PlaylistPage(playlist: Fixture.json("playlist-own")).privacy == nil)
+        let raw = try #require(String(data: Fixture.data("playlist-own"), encoding: .utf8))
+        let marker = "\"musicEditablePlaylistDetailHeaderRenderer\": {"
+        #expect(raw.contains(marker))
+        let patched = raw.replacingOccurrences(
+            of: marker, with: marker + "\"editHeader\": {\"musicPlaylistEditHeaderRenderer\": {\"privacy\": \"UNLISTED\"}},")
+        let page = try PlaylistPage(playlist: JSONValue(response: Data(patched.utf8)))
+        #expect(page.privacy == .unlisted)
+    }
+
     @Test func savedStateIsTheBookmarkToggle() throws {
         #expect(try PlaylistPage(playlist: Fixture.json("playlist")).header.isSaved == false)
         let text = String(decoding: try Fixture.data("playlist"), as: UTF8.self)

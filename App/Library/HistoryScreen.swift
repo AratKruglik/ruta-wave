@@ -5,6 +5,7 @@ struct HistoryScreen: View {
     let model: HistoryModel
 
     @State private var width = Metrics.defaultWindowWidth
+    @State private var selection = TrackSelection()
 
     private var padding: CGFloat { width >= Metrics.widePageWidth ? Metrics.space32 : Metrics.space24 }
 
@@ -39,6 +40,7 @@ struct HistoryScreen: View {
             .padding(padding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         case .loaded(let days):
+            let order = days.flatMap { $0.entries.map(\.song.rowKey) }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Metrics.space24) {
                     title
@@ -50,14 +52,15 @@ struct HistoryScreen: View {
                                 .accessibilityAddTraits(.isHeader)
                             ForEach(Array(day.entries.enumerated()), id: \.offset) { _, entry in
                                 TrackRow(
-                                    song: entry.song, density: .detailed,
-                                    onRemoveFromHistory: entry.feedbackToken == nil ? nil : { model.remove(entry) })
+                                    song: entry.song, density: .detailed, selection: $selection.row(for: entry.song, order: order),
+                                    place: entry.feedbackToken == nil ? .plain : .historyRow, onAction: { if $0 == .removeFromHistory { model.remove(entry) } })
                             }
                         }
                     }
                 }
                 .padding(padding)
             }
+            .trackSelection($selection, songs: days.flatMap { $0.entries.map(\.song) })
         }
     }
 
