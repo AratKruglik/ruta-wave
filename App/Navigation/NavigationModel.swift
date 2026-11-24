@@ -45,12 +45,14 @@ final class NavigationModel {
     }
 
     func push(_ route: Route) {
+        isPlayerPagePresented = false
         paths[selection, default: []].append(route)
         forwardRoutes[selection] = []
     }
 
     /// A filter change swaps the page instead of stacking another one.
     func replaceLast(_ route: Route) {
+        isPlayerPagePresented = false
         var current = path(for: selection)
         guard !current.isEmpty else {
             push(route)

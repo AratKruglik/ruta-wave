@@ -2105,6 +2105,46 @@
           }
         }
       }
+    },
+    "Lyrics aren't available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тексту пісні немає"
+          }
+        }
+      }
+    },
+    "Comments aren't available yet" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коментарі поки недоступні"
+          }
+        }
+      }
+    },
+    "Player page tabs" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вкладки сторінки програвача"
+          }
+        }
+      }
+    },
+    "Nothing related for this track" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для цього треку немає схожого"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -45,15 +45,28 @@ public struct Chip: Sendable, Equatable {
     }
 }
 
+/// Prose block such as "About the artist".
+public struct DescriptionShelf: Sendable, Equatable {
+    public let title: String?
+    public let text: String
+
+    public init(title: String?, text: String) {
+        self.title = title
+        self.text = text
+    }
+}
+
 public struct BrowsePage: Sendable, Equatable {
     public let title: String?
     public let chips: [Chip]
     public let shelves: Page<Shelf>
+    public let about: DescriptionShelf?
 
-    public init(title: String?, chips: [Chip], shelves: Page<Shelf>) {
+    public init(title: String?, chips: [Chip], shelves: Page<Shelf>, about: DescriptionShelf? = nil) {
         self.title = title
         self.chips = chips
         self.shelves = shelves
+        self.about = about
     }
 }
 

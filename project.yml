@@ -72,6 +72,8 @@ targets:
       - App/PlayerBar/PlaybackRules.swift
       - App/PlayerBar/NowPlayingModel.swift
       - App/PlayerBar/PlayerControlling.swift
+      - App/PlayerPage/TrackTabsLoader.swift
+      - App/PlayerPage/TrackTabsModel.swift
       - App/Shell/SidebarLoader.swift
       - App/Shell/SidebarModel.swift
       - App/Shell/Toast.swift

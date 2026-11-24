@@ -49,7 +49,8 @@ private struct Harness {
     init(
         signedIn: Bool = false, preferences: Preferences? = nil,
         client: InnerTubeClient? = nil, resolve: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil,
-        clock: TestClock = TestClock(), rateVideo: (@MainActor (String, Rating, Credentials) async throws -> Void)? = nil
+        clock: TestClock = TestClock(), rateVideo: (@MainActor (String, Rating, Credentials) async throws -> Void)? = nil,
+        watchNext: (@MainActor (WatchTarget, Credentials?) async throws -> WatchNext)? = nil
     ) {
         let prefs = preferences ?? Preferences(defaults: UserDefaults(suiteName: UUID().uuidString)!)
         self.preferences = prefs
@@ -64,7 +65,7 @@ private struct Harness {
         model = NowPlayingModel(
             player: player, toasts: toasts, preferences: prefs,
             credentials: { signedIn ? credentials : nil }, client: client,
-            resolveQueue: resolveQueue,
+            resolveQueue: resolveQueue, watchNext: watchNext,
             rateVideo: rateVideo,
             now: { clock.instant })
     }
@@ -82,6 +83,17 @@ private struct Harness {
 
 private func item(_ id: String, current: Bool) -> PlayerQueueItem {
     PlayerQueueItem(videoId: id, title: "T", artist: "A", artworkURL: nil, duration: 1, isCurrent: current)
+}
+
+private func nextResponse(for id: String, lyrics: String?, related: String?) -> WatchNext {
+    WatchNext(
+        queue: Page(items: [QueueItem(song: Song(videoId: id, title: "T"), isCurrent: true, counterpart: nil)], continuation: nil),
+        automix: nil, chips: [], playingFrom: nil, playlistId: nil, lyricsBrowseId: lyrics, relatedBrowseId: related)
+}
+
+@MainActor
+private final class FailSwitch {
+    var isOn = true
 }
 
 private func song(_ id: String) -> SongInfo {
@@ -586,5 +598,48 @@ struct NowPlayingModelTests {
         release?.resume()
         await h.settle()
         #expect(rated == 0 && h.toasts.toast == nil)
+    }
+
+    @Test func detailsKeepTheLyricsAndRelatedBrowseIds() async {
+        let h = Harness(watchNext: { _, _ in nextResponse(for: "a", lyrics: "MPLYt_a", related: "MPTRt_a") })
+        h.player.song = song("a")
+        await h.model.loadDetails(for: song("a"))
+        #expect(h.model.details?.videoId == "a")
+        #expect(h.model.details?.lyricsBrowseId == "MPLYt_a")
+        #expect(h.model.details?.relatedBrowseId == "MPTRt_a")
+        #expect(!h.model.detailsFailed)
+    }
+
+    @Test func unselectableLyricsLeaveDetailsWithoutAnId() async {
+        let h = Harness(watchNext: { _, _ in nextResponse(for: "a", lyrics: nil, related: "MPTRt_a") })
+        h.player.song = song("a")
+        var before: TrackDetails?
+        let task = Task { await h.model.loadDetails(for: song("a")) }
+        before = h.model.details
+        await task.value
+        #expect(before == nil)
+        #expect(h.model.details != nil && h.model.details?.lyricsBrowseId == nil)
+    }
+
+    @Test func aSongChangeBeforeTheResponseLeavesNothingBehind() async {
+        let h = Harness(watchNext: { _, _ in nextResponse(for: "a", lyrics: "x", related: "y") })
+        h.player.song = song("b")
+        await h.model.loadDetails(for: song("a"))
+        #expect(h.model.details == nil && !h.model.detailsFailed)
+    }
+
+    @Test func aFailedNextSetsTheFlagAndTheNextLoadClearsIt() async {
+        struct Boom: Error {}
+        let fails = FailSwitch()
+        let h = Harness(watchNext: { _, _ in
+            if fails.isOn { throw Boom() }
+            return nextResponse(for: "a", lyrics: "x", related: "y")
+        })
+        h.player.song = song("a")
+        await h.model.loadDetails(for: song("a"))
+        #expect(h.model.detailsFailed && h.model.details == nil)
+        fails.isOn = false
+        await h.model.loadDetails(for: song("a"))
+        #expect(!h.model.detailsFailed && h.model.details != nil)
     }
 }

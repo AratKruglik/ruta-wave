@@ -13,6 +13,7 @@ private func shelf(_ page: BrowsePage, _ title: String) throws -> Shelf {
 @Suite struct BrowseParserTests {
     @Test func homeHasChipsShelvesAndContinuation() throws {
         let home = try page("home")
+        #expect(home.about == nil)
         #expect(home.chips.count == 10)
         #expect(home.chips.allSatisfy { $0.target?.browseId == "FEmusic_home" && $0.target?.params != nil && !$0.title.isEmpty })
         #expect(home.shelves.items.map(\.title) == ["Morning boost", "It's autumn"])
