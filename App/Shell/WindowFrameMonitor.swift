@@ -1,8 +1,5 @@
 import AppKit
-import OSLog
 import SwiftUI
-
-private let log = Logger(subsystem: "dev.kruhlyk.rutawave", category: "window")
 
 extension View {
     /// Reports the real window content width, keeps the window at its minimum size, and relays out after
@@ -35,24 +32,24 @@ private struct WindowFrameMonitor: NSViewRepresentable {
             ]
             tokens = relayoutEvents.map { name in
                 center.addObserver(forName: name, object: window, queue: .main) { [weak self] _ in
-                    MainActor.assumeIsolated { self?.handle(name.rawValue, relayout: true) }
+                    MainActor.assumeIsolated { self?.handle(relayout: true) }
                 }
             }
             tokens.append(
                 center.addObserver(forName: NSWindow.didResizeNotification, object: window, queue: .main) { [weak self] _ in
-                    MainActor.assumeIsolated { self?.handle("didResize", relayout: false) }
+                    MainActor.assumeIsolated { self?.handle(relayout: false) }
                 })
             tokens.append(
                 center.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) {
                     [weak self] _ in
-                    MainActor.assumeIsolated { self?.handle("didChangeScreenParameters", relayout: true) }
+                    MainActor.assumeIsolated { self?.handle(relayout: true) }
                 })
-            handle("attach", relayout: false)
+            handle(relayout: false)
         }
 
         isolated deinit { tokens.forEach(NotificationCenter.default.removeObserver) }
 
-        private func handle(_ event: String, relayout: Bool) {
+        private func handle(relayout: Bool) {
             guard let window else { return }
             if !window.styleMask.contains(.fullScreen),
                 let frame = WindowLayout.correctedFrame(
@@ -66,9 +63,6 @@ private struct WindowFrameMonitor: NSViewRepresentable {
                 content.needsDisplay = true
             }
             let width = window.contentView?.bounds.width ?? window.frame.width
-            log.debug(
-                "\(event, privacy: .public) frame=\(NSStringFromRect(window.frame), privacy: .public) content=\(width) min=\(NSStringFromSize(window.contentMinSize), privacy: .public) screen=\(window.screen?.localizedName ?? "none", privacy: .public)"
-            )
             DispatchQueue.main.async { [weak self] in self?.onWidthChange(width) }
         }
     }
