@@ -396,7 +396,8 @@ the chips and source come from `next` **[known]**.
 Plain lyrics from YouTube with the source line ("Source: …") at the bottom;
 disabled (dimmed label, tooltip "Lyrics aren't available") when the track has
 none **[observed]**. **Data:** `browse` with the lyrics `browseId` from `next`
-**[known]**. Synced lyrics and romanisation are the S6 `synced-lyrics` plugin.
+**[known]**. Synced lyrics are built into this tab (stage 6, row 6.2), not a plugin;
+romanisation comes later.
 **States:** loading (skeleton lines; the tab is not dimmed while `next` is
 still loading), loaded, empty ("Lyrics aren't available"), error with Retry.
 Loaded once per track when the tab is first selected; reset on a mode change.

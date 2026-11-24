@@ -70,6 +70,7 @@ final class NowPlayingModel {
     @ObservationIgnored private var unavailableStreak = 0
     @ObservationIgnored private var syncsRepeat = false
     @ObservationIgnored private var syncsShuffle = false
+    @ObservationIgnored var albumChanged: (@MainActor (_ videoId: String, _ album: String?) -> Void)?
 
     init(
         player: any PlayerControlling, toasts: ToastCenter, preferences: Preferences = Preferences(),
@@ -154,11 +155,11 @@ final class NowPlayingModel {
         skip = nil
     }
 
-    func togglePlay() { act(.togglePlay) }
-    func previous() { act(.previous) }
-    func next() { act(.next) }
-    func seek(to seconds: TimeInterval) { act(.seek(to: seconds)) }
-    func skip(by seconds: TimeInterval) { act(.skip(by: seconds)) }
+    func togglePlay() { perform(.togglePlay) }
+    func previous() { perform(.previous) }
+    func next() { perform(.next) }
+    func seek(to seconds: TimeInterval) { perform(.seek(to: seconds)) }
+    func skip(by seconds: TimeInterval) { perform(.skip(by: seconds)) }
 
     func setVolume(_ level: Double) {
         player.send(.setVolume(level))
@@ -192,7 +193,7 @@ final class NowPlayingModel {
         player.send(.setLike(player.like == status ? .indifferent : status))
     }
 
-    private func act(_ command: PlayerCommand) {
+    func perform(_ command: PlayerCommand) {
         cancelSkip()
         player.send(command)
     }
@@ -206,7 +207,7 @@ final class NowPlayingModel {
             let instant = now()
             if let lastLoad, lastLoad.key == key, instant - lastLoad.at < .seconds(NSEvent.doubleClickInterval) { return }
             lastLoad = (key, instant)
-            act(.load(videoId: song.videoId, playlistId: song.playlistId))
+            perform(.load(videoId: song.videoId, playlistId: song.playlistId))
         case .album(let album):
             play(album.playTarget)
         case .playlist(let playlist):
@@ -219,7 +220,7 @@ final class NowPlayingModel {
     // shortcut: RDAMVM{videoId} is the community-known radio id, unverified against a fixture; parse watchEndpoint params if radio starts fail.
     func startRadio(_ song: Song) {
         guard song.isAvailable else { return }
-        act(.load(videoId: song.videoId, playlistId: song.playlistId ?? "RDAMVM" + song.videoId))
+        perform(.load(videoId: song.videoId, playlistId: song.playlistId ?? "RDAMVM" + song.videoId))
     }
 
     func startRadio(_ item: MusicItem) {
@@ -349,7 +350,7 @@ final class NowPlayingModel {
 
     func jump(to index: Int) {
         guard canEditQueue else { return }
-        act(.playQueueItem(index: index))
+        perform(.playQueueItem(index: index))
     }
 
     func enqueue(_ videoIds: [String], playNext: Bool) {
@@ -359,7 +360,7 @@ final class NowPlayingModel {
         expectQueueChange(isApplied: { $0.count == before + count }) { [weak self] _ in
             self?.toasts.show(playNext ? "Playing next" : "Added to queue", undo: { self?.undoEnqueue(videoIds, playNext: playNext) })
         }
-        act(.enqueue(videoIds: videoIds, playNext: playNext))
+        perform(.enqueue(videoIds: videoIds, playNext: playNext))
     }
 
     func enqueue(_ item: MusicItem, playNext: Bool) {
@@ -459,7 +460,7 @@ final class NowPlayingModel {
 
     func selectChip(_ chip: QueueChip) {
         guard canEditQueue, let videoId = player.song?.videoId else { return }
-        act(.load(videoId: videoId, playlistId: chip.target.playlistId))
+        perform(.load(videoId: videoId, playlistId: chip.target.playlistId))
     }
 
     private func expectQueueChange(
@@ -526,7 +527,7 @@ final class NowPlayingModel {
             return
         }
         if let videoId = target.videoId {
-            act(.load(videoId: videoId, playlistId: target.playlistId))
+            perform(.load(videoId: videoId, playlistId: target.playlistId))
             return
         }
         playTask = Task { [weak self] in
@@ -537,7 +538,7 @@ final class NowPlayingModel {
                 toasts.show("Couldn't play this")
                 return
             }
-            act(.load(videoId: first, playlistId: target.playlistId))
+            perform(.load(videoId: first, playlistId: target.playlistId))
         }
     }
 
@@ -572,6 +573,7 @@ final class NowPlayingModel {
         details = TrackDetails(
             videoId: song.videoId, artists: item.song.artists, album: item.song.album, isVideo: item.song.isVideo,
             lyricsBrowseId: next.lyricsBrowseId, relatedBrowseId: next.relatedBrowseId)
+        albumChanged?(song.videoId, item.song.album?.name)
         queueInfo = QueueInfo(
             playingFrom: next.playingFrom, playlistId: next.playlistId,
             chips: next.chips.compactMap { chip in

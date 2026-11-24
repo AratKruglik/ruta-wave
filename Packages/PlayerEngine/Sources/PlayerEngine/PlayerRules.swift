@@ -1,6 +1,6 @@
 import Foundation
 
-enum PlayerRules {
+public enum PlayerRules {
     static let playerHost = "music.youtube.com"
     static let maxReloadAttempts = 2
     static let playerTimeout: Duration = .seconds(15)
@@ -70,7 +70,7 @@ enum PlayerRules {
         return TimeInterval(total)
     }
 
-    static func isRefusedDuringAd(_ command: PlayerCommand) -> Bool {
+    public static func isRefusedDuringAd(_ command: PlayerCommand) -> Bool {
         switch command {
         case .next, .seek(to: _), .skip(by: _): true
         default: false
@@ -127,7 +127,34 @@ enum PlayerRules {
         return Array(queue[(current + 1)...].prefix(maxRestoredQueueItems).map(\.videoId))
     }
 
-    static func isAllowedArtworkHost(_ url: URL) -> Bool {
+    /// A message from the isolated Now Playing script; anything else is dropped.
+    static func remoteCommand(from body: Any) -> PlayerCommand? {
+        guard let message = body as? [String: Any], let action = message["action"] as? String else { return nil }
+        switch action {
+        case "play": return .play
+        case "pause": return .pause
+        case "nexttrack": return .next
+        case "previoustrack": return .previous
+        case "seekto":
+            guard let time = message["time"] as? Double, time.isFinite, time >= 0 else { return nil }
+            return .seek(to: time)
+        default: return nil
+        }
+    }
+
+    /// Arguments for `__nowPlaying.update(info)`; artwork off the allowlist is left out so WebKit never fetches it.
+    static func nowPlayingArguments(_ info: NowPlayingInfo?) -> [String: Any] {
+        guard let info else { return ["info": NSNull()] }
+        var fields: [String: Any] = [
+            "title": info.title, "artist": info.artist, "duration": info.duration, "elapsed": info.elapsed,
+            "playing": info.isPlaying,
+        ]
+        if let album = info.album { fields["album"] = album }
+        if let url = info.artworkURL, isAllowedArtworkHost(url) { fields["artwork"] = url.absoluteString }
+        return ["info": fields]
+    }
+
+    public static func isAllowedArtworkHost(_ url: URL) -> Bool {
         guard url.scheme == "https", let host = url.host?.lowercased() else { return false }
         return host == "i.ytimg.com" || allowedArtworkHostSuffixes.contains { host.hasSuffix($0) }
     }

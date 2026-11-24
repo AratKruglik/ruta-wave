@@ -37,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let player: PlayerEngine
     let toasts: ToastCenter
     let nowPlaying: NowPlayingModel
+    let systemNowPlaying: SystemNowPlaying
     let network = NetworkMonitor()
     private var playerWindow: PlayerWindow?
 
@@ -48,6 +49,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.player = player
         self.toasts = toasts
         nowPlaying = NowPlayingModel(player: player, toasts: toasts, credentials: { session.credentials })
+        let systemNowPlaying = SystemNowPlaying(
+            send: { [nowPlaying] in nowPlaying.perform($0) }, publish: { [player] in player.publishNowPlaying($0) })
+        nowPlaying.albumChanged = { systemNowPlaying.setAlbum($1, for: $0) }
+        self.systemNowPlaying = systemNowPlaying
         super.init()
     }
 
@@ -55,5 +60,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         playerWindow = PlayerWindow(session: session, player: player)
         network.start()
         Task { await nowPlaying.run() }
+        Task { await systemNowPlaying.run(player.events()) }
     }
 }

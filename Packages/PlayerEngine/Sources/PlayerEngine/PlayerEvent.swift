@@ -13,4 +13,7 @@ public enum PlayerEvent: Sendable, Equatable {
     case queueChanged([QueueItem])
     case adChanged(Bool)
     case error(PlayerError)
+    case stopped
+    /// A Now Playing control (Control Centre, media keys, headphones) asked for this command.
+    case remoteCommand(PlayerCommand)
 }

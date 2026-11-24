@@ -138,7 +138,8 @@ relaunch the app returns to the last track.
 
 - [ ] Infrastructure: `Plugin` protocol, registry, toggles in settings, `PluginContext`.
 - [ ] `notifications` (move from stage 5 into plugin form).
-- [ ] `synced-lyrics`: lyrics source, synchronized line highlighting, lyrics screen.
+- [ ] Synced lyrics, built into the player page Lyrics tab (not a plugin): lyrics
+      source, synchronized line highlighting.
 - [ ] `scrobbler`: Last.fm (`ws.audioscrobbler.com/2.0/`) and ListenBrainz
       (`api.listenbrainz.org/1/`); keys in the Keychain.
 - [ ] `discord`: Rich Presence through Discord's local IPC socket.

@@ -10,7 +10,7 @@ let package = Package(
         .target(
             name: "PlayerEngine",
             dependencies: [.product(name: "Auth", package: "Auth")],
-            resources: [.copy("Resources/bridge.js")]
+            resources: [.copy("Resources/bridge.js"), .copy("Resources/nowplaying.js")]
         ),
         .testTarget(name: "PlayerEngineTests", dependencies: ["PlayerEngine"], resources: [.copy("Fixtures")]),
     ]

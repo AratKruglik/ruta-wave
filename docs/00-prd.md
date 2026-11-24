@@ -216,7 +216,7 @@ decisions in [04](04-plugins.md).
 | ID | Requirement | Pri | Row |
 |---|---|---|---|
 | F-PLG-1 | Plugin infrastructure, toggles in Settings | P2 | 6.1 |
-| F-PLG-2 | Synced lyrics | P2 | 6.2 |
+| F-PLG-2 | Synced lyrics in the Lyrics tab (built in, not a plugin toggle) | P2 | 6.2 |
 | F-PLG-3 | Last.fm and ListenBrainz scrobbling | P2 | 6.3 |
 | F-PLG-4 | Discord Rich Presence | P2 | 6.4 |
 | F-PLG-5 | Playback tweaks: precise / exponential volume, speed, skip disliked, disable autoplay | P2 | 6.5 |

@@ -41,6 +41,7 @@ public final class PlayerEngine {
     @ObservationIgnored var watchdog: Task<Void, Never>?
     @ObservationIgnored var committedAt: ContinuousClock.Instant?
     @ObservationIgnored private var loadGeneration = 0
+    @ObservationIgnored private var nowPlaying: NowPlayingInfo?
     @ObservationIgnored private let delegate = WebDelegate()
     @ObservationIgnored private static let log = Logger(subsystem: "dev.kruhlyk.rutawave", category: "player")
 
@@ -131,6 +132,7 @@ public final class PlayerEngine {
         queueOffset = 0
         isAd = false
         isBuffering = false
+        emit(.stopped)
     }
 
     public func load(videoId: String, playlistId: String?) {
@@ -264,6 +266,7 @@ public final class PlayerEngine {
             isReady = true
             let event = emit(.ready)
             if let requestedVolume { send(.setVolume(requestedVolume)) }
+            publishNowPlaying(nowPlaying)
             return event
         case .playback(let paused, let time):
             isPaused = paused
@@ -366,11 +369,18 @@ public final class PlayerEngine {
         configuration.mediaTypesRequiringUserActionForPlayback = []
         configuration.applicationNameForUserAgent = SignInRules.safariApplicationName
         configuration.preferences.inactiveSchedulingPolicy = .none
-        if let script = Self.bridgeSource {
+        configuration.userContentController.addUserScript(
+            WKUserScript(source: Self.mediaSessionNeutraliser, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        if let script = Self.resource("bridge") {
             configuration.userContentController.addUserScript(
                 WKUserScript(source: script, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
         }
+        if let script = Self.resource("nowplaying") {
+            configuration.userContentController.addUserScript(
+                WKUserScript(source: script, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: Self.nowPlayingWorld))
+        }
         configuration.userContentController.add(delegate, name: "player")
+        configuration.userContentController.add(delegate, contentWorld: Self.nowPlayingWorld, name: "nowPlaying")
         let view = WKWebView(frame: .zero, configuration: configuration)
         view.navigationDelegate = delegate
         view.uiDelegate = delegate
@@ -380,18 +390,53 @@ public final class PlayerEngine {
         return view
     }
 
-    private static let bridgeSource: String? = {
+    // The page's Media Session made WebKit publish a second Now Playing entry; SystemKit owns it (risk 5).
+    // Runs at document start so the page never registers handlers; navigator.mediaSession stays defined.
+    private static let mediaSessionNeutraliser = """
+        (() => {
+          const session = navigator.mediaSession;
+          if (!session) return;
+          const proto = Object.getPrototypeOf(session);
+          for (const action of ['play', 'pause', 'stop', 'previoustrack', 'nexttrack', 'seekto', 'seekbackward', 'seekforward']) {
+            try { proto.setActionHandler.call(session, action, null); } catch {}
+          }
+          proto.setActionHandler = () => {};
+          proto.setPositionState = () => {};
+          Object.defineProperty(proto, 'metadata', { get: () => null, set: () => {}, configurable: false });
+        })();
+        """
+
+    // WebKit publishes its own Now Playing entry for the page's media element and offers no way to remove it,
+    // so the app drives that entry's Media Session from a world the page cannot reach (risk 5).
+    private static let nowPlayingWorld = WKContentWorld.world(name: "rutawave-now-playing")
+
+    private static func resource(_ name: String) -> String? {
         do {
-            guard let url = Bundle.module.url(forResource: "bridge", withExtension: "js") else {
-                log.fault("bridge.js missing from bundle")
+            guard let url = Bundle.module.url(forResource: name, withExtension: "js") else {
+                log.fault("\(name, privacy: .public).js missing from bundle")
                 return nil
             }
             return try String(contentsOf: url, encoding: .utf8)
         } catch {
-            log.fault("bridge.js unreadable: \(error, privacy: .public)")
+            log.fault("\(name, privacy: .public).js unreadable: \(error, privacy: .public)")
             return nil
         }
-    }()
+    }
+
+    /// Kept and re-sent after each page load, since a new document starts with an empty Media Session.
+    public func publishNowPlaying(_ info: NowPlayingInfo?) {
+        nowPlaying = info
+        guard let webView, isReady else { return }
+        Task {
+            do {
+                _ = try await webView.callAsyncJavaScript(
+                    "window.__nowPlaying?.update(info)", arguments: PlayerRules.nowPlayingArguments(info), in: nil,
+                    contentWorld: Self.nowPlayingWorld)
+            } catch {
+                Self.log.error("now playing update failed: \((error as NSError).domain, privacy: .public) \((error as NSError).code, privacy: .public)")
+            }
+        }
+    }
 
     private static let headCheck: @Sendable (URL) async -> Bool = { url in
         var request = URLRequest(url: url, timeoutInterval: 5)
@@ -411,6 +456,14 @@ public final class PlayerEngine {
         _ = handle(decoded)
     }
 
+    fileprivate func handleNowPlayingScript(_ message: WKScriptMessage) {
+        let origin = message.frameInfo.securityOrigin
+        guard PlayerRules.isTrustedMessage(
+            isMainFrame: message.frameInfo.isMainFrame, scheme: origin.protocol, host: origin.host, port: origin.port),
+            let command = PlayerRules.remoteCommand(from: message.body) else { return }
+        emit(.remoteCommand(command))
+    }
+
     fileprivate func policy(for action: WKNavigationAction) -> WKNavigationActionPolicy {
         if action.targetFrame?.isMainFrame == false { return .allow }
         if PlayerRules.isAllowedMainFrameNavigation(action.request.url) { return .allow }
@@ -418,16 +471,24 @@ public final class PlayerEngine {
         return .cancel
     }
 
-    fileprivate func navigationCommitted() {
+    func navigationCommitted() {
         isReady = false
         isBuffering = false
+        clearAd()
+    }
+
+    // A new document starts with bridge.js `adShowing = false` and posts only edges, so an ad cut off by a load never ends.
+    private func clearAd() {
+        guard isAd else { return }
+        isAd = false
+        emit(.adChanged(false))
     }
 
     fileprivate func contentProcessTerminated() {
         Self.log.error("web content process terminated")
         isReady = false
         snapshotForRestore()
-        isAd = false
+        clearAd()
         isBuffering = false
         emit(.error(.contentProcessCrashed))
         reload()
@@ -463,7 +524,11 @@ private final class WebDelegate: NSObject, WKNavigationDelegate, WKUIDelegate, W
     weak var engine: PlayerEngine?
 
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
-        engine?.handleScript(message)
+        if message.name == "nowPlaying" {
+            engine?.handleNowPlayingScript(message)
+        } else {
+            engine?.handleScript(message)
+        }
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
