@@ -48,6 +48,15 @@ struct PlayerEngineTests {
         #expect(await iterator.next() == .stopped)
     }
 
+    @Test func newDocumentClearsAStuckAd() async {
+        let engine = makeEngine()
+        _ = engine.handle(.ad(true))
+        var iterator = engine.events().makeAsyncIterator()
+        engine.navigationCommitted()
+        #expect(!engine.isAd)
+        #expect(await iterator.next() == .adChanged(false))
+    }
+
     @Test func duplicateVideoIdEmitsNothing() {
         let engine = makeEngine()
         engine.commit(makeSong("abc"))

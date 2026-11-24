@@ -437,16 +437,24 @@ public final class PlayerEngine {
         return .cancel
     }
 
-    fileprivate func navigationCommitted() {
+    func navigationCommitted() {
         isReady = false
         isBuffering = false
+        clearAd()
+    }
+
+    // A new document starts with bridge.js `adShowing = false` and posts only edges, so an ad cut off by a load never ends.
+    private func clearAd() {
+        guard isAd else { return }
+        isAd = false
+        emit(.adChanged(false))
     }
 
     fileprivate func contentProcessTerminated() {
         Self.log.error("web content process terminated")
         isReady = false
         snapshotForRestore()
-        isAd = false
+        clearAd()
         isBuffering = false
         emit(.error(.contentProcessCrashed))
         reload()
