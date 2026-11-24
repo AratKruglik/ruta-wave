@@ -42,7 +42,6 @@ struct ShellView<AccountPopover: View>: View {
                     onNewPlaylist: onNewPlaylist, onPlaylistRemoved: onPlaylistRemoved, onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
                 .id(identity)
-                .disabled(navigation.isPlayerPagePresented)
                 .accessibilityHidden(navigation.isPlayerPagePresented)
                 .safeAreaPadding(.top, Metrics.topBarHeight)
                 .ignoresSafeArea(.container, edges: .top)
@@ -52,7 +51,7 @@ struct ShellView<AccountPopover: View>: View {
                 content
                     .safeAreaInset(edge: .top, spacing: 0) {
                         if isOffline {
-                            OfflineBanner().transition(.opacity)
+                            OfflineBanner()
                         } else if guestFailed {
                             GuestBanner(onRetry: onRetryGuest)
                         }
@@ -61,6 +60,20 @@ struct ShellView<AccountPopover: View>: View {
                     .ignoresSafeArea(.container, edges: .top)
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
+            // Pushed pages are hosted by the split view itself and draw above anything inside the detail column,
+            // so the player page sits over the whole split view, inset past the sidebar.
+            .overlay {
+                // The animation stays inside the overlay: an animated transaction over the split view re-shows the stack's root page.
+                ZStack {
+                    if navigation.isPlayerPagePresented {
+                        PlayerPage { navigation.isPlayerPagePresented = false }
+                            .safeAreaPadding(.top, Metrics.topBarHeight)
+                            .padding(.leading, isSidebarVisible ? Metrics.sidebarWidth : 0)
+                            .transition(.move(edge: .bottom))
+                    }
+                }
+                .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
+            }
             // The bar floats over both columns so content scrolls under its glass.
             .overlay(alignment: .top) {
                 TopBar(
@@ -68,7 +81,6 @@ struct ShellView<AccountPopover: View>: View {
                     canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
                     onToggleSidebar: { setSidebarVisible(!isSidebarVisible) }, onHome: navigation.goHome,
                     onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
-                    .disabled(navigation.isPlayerPagePresented)
                     .accessibilityHidden(navigation.isPlayerPagePresented)
             }
         }
@@ -104,14 +116,6 @@ struct ShellView<AccountPopover: View>: View {
         .contentMargins(.bottom, isBarVisible ? Metrics.playerBarHeight + Metrics.contentBottomMargin : 0, for: .scrollContent)
         .disabled(navigation.isPlayerPagePresented)
         .accessibilityHidden(navigation.isPlayerPagePresented)
-        .overlay {
-            if navigation.isPlayerPagePresented {
-                PlayerPage { navigation.isPlayerPagePresented = false }
-                    .transition(.move(edge: .bottom))
-            }
-        }
-        .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
-        .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: isOffline)
     }
 
     private var bottomOverlay: some View {
@@ -144,7 +148,10 @@ struct ShellView<AccountPopover: View>: View {
     }
 
     private func openPlaylist(_ browseId: String) {
-        guard selectedPlaylistId != browseId else { return }
+        guard selectedPlaylistId != browseId else {
+            navigation.isPlayerPagePresented = false
+            return
+        }
         navigation.push(.playlist(browseId: browseId))
     }
 }

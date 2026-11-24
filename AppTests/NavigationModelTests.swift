@@ -186,6 +186,28 @@ struct NavigationModelTests {
         #expect(!model.isPlayerPagePresented)
     }
 
+    @Test func sidebarAndTopBarNavigationClosePlayerPage() {
+        let model = NavigationModel()
+        model.push(.history)
+        model.isPlayerPagePresented = true
+        model.back()
+        #expect(!model.isPlayerPagePresented)
+        #expect(model.path(for: model.selection) == [.history])
+
+        model.isPlayerPagePresented = true
+        model.select(.library)
+        #expect(!model.isPlayerPagePresented)
+        #expect(model.selection == .library)
+
+        model.isPlayerPagePresented = true
+        model.goHome()
+        #expect(!model.isPlayerPagePresented)
+
+        model.isPlayerPagePresented = true
+        model.forward()
+        #expect(!model.isPlayerPagePresented)
+    }
+
     private func saved(signedIn: Bool = true, user: Int = 0, build: (NavigationModel) -> Void) throws -> Data {
         let model = NavigationModel()
         build(model)

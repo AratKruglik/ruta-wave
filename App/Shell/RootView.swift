@@ -37,7 +37,6 @@ struct RootView: View {
     @State private var guestAttempt = 0
     @State private var theme = ArtworkTheme()
     @State private var useArtworkColors = Preferences().useArtworkColors
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor) {
         self.session = session
@@ -80,7 +79,6 @@ struct RootView: View {
         .environment(\.requestSignIn, SignInRequest { isSigningIn = true })
         .environment(\.themeBase, theme.base)
         .environment(\.themeHeaderTop, theme.headerTop)
-        .animation(reduceMotion ? nil : .easeInOut(duration: Motion.theme), value: theme.base)
         .task(id: ThemeKey(artworkURL: nowPlaying.player.song?.artworkURL, isEnabled: useArtworkColors)) {
             await theme.update(artworkURL: useArtworkColors ? nowPlaying.player.song?.artworkURL : nil)
         }

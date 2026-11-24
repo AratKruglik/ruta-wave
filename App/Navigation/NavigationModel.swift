@@ -63,6 +63,7 @@ final class NavigationModel {
     }
 
     func select(_ section: SidebarSection) {
+        isPlayerPagePresented = false
         if section == selection {
             popToRoot(section)
         } else {
@@ -71,6 +72,7 @@ final class NavigationModel {
     }
 
     func goHome() {
+        isPlayerPagePresented = false
         selection = .home
         popToRoot(.home)
     }
@@ -104,12 +106,18 @@ final class NavigationModel {
         newPlaylistRequests += 1
     }
 
+    /// With the player page open, Back only closes it.
     func back() {
+        if isPlayerPagePresented {
+            isPlayerPagePresented = false
+            return
+        }
         guard let route = paths[selection]?.popLast() else { return }
         forwardRoutes[selection, default: []].insert(route, at: 0)
     }
 
     func forward() {
+        isPlayerPagePresented = false
         guard var queued = forwardRoutes[selection], !queued.isEmpty else { return }
         let route = queued.removeFirst()
         forwardRoutes[selection] = queued
