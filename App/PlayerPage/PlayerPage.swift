@@ -171,4 +171,14 @@ struct PlayerPage: View {
         .environment(ToastCenter())
         .background(.themeBase)
 }
+
+#Preview("Player page, minimum window") {
+    PlayerPage(onClose: {})
+        .frame(width: Metrics.minWindowWidth - Metrics.sidebarWidth, height: Metrics.minWindowHeight)
+        .environment(NavigationModel())
+        .environment(PreviewFixtures.nowPlaying())
+        .environment(PreviewFixtures.trackTabs())
+        .environment(ToastCenter())
+        .background(.themeBase)
+}
 #endif

@@ -128,7 +128,7 @@ struct TrackRow: View {
                 Text(song.title)
                     .font(.rwTitle)
                     .foregroundStyle(isCurrent ? .accentLink : .textPrimary)
-                    .lineLimit(1)
+                    .lineLimit(density == .compact ? 2 : 1)
                 if song.isExplicit { ExplicitBadge() }
             }
             if let line = artistLine {

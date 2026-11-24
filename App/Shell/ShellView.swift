@@ -25,9 +25,11 @@ struct ShellView<AccountPopover: View>: View {
     @State private var sidebarOverride: Bool?
     @State private var isSidebarCollapsedPreference = Preferences().sidebarCollapsed
 
-    private var isNarrow: Bool { width < Metrics.sidebarAutoCollapseWidth }
+    private var isNarrow: Bool { WindowLayout.isNarrow(width: width) }
     private var isBarVisible: Bool { nowPlaying.player.song != nil }
-    private var isSidebarVisible: Bool { sidebarOverride ?? (!isNarrow && !isSidebarCollapsedPreference) }
+    private var isSidebarVisible: Bool {
+        WindowLayout.isSidebarVisible(width: width, override: sidebarOverride, collapsedPreference: isSidebarCollapsedPreference)
+    }
 
     private var selectedPlaylistId: String? {
         if case .playlist(let browseId) = navigation.path(for: navigation.selection).last { browseId } else { nil }
@@ -87,8 +89,8 @@ struct ShellView<AccountPopover: View>: View {
         // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
         // hiding the toolbar itself would also remove the window buttons.
         .ignoresSafeArea(.container, edges: .top)
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { newWidth in
-            if (width < Metrics.sidebarAutoCollapseWidth) != (newWidth < Metrics.sidebarAutoCollapseWidth) { sidebarOverride = nil }
+        .windowFrameMonitor { newWidth in
+            if WindowLayout.crossesCollapseThreshold(from: width, to: newWidth) { sidebarOverride = nil }
             width = newWidth
         }
         .overlay(alignment: .bottom) { bottomOverlay }
@@ -213,6 +215,10 @@ extension FocusedValues {
     ShellPreview(isSignedIn: true, player: PreviewPlayer())
 }
 
+#Preview("Minimum window 960 x 600") {
+    ShellPreview(isSignedIn: true, player: PreviewPlayer(), width: Metrics.minWindowWidth, height: Metrics.minWindowHeight)
+}
+
 #Preview("Guest, nothing playing") {
     let player = PreviewPlayer()
     player.song = nil
@@ -222,11 +228,15 @@ extension FocusedValues {
 private struct ShellPreview: View {
     let isSignedIn: Bool
     let player: PreviewPlayer
+    var width: CGFloat = 1280
+    var height: CGFloat = 800
     @State private var sidebar: SidebarModel
 
-    init(isSignedIn: Bool, player: PreviewPlayer) {
+    init(isSignedIn: Bool, player: PreviewPlayer, width: CGFloat = 1280, height: CGFloat = 800) {
         self.isSignedIn = isSignedIn
         self.player = player
+        self.width = width
+        self.height = height
         _sidebar = State(initialValue: PreviewFixtures.sidebarModel(isSignedIn ? .loaded : .guest))
     }
 
@@ -243,7 +253,7 @@ private struct ShellPreview: View {
         .environment(ToastCenter())
         .environment(PreviewFixtures.searchFieldModel(.empty))
         .task { await sidebar.load() }
-        .frame(width: 1280, height: 800)
+        .frame(width: width, height: height)
     }
 }
 #endif
