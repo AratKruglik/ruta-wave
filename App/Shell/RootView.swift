@@ -14,6 +14,7 @@ struct RootView: View {
 
     @State private var browse: BrowseStore
     @State private var searchField: SearchFieldModel
+    @State private var trackTabs: TrackTabsModel
     @State private var navigation = NavigationModel()
     @State private var account = AccountModel()
     @State private var sidebar: SidebarModel
@@ -36,6 +37,7 @@ struct RootView: View {
         _browse = State(initialValue: BrowseStore(
             loader: .live(client), searchLoader: searchLoader, entityLoader: .live(client), libraryLoader: .live(client),
             toasts: toasts, credentials: { session.credentials }))
+        _trackTabs = State(initialValue: TrackTabsModel(loader: .live(client), credentials: { session.credentials }))
         _sidebar = State(initialValue: SidebarModel(
             loader: .live(client), credentials: { session.credentials }, toasts: toasts))
         _searchField = State(initialValue: SearchFieldModel(
@@ -55,6 +57,7 @@ struct RootView: View {
         .environment(session)
         .environment(navigation)
         .environment(nowPlaying)
+        .environment(trackTabs)
         .environment(toasts)
         .environment(sidebar)
         .environment(browse)
@@ -73,6 +76,7 @@ struct RootView: View {
             searchField.reset()
             navigation.dropIdentityRoutes()
             nowPlaying.resetAccountState()
+            trackTabs.reset()
             guest.reset()
             toasts.reset()
             isNewPlaylistPresented = false

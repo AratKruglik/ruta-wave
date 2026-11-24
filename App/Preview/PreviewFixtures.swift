@@ -47,10 +47,24 @@ enum PreviewFixtures {
             credentials: { signedIn ? Credentials(cookies: [], authUserIndex: 0) : nil }, client: nil)
     }
 
+    static func trackTabs() -> TrackTabsModel {
+        let shelves = shelves
+        return TrackTabsModel(
+            loader: TrackTabsLoader(
+                lyrics: { _, _ in Lyrics(text: "First line\nSecond line\n\nChorus line", source: "Source: LyricFind") },
+                related: { _, _ in
+                    BrowsePage(
+                        title: nil, chips: [], shelves: Page(items: shelves, continuation: nil),
+                        about: DescriptionShelf(title: "About the artist", text: String(repeating: "A long biography sentence. ", count: 12)))
+                }),
+            credentials: { nil })
+    }
+
     static func details(for song: SongInfo = song) -> TrackDetails {
         TrackDetails(
             videoId: song.videoId, artists: [ItemRef(name: "Test Artist", browseId: "UCpreview")],
-            album: ItemRef(name: "Test Album", browseId: "MPREbpreview"), isVideo: false)
+            album: ItemRef(name: "Test Album", browseId: "MPREbpreview"), isVideo: false,
+            lyricsBrowseId: "MPLYtpreview", relatedBrowseId: "MPTRtpreview")
     }
 
     static let songs: [Song] = (1...8).map { index in

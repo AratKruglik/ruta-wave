@@ -10,6 +10,8 @@ struct TrackDetails: Equatable {
     let artists: [ItemRef]
     let album: ItemRef?
     let isVideo: Bool
+    let lyricsBrowseId: String?
+    let relatedBrowseId: String?
 }
 
 struct QueueChip: Equatable {
@@ -41,6 +43,7 @@ final class NowPlayingModel {
 
     let player: any PlayerControlling
     var details: TrackDetails?
+    private(set) var detailsFailed = false
     var likePrompt: LikePrompt?
     var timeShowsRemaining = false
     private(set) var rowRatings: [String: Rating] = [:]
@@ -51,6 +54,7 @@ final class NowPlayingModel {
     @ObservationIgnored private let preferences: Preferences
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
     @ObservationIgnored private let client: InnerTubeClient?
+    @ObservationIgnored private let fetchNext: (@MainActor (WatchTarget, Credentials?) async throws -> WatchNext)?
     @ObservationIgnored private let resolveQueue: (@MainActor (WatchTarget, Credentials?) async throws -> [String])?
     @ObservationIgnored private let rateVideo: @MainActor (String, Rating, Credentials) async throws -> Void
     @ObservationIgnored private var pendingQueueChange: PendingQueueChange?
@@ -69,11 +73,19 @@ final class NowPlayingModel {
         player: any PlayerControlling, toasts: ToastCenter, preferences: Preferences = Preferences(),
         credentials: @escaping @MainActor () -> Credentials?, client: InnerTubeClient? = InnerTubeClient(),
         resolveQueue: (@MainActor (WatchTarget, Credentials?) async throws -> [String])? = nil,
+        watchNext: (@MainActor (WatchTarget, Credentials?) async throws -> WatchNext)? = nil,
         rateVideo: (@MainActor (String, Rating, Credentials) async throws -> Void)? = nil,
         now: @escaping @MainActor () -> ContinuousClock.Instant = { .now }
     ) {
         self.now = now
         self.resolveQueue = resolveQueue
+        if let watchNext {
+            fetchNext = watchNext
+        } else if let client {
+            fetchNext = { target, credentials in try await client.watchNext(target, credentials: credentials) }
+        } else {
+            fetchNext = nil
+        }
         self.rateVideo = rateVideo ?? { [client] videoId, rating, credentials in
             try await client?.rate(videoId: videoId, rating, credentials: credentials)
         }
@@ -525,14 +537,25 @@ final class NowPlayingModel {
 
     func loadDetails(for song: SongInfo) async {
         details = nil
+        detailsFailed = false
         queueInfo = nil
-        guard let client else { return }
+        guard let fetchNext else { return }
         let target = WatchTarget(videoId: song.videoId, playlistId: song.playlistId)
-        guard let next = try? await client.watchNext(target, credentials: credentials()),
-              !Task.isCancelled, player.song?.videoId == song.videoId,
-              let item = next.queue.items.first(where: { $0.song.videoId == song.videoId })
-        else { return }
-        details = TrackDetails(videoId: song.videoId, artists: item.song.artists, album: item.song.album, isVideo: item.song.isVideo)
+        let next: WatchNext
+        do {
+            next = try await fetchNext(target, credentials())
+        } catch {
+            if !Task.isCancelled, player.song?.videoId == song.videoId { detailsFailed = true }
+            return
+        }
+        guard !Task.isCancelled, player.song?.videoId == song.videoId else { return }
+        guard let item = next.queue.items.first(where: { $0.song.videoId == song.videoId }) else {
+            detailsFailed = true
+            return
+        }
+        details = TrackDetails(
+            videoId: song.videoId, artists: item.song.artists, album: item.song.album, isVideo: item.song.isVideo,
+            lyricsBrowseId: next.lyricsBrowseId, relatedBrowseId: next.relatedBrowseId)
         queueInfo = QueueInfo(
             playingFrom: next.playingFrom, playlistId: next.playlistId,
             chips: next.chips.compactMap { chip in

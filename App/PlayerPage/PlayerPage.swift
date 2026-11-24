@@ -15,9 +15,34 @@ struct PlayerPage: View {
             case .related: "Related"
             }
         }
+
+        var disabledHint: LocalizedStringKey? {
+            switch self {
+            case .lyrics: "Lyrics aren't available"
+            case .comments: "Comments aren't available yet"
+            case .upNext, .related: nil
+            }
+        }
     }
 
     @Environment(NowPlayingModel.self) private var nowPlaying
+    @State private var selection: Tab = .upNext
+
+    private var currentDetails: TrackDetails? {
+        nowPlaying.details.flatMap { $0.videoId == nowPlaying.player.song?.videoId ? $0 : nil }
+    }
+
+    private var isLyricsUnavailable: Bool {
+        currentDetails.map { $0.lyricsBrowseId == nil } ?? false
+    }
+
+    private func isDisabled(_ tab: Tab) -> Bool {
+        switch tab {
+        case .comments: true
+        case .lyrics: isLyricsUnavailable
+        case .upNext, .related: false
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -25,7 +50,7 @@ struct PlayerPage: View {
                 artwork
                 VStack(alignment: .leading, spacing: Metrics.space16) {
                     tabs
-                    UpNextView(onClose: onClose)
+                    tabContent
                 }
                 .frame(minWidth: Metrics.playerPanelMinWidth, maxWidth: Metrics.playerPanelMaxWidth)
                 .frame(maxHeight: .infinity)
@@ -49,6 +74,36 @@ struct PlayerPage: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.themeBase)
+        .onChange(of: isLyricsUnavailable) {
+            if isLyricsUnavailable, selection == .lyrics { selection = .upNext }
+        }
+    }
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch selection {
+        case .upNext, .comments:
+            UpNextView(onClose: onClose)
+        case .lyrics:
+            detailsGated(\.lyricsBrowseId, unavailable: "Lyrics aren't available") { LyricsView(browseId: $0) }
+        case .related:
+            detailsGated(\.relatedBrowseId, unavailable: "Nothing related for this track") { RelatedView(browseId: $0) }
+        }
+    }
+
+    @ViewBuilder
+    private func detailsGated<Content: View>(
+        _ browseId: KeyPath<TrackDetails, String?>, unavailable: LocalizedStringKey, @ViewBuilder content: (String) -> Content
+    ) -> some View {
+        if let details = currentDetails {
+            if let id = details[keyPath: browseId] { content(id) } else { PanelMessage(text: unavailable) }
+        } else if nowPlaying.detailsFailed {
+            PageErrorView {
+                if let song = nowPlaying.player.song { Task { await nowPlaying.loadDetails(for: song) } }
+            }
+        } else {
+            SkeletonRows(count: 6).accessibilityHidden(true)
+        }
     }
 
     private var artwork: some View {
@@ -70,17 +125,32 @@ struct PlayerPage: View {
     private var tabs: some View {
         HStack(spacing: Metrics.space24) {
             ForEach(Tab.allCases, id: \.self) { tab in
-                Text(tab.title)
-                    .font(.rwTab)
-                    .foregroundStyle(tab == .upNext ? .textPrimary : .textDisabled)
-                    .padding(.bottom, Metrics.space4)
-                    .overlay(alignment: .bottom) {
-                        if tab == .upNext { Rectangle().fill(.textPrimary).frame(height: 2) }
-                    }
-                    .accessibilityAddTraits(tab == .upNext ? .isSelected : [])
-                    .accessibilityHint(tab == .upNext ? "" : String(localized: "Coming soon"))
+                tabButton(tab)
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Player page tabs")
+    }
+
+    private func tabButton(_ tab: Tab) -> some View {
+        let isSelected = tab == selection
+        let isDisabled = isDisabled(tab)
+        let hint: LocalizedStringKey = isDisabled ? (tab.disabledHint ?? "") : ""
+        return Button { selection = tab } label: {
+            Text(tab.title)
+                .font(.rwTab)
+                .foregroundStyle(isSelected ? .textPrimary : (isDisabled ? .textDisabled : .textTertiary))
+                .padding(.bottom, Metrics.space4)
+                .overlay(alignment: .bottom) {
+                    if isSelected { Rectangle().fill(.textPrimary).frame(height: 2) }
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
+        .help(hint)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint(hint)
     }
 }
 
@@ -90,6 +160,7 @@ struct PlayerPage: View {
         .frame(width: 1100, height: 700)
         .environment(NavigationModel())
         .environment(PreviewFixtures.nowPlaying())
+        .environment(PreviewFixtures.trackTabs())
         .environment(ToastCenter())
         .background(.themeBase)
 }

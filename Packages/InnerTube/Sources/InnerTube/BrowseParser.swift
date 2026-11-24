@@ -10,11 +10,15 @@ extension JSONValue {
 extension BrowsePage {
     init(browse json: JSONValue) throws(InnerTubeError) {
         guard let list = json.sectionList else { throw .unexpectedResponse }
+        let about = list["contents"]?.array?.lazy.compactMap { $0["musicDescriptionShelfRenderer"] }.first
         self.init(
             title: json["header"]?["musicHeaderRenderer"]?["title"].flatMap(text),
             chips: ItemParser.chips(list["header"]?["chipCloudRenderer"]),
             shelves: Page(
                 items: parseBlocks(list["contents"]?.array ?? [], ItemParser.section),
-                continuation: list.nextContinuation))
+                continuation: list.nextContinuation),
+            about: about.flatMap { shelf in
+                shelf["description"].flatMap(text).map { DescriptionShelf(title: shelf["header"].flatMap(text), text: $0) }
+            })
     }
 }

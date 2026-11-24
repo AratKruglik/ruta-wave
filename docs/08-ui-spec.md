@@ -397,16 +397,49 @@ Plain lyrics from YouTube with the source line ("Source: …") at the bottom;
 disabled (dimmed label, tooltip "Lyrics aren't available") when the track has
 none **[observed]**. **Data:** `browse` with the lyrics `browseId` from `next`
 **[known]**. Synced lyrics and romanisation are the S6 `synced-lyrics` plugin.
+**States:** loading (skeleton lines; the tab is not dimmed while `next` is
+still loading), loaded, empty ("Lyrics aren't available"), error with Retry.
+Loaded once per track when the tab is first selected; reset on a mode change.
+If the track changes to one without lyrics while the tab is open, the page
+falls back to Up next.
 
 ### 10.4. Comments tab
-Present in the reference (screenshot 1). Its data source and guest behaviour
-are **not verified**; treat as optional until checked on the live site.
-Reading comments only; posting is account-only.
+Present in the reference (screenshot 1). **Finding (4.8, 2026-11-24).**
+
+**Verified** (repo fixtures, guest WEB_REMIX captures of 2026-11-19): every
+captured `next` response has a third "Comments" tab, also for ATV songs. Unlike
+Lyrics and Related it has no `browseEndpoint` and no page type. It carries
+`content.sectionListRenderer{continuations[0].reloadContinuationData.continuation,
+targetId: <videoId>}`, so the data source is a `next` request with
+`{continuation: token}`, and a guest does receive the token.
+
+**Not verified:** the WEB_REMIX response shape of that continuation; whether a
+guest gets comments or a sign-in message; whether ATV-only songs without a
+music video return anything; paging and replies. Public sources say the mobile
+apps show the comments of the song's official video and that the WEB client
+moved comment content into `frameworkUpdates.entityBatchUpdate.mutations[]`
+(`commentEntityPayload`), joined by `commentKey`. No POST to InnerTube could be
+sent and the repo holds no comments capture.
+
+**Decision:** dropped from 4.8; F-PLY-6 stays P2. The tab is shown disabled
+with the tooltip "Comments aren't available yet". Shipping needs a new parser
+for the entity-mutation join (the most volatile part of InnerTube), privacy
+scrubbing of names and avatars in fixtures, and relative-time and count
+strings. **To unblock:** capture `next {continuation: <Comments token>}` as a
+guest and signed in (same visitor id) for one ATV song and one OMV video and add
+scrubbed fixtures. If the guest capture returns comment entities, the feature
+is a small read-only first page (no replies, no posting, no sort).
 
 ### 10.5. Related tab
 Shelves "You might also like", "Recommended playlists", "Similar artists",
 "About the artist" **[observed]**. **Data:** `browse` with the related
 `browseId` from `next` **[known]**. Cards behave as on Home.
+**Panel layout** (360–420 pt): `rows` shelves become one column of compact
+rows (a tap starts a radio, as on Home), card shelves stay horizontal
+carousels, and "About the artist" follows the shelves with the Wikipedia
+attribution kept intact. **States:** loading skeleton, empty ("Nothing related
+for this track"), error with Retry. Any navigation out of the tab (card, row,
+menu action, artist or album link) closes the player page.
 
 **Stage:** 2.3 (`next` parser), 4.6 (queue), 4.8 (lyrics, related,
 comments).

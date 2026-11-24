@@ -5,6 +5,7 @@ struct ShelfView: View {
     let shelf: Shelf
     let onMore: (BrowseTarget) -> Void
     var moreTitle: LocalizedStringKey = "More"
+    var isPanel = false
 
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
@@ -12,7 +13,7 @@ struct ShelfView: View {
     @State private var firstVisible: Int?
     @State private var width: CGFloat = 0
 
-    private var isCarousel: Bool { shelf.layout == .cards || shelf.layout == .rows }
+    private var isCarousel: Bool { shelf.layout == .cards || (shelf.layout == .rows && !isPanel) }
 
     private var itemWidth: CGFloat {
         switch shelf.layout {
@@ -97,6 +98,10 @@ struct ShelfView: View {
         } else {
             switch shelf.layout {
             case .cards: carousel { index in MusicCard(item: shelf.items[index]) }
+            case .rows where isPanel:
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(shelf.items.enumerated()), id: \.offset) { _, item in listRow(item, startsRadio: true) }
+                }
             case .rows: carousel { index in rowColumn(columns[index]) }
             case .grid:
                 LazyVGrid(

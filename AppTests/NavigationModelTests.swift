@@ -174,4 +174,14 @@ struct NavigationModelTests {
         model.requestNewPlaylist()
         #expect(model.pendingPlaylistVideoIds.isEmpty)
     }
+
+    @Test func pushAndReplaceLastClosePlayerPage() {
+        let model = NavigationModel()
+        model.isPlayerPagePresented = true
+        model.push(.history)
+        #expect(!model.isPlayerPagePresented)
+        model.isPlayerPagePresented = true
+        model.replaceLast(.history)
+        #expect(!model.isPlayerPagePresented)
+    }
 }
