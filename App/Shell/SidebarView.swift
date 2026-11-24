@@ -146,7 +146,7 @@ private struct PlaylistList: View {
     let onResolve: (Playlist) -> Void
 
     @Environment(NowPlayingModel.self) private var nowPlaying
-    @Environment(ToastCenter.self) private var toasts
+
 
     var body: some View {
         switch model.state {
@@ -164,6 +164,7 @@ private struct PlaylistList: View {
                     onPrefetch: playlist.browseId == Route.likedMusicBrowseId ? nil : { await model.resolveOwnership(playlist.browseId) }
                 ) { onSelect(playlist.browseId) }
                 .contextMenu { menu(for: playlist) }
+                .dropDestination(for: TrackDrag.self) { drags, _ in drop(drags, on: playlist) }
             }
         case .failed:
             VStack(alignment: .leading, spacing: Metrics.space8) {
@@ -180,17 +181,21 @@ private struct PlaylistList: View {
         }
     }
 
+    /// Liked music rates the songs; a playlist the user is known not to own takes nothing.
+    private func drop(_ drags: [TrackDrag], on playlist: Playlist) -> Bool {
+        let ids = drags.flatMap(\.videoIds)
+        guard !ids.isEmpty, model.ownership(of: playlist.browseId) != false || playlist.browseId == Route.likedMusicBrowseId else { return false }
+        if playlist.browseId == Route.likedMusicBrowseId {
+            nowPlaying.rateAll(.like) { ids }
+        } else {
+            Task { await model.add(videoIds: ids, to: playlist.browseId) }
+        }
+        return true
+    }
+
     @ViewBuilder
     private func menu(for playlist: Playlist) -> some View {
-        Button("Play") { nowPlaying.play(.playlist(playlist)) }
-        if let url = PlaylistLink.shareURL(browseId: playlist.browseId) {
-            Button("Copy link") {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(url.absoluteString, forType: .string)
-                toasts.show("Link copied")
-            }
-            ShareLink(item: url)
-        }
+        ItemMenu(item: .playlist(playlist), place: .sidebarPlaylist(owned: model.ownership(of: playlist.browseId)), popover: .constant(nil))
         if playlist.browseId != Route.likedMusicBrowseId {
             Divider()
             switch model.ownership(of: playlist.browseId) {

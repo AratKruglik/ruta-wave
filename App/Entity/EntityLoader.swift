@@ -10,8 +10,8 @@ struct EntityLoader: Sendable {
     var save: @Sendable (String, Bool, Credentials?) async throws -> Void
     /// The channel id, never the page's browse id, then subscribe or unsubscribe.
     var subscribe: @Sendable (String, Bool, Credentials?) async throws -> Void
-    /// Playlist id, then the video to append.
-    var add: @Sendable (String, String, Credentials?) async throws -> Void
+    /// Playlist id, then all edits in one request. The result lists the rows an `.add` created.
+    var edit: @Sendable (String, [PlaylistEdit], Credentials?) async throws -> [AddedPlaylistRow]
 
     static func live(_ client: InnerTubeClient) -> EntityLoader {
         EntityLoader(
@@ -26,8 +26,6 @@ struct EntityLoader: Sendable {
             subscribe: { id, subscribed, credentials in
                 try await client.setSubscribed(subscribed, channelId: id, credentials: credentials)
             },
-            add: { id, videoId, credentials in
-                try await client.editPlaylist(id, [.add(videoId: videoId)], credentials: credentials)
-            })
+            edit: { id, edits, credentials in try await client.editPlaylist(id, edits, credentials: credentials) })
     }
 }

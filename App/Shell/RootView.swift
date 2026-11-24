@@ -56,6 +56,7 @@ struct RootView: View {
         .environment(navigation)
         .environment(nowPlaying)
         .environment(toasts)
+        .environment(sidebar)
         .environment(browse)
         .environment(searchField)
         .environment(\.requestSignIn, SignInRequest { isSigningIn = true })
@@ -73,6 +74,7 @@ struct RootView: View {
             navigation.dropIdentityRoutes()
             nowPlaying.resetAccountState()
             guest.reset()
+            toasts.reset()
             isNewPlaylistPresented = false
         }
         .onChange(of: navigation.newPlaylistRequests) {
@@ -97,6 +99,7 @@ struct RootView: View {
         }
         .sheet(isPresented: $isNewPlaylistPresented) {
             NewPlaylistSheet(
+                initial: NewPlaylistDraft(videoIds: navigation.pendingPlaylistVideoIds),
                 isCreating: isCreatingPlaylist, onCancel: { isNewPlaylistPresented = false }, onCreate: createPlaylist)
         }
         .sheet(isPresented: Binding(get: { session.isAddingAccount }, set: { if !$0 { session.cancelAddAccount() } })) {

@@ -49,14 +49,23 @@ private struct Harness {
     init(
         signedIn: Bool = false, preferences: Preferences? = nil,
         client: InnerTubeClient? = nil, resolve: (@MainActor (WatchTarget, Credentials?) async throws -> String?)? = nil,
-        clock: TestClock = TestClock()
+        clock: TestClock = TestClock(), rateVideo: (@MainActor (String, Rating, Credentials) async throws -> Void)? = nil
     ) {
         let prefs = preferences ?? Preferences(defaults: UserDefaults(suiteName: UUID().uuidString)!)
         self.preferences = prefs
         let credentials = Credentials(cookies: [], authUserIndex: 0)
+        var resolveQueue: (@MainActor (WatchTarget, Credentials?) async throws -> [String])?
+        if let resolve {
+            resolveQueue = { target, credentials in
+                let first = try await resolve(target, credentials)
+                return first.map { [$0] } ?? []
+            }
+        }
         model = NowPlayingModel(
             player: player, toasts: toasts, preferences: prefs,
-            credentials: { signedIn ? credentials : nil }, client: client, resolveFirstVideo: resolve,
+            credentials: { signedIn ? credentials : nil }, client: client,
+            resolveQueue: resolveQueue,
+            rateVideo: rateVideo,
             now: { clock.instant })
     }
 
@@ -352,5 +361,230 @@ struct NowPlayingModelTests {
         h.model.play(.artist(Artist(browseId: "UC1", name: "N")))
         h.model.play(.link(NavigationLink(title: "L", target: BrowseTarget(browseId: "FEx"))))
         #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func enqueueShowsItsToastOnlyAfterTheQueueChanges() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true)]
+        await h.start()
+        h.model.enqueue(["x", "y"], playNext: false)
+        #expect(h.player.sent.last == .enqueue(videoIds: ["x", "y"], playNext: false))
+        #expect(h.toasts.toast == nil)
+        h.player.queue = [item("a", current: true), item("x", current: false), item("y", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast?.undo != nil })
+    }
+
+    @Test func undoOfPlayNextRemovesTheInsertedRowsDescending() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false)]
+        await h.start()
+        h.model.enqueue(["x", "y"], playNext: true)
+        h.player.queue = [item("a", current: true), item("x", current: false), item("y", current: false), item("b", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast != nil })
+        h.toasts.undo()
+        #expect(h.player.sent.suffix(2) == [.removeQueueItem(index: 2), .removeQueueItem(index: 1)])
+    }
+
+    @Test func removeUndoAppendsThenMovesBack() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false), item("c", current: false)]
+        await h.start()
+        h.model.removeQueueItem(at: 1)
+        h.player.queue = [item("a", current: true), item("c", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast != nil })
+        h.toasts.undo()
+        #expect(h.player.sent.last == .enqueue(videoIds: ["b"], playNext: false))
+        h.player.queue = [item("a", current: true), item("c", current: false), item("b", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.player.sent.last == .moveQueueItem(from: 2, to: 1) })
+    }
+
+    @Test func removingTheCurrentRowIsRefused() {
+        let h = Harness()
+        h.player.queue = [item("a", current: true)]
+        h.model.removeQueueItem(at: 0)
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func rateAllReportsPartialFailure() async {
+        let h = Harness(signedIn: true, rateVideo: { id, _, _ in if id == "bad" { throw URLError(.badServerResponse) } })
+        h.model.rateAll(.like) { ["a", "bad", "c"] }
+        #expect(await waitUntil { h.toasts.toast != nil })
+        #expect(h.model.rowRatings["a"] == .like && h.model.rowRatings["bad"] == nil)
+    }
+
+    @Test func queueRowsKeyRepeatedVideosByIndex() {
+        let h = Harness()
+        h.player.queue = [item("a", current: true), item("a", current: false)]
+        let keys = h.model.queueSongs.map(\.playlistSetVideoId)
+        #expect(keys == ["q0", "q1"])
+        #expect(NowPlayingModel.queueIndex(of: "q1") == 1)
+        #expect(NowPlayingModel.queueIndex(of: "x1") == nil)
+    }
+
+    @Test func queueEditsAreRefusedWhileAnAdPlaysOrNotReady() {
+        let h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false)]
+        h.player.isAd = true
+        h.model.enqueue(["x"], playNext: false)
+        h.model.removeQueueItem(at: 1)
+        h.model.moveQueueItem(from: 1, to: 0)
+        h.model.jump(to: 1)
+        h.player.isAd = false
+        h.player.isReady = false
+        h.model.enqueue(["x"], playNext: true)
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func enqueueingNothingSendsNothing() {
+        let h = Harness()
+        h.model.enqueue([String](), playNext: false)
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func undoOfAddToQueueRemovesTheTailDescending() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true)]
+        await h.start()
+        h.model.enqueue(["x", "y"], playNext: false)
+        h.player.queue = [item("a", current: true), item("x", current: false), item("y", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast != nil })
+        h.toasts.undo()
+        #expect(h.player.sent.suffix(2) == [.removeQueueItem(index: 2), .removeQueueItem(index: 1)])
+    }
+
+    @Test func undoSkipsRowsThatNoLongerMatch() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true)]
+        await h.start()
+        h.model.enqueue(["x"], playNext: false)
+        h.player.queue = [item("a", current: true), item("x", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast != nil })
+        h.player.queue = [item("a", current: true), item("other", current: false)]
+        let sentBefore = h.player.sent.count
+        h.toasts.undo()
+        #expect(h.player.sent.count == sentBefore)
+    }
+
+    @Test func removingSeveralRowsSkipsTheCurrentAndShowsOneToastWithoutUndo() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false), item("c", current: false), item("d", current: false)]
+        await h.start()
+        h.model.removeQueueItems(at: [0, 1, 3])
+        #expect(h.player.sent.suffix(2) == [.removeQueueItem(index: 3), .removeQueueItem(index: 1)])
+        #expect(h.toasts.toast == nil)
+        h.player.queue = [item("a", current: true), item("c", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast != nil })
+        #expect(h.toasts.toast?.undo == nil)
+    }
+
+    @Test func movingARowShowsUndoThatMovesItBack() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false), item("c", current: false)]
+        await h.start()
+        h.model.moveQueueItem(from: 2, to: 1)
+        #expect(h.player.sent.last == .moveQueueItem(from: 2, to: 1))
+        h.player.queue = [item("a", current: true), item("c", current: false), item("b", current: false)]
+        h.player.emit(.queueChanged(h.player.queue))
+        #expect(await waitUntil { h.toasts.toast?.undo != nil })
+        h.toasts.undo()
+        #expect(h.player.sent.last == .moveQueueItem(from: 1, to: 2))
+    }
+
+    @Test func playNextMovesARowRightAfterTheCurrentOne() {
+        let h = Harness()
+        h.player.queue = [item("a", current: false), item("b", current: true), item("c", current: false), item("d", current: false)]
+        h.model.playNext(queueIndex: 3)
+        #expect(h.player.sent.last == .moveQueueItem(from: 3, to: 2))
+        h.model.playNext(queueIndex: 0)
+        #expect(h.player.sent.last == .moveQueueItem(from: 0, to: 1))
+    }
+
+    @Test func playNextIsANoOpForTheCurrentOrAlreadyNextRow() {
+        let h = Harness()
+        h.player.queue = [item("a", current: true), item("b", current: false)]
+        h.model.playNext(queueIndex: 0)
+        h.model.playNext(queueIndex: 1)
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func aStaleQueueChangeDoesNotFireTheToast() async {
+        var h = Harness()
+        h.player.queue = [item("a", current: true)]
+        await h.start()
+        h.model.enqueue(["x"], playNext: false)
+        h.player.emit(.queueChanged([item("a", current: true)]))
+        await h.settle()
+        #expect(h.toasts.toast == nil)
+    }
+
+    @Test func draggedTrackIdsAreEnqueuedDirectly() {
+        let h = Harness()
+        h.player.queue = [item("a", current: true)]
+        h.model.enqueue(TrackDrag(videoIds: ["x", "y"]), playNext: true)
+        #expect(h.player.sent.last == .enqueue(videoIds: ["x", "y"], playNext: true))
+    }
+
+    @Test func aDraggedCardIsResolvedToItsTracksFirst() async {
+        var h = Harness(resolve: { target, _ in target.playlistId == "PL9" ? "first" : nil })
+        h.player.queue = [item("a", current: true)]
+        await h.start()
+        h.model.enqueue(TrackDrag(playlistId: "PL9"), playNext: false)
+        #expect(await waitUntil { h.player.sent.last == .enqueue(videoIds: ["first"], playNext: false) })
+    }
+
+    @Test func aCardThatResolvesToNothingShowsAnError() async {
+        let h = Harness(resolve: { _, _ in nil })
+        h.model.enqueue(TrackDrag(playlistId: "PL9"), playNext: false)
+        #expect(await waitUntil { h.toasts.toast != nil })
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func anUnavailableSongIsNotEnqueued() {
+        let h = Harness()
+        h.player.queue = [item("a", current: true)]
+        h.model.enqueue(.song(Song(videoId: "u", title: "T", isAvailable: false)), playNext: false)
+        #expect(h.player.sent.isEmpty)
+    }
+
+    @Test func selectingAChipReloadsTheCurrentSongWithTheChipPlaylist() {
+        let h = Harness()
+        h.player.song = song("cur")
+        h.model.selectChip(QueueChip(title: "Chill", target: WatchTarget(playlistId: "RDX"), isSelected: false))
+        #expect(h.player.sent.last == .load(videoId: "cur", playlistId: "RDX"))
+    }
+
+    @Test func rateAllAnnouncesFullSuccess() async {
+        let h = Harness(signedIn: true, rateVideo: { _, _, _ in })
+        h.model.rateAll(.dislike) { ["a", "b"] }
+        #expect(await waitUntil { h.model.rowRatings.count == 2 && h.toasts.toast != nil })
+    }
+
+    @Test func rateAllDoesNothingForAGuest() async {
+        let h = Harness(rateVideo: { _, _, _ in Issue.record("must not rate") })
+        h.model.rateAll(.like) { ["a"] }
+        await h.settle()
+        #expect(h.model.rowRatings.isEmpty && h.toasts.toast == nil)
+    }
+
+    @Test func rateAllStopsWhenTheAccountChangesWhileIdsResolve() async {
+        var rated = 0
+        let h = Harness(signedIn: true, rateVideo: { _, _, _ in rated += 1 })
+        var release: CheckedContinuation<Void, Never>?
+        h.model.rateAll(.like) {
+            await withCheckedContinuation { release = $0 }
+            return ["a", "b"]
+        }
+        #expect(await waitUntil { release != nil })
+        h.model.resetAccountState()
+        release?.resume()
+        await h.settle()
+        #expect(rated == 0 && h.toasts.toast == nil)
     }
 }

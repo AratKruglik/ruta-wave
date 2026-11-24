@@ -1,31 +1,44 @@
+import AppKit
 import InnerTube
 import SwiftUI
+
+/// A row's part in a multi-selection. A click with ⌘ or ⇧ selects instead of playing.
+struct RowSelection {
+    let isSelected: Bool
+    let onSelect: (NSEvent.ModifierFlags) -> Void
+    /// What a drag of this (selected) row carries: the whole selection.
+    var selectedSongs: () -> [Song] = { [] }
+}
 
 struct TrackRow: View {
     enum Density { case compact, detailed, numbered }
 
     let song: Song
     let density: Density
-    var isSelected: Binding<Bool>?
+    var selection: RowSelection?
     /// Replaces the chart rank in the leading column (an album's track number).
     var number: Int?
     var onPlay: (() -> Void)?
-    /// A History row: adds "Remove from history" to the context menu and the ⋮ menu.
-    var onRemoveFromHistory: (() -> Void)?
+    /// Queue rows decide for themselves: the same video can appear twice.
+    var isCurrentRow: Bool?
+    var place: ItemPlace = .plain
+    /// Set on own-playlist rows so a drop on another row of the same playlist reorders.
+    var sourcePlaylistId: String?
+    /// Handles the actions only the list can do: removals, and a queue row's Play next.
+    var onAction: ((ItemAction) -> Void)?
 
     private enum Field: Hashable { case main, like, dislike, menu, select }
 
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
-    @Environment(\.requestSignIn) private var requestSignIn
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
-    @State private var prompt: NowPlayingModel.LikePrompt?
+    @State private var popover: ItemPopover?
     @FocusState private var focus: Field?
 
     private var item: MusicItem { .song(song) }
-    private var isCurrent: Bool { nowPlaying.isPlaying(item) }
-    private var showsActions: Bool { isHovering || focus != nil }
+    private var isCurrent: Bool { isCurrentRow ?? nowPlaying.isPlaying(item) }
+    private var showsActions: Bool { isHovering || focus != nil || selection?.isSelected == true }
     private var rating: Rating? { nowPlaying.rowRatings[song.videoId] }
 
     private var height: CGFloat {
@@ -63,13 +76,16 @@ struct TrackRow: View {
                 }
                 .padding(.horizontal, Metrics.space8)
                 .frame(height: height)
-                .background(isHovering ? Color.surfaceFill : .clear, in: RoundedRectangle(cornerRadius: Metrics.radiusThumb))
+                .background(
+                    selection?.isSelected == true ? Color.surfaceRaised : (isHovering ? Color.surfaceFill : .clear),
+                    in: RoundedRectangle(cornerRadius: Metrics.radiusThumb))
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .disabled(!song.isAvailable)
             .focused($focus, equals: .main)
             .accessibilityLabel(accessibilityLabel)
+            .accessibilityAddTraits(selection?.isSelected == true ? .isSelected : [])
 
             actions
                 .opacity(showsActions ? 1 : 0)
@@ -79,20 +95,28 @@ struct TrackRow: View {
         .onHover { isHovering = $0 }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: showsActions)
         .contextMenu { menu }
-        .guestPrompt(
-            isPresented: Binding(get: { prompt != nil }, set: { if !$0 { prompt = nil } }),
-            reason: prompt == .dislike ? "Sign in to dislike songs" : "Sign in to like songs", onSignIn: requestSignIn.perform)
+        .draggable(dragPayload())
+        .itemPopover($popover)
+    }
+
+    private func dragPayload() -> TrackDrag {
+        let songs = selection?.isSelected == true ? (selection?.selectedSongs()).flatMap { $0.isEmpty ? nil : $0 } ?? [song] : [song]
+        return TrackDrag(
+            videoIds: songs.map(\.videoId), sourcePlaylistId: sourcePlaylistId, setVideoIds: songs.compactMap(\.playlistSetVideoId))
     }
 
     @ViewBuilder private var menu: some View {
-        ItemMenu(item: item)
-        if let onRemoveFromHistory {
-            Divider()
-            Button("Remove from history", action: onRemoveFromHistory)
-        }
+        ItemMenu(item: item, place: place, popover: $popover, onHostAction: onAction)
     }
 
     private func play() {
+        if let selection {
+            let flags = NSEvent.modifierFlags.intersection([.command, .shift])
+            if !flags.isEmpty {
+                selection.onSelect(flags)
+                return
+            }
+        }
         if let onPlay { onPlay() } else { nowPlaying.play(item) }
     }
 
@@ -142,9 +166,9 @@ struct TrackRow: View {
 
     private var actions: some View {
         HStack(spacing: Metrics.space4) {
-            if let isSelected {
-                actionButton(isSelected.wrappedValue ? "checkmark.square.fill" : "square", label: "Select", field: .select) {
-                    isSelected.wrappedValue.toggle()
+            if let selection {
+                actionButton(selection.isSelected ? "checkmark.square.fill" : "square", label: "Select", field: .select) {
+                    selection.onSelect(.command)
                 }
             }
             actionButton(rating == .like ? "hand.thumbsup.fill" : "hand.thumbsup", label: "Like", field: .like) { rate(.like) }
@@ -182,7 +206,7 @@ struct TrackRow: View {
 
     private func rate(_ target: Rating) {
         guard nowPlaying.isSignedIn else {
-            prompt = target == .like ? .like : .dislike
+            popover = .signIn(reason: String(localized: target == .like ? "Sign in to like songs" : "Sign in to dislike songs"))
             return
         }
         nowPlaying.rate(videoId: song.videoId, rating == target ? .indifferent : target)
@@ -225,13 +249,14 @@ extension ChartRank.Trend {
 #Preview("Rows") {
     VStack(spacing: 0) {
         ForEach(Array(PreviewFixtures.songs.enumerated()), id: \.offset) { index, song in
-            TrackRow(song: song, density: [.compact, .detailed, .numbered][index % 3], isSelected: .constant(false))
+            TrackRow(song: song, density: [.compact, .detailed, .numbered][index % 3], selection: RowSelection(isSelected: index == 1) { _ in })
         }
     }
     .padding()
     .frame(width: 600)
     .environment(NavigationModel())
     .environment(PreviewFixtures.nowPlaying())
+    .environment(ToastCenter())
     .background(.themeBase)
 }
 #endif

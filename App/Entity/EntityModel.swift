@@ -209,7 +209,7 @@ final class EntityModel {
         let captured = generation
         Task { [loader] in
             do {
-                try await loader.add(browseId, song.videoId, credentials)
+                _ = try await loader.edit(browseId, [.add(videoId: song.videoId)], credentials)
                 guard generation == captured else { return }
                 update { $0.sections = $0.sections.removing(videoId: song.videoId) }
                 toasts.show("Added to playlist")
@@ -218,6 +218,178 @@ final class EntityModel {
                 toasts.show("Couldn't add to the playlist")
             }
         }
+    }
+
+    // MARK: Own-playlist editing
+
+    var canEdit: Bool {
+        if case .playlist(let playlist) = page { playlist.isOwned && kind != .playlist(browseId: Route.likedMusicBrowseId) } else { false }
+    }
+
+    var playlistBrowseId: String? {
+        if case .playlist(let browseId) = kind { browseId } else { nil }
+    }
+
+    var canEditPrivacy: Bool {
+        if case .playlist(let playlist) = page { playlist.privacy != nil } else { false }
+    }
+
+    var editDraft: NewPlaylistDraft? {
+        if case .playlist(let playlist) = page { NewPlaylistDraft(page: playlist) } else { nil }
+    }
+
+    /// Sends only the changed fields. Undo sends the previous values.
+    func editDetails(_ draft: NewPlaylistDraft) async -> Bool {
+        guard canEdit, let original = editDraft, case .playlist(let browseId) = kind, let credentials = credentials() else { return false }
+        let edits = draft.edits(from: original)
+        guard !edits.isEmpty else { return true }
+        let captured = generation
+        do {
+            _ = try await loader.edit(browseId, edits, credentials)
+            guard generation == captured else { return false }
+            toasts.show("Playlist updated", undo: { [weak self] in self?.send(original.edits(from: draft), failure: "Couldn't undo") })
+            retry()
+            return true
+        } catch {
+            guard generation == captured else { return false }
+            toasts.show("Couldn't update the playlist")
+            return false
+        }
+    }
+
+    /// Optimistic; a failure restores the rows. Rows without a set id (not loaded from this playlist) cannot be removed.
+    func removeRows(_ keys: [String]) {
+        guard canEdit, case .playlist(let browseId) = kind, case .loaded(let content) = state, let credentials = credentials() else { return }
+        let wanted = Set(keys)
+        let removed = content.tracks.enumerated().filter { wanted.contains($0.element.rowKey) && $0.element.playlistSetVideoId != nil }
+        guard !removed.isEmpty else { return }
+        let before = content.tracks
+        let removedKeys = Set(removed.map(\.element.rowKey))
+        let captured = generation
+        update { $0.tracks.removeAll { removedKeys.contains($0.rowKey) } }
+        let edits = removed.compactMap { entry in
+            entry.element.playlistSetVideoId.map { PlaylistEdit.remove(videoId: entry.element.videoId, setVideoId: $0) }
+        }
+        let placements = Self.placements(of: removed.map(\.offset), in: before)
+        Task { [weak self, loader] in
+            guard let self else { return }
+            do {
+                _ = try await loader.edit(browseId, edits, credentials)
+                guard generation == captured else { return }
+                let count = removed.count
+                toasts.show(
+                    count == 1 ? "Removed from the playlist" : "Removed \(count) songs",
+                    undo: { [weak self] in self?.restore(removed.map(\.element.videoId), placements: placements) })
+            } catch {
+                guard generation == captured else { return }
+                update { $0.tracks = before }
+                toasts.show("Couldn't update the playlist")
+            }
+        }
+    }
+
+    /// For each removed row, the set id of the next row that survives; `nil` when nothing survives after it.
+    private static func placements(of removedIndexes: [Int], in tracks: [Song]) -> [String?] {
+        let removed = Set(removedIndexes)
+        return removedIndexes.map { index in
+            tracks[(index + 1)...].enumerated().first { !removed.contains(index + 1 + $0.offset) }?.element.playlistSetVideoId
+        }
+    }
+
+    // Re-adding appends, so each row is moved before the row that followed it; rows that were last stay where the append put them.
+    // The first-to-last order keeps rows that shared a successor in order.
+    private func restore(_ videoIds: [String], placements: [String?]) {
+        guard case .playlist(let browseId) = kind, let credentials = credentials() else { return }
+        let captured = generation
+        Task { [weak self, loader] in
+            guard let self else { return }
+            do {
+                let added = try await loader.edit(browseId, videoIds.map { .add(videoId: $0) }, credentials)
+                guard generation == captured else { return }
+                guard added.count == videoIds.count else {
+                    toasts.show("Couldn't undo")
+                    retry()
+                    return
+                }
+                let moves = zip(added, placements).compactMap { row, before in
+                    before.map { PlaylistEdit.move(setVideoId: row.setVideoId, before: $0) }
+                }
+                if !moves.isEmpty { _ = try await loader.edit(browseId, moves, credentials) }
+                guard generation == captured else { return }
+                retry()
+            } catch {
+                guard generation == captured else { return }
+                toasts.show("Couldn't undo")
+                retry()
+            }
+        }
+    }
+
+    /// Moves an own-playlist row in front of another one (`nil` = to the end). Optimistic, with rollback.
+    func moveRow(_ key: String, before beforeKey: String?) {
+        guard canEdit, case .playlist(let browseId) = kind, case .loaded(let content) = state, key != beforeKey,
+              let credentials = credentials(),
+              let from = content.tracks.firstIndex(where: { $0.rowKey == key }), let moving = content.tracks[from].playlistSetVideoId
+        else { return }
+        let target = beforeKey.flatMap { id in content.tracks.firstIndex { $0.rowKey == id } }
+        if beforeKey != nil, target == nil { return }
+        let successor = from + 1 < content.tracks.count ? content.tracks[from + 1].playlistSetVideoId : nil
+        let before = content.tracks
+        var reordered = before
+        let song = reordered.remove(at: from)
+        let insertion = target.map { $0 > from ? $0 - 1 : $0 } ?? reordered.count
+        reordered.insert(song, at: insertion)
+        guard reordered != before else { return }
+        let captured = generation
+        update { $0.tracks = reordered }
+        Task { [weak self, loader] in
+            guard let self else { return }
+            do {
+                _ = try await loader.edit(browseId, [.move(setVideoId: moving, before: beforeKey)], credentials)
+                guard generation == captured else { return }
+                toasts.show("Moved in playlist", undo: { [weak self] in
+                    self?.send([.move(setVideoId: moving, before: successor)], failure: "Couldn't undo")
+                    self?.update { $0.tracks = before }
+                })
+            } catch {
+                guard generation == captured else { return }
+                update { $0.tracks = before }
+                toasts.show("Couldn't update the playlist")
+            }
+        }
+    }
+
+    private func send(_ edits: [PlaylistEdit], failure: LocalizedStringResource) {
+        guard !edits.isEmpty, case .playlist(let browseId) = kind, let credentials = credentials() else { return }
+        let captured = generation
+        Task { [weak self, loader] in
+            guard let self else { return }
+            do {
+                _ = try await loader.edit(browseId, edits, credentials)
+                guard generation == captured else { return }
+                retry()
+            } catch {
+                guard generation == captured else { return }
+                toasts.show(failure)
+            }
+        }
+    }
+
+    /// Every track id for Like all: an album has them all, a playlist is paged to the end first.
+    func allTrackIds() async -> [String] {
+        guard !isRetired else { return [] }
+        let captured = generation
+        let credentials = credentials()
+        while let token = continuation {
+            guard let page = try? await loader.moreTracks(token, credentials), generation == captured, !Task.isCancelled else { break }
+            append(page, requestedWith: token)
+        }
+        guard !isRetired, generation == captured, case .loaded(let content) = state else { return [] }
+        var ids: [String]
+        if case .album(let album) = content.entity { ids = album.tracks.map(\.song.videoId) } else { ids = content.tracks.map(\.videoId) }
+        var seenIds = Set<String>()
+        ids = ids.filter { seenIds.insert($0).inserted }
+        return ids
     }
 
     // MARK: Derived
@@ -317,20 +489,18 @@ final class EntityModel {
         if case .playlist(let playlist) = content.entity {
             continuation = playlist.tracks.continuation
             sectionsToken = playlist.sectionsContinuation
-            seen = Set(content.tracks.map(Self.rowKey))
+            seen = Set(content.tracks.map(\.rowKey))
         } else {
             continuation = nil
             sectionsToken = nil
         }
     }
 
-    // Keyed by the row's id in the playlist: the same video can legitimately appear twice. The `seen` set also catches the guest
-    // continuation that silently returns page 1 again.
-    private static func rowKey(_ song: Song) -> String { song.playlistSetVideoId ?? song.videoId }
+    // The `seen` set also catches the guest continuation that silently returns page 1 again.
 
     private func append(_ page: Page<Song>, requestedWith token: String) {
         var fresh: [Song] = []
-        for song in page.items where seen.insert(Self.rowKey(song)).inserted { fresh.append(song) }
+        for song in page.items where seen.insert(song.rowKey).inserted { fresh.append(song) }
         let finished = fresh.isEmpty || page.continuation == nil || page.continuation == token
         continuation = finished ? nil : page.continuation
         update {

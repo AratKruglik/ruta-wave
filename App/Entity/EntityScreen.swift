@@ -6,8 +6,7 @@ struct EntityScreen: View {
 
     @Environment(NavigationModel.self) private var navigation
     @State private var width = Metrics.defaultWindowWidth
-    // Visual only for now; the selection bar arrives with 4.6.
-    @State private var selected: Set<Int> = []
+    @State private var selection = TrackSelection()
 
     private var isWide: Bool { width >= Metrics.widePageWidth }
     private var padding: CGFloat { isWide ? Metrics.space32 : Metrics.space24 }
@@ -46,6 +45,15 @@ struct EntityScreen: View {
                 }
                 .padding(.vertical, padding)
             }
+            .trackSelection($selection, songs: selectableSongs(content), onRemove: model.canEdit ? { model.removeRows($0) } : nil)
+        }
+    }
+
+    private func selectableSongs(_ content: EntityModel.Content) -> [Song] {
+        switch content.entity {
+        case .album(let album): album.tracks.map(\.song)
+        case .playlist: content.tracks
+        case .artist: []
         }
     }
 
@@ -61,22 +69,18 @@ struct EntityScreen: View {
         }
     }
 
-    private func selection(_ index: Int) -> Binding<Bool> {
-        Binding(
-            get: { selected.contains(index) },
-            set: { if $0 { selected.insert(index) } else { selected.remove(index) } })
-    }
-
     // MARK: Album
 
     @ViewBuilder
     private func albumBody(_ album: AlbumPage, _ content: EntityModel.Content) -> some View {
         EntityHeader(model: model, header: album.header, isSaved: content.isSaved, showsShuffle: true, isWide: isWide)
             .padding(.horizontal, padding)
+        let order = album.tracks.map(\.song.rowKey)
         VStack(spacing: 0) {
             ForEach(album.tracks.indices, id: \.self) { index in
+                let song = album.tracks[index].song
                 TrackRow(
-                    song: album.tracks[index].song, density: .numbered, isSelected: selection(index), number: album.tracks[index].number)
+                    song: song, density: .numbered, selection: $selection.row(for: song, order: order, songs: album.tracks.map(\.song)), number: album.tracks[index].number)
             }
         }
         .padding(.horizontal, padding)
@@ -98,9 +102,15 @@ struct EntityScreen: View {
     private func playlistBody(_ playlist: PlaylistPage, _ content: EntityModel.Content) -> some View {
         EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, showsShuffle: false, isWide: isWide)
             .padding(.horizontal, padding)
+        let order = content.tracks.map(\.rowKey)
         LazyVStack(spacing: 0) {
             ForEach(content.tracks.indices, id: \.self) { index in
-                TrackRow(song: content.tracks[index], density: .detailed, isSelected: selection(index))
+                let song = content.tracks[index]
+                TrackRow(
+                    song: song, density: .detailed, selection: $selection.row(for: song, order: order, songs: content.tracks),
+                    place: model.canEdit ? .ownPlaylistRow : .plain, sourcePlaylistId: model.canEdit ? model.playlistBrowseId : nil,
+                    onAction: { if $0 == .removeFromPlaylist { model.removeRows([song.rowKey]) } })
+                    .dropDestination(for: TrackDrag.self) { drags, _ in reorder(drags, before: song) }
                     .onAppear { if index >= content.tracks.count - 10 { model.loadMore() } }
             }
             footer(content, isOwned: playlist.isOwned)
@@ -114,6 +124,15 @@ struct EntityScreen: View {
                     .padding(.horizontal, padding)
             }
         }
+    }
+
+    /// Only rows dragged from this same own playlist reorder it; the drop lands before the row it is released on.
+    private func reorder(_ drags: [TrackDrag], before song: Song) -> Bool {
+        guard model.canEdit, let id = model.playlistBrowseId else { return false }
+        let keys = drags.filter { $0.sourcePlaylistId == id }.flatMap(\.setVideoIds)
+        guard !keys.isEmpty else { return false }
+        for key in keys { model.moveRow(key, before: song.rowKey) }
+        return true
     }
 
     @ViewBuilder

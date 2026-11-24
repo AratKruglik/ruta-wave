@@ -3,6 +3,7 @@ import PlayerEngine
 
 enum PlaybackRules {
     static let volumeStep = 0.05
+    static let maxEnqueueBatch = 200
     static let unavailableSkipDelay: Duration = .seconds(3)
 
     static func nextRepeat(_ mode: RepeatMode) -> RepeatMode {

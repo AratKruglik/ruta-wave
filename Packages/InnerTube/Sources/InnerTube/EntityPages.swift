@@ -120,12 +120,17 @@ public struct PlaylistPage: Sendable, Equatable {
     public let sectionsContinuation: String?
     /// The signed-in account owns and can edit the playlist.
     public let isOwned: Bool
+    /// Only an own playlist has one, and only when the edit header carries it.
+    public let privacy: PlaylistPrivacy?
 
-    public init(header: PageHeader, tracks: Page<Song>, sectionsContinuation: String?, isOwned: Bool = false) {
+    public init(
+        header: PageHeader, tracks: Page<Song>, sectionsContinuation: String?, isOwned: Bool = false, privacy: PlaylistPrivacy? = nil
+    ) {
         self.header = header
         self.tracks = tracks
         self.sectionsContinuation = sectionsContinuation
         self.isOwned = isOwned
+        self.privacy = privacy
     }
 }
 

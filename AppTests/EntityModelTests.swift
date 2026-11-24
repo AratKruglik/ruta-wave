@@ -16,7 +16,7 @@ extension EntityLoader {
     static let stub = EntityLoader(
         album: { _, _ in throw Failure() }, artist: { _, _ in throw Failure() }, playlist: { _, _ in throw Failure() },
         moreTracks: { _, _ in throw Failure() }, sections: { _, _ in throw Failure() }, save: { _, _, _ in },
-        subscribe: { _, _, _ in }, add: { _, _, _ in })
+        subscribe: { _, _, _ in }, edit: { _, _, _ in [] })
 }
 
 private func song(_ id: String) -> Song { Song(videoId: id, title: id) }
@@ -40,6 +40,13 @@ private func artistPage(subscribed: Bool? = false, channel: String? = "UCchan") 
     ArtistPage(
         name: "N", thumbnailURL: nil, subscriberCountText: nil, isSubscribed: subscribed, channelId: channel,
         shuffle: WatchTarget(playlistId: "RDshuffle"), radio: nil, shelves: [], description: nil, viewCountText: nil)
+}
+
+private func ownPage(_ ids: [String], privacy: PlaylistPrivacy? = .private) -> PlaylistPage {
+    PlaylistPage(
+        header: PageHeader(title: "Mine", description: "d"),
+        tracks: Page(items: ids.map { Song(videoId: $0, title: $0, playlistSetVideoId: "s" + $0) }, continuation: nil),
+        sectionsContinuation: nil, isOwned: true, privacy: privacy)
 }
 
 @MainActor
@@ -243,7 +250,7 @@ struct EntityModelTests {
         var loader = EntityLoader.stub
         loader.playlist = { _, _ in playlistPage() }
         loader.save = { _, _, _ in calls.record("save") }
-        loader.add = { _, _, _ in calls.record("add") }
+        loader.edit = { _, _, _ in calls.record("add"); return [] }
         let model = makeModel(loader: loader, signedIn: false)
         await model.load()
         model.toggleSaved()
@@ -300,9 +307,11 @@ struct EntityModelTests {
         loader.sections = { _, _ in
             Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x")), .song(song("y"))])], continuation: nil)
         }
-        loader.add = { id, videoId, _ in
+        loader.edit = { id, edits, _ in
+            guard case .add(let videoId) = edits[0] else { return [] }
             calls.record("\(id) \(videoId)")
             if videoId == "y" { throw Failure() }
+            return []
         }
         let toasts = ToastCenter()
         let model = makeModel(loader: loader, toasts: toasts)
@@ -523,4 +532,97 @@ struct EntityModelTests {
 private final class Changes {
     private(set) var all: [EntityModel.LibraryChange] = []
     func record(_ change: EntityModel.LibraryChange) { all.append(change) }
+
+    @Test func editDetailsSendsOnlyChangedFieldsAndUndoSendsThePreviousValues() async {
+        let calls = Calls()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in ownPage(["a"]) }
+        loader.edit = { _, edits, _ in calls.record("\(edits)"); return [] }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        var draft = model.editDraft ?? NewPlaylistDraft()
+        draft.title = "Renamed"
+        draft.privacy = .public
+        #expect(await model.editDetails(draft))
+        #expect(calls.all == ["[InnerTube.PlaylistEdit.rename(\"Renamed\"), InnerTube.PlaylistEdit.setPrivacy(InnerTube.PlaylistPrivacy.public)]"])
+        toasts.undo()
+        #expect(await waitUntil { calls.all.count == 2 })
+        #expect(calls.all[1].contains("rename(\"Mine\")") && calls.all[1].contains("private"))
+    }
+
+    @Test func removeRowsIsOptimisticAndRollsBackOnFailure() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in ownPage(["a", "b", "c"]) }
+        loader.edit = { _, _, _ in throw Failure() }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        model.removeRows(["sb"])
+        #expect(trackIds(model) == ["a", "c"])
+        #expect(await waitUntil { trackIds(model) == ["a", "b", "c"] && toasts.message != nil })
+    }
+
+    @Test func removeUndoReAddsThenMovesEachRowBeforeItsSurvivingSuccessor() async {
+        let calls = Calls()
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in ownPage(["a", "b", "c", "d"]) }
+        loader.edit = { _, edits, _ in
+            calls.record("\(edits)")
+            return edits.compactMap { if case .add(let id) = $0 { AddedPlaylistRow(videoId: id, setVideoId: "n" + id) } else { nil } }
+        }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        model.removeRows(["sb", "sc"])
+        #expect(await waitUntil { toasts.toast?.undo != nil })
+        toasts.undo()
+        #expect(await waitUntil { calls.all.count == 3 })
+        #expect(calls.all[2].contains("move(setVideoId: \"nb\", before: Optional(\"sd\"))"))
+        #expect(calls.all[2].contains("move(setVideoId: \"nc\", before: Optional(\"sd\"))"))
+        #expect(calls.all[2].range(of: "nb")!.lowerBound < calls.all[2].range(of: "nc")!.lowerBound)
+    }
+
+    @Test func moveRowReordersOptimisticallyAndRollsBack() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in ownPage(["a", "b", "c"]) }
+        loader.edit = { _, _, _ in throw Failure() }
+        let model = makeModel(loader: loader)
+        await model.load()
+        model.moveRow("sc", before: "sa")
+        #expect(trackIds(model) == ["c", "a", "b"])
+        #expect(await waitUntil { trackIds(model) == ["a", "b", "c"] })
+    }
+
+    @Test func guestOrNonOwnerCannotEdit() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage() }
+        let model = makeModel(loader: loader)
+        await model.load()
+        #expect(!model.canEdit)
+        model.removeRows(["a"])
+        #expect(trackIds(model) == ["a", "b"])
+    }
+
+    @Test func allTrackIdsPagesToTheEnd() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a", "b"], next: "t1") }
+        loader.moreTracks = { _, _ in Page(items: [song("c"), song("a")], continuation: nil) }
+        let model = makeModel(loader: loader)
+        await model.load()
+        #expect(await model.allTrackIds() == ["a", "b", "c"])
+    }
+
+    @Test func allTrackIdsIsEmptyWhenRetiredWhilePaging() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a", "b"], next: "t1") }
+        var model: EntityModel!
+        loader.moreTracks = { _, _ in
+            await MainActor.run { model.cancelInFlight() }
+            return Page(items: [song("c")], continuation: nil)
+        }
+        model = makeModel(loader: loader)
+        await model.load()
+        #expect(await model.allTrackIds().isEmpty)
+    }
 }

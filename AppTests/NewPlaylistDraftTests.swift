@@ -14,4 +14,19 @@ struct NewPlaylistDraftTests {
     @Test func defaultsToPrivate() {
         #expect(NewPlaylistDraft().privacy == .private)
     }
+
+    @Test func startsWithoutSongs() {
+        #expect(NewPlaylistDraft().videoIds.isEmpty)
+    }
+
+    @Test func editsListOnlyChangedFields() {
+        let original = NewPlaylistDraft(title: "A", description: "d", privacy: .private)
+        #expect(original.edits(from: original).isEmpty)
+        var changed = original
+        changed.title = "  B  "
+        changed.description = ""
+        #expect(changed.edits(from: original) == [.rename("B"), .setDescription("")])
+        changed.privacy = .unlisted
+        #expect(changed.edits(from: original).last == .setPrivacy(.unlisted))
+    }
 }

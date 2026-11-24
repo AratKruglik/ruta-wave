@@ -75,9 +75,12 @@ struct BridgeCallTests {
     }
 
     @Test func enqueueValidatesTheID() throws {
-        let call = try #require(PlayerRules.bridgeCall(for: .enqueue(videoId: "abc", playNext: true), queue: []))
-        #expect(call.args[0] as? String == "abc" && call.args[1] as? Bool == true)
-        #expect(PlayerRules.bridgeCall(for: .enqueue(videoId: "a&b", playNext: false), queue: []) == nil)
+        let call = try #require(PlayerRules.bridgeCall(for: .enqueue(videoIds: ["abc", "def"], playNext: true), queue: []))
+        #expect(call.args[0] as? [String] == ["abc", "def"] && call.args[1] as? Bool == true)
+        #expect(PlayerRules.bridgeCall(for: .enqueue(videoIds: ["abc", "a&b"], playNext: false), queue: []) == nil)
+        #expect(PlayerRules.bridgeCall(for: .enqueue(videoIds: [], playNext: false), queue: []) == nil)
+        let tooMany = (0...PlayerRules.maxRestoredQueueItems).map { "id\($0)" }
+        #expect(PlayerRules.bridgeCall(for: .enqueue(videoIds: tooMany, playNext: false), queue: []) == nil)
     }
 
     @Test func adRefusesNextAndSeeksOnly() {

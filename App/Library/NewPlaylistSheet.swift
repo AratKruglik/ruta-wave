@@ -2,11 +2,27 @@ import InnerTube
 import SwiftUI
 
 struct NewPlaylistSheet: View {
+    let title: LocalizedStringKey
+    let confirmTitle: LocalizedStringKey
+    let showsPrivacy: Bool
     let isCreating: Bool
     let onCancel: () -> Void
     let onCreate: (NewPlaylistDraft) -> Void
 
-    @State private var draft = NewPlaylistDraft()
+    @State private var draft: NewPlaylistDraft
+
+    init(
+        title: LocalizedStringKey = "New playlist", confirmTitle: LocalizedStringKey = "Create", initial: NewPlaylistDraft = NewPlaylistDraft(),
+        showsPrivacy: Bool = true, isCreating: Bool, onCancel: @escaping () -> Void, onCreate: @escaping (NewPlaylistDraft) -> Void
+    ) {
+        self.title = title
+        self.confirmTitle = confirmTitle
+        self.showsPrivacy = showsPrivacy
+        self.isCreating = isCreating
+        self.onCancel = onCancel
+        self.onCreate = onCreate
+        _draft = State(initialValue: initial)
+    }
     @FocusState private var isTitleFocused: Bool
 
     private static let privacies: [(PlaylistPrivacy, LocalizedStringKey)] = [
@@ -17,7 +33,7 @@ struct NewPlaylistSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.space16) {
-            Text("New playlist")
+            Text(title)
                 .font(.rwShelfTitle)
                 .foregroundStyle(.textPrimary)
                 .accessibilityAddTraits(.isHeader)
@@ -39,15 +55,17 @@ struct NewPlaylistSheet: View {
                 .font(.rwBody)
                 .lineLimit(3...6)
                 .accessibilityLabel("Description")
-            Picker("Privacy", selection: $draft.privacy) {
-                ForEach(Self.privacies, id: \.0) { privacy, title in Text(title).tag(privacy) }
+            if showsPrivacy {
+                Picker("Privacy", selection: $draft.privacy) {
+                    ForEach(Self.privacies, id: \.0) { privacy, title in Text(title).tag(privacy) }
+                }
+                .font(.rwBody)
             }
-            .font(.rwBody)
             HStack(spacing: Metrics.space12) {
                 Spacer(minLength: 0)
                 Button("Cancel", action: onCancel)
                     .keyboardShortcut(.cancelAction)
-                Button("Create", action: create)
+                Button(confirmTitle, action: create)
                     .keyboardShortcut(.defaultAction)
                     .disabled(!draft.isValid || isCreating)
             }

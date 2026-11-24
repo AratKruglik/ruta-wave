@@ -7,6 +7,7 @@ struct PlayerBar: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(NavigationModel.self) private var navigation
     @Environment(\.requestSignIn) private var requestSignIn
+    @State private var popover: ItemPopover?
 
     private var player: any PlayerControlling { nowPlaying.player }
 
@@ -24,6 +25,10 @@ struct PlayerBar: View {
         .glassSurface(in: RoundedRectangle(cornerRadius: cornerRadius))
         .overlay(alignment: .top) { ProgressLine().padding(.horizontal, cornerRadius) }
         .padding([.horizontal, .bottom], LiquidGlass.isAvailable ? Metrics.space8 : 0)
+        .dropDestination(for: TrackDrag.self) { drags, _ in
+            for drag in drags { nowPlaying.enqueue(drag, playNext: true) }
+            return !drags.isEmpty
+        }
         .task(id: player.song?.videoId) {
             guard let song = player.song else { return }
             await nowPlaying.loadDetails(for: song)
@@ -101,6 +106,13 @@ struct PlayerBar: View {
         nowPlaying.details.flatMap { $0.videoId == player.song?.videoId ? $0 : nil }
     }
 
+    private var currentItem: MusicItem? {
+        guard let song = player.song else { return nil }
+        return .song(Song(
+            videoId: song.videoId, playlistId: song.playlistId, title: song.title, artists: currentDetails?.artists ?? [],
+            album: currentDetails?.album, isVideo: currentDetails?.isVideo ?? false))
+    }
+
     private var ratings: some View {
         HStack(spacing: 0) {
             BarIconButton(
@@ -123,11 +135,8 @@ struct PlayerBar: View {
 
     private var moreMenu: some View {
         Menu {
-            if let artist = currentDetails?.artists.first?.browseId {
-                Button("Go to artist") { navigation.push(.artist(channelId: artist)) }
-            }
-            if let album = currentDetails?.album?.browseId {
-                Button("Go to album") { navigation.push(.album(browseId: album)) }
+            if let item = currentItem {
+                ItemMenu(item: item, place: .playerBar, popover: $popover)
             }
             Button("Open player page") { isPlayerPagePresented = true }
         } label: {
@@ -139,7 +148,7 @@ struct PlayerBar: View {
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
-
+        .itemPopover($popover)
         .help("More")
         .accessibilityLabel("More")
     }

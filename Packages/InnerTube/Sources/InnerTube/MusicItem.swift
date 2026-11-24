@@ -68,7 +68,8 @@ public struct Song: Sendable, Equatable {
     public init(
         videoId: String, playlistId: String? = nil, title: String, subtitle: String? = nil,
         artists: [ItemRef] = [], album: ItemRef? = nil, duration: String? = nil, thumbnailURL: URL? = nil,
-        isExplicit: Bool = false, isVideo: Bool = false, rank: ChartRank? = nil, isAvailable: Bool = true
+        isExplicit: Bool = false, isVideo: Bool = false, rank: ChartRank? = nil, isAvailable: Bool = true,
+        playlistSetVideoId: String? = nil
     ) {
         self.isAvailable = isAvailable
         self.videoId = videoId
@@ -82,7 +83,7 @@ public struct Song: Sendable, Equatable {
         self.isExplicit = isExplicit
         self.isVideo = isVideo
         self.rank = rank
-        self.playlistSetVideoId = nil
+        self.playlistSetVideoId = playlistSetVideoId
     }
 }
 

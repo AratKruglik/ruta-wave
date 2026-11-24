@@ -9,7 +9,7 @@ private func playlist(_ id: String, title: String = "T") -> Playlist { Playlist(
 
 private extension SidebarLoader {
     static let stub = SidebarLoader(
-        playlists: { _ in [] }, create: { _, _ in "NEW" }, delete: { _, _ in }, removeFromLibrary: { _, _ in },
+        playlists: { _ in [] }, create: { _, _ in "NEW" }, edit: { _, _, _ in [] }, delete: { _, _ in }, removeFromLibrary: { _, _ in },
         isOwned: { _, _ in false })
 }
 
@@ -273,5 +273,41 @@ struct SidebarModelTests {
         try? await Task.sleep(for: .milliseconds(10))
         model.reset()
         #expect(await task.value == .discarded)
+    }
+
+    @Test func addSendsOneBatchedEditAndUndoRemovesTheAddedRows() async {
+        let calls = CallLog()
+        var loader = SidebarLoader.stub
+        loader.playlists = { _ in [playlist("VL1", title: "Mix")] }
+        loader.edit = { id, edits, _ in
+            calls.record("\(id) \(edits)")
+            return edits.contains { if case .add = $0 { true } else { false } } ? [AddedPlaylistRow(videoId: "a", setVideoId: "s1")] : []
+        }
+        let toasts = ToastCenter()
+        let model = makeModel(loader, toasts: toasts)
+        await model.load()
+        await model.add(videoIds: ["a", "b"], to: "VL1")
+        #expect(calls.all.count == 1)
+        #expect(model.ownership(of: "VL1") == true)
+        toasts.undo()
+        for _ in 0..<20 { await Task.yield() }
+        #expect(calls.all.last?.contains("remove") == true)
+    }
+
+    @Test func addingNothingNewReportsAlreadyThere() async {
+        let toasts = ToastCenter()
+        let model = makeModel(.stub, toasts: toasts)
+        await model.add(videoIds: ["a"], to: "VL1")
+        #expect(toasts.toast != nil && toasts.toast?.undo == nil)
+    }
+
+    @Test func failedAddShowsAnErrorWithoutUndo() async {
+        var loader = SidebarLoader.stub
+        loader.edit = { _, _, _ in throw Failure() }
+        let toasts = ToastCenter()
+        let model = makeModel(loader, toasts: toasts)
+        await model.add(videoIds: ["a"], to: "VL1")
+        #expect(toasts.toast != nil && toasts.toast?.undo == nil)
+        #expect(model.ownership(of: "VL1") == nil)
     }
 }

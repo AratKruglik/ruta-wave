@@ -108,8 +108,9 @@ enum PlayerRules {
         case .cycleRepeat: return ("cycleRepeat", [])
         case .playQueueItem(let index):
             return row(index).map { ("jump", $0) }
-        case .enqueue(let videoId, let playNext):
-            return isValidID(videoId) ? ("enqueue", [videoId, playNext]) : nil
+        case .enqueue(let videoIds, let playNext):
+            guard !videoIds.isEmpty, videoIds.count <= maxRestoredQueueItems, videoIds.allSatisfy(isValidID) else { return nil }
+            return ("enqueue", [videoIds, playNext])
         case .removeQueueItem(let index):
             guard !queue.indices.contains(index) || !queue[index].isCurrent else { return nil }
             return row(index).map { ("remove", $0) }

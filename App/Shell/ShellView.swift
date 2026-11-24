@@ -93,9 +93,11 @@ struct ShellView<AccountPopover: View>: View {
         }
         .id(StackIdentity(section: navigation.selection, content: identity))
         .contentMargins(.bottom, isBarVisible ? Metrics.playerBarHeight + Metrics.contentBottomMargin : 0, for: .scrollContent)
+        .disabled(navigation.isPlayerPagePresented)
+        .accessibilityHidden(navigation.isPlayerPagePresented)
         .overlay {
             if navigation.isPlayerPagePresented {
-                PlayerPagePlaceholder { navigation.isPlayerPagePresented = false }
+                PlayerPage { navigation.isPlayerPagePresented = false }
                     .transition(.move(edge: .bottom))
             }
         }
@@ -104,8 +106,8 @@ struct ShellView<AccountPopover: View>: View {
 
     private var bottomOverlay: some View {
         VStack(spacing: Metrics.space8) {
-            if let message = toasts.message {
-                ToastView(message: message)
+            if let toast = toasts.toast {
+                ToastView(toast: toast, onUndo: toasts.undo)
                     .transition(.opacity)
             }
             if isBarVisible {

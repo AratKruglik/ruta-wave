@@ -97,7 +97,7 @@
     remove: (index, videoId, setId) => rowMatches(index, videoId, setId) && dispatch({ type: 'REMOVE_ITEM', payload: index }),
     move: (from, videoId, setId, to) =>
       rowMatches(from, videoId, setId) && dispatch({ type: 'MOVE_ITEM', payload: { fromIndex: from, toIndex: to } }),
-    enqueue: (videoId, playNext) => enqueue([videoId], playNext),
+    enqueue: (videoIds, playNext) => Array.isArray(videoIds) && videoIds.length > 0 && enqueue(videoIds, playNext),
     append: (videoIds) => Array.isArray(videoIds) && videoIds.length > 0 && enqueue(videoIds, false),
   }));
 
