@@ -64,6 +64,7 @@ final class NowPlayingModel {
     @ObservationIgnored private var pendingQueueCounter = 0
     @ObservationIgnored private let now: @MainActor () -> ContinuousClock.Instant
     @ObservationIgnored private var playTask: Task<Void, Never>?
+    @ObservationIgnored private var detailsTask: Task<Void, Never>?
     @ObservationIgnored private var lastLoad: (key: String, at: ContinuousClock.Instant)?
     @ObservationIgnored private var ratingGeneration = 0
     @ObservationIgnored private var skip: (videoId: String, task: Task<Void, Never>)?
@@ -123,6 +124,14 @@ final class NowPlayingModel {
         case .songChanged(let song):
             unavailableStreak = 0
             if skip?.videoId != song.videoId { cancelSkip() }
+            // Loaded here rather than from a view, so Now Playing gets the album with every window closed (#82).
+            detailsTask?.cancel()
+            detailsTask = Task { [weak self] in await self?.loadDetails(for: song) }
+        case .stopped:
+            detailsTask?.cancel()
+            detailsTask = nil
+            details = nil
+            detailsFailed = false
         case .queueChanged(let items):
             if let pending = pendingQueueChange, pending.isApplied(items) {
                 clearPendingQueueChange()

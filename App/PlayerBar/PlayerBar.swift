@@ -29,10 +29,6 @@ struct PlayerBar: View {
             for drag in drags { nowPlaying.enqueue(drag, playNext: true) }
             return !drags.isEmpty
         }
-        .task(id: player.song?.videoId) {
-            guard let song = player.song else { return }
-            await nowPlaying.loadDetails(for: song)
-        }
     }
 
     private var cornerRadius: CGFloat { LiquidGlass.isAvailable ? Metrics.radiusBar : 0 }

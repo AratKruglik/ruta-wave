@@ -639,6 +639,52 @@ struct NowPlayingModelTests {
         #expect(h.model.details == nil && !h.model.detailsFailed)
     }
 
+    @Test func aSongChangeLoadsDetailsWithoutAnyView() async {
+        var requests: [String] = []
+        var h = Harness(watchNext: { target, _ in
+            requests.append(target.videoId)
+            return nextResponse(for: target.videoId, lyrics: nil, related: nil)
+        })
+        var albums: [String] = []
+        h.model.albumChanged = { videoId, _ in albums.append(videoId) }
+        await h.start()
+        h.player.song = song("a")
+        h.player.emit(.songChanged(song("a")))
+        #expect(await waitUntil { h.model.details?.videoId == "a" })
+        #expect(albums == ["a"])
+        #expect(requests == ["a"])
+    }
+
+    @Test func aNewSongDropsTheEarlierDetailsLoad() async {
+        var release: CheckedContinuation<Void, Never>?
+        var h = Harness(watchNext: { target, _ in
+            if target.videoId == "a" { await withCheckedContinuation { release = $0 } }
+            return nextResponse(for: target.videoId, lyrics: nil, related: nil)
+        })
+        await h.start()
+        h.player.song = song("a")
+        h.player.emit(.songChanged(song("a")))
+        #expect(await waitUntil { release != nil })
+        h.player.song = song("b")
+        h.player.emit(.songChanged(song("b")))
+        #expect(await waitUntil { h.model.details?.videoId == "b" })
+        release?.resume()
+        await h.settle()
+        #expect(h.model.details?.videoId == "b")
+    }
+
+    @Test func stoppingThePlayerClearsTheDetails() async {
+        var h = Harness(watchNext: { target, _ in nextResponse(for: target.videoId, lyrics: nil, related: nil) })
+        await h.start()
+        h.player.song = song("a")
+        h.player.emit(.songChanged(song("a")))
+        #expect(await waitUntil { h.model.details != nil })
+        h.player.song = nil
+        h.player.emit(.stopped)
+        #expect(await waitUntil { h.model.details == nil })
+        #expect(!h.model.detailsFailed)
+    }
+
     @Test func aFailedNextSetsTheFlagAndTheNextLoadClearsIt() async {
         struct Boom: Error {}
         let fails = FailSwitch()
