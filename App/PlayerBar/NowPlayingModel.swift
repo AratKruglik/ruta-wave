@@ -72,6 +72,7 @@ final class NowPlayingModel {
     @ObservationIgnored private var syncsRepeat = false
     @ObservationIgnored private var syncsShuffle = false
     @ObservationIgnored private var hasResumed = false
+    @ObservationIgnored private var pendingLink: WatchTarget?
     /// The position a resumed track is being brought back to; positions are not saved until the player reaches it.
     @ObservationIgnored private var resumeTarget: LastPlayback?
     @ObservationIgnored var albumChanged: (@MainActor (_ videoId: String, _ album: String?) -> Void)?
@@ -177,9 +178,19 @@ final class NowPlayingModel {
     func resumeLastSession() {
         guard !hasResumed else { return }
         hasResumed = true
+        if let link = pendingLink {
+            pendingLink = nil
+            play(link)
+            return
+        }
         guard preferences.resumeOnStart, player.song == nil, let last = preferences.lastPlayback else { return }
         resumeTarget = last
         player.send(.resume(videoId: last.videoId, playlistId: last.playlistId, at: last.elapsed))
+    }
+
+    /// A link opened before the player has started would be dropped, so it waits and replaces the resume.
+    func openLink(_ target: WatchTarget) {
+        if hasResumed { play(target) } else { pendingLink = target }
     }
 
     /// Saves the position as it is now, for quitting.

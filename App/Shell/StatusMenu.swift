@@ -6,11 +6,13 @@ import AppSettings
 final class StatusMenu: NSObject {
     private let nowPlaying: NowPlayingModel
     private let showMainWindow: () -> Void
+    private let showMiniPlayer: () -> Void
     private var item: NSStatusItem?
 
-    init(nowPlaying: NowPlayingModel, showMainWindow: @escaping () -> Void) {
+    init(nowPlaying: NowPlayingModel, showMainWindow: @escaping () -> Void, showMiniPlayer: @escaping () -> Void) {
         self.nowPlaying = nowPlaying
         self.showMainWindow = showMainWindow
+        self.showMiniPlayer = showMiniPlayer
     }
 
     func setVisible(_ isVisible: Bool) {
@@ -37,6 +39,7 @@ final class StatusMenu: NSObject {
     private func statusMenu() -> NSMenu {
         let menu = playbackMenu()
         menu.addItem(.separator())
+        menu.addItem(item(String(localized: "Mini Player"), #selector(miniPlayer)))
         menu.addItem(item(String(localized: "Show Rutawave"), #selector(show)))
         menu.addItem(withTitle: String(localized: "Quit Rutawave"), action: #selector(NSApplication.terminate), keyEquivalent: "q")
         return menu
@@ -82,4 +85,5 @@ final class StatusMenu: NSObject {
     @objc private func previous() { nowPlaying.previous() }
     @objc private func next() { nowPlaying.next() }
     @objc private func show() { showMainWindow() }
+    @objc private func miniPlayer() { showMiniPlayer() }
 }

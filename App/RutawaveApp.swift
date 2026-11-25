@@ -20,8 +20,9 @@ struct RutawaveApp: App {
     var body: some Scene {
         // The delegate needs the action to reopen the window with none open, and only a scene can hand it out.
         let _ = app.openMainWindow = { openWindow(id: AppDelegate.mainWindowId) }
+        let _ = app.openMiniPlayer = { openWindow(id: AppDelegate.miniPlayerWindowId) }
         WindowGroup(id: AppDelegate.mainWindowId) {
-            RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts, network: app.network)
+            RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts, network: app.network, links: app.links)
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
@@ -30,9 +31,14 @@ struct RutawaveApp: App {
             SidebarCommands()
             AppCommands(nowPlaying: app.nowPlaying)
         }
+        Window("Mini Player", id: AppDelegate.miniPlayerWindowId) { MiniPlayerView(nowPlaying: app.nowPlaying) }
+            .windowResizability(.contentSize)
+            .keyboardShortcut("m", modifiers: [.command, .shift])
+            .handlesExternalEvents(matching: [])
         Settings { SettingsView(session: app.session) }
         #if DEBUG
         Window("Player Debug", id: "player-debug") { PlayerDebugView(player: app.player) }
+            .handlesExternalEvents(matching: [])
         #endif
     }
 }
@@ -46,8 +52,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let systemNowPlaying: SystemNowPlaying
     let trackNotifier: TrackNotifier
     let network = NetworkMonitor()
+    let links = LinkInbox()
     static let mainWindowId = "main"
+    static let miniPlayerWindowId = "mini-player"
     var openMainWindow: (() -> Void)?
+    var openMiniPlayer: (() -> Void)?
     private var statusMenu: StatusMenu?
     private var playerWindow: PlayerWindow?
 
@@ -66,7 +75,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         trackNotifier = TrackNotifier(
             posting: UserNotificationPosting(), isEnabled: { Preferences().trackNotifications }, isFrontmost: { NSApp.isActive })
         super.init()
-        statusMenu = StatusMenu(nowPlaying: nowPlaying) { [weak self] in self?.showMainWindow() }
+        statusMenu = StatusMenu(
+            nowPlaying: nowPlaying, showMainWindow: { [weak self] in self?.showMainWindow() },
+            showMiniPlayer: { [weak self] in self?.showMiniPlayer() })
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -103,6 +114,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         nowPlaying.savePosition()
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard let link = urls.lazy.compactMap(Self.link).first else { return }
+        switch link {
+        case .play(let target): nowPlaying.openLink(target)
+        case .openInBrowser(let url): NSWorkspace.shared.open(url)
+        case .section, .route:
+            links.pending = link
+            showMainWindow()
+        }
+    }
+
+    private static let maxWeblocSize = 64 * 1024
+
+    private static func link(from url: URL) -> MusicLink? {
+        guard url.isFileURL else { return MusicLink(url) }
+        let file = url.resolvingSymlinksInPath()
+        guard (try? file.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true,
+              let handle = try? FileHandle(forReadingFrom: file) else { return nil }
+        defer { try? handle.close() }
+        guard let data = try? handle.read(upToCount: maxWeblocSize + 1), data.count <= maxWeblocSize else { return nil }
+        return MusicLink.webloc(data).flatMap(MusicLink.init)
+    }
+
+    func showMiniPlayer() {
+        NSApp.activate()
+        openMiniPlayer?()
     }
 
     func showMainWindow() {

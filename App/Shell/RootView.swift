@@ -19,6 +19,7 @@ struct RootView: View {
     let nowPlaying: NowPlayingModel
     let toasts: ToastCenter
     let network: NetworkMonitor
+    let links: LinkInbox
 
     @State private var browse: BrowseStore
     @State private var searchField: SearchFieldModel
@@ -40,11 +41,12 @@ struct RootView: View {
     @State private var alwaysOnTop = Preferences().alwaysOnTop
     @State private var showsDislikeButton = Preferences().showDislikeButton
 
-    init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor) {
+    init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor, links: LinkInbox) {
         self.session = session
         self.nowPlaying = nowPlaying
         self.toasts = toasts
         self.network = network
+        self.links = links
         let preferences = Preferences()
         _navigation = State(initialValue: .restored(
             from: preferences.navigationState, isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex,
@@ -112,6 +114,11 @@ struct RootView: View {
         }
         .onChange(of: navigation.snapshot(isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex)) { _, snapshot in
             Preferences().navigationState = try? JSONEncoder().encode(snapshot)
+        }
+        .onChange(of: links.pending, initial: true) { _, link in
+            guard let link else { return }
+            links.pending = nil
+            open(link)
         }
         .onChange(of: network.reconnects) { retryFailedLoads() }
         .onChange(of: network.isOnline) { _, online in nowPlaying.networkChanged(isOnline: online) }
@@ -217,6 +224,15 @@ struct RootView: View {
             case .discarded:
                 break
             }
+        }
+    }
+
+    private func open(_ link: MusicLink) {
+        switch link {
+        case .section(let section): navigation.select(section)
+        case .route(.history) where !session.state.isSignedIn: isSigningIn = true
+        case .route(let route): navigation.push(route)
+        case .play, .openInBrowser: break
         }
     }
 

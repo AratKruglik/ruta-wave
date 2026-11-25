@@ -816,6 +816,34 @@ struct ResumeOnStartTests {
         #expect(!h.player.sent.contains { if case .resume = $0 { true } else { false } })
     }
 
+    @Test func aLinkOpenedBeforeTheStartReplacesTheResume() async {
+        var h = Harness()
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: 42)
+        await h.start()
+        h.model.openLink(WatchTarget(videoId: "v", playlistId: "PL1"))
+        #expect(h.player.sent == [.setVolume(1)])
+        h.model.resumeLastSession()
+        #expect(h.player.sent.last == .load(videoId: "v", playlistId: "PL1"))
+        #expect(!h.player.sent.contains { if case .resume = $0 { true } else { false } })
+    }
+
+    @Test func aLinkOpenedAfterTheStartLoadsAtOnce() async {
+        var h = Harness()
+        await h.start()
+        h.model.resumeLastSession()
+        h.model.openLink(WatchTarget(videoId: "v"))
+        #expect(h.player.sent.last == .load(videoId: "v", playlistId: nil))
+    }
+
+    @Test func aPlaylistLinkResolvesItsFirstTrack() async {
+        var h = Harness(resolve: { _, _ in "first" })
+        await h.start()
+        h.model.resumeLastSession()
+        h.model.openLink(WatchTarget(playlistId: "RD1"))
+        await h.settle()
+        #expect(h.player.sent.last == .load(videoId: "first", playlistId: "RD1"))
+    }
+
     @Test func resumesOnlyOncePerLaunch() async {
         var h = Harness()
         h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: 42)
