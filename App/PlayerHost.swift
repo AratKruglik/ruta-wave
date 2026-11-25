@@ -33,7 +33,6 @@ private struct PlayerHostView: View {
         PlayerHost(engine: player)
             .frame(width: 1, height: 1)
             .onChange(of: session.state.isSignedIn) { InnerTubeClient.resetGuestVisitor() }
-            .onChange(of: session.authUserIndex, initial: true) { player.authUserIndex = $1 }
             .task(id: PlayerSession(session)) { await startPlayer() }
     }
 
@@ -52,8 +51,11 @@ private struct PlayerHostView: View {
         case .off:
             player.stop()
             return
-        case .guest, .account:
+        case .guest:
             await player.start(session.state)
+        case .account(let authUserIndex):
+            // The engine owns the index: it restarts the player when the account changes (#81).
+            await player.start(session.state, authUserIndex: authUserIndex)
         }
         #if DEBUG
         if let videoId = UserDefaults.standard.string(forKey: "debugVideoId") {
@@ -64,13 +66,14 @@ private struct PlayerHostView: View {
 }
 
 // Tears the signed-in web view down as soon as sign-out starts; the wipe of the shared store may already be running.
+// The account index is part of the key, so switching accounts restarts the player for the new one.
 private enum PlayerSession: Equatable {
-    case guest, account, off
+    case guest, account(Int), off
 
     @MainActor init(_ session: AuthSession) {
         switch session.state {
         case .keychainUnavailable: self = .off
-        case .signedIn: self = session.isSigningOut ? .off : .account
+        case .signedIn: self = session.isSigningOut ? .off : .account(session.authUserIndex)
         case .signedOut: self = .guest
         }
     }

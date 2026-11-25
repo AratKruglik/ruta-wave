@@ -15,6 +15,11 @@ public enum PlayerRules {
 
     private static let allowedArtworkHostSuffixes = [".googleusercontent.com", ".ggpht.com"]
 
+    /// A running player is kept only for the same mode and, when signed in, the same account.
+    static func reusesPlayer(running: (ephemeral: Bool, authUserIndex: Int), wanted: (ephemeral: Bool, authUserIndex: Int)) -> Bool {
+        running.ephemeral == wanted.ephemeral && (wanted.ephemeral || running.authUserIndex == wanted.authUserIndex)
+    }
+
     static func isAllowedMainFrameNavigation(_ url: URL?) -> Bool {
         guard let url, url.scheme == "https", url.host?.lowercased() == playerHost,
               url.user == nil, url.password == nil else { return false }

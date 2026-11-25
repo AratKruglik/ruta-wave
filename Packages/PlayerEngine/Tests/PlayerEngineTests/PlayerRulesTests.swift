@@ -3,6 +3,15 @@ import Testing
 @testable import PlayerEngine
 
 struct PlayerRulesTests {
+    @Test func aRunningPlayerIsReusedOnlyForTheSameModeAndAccount() {
+        #expect(PlayerRules.reusesPlayer(running: (false, 1), wanted: (false, 1)))
+        #expect(PlayerRules.reusesPlayer(running: (true, 0), wanted: (true, 0)))
+        #expect(PlayerRules.reusesPlayer(running: (true, 2), wanted: (true, 0)))
+        #expect(!PlayerRules.reusesPlayer(running: (false, 0), wanted: (false, 1)))
+        #expect(!PlayerRules.reusesPlayer(running: (true, 0), wanted: (false, 0)))
+        #expect(!PlayerRules.reusesPlayer(running: (false, 0), wanted: (true, 0)))
+    }
+
     @Test func allowsPlayerHost() {
         #expect(PlayerRules.isAllowedMainFrameNavigation(URL(string: "https://music.youtube.com/watch?v=x")))
         #expect(PlayerRules.isAllowedMainFrameNavigation(URL(string: "https://music.youtube.com:443/")))
