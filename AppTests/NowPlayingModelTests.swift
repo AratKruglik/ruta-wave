@@ -642,8 +642,8 @@ struct NowPlayingModelTests {
     @Test func aSongChangeLoadsDetailsWithoutAnyView() async {
         var requests: [String] = []
         var h = Harness(watchNext: { target, _ in
-            requests.append(target.videoId)
-            return nextResponse(for: target.videoId, lyrics: nil, related: nil)
+            requests.append(target.videoId ?? "")
+            return nextResponse(for: target.videoId ?? "", lyrics: nil, related: nil)
         })
         var albums: [String] = []
         h.model.albumChanged = { videoId, _ in albums.append(videoId) }
@@ -659,7 +659,7 @@ struct NowPlayingModelTests {
         var release: CheckedContinuation<Void, Never>?
         var h = Harness(watchNext: { target, _ in
             if target.videoId == "a" { await withCheckedContinuation { release = $0 } }
-            return nextResponse(for: target.videoId, lyrics: nil, related: nil)
+            return nextResponse(for: target.videoId ?? "", lyrics: nil, related: nil)
         })
         await h.start()
         h.player.song = song("a")
@@ -674,7 +674,7 @@ struct NowPlayingModelTests {
     }
 
     @Test func stoppingThePlayerClearsTheDetails() async {
-        var h = Harness(watchNext: { target, _ in nextResponse(for: target.videoId, lyrics: nil, related: nil) })
+        var h = Harness(watchNext: { target, _ in nextResponse(for: target.videoId ?? "", lyrics: nil, related: nil) })
         await h.start()
         h.player.song = song("a")
         h.player.emit(.songChanged(song("a")))
@@ -797,6 +797,23 @@ struct ResumeOnStartTests {
         await h.start()
         h.model.resumeLastSession()
         #expect(h.player.sent.last == .resume(videoId: "abc", playlistId: "PL1", at: 42))
+    }
+
+    @Test func anAccountChangeForgetsTheLastTrack() async {
+        var h = Harness()
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: "LM", elapsed: 42)
+        h.player.song = playing("abc", playlistId: "LM")
+        await h.start()
+        h.model.resetAccountState()
+        #expect(h.preferences.lastPlayback == nil)
+        h.player.emit(.timeChanged(60))
+        h.player.emit(.playbackChanged(isPaused: true, elapsed: 61))
+        await h.settle()
+        h.model.savePosition()
+        #expect(h.preferences.lastPlayback == nil, "saving a position never brings the old account's track back")
+        h.player.song = nil
+        h.model.resumeLastSession()
+        #expect(!h.player.sent.contains { if case .resume = $0 { true } else { false } })
     }
 
     @Test func resumesOnlyOncePerLaunch() async {

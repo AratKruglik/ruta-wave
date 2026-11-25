@@ -93,7 +93,8 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(newValue, forKey: Key.resumeOnStart) }
     }
 
-    /// The track that was playing when the app last ran. Only ids and a position are kept, nothing tied to the account.
+    /// The track that was playing when the app last ran. The playlist id can be the account's own (`LM`, a private `PL…`),
+    /// so this is cleared whenever the signed-in account changes.
     public var lastPlayback: LastPlayback? {
         get {
             guard let videoId = defaults.string(forKey: Key.lastVideoId).flatMap(Self.isPlayerId) else { return nil }
