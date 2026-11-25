@@ -363,6 +363,12 @@ into an isolated content world the page cannot reach, sets the metadata,
 position and handlers. `SystemNowPlaying` reduces `PlayerEvent`s to that state
 and routes the handlers' commands through `NowPlayingModel.perform`.
 
+Skip ±10 s is deliberately not offered. On macOS, registering
+`seekbackward`/`seekforward` handlers can make Control Centre, the lock screen
+and AirPods show ±10 s buttons in place of next and previous, and next/previous
+matter more for music. `PlayerRules.remoteCommand` drops both actions, and the
+page-world neutraliser keeps nulling them.
+
 ## 9. Settings
 
 A typed wrapper over `UserDefaults`. Mapping to the original's options:

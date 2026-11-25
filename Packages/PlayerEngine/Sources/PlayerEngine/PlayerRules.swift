@@ -122,7 +122,7 @@ public enum PlayerRules {
         case .moveQueueItem(let from, let to):
             guard queue.indices.contains(to), let args = row(from) else { return nil }
             return ("move", args + [offset + to])
-        case .setLike, .load, .recover: return nil
+        case .setLike, .load, .resume, .recover: return nil
         }
     }
 
