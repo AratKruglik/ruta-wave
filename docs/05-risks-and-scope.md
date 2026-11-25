@@ -67,7 +67,7 @@ They need a decision from the user or are settled at the stage shown.
 | 6 | Which of the "If needed" plugins are actually wanted | stage 7 |
 | 7 | ~~Localization: only Ukrainian and English, or more~~ — **decided: English and Ukrainian only, with an in-app language switch** (2026-11-20, [#15](https://github.com/AratKruglik/yt-music-mac/issues/15)). Strings live in a String Catalog (stage 4.1, #16). Settings → General offers System / English / Українська. System is the default and follows the macOS language order. A choice takes effect after a relaunch ([02 §9](02-architecture.md#9-settings)). No other languages are planned | — |
 | 8 | ~~Whether there is an Apple Developer account~~ — **decided: no**, the DMG is ad-hoc signed and not notarized | — |
-| 9 | DMG for Apple Silicon only, or universal (arm64 + x86_64) | stage 8 |
+| 9 | ~~DMG for Apple Silicon only, or universal (arm64 + x86_64)~~ — **decided: Apple Silicon only** (2026-11-25, [#29](https://github.com/AratKruglik/yt-music-mac/issues/29)). The Release configuration builds `arm64` only; the DMG is `RutaWave-<version>-arm64.dmg`. Intel Macs are not supported | — |
 | 10 | Whether auto-update (Sparkle) is needed | before release |
 
 ## 5. What remains uninvestigated in the original

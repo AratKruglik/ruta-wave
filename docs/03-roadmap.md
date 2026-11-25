@@ -186,8 +186,8 @@ The app is distributed as a DMG file, not through the App Store. The build
 script is worth adding right after stage 5, so working builds can be installed
 on your own machine.
 
-- [ ] Release configuration: Hardened Runtime, no sandbox, architectures
-      arm64 + x86_64 (or arm64 only — to be decided).
+- [ ] Release configuration: Hardened Runtime, no sandbox, architecture
+      arm64 only (decided in [#29](https://github.com/AratKruglik/yt-music-mac/issues/29)).
 - [ ] `scripts/build-dmg.sh`:
       1. `xcodebuild archive` → `xcodebuild -exportArchive` (the `mac-application`
          method, no Developer ID);

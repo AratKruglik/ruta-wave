@@ -308,7 +308,8 @@ in the same language.
 
 ### 7.6. Compatibility
 
-macOS 14 or later, Apple Silicon. Intel support depends on open question #9.
+macOS 14 or later, Apple Silicon only: the Release build and the DMG are
+`arm64`; Intel Macs are not supported (open question #9, [#29](https://github.com/AratKruglik/yt-music-mac/issues/29)).
 
 ---
 
@@ -350,7 +351,8 @@ Kept in one place, [05](05-risks-and-scope.md). The ones that shape the product:
 - **Ads for guests and free accounts** — accepted, not blocked.
 
 Open questions that affect this PRD:
-#5 lyrics source, #6 optional plugins, #9 Intel, #10 auto-update.
+#5 lyrics source, #6 optional plugins, #10 auto-update.
+Question #9 is settled: Apple Silicon only (§7.6).
 Question #1 (name, bundle ID, icon) is settled here; the icon is done (2026-11-25, [spec](superpowers/specs/2026-11-25-app-icon-design.md)), pending the trademark review of #28.
 
 ---
@@ -364,3 +366,4 @@ Question #1 (name, bundle ID, icon) is settled here; the icon is done (2026-11-2
 | 2026-11-19 | Music video mode deferred to later (open question #3, #12); Song/Video toggle removed from F-PLY-5; 02 §4.1 requires a re-parentable web view |
 | 2026-11-20 | Product renamed **RutaWave** (was Redwave: too generic, nothing said music; main audience is Ukrainian); bundle ID `dev.kruhlyk.rutawave`; rename in code planned as backlog 0.4 |
 | 2026-11-20 | Localization decided (open question #7, #15): English and Ukrainian only; in-app language switch in Settings → General, system language by default; removed from non-goals |
+| 2026-11-25 | Architecture decided (open question #9, [#29](https://github.com/AratKruglik/yt-music-mac/issues/29)): Apple Silicon only; the Release build and the DMG are `arm64`, no universal binary (§7.6) |
