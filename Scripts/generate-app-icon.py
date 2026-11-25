@@ -32,9 +32,9 @@ class Ring(NamedTuple):
 
 
 RINGS = [
-    Ring("ring-outer", 300 * SCALE, 0.16, 0.0, 16 * SCALE, 0.45),
-    Ring("ring-middle", 225 * SCALE, 0.20, 0.5, 20 * SCALE, 0.70),
-    Ring("ring-inner", 150 * SCALE, 0.22, 1.0, 24 * SCALE, 1.00),
+    Ring("ring-outer", 300 * SCALE, 0.16, 0.0, 36 * SCALE, 0.70),
+    Ring("ring-middle", 225 * SCALE, 0.20, 0.5, 40 * SCALE, 0.85),
+    Ring("ring-inner", 150 * SCALE, 0.22, 1.0, 44 * SCALE, 1.00),
 ]
 
 

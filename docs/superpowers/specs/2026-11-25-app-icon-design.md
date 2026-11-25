@@ -21,8 +21,8 @@ Rutawave needs its own icon for the Dock, Finder, the DMG window and notificatio
   - middle ring: half 5 petals, half 3 lobes;
   - inner ring: 3 lobes pointing right, a rounded play shape;
   - centre: a filled white play triangle with rounded corners and slightly convex sides, optically centred (its centroid on the icon centre).
-- **Colour**: a vertical "ruta" gradient, `#E8253F` at the top to `#9E0E24` at the bottom. Graphics are white. Ring opacity from outer to inner: 45 %, 70 %, 100 %. Not the flat `#FF0033` of YouTube Music.
-- Reference geometry (1024 canvas, centre 512): rings R = 300 / 225 / 150, amplitude 0.16 / 0.20 / 0.22, stroke 16 / 20 / 24. Play: circumradius 66, side bulge 5 %, corner rounding about 30 px. Ring radius as a function of the angle φ: `r(φ) = R·(1 + a·((1−m)·cos 5(φ+π/2) + m·cos 3φ))`, with the 5→3 blend m = 0 / 0.5 / 1. The mockup is in `.superpowers/brainstorm/` and is not committed.
+- **Colour**: a vertical "ruta" gradient, `#E8253F` at the top to `#9E0E24` at the bottom. Graphics are white. Ring opacity from outer to inner: 70 %, 85 %, 100 %. Not the flat `#FF0033` of YouTube Music.
+- Reference geometry (1024 canvas with the icon shape on an 824 plate, centre 512; the generator scales it by 1024/824 because an `.icon` layer fills the whole shape): rings R = 300 / 225 / 150, amplitude 0.16 / 0.20 / 0.22, stroke 36 / 40 / 44 (thickened on 2026-11-25 for small sizes; 16 px @1x still blurs, accepted). Play: circumradius 66, side bulge 5 %, corner rounding about 30 px. Ring radius as a function of the angle φ: `r(φ) = R·(1 + a·((1−m)·cos 5(φ+π/2) + m·cos 3φ))`, with the 5→3 blend m = 0 / 0.5 / 1. The mockup is in `.superpowers/brainstorm/` and is not committed.
 
 ## Approaches
 
