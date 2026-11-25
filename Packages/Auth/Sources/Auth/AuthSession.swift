@@ -18,6 +18,8 @@ public final class AuthSession {
     public private(set) var signOutError: KeychainError?
     public private(set) var isSigningOut = false
     public private(set) var isSessionExpired = false
+    /// Set for the rest of the launch once the migration dropped a session that may have belonged to several accounts.
+    public private(set) var droppedLegacySession = false
 
     @ObservationIgnored var migration: Task<Void, Never>?
 
@@ -65,13 +67,19 @@ public final class AuthSession {
             defaults.set(true, forKey: Self.migrationKey)
         case .signedIn:
             state = .signedOut
-            isSigningOut = true
-            migration = Task { @MainActor in
-                defer { isSigningOut = false }
-                await wipeWebData()
-                guard (try? keychain.delete()) != nil else { return }
-                defaults.set(true, forKey: Self.migrationKey)
-            }
+            dropLegacySession(deletingKeychain: true)
+        }
+    }
+
+    // The marker is written only once the Keychain item is gone; without that the next launch migrates again.
+    private func dropLegacySession(deletingKeychain: Bool) {
+        droppedLegacySession = true
+        isSigningOut = true
+        migration = Task { @MainActor in
+            defer { isSigningOut = false }
+            await wipeWebData()
+            guard deletingKeychain, (try? keychain.delete()) != nil else { return }
+            defaults.set(true, forKey: Self.migrationKey)
         }
     }
 
@@ -82,6 +90,8 @@ public final class AuthSession {
     public func continueAsGuest() {
         guard case .keychainUnavailable = state else { return }
         state = .signedOut
+        // The unread Keychain may hold a multi-account session whose cookies are still in WebKit; a sign-in would reuse them.
+        if !defaults.bool(forKey: Self.migrationKey) { dropLegacySession(deletingKeychain: false) }
     }
 
     // The state guard matters: a successful sign-in dismisses the sheet, which must not wipe the new session.

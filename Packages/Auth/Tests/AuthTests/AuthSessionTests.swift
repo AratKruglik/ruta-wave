@@ -220,6 +220,7 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
         #expect(fresh.object(forKey: "authUserIndex") == nil)
         #expect(!session.isSessionExpired)
         #expect(!session.isSigningOut)
+        #expect(session.droppedLegacySession)
     }
 
     @Test func migrationOfGuestOnlyWritesMarker() {
@@ -229,6 +230,7 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
         #expect(session.migration == nil)
         #expect(keychain.deleteCount == 0)
         #expect(fresh.bool(forKey: "singleAccountMigrated"))
+        #expect(!session.droppedLegacySession)
     }
 
     @Test func migratedSessionIsKept() throws {
@@ -268,5 +270,30 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
         await session.migration?.value
         #expect(keychain.deleteCount == 1)
         #expect(fresh.bool(forKey: "singleAccountMigrated"))
+    }
+
+    @Test func guestWithUnreadableKeychainWipesWebDataBeforeMigration() async {
+        let fresh = unmigratedDefaults()
+        let keychain = KeychainSpy()
+        keychain.readError = KeychainError(status: errSecInteractionNotAllowed)
+        let session = AuthSession(keychain: keychain, defaults: fresh)
+        session.continueAsGuest()
+        #expect(session.isSigningOut)
+        #expect(session.droppedLegacySession)
+        #expect(!session.completeSignIn(with: SessionCookies.requiredNames.map { makeCookie($0) }))
+        await session.migration?.value
+        #expect(!session.isSigningOut)
+        #expect(keychain.deleteCount == 0)
+        #expect(!fresh.bool(forKey: "singleAccountMigrated"))
+    }
+
+    @Test func guestWithUnreadableKeychainAfterMigrationSkipsWipe() {
+        let keychain = KeychainSpy()
+        keychain.readError = KeychainError(status: errSecInteractionNotAllowed)
+        let session = AuthSession(keychain: keychain, defaults: defaults)
+        session.continueAsGuest()
+        #expect(session.migration == nil)
+        #expect(!session.isSigningOut)
+        #expect(!session.droppedLegacySession)
     }
 }
