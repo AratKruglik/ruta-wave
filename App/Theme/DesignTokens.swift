@@ -97,6 +97,8 @@ enum Metrics {
     static let artworkSize: CGFloat = 40
     static let videoArtworkWidth: CGFloat = 71
     static let avatarSize: CGFloat = 32
+    static let miniPlayerWidth: CGFloat = 320
+    static let miniPlayerArtworkSize: CGFloat = 64
     static let playerBarCenterMaxWidth: CGFloat = 560
 
     static let chipHeight: CGFloat = 36

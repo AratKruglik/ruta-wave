@@ -967,6 +967,16 @@
         }
       }
     },
+    "Mini Player" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мініплеєр"
+          }
+        }
+      }
+    },
     "Moods & genres" : {
       "localizations" : {
         "uk" : {
