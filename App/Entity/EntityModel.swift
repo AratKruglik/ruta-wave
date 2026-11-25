@@ -209,17 +209,28 @@ final class EntityModel {
         }
     }
 
-    /// The row is not appended: its `playlistSetVideoId` is unknown here, and a row without it could not be removed or moved.
-    /// It shows up on the next load.
+    /// The new row is appended with the `setVideoId` from the response; a skipped duplicate appends nothing.
+    /// An empty response for a song not in the list means the response wasn't understood, so the page reloads.
+    /// shortcut: "not in the list" trusts `tracks` to be complete, which holds while Suggestions load only after the last page.
     func add(_ song: Song) {
         guard !isRetired, case .playlist(let browseId) = kind, let credentials = credentials() else { return }
         let captured = generation
         Task { [loader] in
             do {
-                _ = try await loader.edit(browseId, [.add(videoId: song.videoId)], credentials)
+                let added = try await loader.edit(browseId, [.add(videoId: song.videoId)], credentials)
                 guard generation == captured else { return }
-                update { $0.sections = $0.sections.removing(videoId: song.videoId) }
+                var needsReload = false
+                update { content in
+                    if let row = added.first(where: { $0.videoId == song.videoId }) {
+                        let newSong = song.withPlaylistSetVideoId(row.setVideoId)
+                        if seen.insert(newSong.rowKey).inserted { content.tracks.append(newSong) }
+                    } else if !content.tracks.contains(where: { $0.videoId == song.videoId }) {
+                        needsReload = true
+                    }
+                    content.sections = content.sections.removing(videoId: song.videoId)
+                }
                 toasts.show("Added to playlist")
+                if needsReload { retry() }
             } catch {
                 guard generation == captured else { return }
                 toasts.show("Couldn't add to the playlist")
@@ -289,10 +300,16 @@ final class EntityModel {
                     undo: { [weak self] in self?.restore(removed.map(\.element.videoId), placements: placements) })
             } catch {
                 guard generation == captured else { return }
-                update { $0.tracks = before }
+                rollBack(to: before)
                 toasts.show("Couldn't update the playlist")
             }
         }
+    }
+
+    /// Rows added from Suggestions while the edit was in flight stay at the end instead of vanishing until a reload.
+    private func rollBack(to before: [Song]) {
+        let known = Set(before.map(\.rowKey))
+        update { $0.tracks = before + $0.tracks.filter { !known.contains($0.rowKey) } }
     }
 
     /// For each removed row, the set id of the next row that survives; `nil` when nothing survives after it.
@@ -356,11 +373,11 @@ final class EntityModel {
                 guard generation == captured else { return }
                 toasts.show("Moved in playlist", undo: { [weak self] in
                     self?.send([.move(setVideoId: moving, before: successor)], failure: "Couldn't undo")
-                    self?.update { $0.tracks = before }
+                    self?.rollBack(to: before)
                 })
             } catch {
                 guard generation == captured else { return }
-                update { $0.tracks = before }
+                rollBack(to: before)
                 toasts.show("Couldn't update the playlist")
             }
         }

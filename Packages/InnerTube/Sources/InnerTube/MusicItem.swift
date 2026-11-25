@@ -85,6 +85,13 @@ public struct Song: Sendable, Equatable {
         self.rank = rank
         self.playlistSetVideoId = playlistSetVideoId
     }
+
+    /// For a row the add-to-playlist response just created.
+    public func withPlaylistSetVideoId(_ setVideoId: String) -> Song {
+        var song = self
+        song.playlistSetVideoId = setVideoId
+        return song
+    }
 }
 
 public struct Album: Sendable, Equatable {
