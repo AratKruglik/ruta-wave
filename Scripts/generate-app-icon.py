@@ -38,10 +38,10 @@ RINGS = [
 ]
 
 
-def ring_points(R: float, a: float, m: float, n: int = 720) -> list[tuple[float, float]]:
+def ring_points(R: float, a: float, m: float, n: int = 96) -> list[tuple[float, float]]:
     """r(φ) = R·(1 + a·((1−m)·cos 5(φ+π/2) + m·cos 3φ)): 5 petals up blended into 3 lobes pointing right."""
     points = []
-    for i in range(n + 1):
+    for i in range(n):
         phi = 2 * math.pi * i / n
         r = R * (1 + a * ((1 - m) * math.cos(5 * (phi + math.pi / 2)) + m * math.cos(3 * phi)))
         points.append((CENTER + r * math.cos(phi), CENTER + r * math.sin(phi)))
@@ -68,10 +68,21 @@ def centroid(points: list[tuple[float, float]]) -> tuple[float, float]:
     return sum(x for x, _ in points) / len(points), sum(y for _, y in points) / len(points)
 
 
-def svg(polygon_attrs: str, points: list[tuple[float, float]]) -> str:
-    coords = " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+def smooth_path(points: list[tuple[float, float]]) -> str:
+    """Closed Catmull-Rom spline as cubic Béziers: Liquid Glass shows a seam at every corner of a dense polyline."""
+    n = len(points)
+    d = [f"M{points[0][0]:.1f},{points[0][1]:.1f}"]
+    for i in range(n):
+        p0, p1, p2, p3 = points[i - 1], points[i], points[(i + 1) % n], points[(i + 2) % n]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        d.append(f"C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}")
+    return " ".join(d) + " Z"
+
+
+def svg(path_attrs: str, points: list[tuple[float, float]]) -> str:
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">'
-            f'<polygon points="{coords}" {polygon_attrs}/></svg>\n')
+            f'<path d="{smooth_path(points)}" {path_attrs}/></svg>\n')
 
 
 def write_icon(dest: Path) -> None:
