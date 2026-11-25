@@ -42,6 +42,7 @@ struct BridgeCallTests {
     @Test func swiftOnlyCommandsAreNotPageCalls() {
         #expect(PlayerRules.bridgeCall(for: .setLike(.like), queue: []) == nil)
         #expect(PlayerRules.bridgeCall(for: .load(videoId: "abc", playlistId: nil), queue: []) == nil)
+        #expect(PlayerRules.bridgeCall(for: .resume(videoId: "abc", playlistId: nil, at: 30), queue: []) == nil)
     }
 
     @Test func queueOperationsCarryRowIdentity() throws {
