@@ -445,14 +445,16 @@ struct EntityModelTests {
             Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
         }
         loader.edit = { _, _, _ in [AddedPlaylistRow(videoId: "x", setVideoId: "sx")] }
-        let model = makeModel(loader: loader, toasts: ToastCenter())
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
         await model.load()
         model.loadSections()
         #expect(await waitUntil { content(model)?.sections.count == 1 })
         model.add(song("x"))
-        #expect(await waitUntil { trackIds(model) == ["a", "x"] })
+        #expect(await waitUntil { trackIds(model) == ["a", "x"] && toasts.message != nil })
+        toasts.reset()
         model.add(song("x"))
-        try? await Task.sleep(for: .milliseconds(50))
+        #expect(await waitUntil { toasts.message != nil })
         #expect(trackIds(model) == ["a", "x"])
     }
 

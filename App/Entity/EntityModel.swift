@@ -222,7 +222,7 @@ final class EntityModel {
                 var needsReload = false
                 update { content in
                     if let row = added.first(where: { $0.videoId == song.videoId }) {
-                        let newSong = song.inPlaylist(setVideoId: row.setVideoId)
+                        let newSong = song.withPlaylistSetVideoId(row.setVideoId)
                         if seen.insert(newSong.rowKey).inserted { content.tracks.append(newSong) }
                     } else if !content.tracks.contains(where: { $0.videoId == song.videoId }) {
                         needsReload = true
@@ -537,15 +537,6 @@ final class EntityModel {
         guard case .loaded(var content) = state else { return }
         change(&content)
         state = .loaded(content)
-    }
-}
-
-private extension Song {
-    func inPlaylist(setVideoId: String) -> Song {
-        Song(
-            videoId: videoId, playlistId: playlistId, title: title, subtitle: subtitle, artists: artists, album: album,
-            duration: duration, thumbnailURL: thumbnailURL, isExplicit: isExplicit, isVideo: isVideo, rank: rank,
-            isAvailable: isAvailable, playlistSetVideoId: setVideoId)
     }
 }
 
