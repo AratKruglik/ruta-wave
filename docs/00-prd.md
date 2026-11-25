@@ -55,10 +55,18 @@ renamed build removes the session stores of the previous identifiers on launch,
 as row 0.3 did for Tunewave
 ([05 §2.4](05-risks-and-scope.md#2-legal-and-policy-constraints)).
 
-Not checked yet: whether "Rutawave" is free as a domain and as a registered
-trademark in software (class 9), including the Ukrainian register (УКРНОІВІ).
-"Chervona Ruta" is also the name of a well-known music festival; check that
-the name does not clash with its marks. Do it before the first public release.
+**Name check, 2026-11-25** ([#28](https://github.com/AratKruglik/yt-music-mac/issues/28)). This is a self-check, not legal advice.
+
+- **Domains:** `rutawave.com`, `.app`, `.dev`, `.net`, `.org`, `.io`, `.ua` and `.com.ua` are unregistered (WHOIS / RDAP).
+- **Trademarks:** "Rutawave" has no exact match in TMview, which covers EUIPO, the USPTO, WIPO, the UK, the Ukrainian register and other national offices. The УКРНОІВІ register (СІС) itself was also searched directly by keyword and has no match.
+- **Products:** no software, app or GitHub repository is called Rutawave (web search, the App Store, GitHub).
+- **Nearby marks to keep in mind:**
+  - *RUTA*, two pending applications in classes 9 and 42. EUIPO 019445038 is a figurative mark for software and SaaS, filed 2026-11-04, with opposition open until 2027-02-10. USPTO 98145984 is a word mark for field-service CRM software. Rutawave shares the prefix, but the whole word, the sound and the field (music client vs business software) differ, so the risk is judged low.
+  - *червона рута* is registered in Ukraine in class 9 (m202212262, owned by an individual, filed 2022-10-05).
+  - *червона ruta* is registered in Ukraine in classes 35, 38 and 41 (m201704221, ТОВ «МЮЗІКРАДІО»).
+  - *фестиваль червона рута* was filed in Ukraine in classes 35 and 41 (m202618337, 2026-09-04).
+  - Rutawave uses neither "червона"/"chervona" nor the festival's name, so it does not reproduce these marks; the reference stays in the backstory, not in the name, icon or copy.
+- **Not done:** registering "Rutawave" as a trademark or buying a domain is the owner's decision. Repeat the TMview search before release 0.1, because new applications appear weekly.
 
 ---
 
