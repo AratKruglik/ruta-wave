@@ -345,7 +345,7 @@ struct EntityModelTests {
             guard case .add(let videoId) = edits[0] else { return [] }
             calls.record("\(id) \(videoId)")
             if videoId == "y" { throw Failure() }
-            return []
+            return [AddedPlaylistRow(videoId: videoId, setVideoId: "s\(videoId)")]
         }
         let toasts = ToastCenter()
         let model = makeModel(loader: loader, toasts: toasts)
@@ -358,6 +358,63 @@ struct EntityModelTests {
         model.add(song("x"))
         #expect(await waitUntil { content(model)?.sections[0].items.count == 1 })
         #expect(calls.all == ["VLPL1 y", "VLPL1 x"])
+        #expect(trackIds(model) == ["a", "x"])
+        #expect(content(model)?.tracks.last?.playlistSetVideoId == "sx")
+    }
+
+    @Test func aFailedAddLeavesTracksAndSuggestionUnchanged() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a"], sections: "s1", owned: true) }
+        loader.sections = { _, _ in
+            Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
+        }
+        loader.edit = { _, _, _ in throw Failure() }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        model.loadSections()
+        #expect(await waitUntil { content(model)?.sections.count == 1 })
+        model.add(song("x"))
+        #expect(await waitUntil { toasts.message != nil })
+        #expect(trackIds(model) == ["a"])
+        #expect(content(model)?.sections[0].items.count == 1)
+    }
+
+    @Test func aRowAddedFromSuggestionsCanBeRemovedBySetVideoId() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a"], sections: "s1", owned: true) }
+        loader.sections = { _, _ in
+            Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
+        }
+        loader.edit = { _, edits, _ in
+            if case .add(let videoId) = edits[0] { return [AddedPlaylistRow(videoId: videoId, setVideoId: "s\(videoId)")] }
+            return []
+        }
+        let model = makeModel(loader: loader, toasts: ToastCenter())
+        await model.load()
+        model.loadSections()
+        #expect(await waitUntil { content(model)?.sections.count == 1 })
+        model.add(song("x"))
+        #expect(await waitUntil { trackIds(model) == ["a", "x"] })
+        model.removeRows(["sx"])
+        #expect(trackIds(model) == ["a"])
+    }
+
+    @Test func addingADuplicateSuggestionLeavesTheTracks() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a"], sections: "s1", owned: true) }
+        loader.sections = { _, _ in
+            Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
+        }
+        loader.edit = { _, _, _ in [] }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        model.loadSections()
+        #expect(await waitUntil { content(model)?.sections.count == 1 })
+        model.add(song("x"))
+        #expect(await waitUntil { toasts.message != nil })
+        #expect(content(model)?.sections[0].items.isEmpty == true)
         #expect(trackIds(model) == ["a"])
     }
 

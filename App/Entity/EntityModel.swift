@@ -209,16 +209,22 @@ final class EntityModel {
         }
     }
 
-    /// The row is not appended: its `playlistSetVideoId` is unknown here, and a row without it could not be removed or moved.
-    /// It shows up on the next load.
+    /// The new row is appended with the `setVideoId` from the response; a skipped duplicate appends nothing.
     func add(_ song: Song) {
         guard !isRetired, case .playlist(let browseId) = kind, let credentials = credentials() else { return }
         let captured = generation
         Task { [loader] in
             do {
-                _ = try await loader.edit(browseId, [.add(videoId: song.videoId)], credentials)
+                let added = try await loader.edit(browseId, [.add(videoId: song.videoId)], credentials)
                 guard generation == captured else { return }
-                update { $0.sections = $0.sections.removing(videoId: song.videoId) }
+                update { content in
+                    if let row = added.first(where: { $0.videoId == song.videoId }) {
+                        let newSong = song.inPlaylist(setVideoId: row.setVideoId)
+                        content.tracks.append(newSong)
+                        seen.insert(newSong.rowKey)
+                    }
+                    content.sections = content.sections.removing(videoId: song.videoId)
+                }
                 toasts.show("Added to playlist")
             } catch {
                 guard generation == captured else { return }
@@ -520,6 +526,15 @@ final class EntityModel {
         guard case .loaded(var content) = state else { return }
         change(&content)
         state = .loaded(content)
+    }
+}
+
+private extension Song {
+    func inPlaylist(setVideoId: String) -> Song {
+        Song(
+            videoId: videoId, playlistId: playlistId, title: title, subtitle: subtitle, artists: artists, album: album,
+            duration: duration, thumbnailURL: thumbnailURL, isExplicit: isExplicit, isVideo: isVideo, rank: rank,
+            isAvailable: isAvailable, playlistSetVideoId: setVideoId)
     }
 }
 
