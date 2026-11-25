@@ -360,8 +360,10 @@ final class NowPlayingModel {
         }
     }
 
-    /// Called when the content identity changes: ratings and a pending collection play belong to the old account.
+    /// Called when the content identity changes: ratings, a pending collection play and the track to resume belong to
+    /// the old account.
     func resetAccountState() {
+        preferences.lastPlayback = nil
         playTask?.cancel()
         playTask = nil
         resumesOnReconnect = false
