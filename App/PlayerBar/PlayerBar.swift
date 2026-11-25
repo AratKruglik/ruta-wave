@@ -2,11 +2,17 @@ import InnerTube
 import PlayerEngine
 import SwiftUI
 
+extension EnvironmentValues {
+    /// The `showDislikeButton` setting.
+    @Entry var showsDislikeButton = true
+}
+
 struct PlayerBar: View {
     @Binding var isPlayerPagePresented: Bool
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(NavigationModel.self) private var navigation
     @Environment(\.requestSignIn) private var requestSignIn
+    @Environment(\.showsDislikeButton) private var showsDislikeButton
     @State private var popover: ItemPopover?
 
     private var player: any PlayerControlling { nowPlaying.player }
@@ -115,10 +121,12 @@ struct PlayerBar: View {
                 symbol: player.like == .like ? "hand.thumbsup.fill" : "hand.thumbsup", size: Metrics.iconBar,
                 label: "Like", isOn: player.like == .like, action: nowPlaying.toggleLike)
                 .guestPrompt(isPresented: promptBinding(.like), reason: "Sign in to like songs", onSignIn: requestSignIn.perform)
-            BarIconButton(
-                symbol: player.like == .dislike ? "hand.thumbsdown.fill" : "hand.thumbsdown", size: Metrics.iconBar,
-                label: "Dislike", isOn: player.like == .dislike, action: nowPlaying.toggleDislike)
-                .guestPrompt(isPresented: promptBinding(.dislike), reason: "Sign in to dislike songs", onSignIn: requestSignIn.perform)
+            if showsDislikeButton {
+                BarIconButton(
+                    symbol: player.like == .dislike ? "hand.thumbsdown.fill" : "hand.thumbsdown", size: Metrics.iconBar,
+                    label: "Dislike", isOn: player.like == .dislike, action: nowPlaying.toggleDislike)
+                    .guestPrompt(isPresented: promptBinding(.dislike), reason: "Sign in to dislike songs", onSignIn: requestSignIn.perform)
+            }
             moreMenu
         }
     }

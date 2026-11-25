@@ -71,6 +71,9 @@ final class NowPlayingModel {
     @ObservationIgnored private var unavailableStreak = 0
     @ObservationIgnored private var syncsRepeat = false
     @ObservationIgnored private var syncsShuffle = false
+    @ObservationIgnored private var hasResumed = false
+    /// The position a resumed track is being brought back to; positions are not saved until the player reaches it.
+    @ObservationIgnored private var resumeTarget: LastPlayback?
     @ObservationIgnored var albumChanged: (@MainActor (_ videoId: String, _ album: String?) -> Void)?
 
     init(
@@ -122,6 +125,7 @@ final class NowPlayingModel {
             syncsShuffle = false
             if reported != preferences.shuffle { player.send(.toggleShuffle) }
         case .songChanged(let song):
+            rememberTrack(song)
             unavailableStreak = 0
             if skip?.videoId != song.videoId { cancelSkip() }
             // Loaded here rather than from a view, so Now Playing gets the album with every window closed (#82).
@@ -132,6 +136,10 @@ final class NowPlayingModel {
             detailsTask = nil
             details = nil
             detailsFailed = false
+        case .timeChanged(let elapsed):
+            rememberPosition(elapsed, force: false)
+        case .playbackChanged(let isPaused, let elapsed):
+            if isPaused { rememberPosition(elapsed, force: true) }
         case .queueChanged(let items):
             if let pending = pendingQueueChange, pending.isApplied(items) {
                 clearPendingQueueChange()
@@ -162,6 +170,41 @@ final class NowPlayingModel {
     private func cancelSkip() {
         skip?.task.cancel()
         skip = nil
+    }
+
+    /// Brings back the last session's track, paused where it was. Only the first player start of a launch does this,
+    /// so a restart for another account (#81) does not.
+    func resumeLastSession() {
+        guard !hasResumed else { return }
+        hasResumed = true
+        guard preferences.resumeOnStart, player.song == nil, let last = preferences.lastPlayback else { return }
+        resumeTarget = last
+        player.send(.resume(videoId: last.videoId, playlistId: last.playlistId, at: last.elapsed))
+    }
+
+    /// Saves the position as it is now, for quitting.
+    func savePosition() {
+        rememberPosition(player.elapsed, force: true)
+    }
+
+    private func rememberTrack(_ song: SongInfo) {
+        if let resumeTarget, resumeTarget.videoId != song.videoId { self.resumeTarget = nil }
+        let previous = preferences.lastPlayback
+        let elapsed = previous?.videoId == song.videoId ? previous?.elapsed ?? 0 : 0
+        preferences.lastPlayback = LastPlayback(videoId: song.videoId, playlistId: song.playlistId, elapsed: elapsed)
+    }
+
+    private func rememberPosition(_ elapsed: TimeInterval, force: Bool) {
+        guard !player.isAd, elapsed.isFinite, let song = player.song, var last = preferences.lastPlayback,
+              last.videoId == song.videoId else { return }
+        if let target = resumeTarget {
+            // The page starts every load at 0 before the seek lands; saving that would lose the position.
+            guard abs(elapsed - target.elapsed) < PlaybackRules.resumeTolerance else { return }
+            resumeTarget = nil
+        }
+        guard force || abs(elapsed - last.elapsed) >= PlaybackRules.positionSaveInterval else { return }
+        last.elapsed = elapsed
+        preferences.lastPlayback = last
     }
 
     func togglePlay() { perform(.togglePlay) }
@@ -204,6 +247,7 @@ final class NowPlayingModel {
 
     func perform(_ command: PlayerCommand) {
         cancelSkip()
+        resumeTarget = nil
         player.send(command)
     }
 

@@ -777,3 +777,105 @@ struct NetworkRecoveryTests {
         #expect(harness.player.sent.isEmpty)
     }
 }
+
+@MainActor
+struct ResumeOnStartTests {
+    private func playing(_ id: String, playlistId: String? = "PL1") -> SongInfo {
+        SongInfo(videoId: id, title: "T", artist: "A", duration: 300, playlistId: playlistId,
+                 url: URL(string: "https://music.youtube.com/watch?v=\(id)")!)
+    }
+
+    private func change(_ h: Harness, to song: SongInfo) async {
+        h.player.song = song
+        h.player.emit(.songChanged(song))
+        await h.settle()
+    }
+
+    @Test func resumesTheLastTrackPausedAtItsPosition() async {
+        var h = Harness()
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: "PL1", elapsed: 42)
+        await h.start()
+        h.model.resumeLastSession()
+        #expect(h.player.sent.last == .resume(videoId: "abc", playlistId: "PL1", at: 42))
+    }
+
+    @Test func resumesOnlyOncePerLaunch() async {
+        var h = Harness()
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: 42)
+        await h.start()
+        h.model.resumeLastSession()
+        h.model.resumeLastSession()
+        #expect(h.player.sent.filter { if case .resume = $0 { true } else { false } }.count == 1)
+    }
+
+    @Test func doesNotResumeWhenSwitchedOff() async {
+        var h = Harness()
+        h.preferences.resumeOnStart = false
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: 42)
+        await h.start()
+        h.model.resumeLastSession()
+        #expect(h.player.sent == [.setVolume(1)])
+    }
+
+    @Test func doesNotReplaceATrackThatIsAlreadyPlaying() async {
+        var h = Harness()
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: 42)
+        h.player.song = playing("xyz")
+        await h.start()
+        h.model.resumeLastSession()
+        #expect(h.player.sent == [.setVolume(1)])
+    }
+
+    @Test func remembersTheTrackAndItsPosition() async {
+        var h = Harness()
+        await h.start()
+        await change(h, to: playing("abc"))
+        #expect(h.preferences.lastPlayback == LastPlayback(videoId: "abc", playlistId: "PL1", elapsed: 0))
+        h.player.emit(.timeChanged(3))
+        await h.settle()
+        #expect(h.preferences.lastPlayback?.elapsed == 0, "saved every few seconds, not on every tick")
+        h.player.emit(.timeChanged(6))
+        await h.settle()
+        #expect(h.preferences.lastPlayback?.elapsed == 6)
+        h.player.emit(.playbackChanged(isPaused: true, elapsed: 7.5))
+        await h.settle()
+        #expect(h.preferences.lastPlayback?.elapsed == 7.5)
+        await change(h, to: playing("def", playlistId: nil))
+        #expect(h.preferences.lastPlayback == LastPlayback(videoId: "def", playlistId: nil, elapsed: 0))
+    }
+
+    @Test func savePositionWritesTheCurrentTime() async {
+        var h = Harness()
+        await h.start()
+        await change(h, to: playing("abc"))
+        h.player.elapsed = 12
+        h.model.savePosition()
+        #expect(h.preferences.lastPlayback?.elapsed == 12)
+    }
+
+    @Test func adTimeIsNotSaved() async {
+        var h = Harness()
+        await h.start()
+        await change(h, to: playing("abc"))
+        h.player.isAd = true
+        h.player.emit(.timeChanged(20))
+        await h.settle()
+        #expect(h.preferences.lastPlayback?.elapsed == 0)
+    }
+
+    @Test func positionBeforeTheResumeSeekIsNotSaved() async {
+        var h = Harness()
+        h.preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: "PL1", elapsed: 42)
+        await h.start()
+        h.model.resumeLastSession()
+        await change(h, to: playing("abc"))
+        #expect(h.preferences.lastPlayback?.elapsed == 42, "the resumed track keeps its saved position")
+        h.player.emit(.playbackChanged(isPaused: true, elapsed: 0.4))
+        await h.settle()
+        #expect(h.preferences.lastPlayback?.elapsed == 42)
+        h.player.emit(.playbackChanged(isPaused: true, elapsed: 42))
+        h.player.emit(.timeChanged(50))
+        await h.settle()
+        #expect(h.preferences.lastPlayback?.elapsed == 50)
+    }
+}

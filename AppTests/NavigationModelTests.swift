@@ -1,3 +1,4 @@
+import AppSettings
 import Foundation
 import Testing
 
@@ -285,5 +286,60 @@ struct NavigationModelTests {
             #expect(model.selection == .home)
             #expect(model.path(for: .explore).isEmpty)
         }
+    }
+}
+
+@MainActor
+struct StartingPageTests {
+    private func saved(build: (NavigationModel) -> Void) throws -> Data {
+        let model = NavigationModel()
+        build(model)
+        return try JSONEncoder().encode(model.snapshot(isSignedIn: true, authUserIndex: 0))
+    }
+
+    @Test func startingPageOpensAtTheRootOfItsSection() throws {
+        let data = try saved { model in
+            model.push(.album(browseId: "a"))
+            model.select(.explore)
+            model.push(.explore(.charts))
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0, startingPage: .home)
+        #expect(model.selection == .home)
+        #expect(model.path(for: .home).isEmpty)
+        #expect(model.path(for: .explore) == [.explore(.charts)], "other sections keep their stacks")
+    }
+
+    @Test func noStartingPageReopensTheLastSection() throws {
+        let data = try saved { model in
+            model.select(.explore)
+            model.push(.explore(.charts))
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0, startingPage: nil)
+        #expect(model.selection == .explore)
+        #expect(model.path(for: .explore) == [.explore(.charts)])
+    }
+
+    @Test func startingPageAppliesWithoutASnapshot() {
+        let model = NavigationModel.restored(from: nil, isSignedIn: true, authUserIndex: 0, startingPage: .library)
+        #expect(model.selection == .library)
+    }
+
+    @Test func guestStartingOnLibraryOpensHome() {
+        let model = NavigationModel.restored(from: nil, isSignedIn: false, authUserIndex: 0, startingPage: .library)
+        #expect(model.selection == .home)
+    }
+
+    @Test(arguments: SidebarSection.allCases)
+    func sectionPreferenceRoundTrips(_ section: SidebarSection) {
+        #expect(SidebarSection(preference: section.preference) == section)
+    }
+
+    @Test func preferenceValuesMatchTheSettingsStore() {
+        #expect(SidebarSection.allCases.map(\.preference) == Preferences.startingPages)
+    }
+
+    @Test func unknownStartingPageIsNil() {
+        #expect(SidebarSection(preference: "last") == nil)
+        #expect(SidebarSection(preference: nil) == nil)
     }
 }

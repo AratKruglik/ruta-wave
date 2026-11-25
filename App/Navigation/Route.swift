@@ -21,6 +21,20 @@ enum SidebarSection: CaseIterable, Hashable, Sendable, Codable {
 
     var filledSymbol: String { symbol + ".fill" }
 
+    /// The value stored as the `startingPage` preference.
+    var preference: String {
+        switch self {
+        case .home: "home"
+        case .explore: "explore"
+        case .library: "library"
+        }
+    }
+
+    init?(preference: String?) {
+        guard let section = Self.allCases.first(where: { $0.preference == preference }) else { return nil }
+        self = section
+    }
+
     var shortcutDigit: Character {
         switch self {
         case .home: "1"

@@ -16,6 +16,8 @@ public enum PlayerCommand: Sendable, Equatable {
     case removeQueueItem(index: Int)
     case moveQueueItem(from: Int, to: Int)
     case load(videoId: String, playlistId: String?)
+    /// Loads a track and holds it paused at `at` seconds, for bringing back the last session at launch.
+    case resume(videoId: String, playlistId: String?, at: TimeInterval)
     /// Reloads the current target after a network outage, keeping position and queue. Does nothing without a target.
     case recover
 }

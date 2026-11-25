@@ -37,14 +37,18 @@ struct RootView: View {
     @State private var guestAttempt = 0
     @State private var theme = ArtworkTheme()
     @State private var useArtworkColors = Preferences().useArtworkColors
+    @State private var alwaysOnTop = Preferences().alwaysOnTop
+    @State private var showsDislikeButton = Preferences().showDislikeButton
 
     init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor) {
         self.session = session
         self.nowPlaying = nowPlaying
         self.toasts = toasts
         self.network = network
+        let preferences = Preferences()
         _navigation = State(initialValue: .restored(
-            from: Preferences().navigationState, isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex))
+            from: preferences.navigationState, isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex,
+            startingPage: SidebarSection(preference: preferences.startingPage)))
         let client = InnerTubeClient()
         let searchLoader = SearchLoader.live(client)
         _browse = State(initialValue: BrowseStore(
@@ -79,11 +83,16 @@ struct RootView: View {
         .environment(\.requestSignIn, SignInRequest { isSigningIn = true })
         .environment(\.themeBase, theme.base)
         .environment(\.themeHeaderTop, theme.headerTop)
+        .environment(\.showsDislikeButton, showsDislikeButton)
+        .background(WindowLevel(isFloating: alwaysOnTop))
         .task(id: ThemeKey(artworkURL: nowPlaying.player.song?.artworkURL, isEnabled: useArtworkColors)) {
             await theme.update(artworkURL: useArtworkColors ? nowPlaying.player.song?.artworkURL : nil)
         }
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification).receive(on: DispatchQueue.main)) { _ in
-            useArtworkColors = Preferences().useArtworkColors
+            let preferences = Preferences()
+            useArtworkColors = preferences.useArtworkColors
+            alwaysOnTop = preferences.alwaysOnTop
+            showsDislikeButton = preferences.showDislikeButton
         }
         .onChange(of: session.state.isSignedIn) { _, signedIn in
             if signedIn {

@@ -36,6 +36,8 @@ public final class PlayerEngine {
     // Every page load brings back the volume the page's player bar stored, not the one set through the player.
     @ObservationIgnored var requestedVolume: Double?
     @ObservationIgnored var resumeQueue: [String] = []
+    /// Set by `resume`: the page autoplays every load, so playback is paused until the user starts it.
+    @ObservationIgnored var holdsPause = false
     // InnerTube writes the like; the hidden page keeps reporting its stale status for that track.
     @ObservationIgnored var ratedLike: (videoId: String, status: LikeStatus)?
     @ObservationIgnored var watchdog: Task<Void, Never>?
@@ -120,6 +122,7 @@ public final class PlayerEngine {
         target = nil
         resumeAt = nil
         resumeQueue = []
+        holdsPause = false
         ratedLike = nil
         committedAt = nil
         attempts = 0
@@ -153,7 +156,16 @@ public final class PlayerEngine {
         attempts = 0
         resumeAt = nil
         resumeQueue = []
+        holdsPause = false
         navigate(to: url, in: webView)
+    }
+
+    /// Like `load`, but the track stays paused at `time` instead of playing from the start.
+    public func resume(videoId: String, playlistId: String?, at time: TimeInterval) {
+        load(videoId: videoId, playlistId: playlistId)
+        guard target?.videoId == videoId else { return }
+        if time.isFinite, time > 0 { resumeAt = time }
+        holdsPause = true
     }
 
     public func send(_ command: PlayerCommand) {
@@ -164,9 +176,14 @@ public final class PlayerEngine {
         case .setLike(let status):
             setLike(status)
             return
+        case .resume(let videoId, let playlistId, let time):
+            resume(videoId: videoId, playlistId: playlistId, at: time)
+            return
         case .recover:
             recover()
             return
+        case .play, .togglePlay, .next, .previous, .playQueueItem:
+            holdsPause = false
         case .setVolume(let level) where level.isFinite:
             requestedVolume = min(max(level, 0), 1)
         default:
@@ -271,9 +288,18 @@ public final class PlayerEngine {
             isReady = true
             let event = emit(.ready)
             if let requestedVolume { send(.setVolume(requestedVolume)) }
+            if holdsPause { pauseHeldPlayback() }
             publishNowPlaying(nowPlaying)
             return event
         case .playback(let paused, let time):
+            if holdsPause {
+                if !paused {
+                    pauseHeldPlayback()
+                } else if resumeAt == nil, song?.videoId == target?.videoId {
+                    // The resumed track is committed, sought and paused: from here on the user decides.
+                    holdsPause = false
+                }
+            }
             isPaused = paused
             elapsed = time
             if !isAd { position = time }
@@ -331,6 +357,11 @@ public final class PlayerEngine {
             }
             return nil
         }
+    }
+
+    private func pauseHeldPlayback() {
+        guard let webView, isReady, let call = PlayerRules.bridgeCall(for: .pause, queue: queue) else { return }
+        run(call, in: webView)
     }
 
     func commit(_ newSong: SongInfo) {

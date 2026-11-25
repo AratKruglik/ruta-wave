@@ -181,6 +181,16 @@
         }
       }
     },
+    "Allow Rutawave in Login Items to open it at login." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозвольте Rutawave в «Об’єктах входу», щоб програма відкривалася під час входу."
+          }
+        }
+      }
+    },
     "Already in %@" : {
       "localizations" : {
         "uk" : {
@@ -387,6 +397,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося додати до черги"
+          }
+        }
+      }
+    },
+    "Couldn't change the login item" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося змінити об’єкт входу"
           }
         }
       }
@@ -737,6 +757,16 @@
         }
       }
     },
+    "General" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загальні"
+          }
+        }
+      }
+    },
     "Go" : {
       "localizations" : {
         "uk" : {
@@ -797,12 +827,32 @@
         }
       }
     },
+    "Keep the window on top" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тримати вікно поверх інших"
+          }
+        }
+      }
+    },
     "Language" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мова"
+          }
+        }
+      }
+    },
+    "Last page" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остання відкрита"
           }
         }
       }
@@ -923,16 +973,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Більше дій"
-          }
-        }
-      }
-    },
-    "More settings are coming." : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Інші налаштування з’являться згодом."
           }
         }
       }
@@ -1187,6 +1227,36 @@
         }
       }
     },
+    "Open at login" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкривати під час входу в систему"
+          }
+        }
+      }
+    },
+    "Open Login Items" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити «Об’єкти входу»"
+          }
+        }
+      }
+    },
+    "Open on" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стартова сторінка"
+          }
+        }
+      }
+    },
     "Open player page" : {
       "localizations" : {
         "uk" : {
@@ -1283,6 +1353,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Грати наступною"
+          }
+        }
+      }
+    },
+    "Playback" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворення"
           }
         }
       }
@@ -1589,6 +1669,16 @@
         }
       }
     },
+    "Resume the last track at launch" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжувати останній трек після запуску"
+          }
+        }
+      }
+    },
     "Retry" : {
       "localizations" : {
         "uk" : {
@@ -1785,6 +1875,16 @@
         }
       }
     },
+    "Show the dislike button" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показувати кнопку «Не подобається»"
+          }
+        }
+      }
+    },
     "Showing results for %@" : {
       "localizations" : {
         "uk" : {
@@ -1935,6 +2035,16 @@
         }
       }
     },
+    "Signed in as" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ви ввійшли як"
+          }
+        }
+      }
+    },
     "Skip by %lld s" : {
       "shouldTranslate" : false
     },
@@ -2044,6 +2154,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Плейлист, імовірно, створено"
+          }
+        }
+      }
+    },
+    "The track opens paused where you stopped." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трек відкривається на паузі там, де ви зупинилися."
           }
         }
       }
@@ -2283,6 +2403,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Гучніше"
+          }
+        }
+      }
+    },
+    "You're not signed in. Sign in from the main window to like songs and see your library." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ви не ввійшли. Увійдіть у головному вікні, щоб ставити вподобання й бачити свою бібліотеку."
           }
         }
       }
