@@ -52,7 +52,7 @@ private struct GeneralSettings: View {
                     HStack {
                         Text("Restart Rutawave to apply the language.")
                             .font(.rwCaption)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(.secondary)
                         Button("Restart now", action: restart)
                     }
                 }
@@ -69,13 +69,16 @@ private struct GeneralSettings: View {
                     HStack {
                         Text("Allow Rutawave in Login Items to open it at login.")
                             .font(.rwCaption)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: Metrics.space8)
                         Button("Open Login Items") { SMAppService.openSystemSettingsLoginItems() }
+                            .fixedSize()
                     }
                 } else if launchAtLogin.failed {
                     Text("Couldn't change the login item")
                         .font(.rwCaption)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             Section {
@@ -175,8 +178,11 @@ private struct PlaybackSettings: View {
                 HStack {
                     Text("Notifications are off in System Settings.")
                         .font(.rwCaption)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: Metrics.space8)
                     Button("Open Notification Settings", action: openNotificationSettings)
+                        .fixedSize()
                 }
             }
         }
@@ -213,7 +219,7 @@ private struct AccountSettings: View {
                     LabeledContent("Signed in as") {
                         VStack(alignment: .trailing) {
                             Text(verbatim: info.name)
-                            if let handle = info.handle { Text(verbatim: handle).foregroundStyle(.textSecondary) }
+                            if let handle = info.handle { Text(verbatim: handle).foregroundStyle(.secondary) }
                         }
                     }
                 case .failed:
@@ -223,7 +229,7 @@ private struct AccountSettings: View {
                     .disabled(session.isSigningOut)
             } else {
                 Text("You're not signed in. Sign in from the main window to like songs and see your library.")
-                    .foregroundStyle(.textSecondary)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)

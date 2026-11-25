@@ -44,8 +44,12 @@ struct EntityScreen: View {
                     case .playlist(let playlist): playlistBody(playlist, content)
                     }
                 }
-                .padding(.vertical, padding)
-                .background(alignment: .top) { if !isArtist { ThemeHeaderGradient() } }
+                .padding(.bottom, padding)
+                // The artist photo runs under the bar to the window top, like the header gradient of the other pages.
+                .padding(.top, isArtist ? -Metrics.topBarHeight : padding)
+                .background(alignment: .top) {
+                    if !isArtist { ThemeHeaderGradient().padding(.top, -Metrics.topBarHeight) }
+                }
             }
             .trackSelection(
                 $selection, songs: selectableSongs(content), onRemove: model.canEdit ? { model.removeRows($0) } : nil,
