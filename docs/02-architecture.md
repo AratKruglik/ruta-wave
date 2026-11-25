@@ -349,7 +349,7 @@ Principles:
 | Media keys, headphones | Media Session action handlers → `PlayerEvent.remoteCommand` |
 | Track-change notifications | `UNUserNotificationCenter` with artwork |
 | App menu | SwiftUI `Commands` |
-| Menu bar item | `MenuBarExtra` |
+| Menu bar item | AppKit `NSStatusItem` (`StatusMenu`): click-to-play needs the click itself, and `MenuBarExtra` has no API for it |
 | Dock menu | `NSApplicationDelegate.applicationDockMenu` |
 | Global hotkeys | Carbon `RegisterEventHotKey` (no Accessibility permission needed) |
 | Launch at login | `SMAppService.mainApp` |
@@ -380,7 +380,8 @@ A typed wrapper over `UserDefaults`. Mapping to the original's options:
 | `startingPage` | `startingPage` (a sidebar section) |
 | `alwaysOnTop` | `alwaysOnTop` |
 | `startAtLogin` | `SMAppService` |
-| `tray`, `trayClickPlayPause`, `appVisible` | `showMenuBarExtra`, `menuBarClickTogglesPlay`, `hideDockIcon` |
+| `tray`, `trayClickPlayPause`, `appVisible` | `showMenuBarExtra`, `menuBarClickTogglesPlay`, `hideDockIcon` (needs `showMenuBarExtra`; the Dock icon returns when the menu bar item is switched off) |
+| `plugins.notifications.enabled` (6.1, #32) | `trackNotifications` (on by default) until the plugin system takes it over |
 | `language` | `appLanguage`: `system` (default), `en`, `uk`; written as `AppleLanguages` in the app's defaults domain (removed for `system`); applies after a relaunch |
 | `proxy` | system proxy; no separate option |
 | `likeButtons`, `swapLikeButtonsOrder` | `showDislikeButton` |

@@ -10,7 +10,10 @@ import WebKit
 final class PlayerWindow {
     private let window: NSWindow
 
-    init(session: AuthSession, player: PlayerEngine, onStarted: @escaping @MainActor () -> Void) {
+    init(
+        session: AuthSession, player: PlayerEngine, onStarted: @escaping @MainActor () -> Void,
+        onIdentityChange: @escaping @MainActor () -> Void
+    ) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1, height: 1), styleMask: .borderless, backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.isRestorable = false
@@ -20,7 +23,7 @@ final class PlayerWindow {
         window.backgroundColor = .clear
         window.hasShadow = false
         window.collectionBehavior = [.transient, .ignoresCycle, .canJoinAllSpaces]
-        window.contentView = NSHostingView(rootView: PlayerHostView(session: session, player: player, onStarted: onStarted))
+        window.contentView = NSHostingView(rootView: PlayerHostView(session: session, player: player, onStarted: onStarted, onIdentityChange: onIdentityChange))
         window.orderBack(nil)
     }
 }
@@ -29,11 +32,13 @@ private struct PlayerHostView: View {
     let session: AuthSession
     let player: PlayerEngine
     let onStarted: @MainActor () -> Void
+    let onIdentityChange: @MainActor () -> Void
 
     var body: some View {
         PlayerHost(engine: player)
             .frame(width: 1, height: 1)
             .onChange(of: session.state.isSignedIn) { InnerTubeClient.resetGuestVisitor() }
+            .onChange(of: session.contentIdentity) { onIdentityChange() }
             .task(id: PlayerSession(session)) { await startPlayer() }
     }
 

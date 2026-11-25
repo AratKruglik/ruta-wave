@@ -142,6 +142,33 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(newValue, forKey: Key.showDislikeButton) }
     }
 
+    /// Adds a status item to the menu bar. Off unless switched on.
+    public var showMenuBarExtra: Bool {
+        get { defaults.bool(forKey: Key.showMenuBarExtra) }
+        nonmutating set {
+            defaults.set(newValue, forKey: Key.showMenuBarExtra)
+            if !newValue { defaults.removeObject(forKey: Key.hideDockIcon) }
+        }
+    }
+
+    /// A left click on the menu bar item plays or pauses instead of opening the menu.
+    public var menuBarClickTogglesPlay: Bool {
+        get { defaults.bool(forKey: Key.menuBarClickTogglesPlay) }
+        nonmutating set { defaults.set(newValue, forKey: Key.menuBarClickTogglesPlay) }
+    }
+
+    /// Needs the menu bar item, so the app can never end up with neither: the getter ignores a stored `true` without it.
+    public var hideDockIcon: Bool {
+        get { defaults.bool(forKey: Key.hideDockIcon) && showMenuBarExtra }
+        nonmutating set { defaults.set(newValue, forKey: Key.hideDockIcon) }
+    }
+
+    /// Posts a notification when the track changes. On unless switched off; moves to `plugins.notifications.enabled` in 6.1 (#32).
+    public var trackNotifications: Bool {
+        get { defaults.object(forKey: Key.trackNotifications) == nil ? true : defaults.bool(forKey: Key.trackNotifications) }
+        nonmutating set { defaults.set(newValue, forKey: Key.trackNotifications) }
+    }
+
     public static let maxNavigationStateBytes = 64 * 1024
     public static let startingPages: [String] = ["home", "explore", "library"]
 
@@ -195,6 +222,10 @@ public struct Preferences: @unchecked Sendable {
         static let startingPage = "startingPage"
         static let alwaysOnTop = "alwaysOnTop"
         static let showDislikeButton = "showDislikeButton"
+        static let showMenuBarExtra = "showMenuBarExtra"
+        static let menuBarClickTogglesPlay = "menuBarClickTogglesPlay"
+        static let hideDockIcon = "hideDockIcon"
+        static let trackNotifications = "trackNotifications"
     }
 }
 

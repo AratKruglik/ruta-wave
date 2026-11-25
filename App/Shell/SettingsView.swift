@@ -3,6 +3,7 @@ import AppSettings
 import Auth
 import ServiceManagement
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     let session: AuthSession
@@ -27,6 +28,9 @@ private struct GeneralSettings: View {
     @State private var alwaysOnTop = Preferences().alwaysOnTop
     @State private var useArtworkColors = Preferences().useArtworkColors
     @State private var launchAtLogin = LaunchAtLogin()
+    @State private var showMenuBarExtra = Preferences().showMenuBarExtra
+    @State private var menuBarClickTogglesPlay = Preferences().menuBarClickTogglesPlay
+    @State private var hideDockIcon = Preferences().hideDockIcon
 
     private let preferences = Preferences()
 
@@ -75,6 +79,16 @@ private struct GeneralSettings: View {
                 }
             }
             Section {
+                Toggle("Show in the menu bar", isOn: $showMenuBarExtra)
+                Toggle("Click the menu bar icon to play or pause", isOn: $menuBarClickTogglesPlay)
+                    .disabled(!showMenuBarExtra)
+                Toggle(isOn: $hideDockIcon) {
+                    Text("Hide the Dock icon")
+                    Text("Needs the menu bar icon. Open the window from its menu.")
+                }
+                .disabled(!showMenuBarExtra)
+            }
+            Section {
                 Toggle("Keep the window on top", isOn: $alwaysOnTop)
                 Toggle("Use artwork colours", isOn: $useArtworkColors)
             }
@@ -83,6 +97,12 @@ private struct GeneralSettings: View {
         .fixedSize(horizontal: false, vertical: true)
         .onChange(of: language) { _, newValue in preferences.appLanguage = newValue }
         .onChange(of: startingPage) { _, newValue in preferences.startingPage = newValue }
+        .onChange(of: showMenuBarExtra) { _, newValue in
+            preferences.showMenuBarExtra = newValue
+            if !newValue { hideDockIcon = false }
+        }
+        .onChange(of: menuBarClickTogglesPlay) { _, newValue in preferences.menuBarClickTogglesPlay = newValue }
+        .onChange(of: hideDockIcon) { _, newValue in preferences.hideDockIcon = newValue }
         .onChange(of: alwaysOnTop) { _, newValue in preferences.alwaysOnTop = newValue }
         .onChange(of: useArtworkColors) { _, newValue in preferences.useArtworkColors = newValue }
         // The user can switch the login item off in System Settings while this window is open.
@@ -125,8 +145,20 @@ private final class LaunchAtLogin {
     }
 }
 
+/// The system owns this permission, so it is read from the notification centre rather than stored.
+@MainActor @Observable
+private final class NotificationPermission {
+    private(set) var isDenied = false
+
+    func refresh() async {
+        isDenied = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
+    }
+}
+
 private struct PlaybackSettings: View {
     @State private var resumeOnStart = Preferences().resumeOnStart
+    @State private var trackNotifications = Preferences().trackNotifications
+    @State private var permission = NotificationPermission()
     @State private var showDislikeButton = Preferences().showDislikeButton
 
     private let preferences = Preferences()
@@ -138,11 +170,32 @@ private struct PlaybackSettings: View {
                 Text("The track opens paused where you stopped.")
             }
             Toggle("Show the dislike button", isOn: $showDislikeButton)
+            Toggle("Notify when the track changes", isOn: $trackNotifications)
+            if trackNotifications, permission.isDenied {
+                HStack {
+                    Text("Notifications are off in System Settings.")
+                        .font(.rwCaption)
+                        .foregroundStyle(.textSecondary)
+                    Button("Open Notification Settings", action: openNotificationSettings)
+                }
+            }
         }
         .formStyle(.grouped)
         .fixedSize(horizontal: false, vertical: true)
         .onChange(of: resumeOnStart) { _, newValue in preferences.resumeOnStart = newValue }
         .onChange(of: showDislikeButton) { _, newValue in preferences.showDislikeButton = newValue }
+        .onChange(of: trackNotifications) { _, newValue in preferences.trackNotifications = newValue }
+        .task { await permission.refresh() }
+        // The user can change the permission in System Settings while this window is open.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await permission.refresh() }
+        }
+    }
+
+    private func openNotificationSettings() {
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(bundleId)") else { return }
+        NSWorkspace.shared.open(url)
     }
 }
 

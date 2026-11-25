@@ -1,12 +1,15 @@
 import Auth
+import AppSettings
 import InnerTube
 import PlayerEngine
 import SwiftUI
 import SystemKit
+import UserNotifications
 
 @main
 struct RutawaveApp: App {
     @NSApplicationDelegateAdaptor private var app: AppDelegate
+    @Environment(\.openWindow) private var openWindow
 
     init() {
         // SecItemDelete can block on a Keychain prompt for the old binary's item, so this must stay off the main actor.
@@ -15,7 +18,9 @@ struct RutawaveApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        // The delegate needs the action to reopen the window with none open, and only a scene can hand it out.
+        let _ = app.openMainWindow = { openWindow(id: AppDelegate.mainWindowId) }
+        WindowGroup(id: AppDelegate.mainWindowId) {
             RootView(session: app.session, nowPlaying: app.nowPlaying, toasts: app.toasts, network: app.network)
         }
         .windowStyle(.hiddenTitleBar)
@@ -39,7 +44,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let toasts: ToastCenter
     let nowPlaying: NowPlayingModel
     let systemNowPlaying: SystemNowPlaying
+    let trackNotifier: TrackNotifier
     let network = NetworkMonitor()
+    static let mainWindowId = "main"
+    var openMainWindow: (() -> Void)?
+    private var statusMenu: StatusMenu?
     private var playerWindow: PlayerWindow?
 
     override init() {
@@ -54,17 +63,97 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             send: { [nowPlaying] in nowPlaying.perform($0) }, publish: { [player] in player.publishNowPlaying($0) })
         nowPlaying.albumChanged = { systemNowPlaying.setAlbum($1, for: $0) }
         self.systemNowPlaying = systemNowPlaying
+        trackNotifier = TrackNotifier(
+            posting: UserNotificationPosting(), isEnabled: { Preferences().trackNotifications }, isFrontmost: { NSApp.isActive })
         super.init()
+        statusMenu = StatusMenu(nowPlaying: nowPlaying) { [weak self] in self?.showMainWindow() }
+    }
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        applyPresentation()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        playerWindow = PlayerWindow(session: session, player: player) { [nowPlaying] in nowPlaying.resumeLastSession() }
+        let preferences = Preferences()
+        if preferences.resumeOnStart, let videoId = preferences.lastPlayback?.videoId {
+            trackNotifier.skipRestored(videoId: videoId)
+        }
+        UNUserNotificationCenter.current().delegate = self
+        playerWindow = PlayerWindow(
+            session: session, player: player,
+            onStarted: { [nowPlaying] in nowPlaying.resumeLastSession() },
+            onIdentityChange: { [nowPlaying, toasts] in
+                nowPlaying.resetAccountState()
+                toasts.reset()
+            })
         network.start()
         Task { await nowPlaying.run() }
         Task { await systemNowPlaying.run(player.events()) }
+        Task { await trackNotifier.run(player.events()) }
+        Task {
+            for await _ in NotificationCenter.default.notifications(named: UserDefaults.didChangeNotification) {
+                applyPresentation(revealsOnPolicyChange: true)
+            }
+        }
+    }
+
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        NSApp.activationPolicy() == .accessory ? nil : statusMenu?.dockMenu()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         nowPlaying.savePosition()
+    }
+
+    func showMainWindow() {
+        NSApp.activate()
+        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue.hasPrefix(Self.mainWindowId) == true }) {
+            if window.isMiniaturized { window.deminiaturize(nil) }
+            window.makeKeyAndOrderFront(nil)
+        } else {
+            openMainWindow?()
+        }
+    }
+
+    private func applyPresentation(revealsOnPolicyChange: Bool = false) {
+        let preferences = Preferences()
+        statusMenu?.setVisible(preferences.showMenuBarExtra)
+        let policy: NSApplication.ActivationPolicy = preferences.hideDockIcon ? .accessory : .regular
+        guard NSApp.activationPolicy() != policy else { return }
+        NSApp.setActivationPolicy(policy)
+        // Switching to .accessory deactivates the app, so the window the user is looking at would disappear.
+        if revealsOnPolicyChange { showMainWindow() }
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse
+    ) async {
+        await MainActor.run { showMainWindow() }
+    }
+}
+
+struct UserNotificationPosting: NotificationPosting {
+    func authorizationStatus() async -> NotificationAuthorization {
+        switch await UNUserNotificationCenter.current().notificationSettings().authorizationStatus {
+        case .notDetermined: .notDetermined
+        case .denied: .denied
+        default: .authorized
+        }
+    }
+
+    func requestAuthorization() async -> Bool {
+        (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert])) ?? false
+    }
+
+    func post(identifier: String, title: String, body: String, attachmentURL: URL?) async {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        if let attachmentURL, let attachment = try? UNNotificationAttachment(identifier: "artwork", url: attachmentURL) {
+            content.attachments = [attachment]
+        }
+        try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil))
     }
 }
