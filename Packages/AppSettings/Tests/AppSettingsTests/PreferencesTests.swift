@@ -188,4 +188,26 @@ struct PreferencesTests {
         #expect(preferences.alwaysOnTop)
         #expect(!preferences.showDislikeButton)
     }
+
+    @Test func menuBarAndNotificationDefaults() {
+        let (preferences, _) = makePreferences()
+        #expect(!preferences.showMenuBarExtra)
+        #expect(!preferences.menuBarClickTogglesPlay)
+        #expect(!preferences.hideDockIcon)
+        #expect(preferences.trackNotifications)
+        preferences.trackNotifications = false
+        #expect(!preferences.trackNotifications)
+    }
+
+    @Test func dockIconStaysVisibleWithoutTheMenuBarItem() {
+        let (preferences, defaults) = makePreferences()
+        defaults.set(true, forKey: "hideDockIcon")
+        #expect(!preferences.hideDockIcon, "a hand-edited value cannot hide both")
+        preferences.showMenuBarExtra = true
+        preferences.hideDockIcon = true
+        #expect(preferences.hideDockIcon)
+        preferences.showMenuBarExtra = false
+        #expect(!preferences.hideDockIcon)
+        #expect(defaults.object(forKey: "hideDockIcon") == nil)
+    }
 }

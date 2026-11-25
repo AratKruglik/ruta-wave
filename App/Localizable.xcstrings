@@ -301,6 +301,16 @@
         }
       }
     },
+    "Click the menu bar icon to play or pause" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Клік по значку в рядку меню — відтворити чи пауза"
+          }
+        }
+      }
+    },
     "Close player page" : {
       "localizations" : {
         "uk" : {
@@ -807,6 +817,16 @@
         }
       }
     },
+    "Hide the Dock icon" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сховати значок у Dock"
+          }
+        }
+      }
+    },
     "History" : {
       "localizations" : {
         "uk" : {
@@ -1027,6 +1047,16 @@
         }
       }
     },
+    "Needs the menu bar icon. Open the window from its menu." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Потрібен значок у рядку меню. Відкрийте вікно з його меню."
+          }
+        }
+      }
+    },
     "New albums and singles will show up here as they come out." : {
       "localizations" : {
         "uk" : {
@@ -1137,6 +1167,16 @@
         }
       }
     },
+    "Not playing" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нічого не грає"
+          }
+        }
+      }
+    },
     "Nothing from this artist yet" : {
       "localizations" : {
         "uk" : {
@@ -1183,6 +1223,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Наразі нічого переглядати"
+          }
+        }
+      }
+    },
+    "Notifications are off in System Settings." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сповіщення вимкнено в Системних параметрах."
+          }
+        }
+      }
+    },
+    "Notify when the track changes" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сповіщати про зміну треку"
           }
         }
       }
@@ -1243,6 +1303,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Відкрити «Об’єкти входу»"
+          }
+        }
+      }
+    },
+    "Open Notification Settings" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити параметри сповіщень"
           }
         }
       }
@@ -1515,6 +1585,16 @@
     },
     "Queue (%lld)" : {
       "shouldTranslate" : false
+    },
+    "Quit Rutawave" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вийти з Rutawave"
+          }
+        }
+      }
     },
     "Radio" : {
       "localizations" : {
@@ -1865,12 +1945,32 @@
         }
       }
     },
+    "Show in the menu bar" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показувати в рядку меню"
+          }
+        }
+      }
+    },
     "Show remaining time" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Показати час, що залишився"
+          }
+        }
+      }
+    },
+    "Show Rutawave" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати Rutawave"
           }
         }
       }

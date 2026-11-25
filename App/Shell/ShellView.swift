@@ -116,7 +116,10 @@ struct ShellView<AccountPopover: View>: View {
             SectionRoot(section: navigation.selection, isSignedIn: isSignedIn)
                 .navigationDestination(for: Route.self) {
                     // Pushed pages are hosted outside the stack's modifiers, so they need the bar inset of their own.
-                    RouteScreen(route: $0).contentMargins(.bottom, barInset, for: .scrollContent)
+                    RouteScreen(route: $0)
+                        .contentMargins(.bottom, barInset, for: .scrollContent)
+                        .safeAreaPadding(.top, Metrics.topBarHeight)
+                        .ignoresSafeArea(.container, edges: .top)
                 }
         }
         .id(StackIdentity(section: navigation.selection, content: identity))

@@ -106,10 +106,8 @@ struct RootView: View {
             browse.reset()
             searchField.reset()
             navigation.dropIdentityRoutes()
-            nowPlaying.resetAccountState()
             trackTabs.reset()
             guest.reset()
-            toasts.reset()
             isNewPlaylistPresented = false
         }
         .onChange(of: navigation.snapshot(isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex)) { _, snapshot in

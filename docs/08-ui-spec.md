@@ -518,7 +518,7 @@ One at a time; a new one replaces the old.
 | ⌫ | remove selected rows (queue, own playlist) |
 | Esc | close dropdown / player page / selection |
 
-All shortcuts appear in the app menu (stage 5.2) so they are discoverable.
+All shortcuts appear in the app menu (stage 5.2), except the focus-dependent Space, Return, ⌫ and Esc, which act on the focused control and stay in the window's key handling.
 
 ### 14.4. Accessibility
 - Every control has a VoiceOver label; icon buttons also have a tooltip.
