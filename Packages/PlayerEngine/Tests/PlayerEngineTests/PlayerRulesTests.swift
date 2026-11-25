@@ -92,11 +92,16 @@ struct PlayerRulesTests {
     }
 
     @Test(arguments: [
-        ["action": "seekforward"], ["action": "seekto"], ["action": "seekto", "time": -1.0],
+        ["action": "seekto"], ["action": "seekto", "time": -1.0],
         ["action": "seekto", "time": Double.infinity], ["action": "seekto", "time": "5"], ["time": 1.0],
     ] as [[String: any Sendable]])
     func remoteCommandRefusesUnknownOrInvalid(_ body: [String: any Sendable]) {
         #expect(PlayerRules.remoteCommand(from: body) == nil)
+    }
+
+    @Test(arguments: ["seekbackward", "seekforward"])
+    func remoteCommandDropsSkipActions(_ action: String) {
+        #expect(PlayerRules.remoteCommand(from: ["action": action]) == nil)
     }
 
     @Test func remoteCommandRefusesNonDictionary() {

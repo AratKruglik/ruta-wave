@@ -114,10 +114,13 @@ start it, and control playback and the queue without touching the web interface.
 
 ## Stage 5. macOS integration
 
-- [ ] `MPNowPlayingInfoCenter`: title, artist, album, artwork, position.
-- [ ] `MPRemoteCommandCenter`: play, pause, next, previous, seek.
-- [ ] Check for a conflict with WebKit's own Now Playing; disable Media Session
-      on the page if needed.
+- [x] Now Playing through the page's Media Session, driven from an isolated
+      `WKContentWorld`: title, artist, album, artwork, position.
+- [x] Media keys and headphones through Media Session action handlers: play,
+      pause, next, previous, seek to a position. Skip ±10 s is not offered
+      (02 §8).
+- [x] WebKit Media Session conflict: the page's own Media Session is blocked at
+      document start, so there is a single entry (risk 5).
 - [ ] Track-change notifications with artwork (can be turned off in settings).
 - [ ] App menu: Playback, View, Go.
 - [ ] Menu bar item with mini controls.

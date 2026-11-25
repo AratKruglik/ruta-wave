@@ -3,6 +3,7 @@
   const session = navigator.mediaSession;
   if (!session) return;
   const post = (action, time) => window.webkit.messageHandlers.nowPlaying.postMessage({ action, time });
+  // No seekbackward/seekforward: macOS can swap next/previous for ±10 s buttons (ARCH §8).
   const register = () => {
     for (const action of ['play', 'pause', 'previoustrack', 'nexttrack']) {
       session.setActionHandler(action, () => post(action));
