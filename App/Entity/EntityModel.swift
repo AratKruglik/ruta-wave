@@ -300,10 +300,16 @@ final class EntityModel {
                     undo: { [weak self] in self?.restore(removed.map(\.element.videoId), placements: placements) })
             } catch {
                 guard generation == captured else { return }
-                update { $0.tracks = before }
+                rollBack(to: before)
                 toasts.show("Couldn't update the playlist")
             }
         }
+    }
+
+    /// Rows added from Suggestions while the edit was in flight stay at the end instead of vanishing until a reload.
+    private func rollBack(to before: [Song]) {
+        let known = Set(before.map(\.rowKey))
+        update { $0.tracks = before + $0.tracks.filter { !known.contains($0.rowKey) } }
     }
 
     /// For each removed row, the set id of the next row that survives; `nil` when nothing survives after it.
@@ -367,11 +373,11 @@ final class EntityModel {
                 guard generation == captured else { return }
                 toasts.show("Moved in playlist", undo: { [weak self] in
                     self?.send([.move(setVideoId: moving, before: successor)], failure: "Couldn't undo")
-                    self?.update { $0.tracks = before }
+                    self?.rollBack(to: before)
                 })
             } catch {
                 guard generation == captured else { return }
-                update { $0.tracks = before }
+                rollBack(to: before)
                 toasts.show("Couldn't update the playlist")
             }
         }

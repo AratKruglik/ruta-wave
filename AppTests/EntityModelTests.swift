@@ -42,11 +42,11 @@ private func artistPage(subscribed: Bool? = false, channel: String? = "UCchan") 
         shuffle: WatchTarget(playlistId: "RDshuffle"), radio: nil, shelves: [], description: nil, viewCountText: nil)
 }
 
-private func ownPage(_ ids: [String], privacy: PlaylistPrivacy? = .private) -> PlaylistPage {
+private func ownPage(_ ids: [String], privacy: PlaylistPrivacy? = .private, sections: String? = nil) -> PlaylistPage {
     PlaylistPage(
         header: PageHeader(title: "Mine", description: "d"),
         tracks: Page(items: ids.map { Song(videoId: $0, title: $0, playlistSetVideoId: "s" + $0) }, continuation: nil),
-        sectionsContinuation: nil, isOwned: true, privacy: privacy)
+        sectionsContinuation: sections, isOwned: true, privacy: privacy)
 }
 
 @MainActor
@@ -721,6 +721,29 @@ private final class Changes {
         model.moveRow("sc", before: "sa")
         #expect(trackIds(model) == ["c", "a", "b"])
         #expect(await waitUntil { trackIds(model) == ["a", "b", "c"] })
+    }
+
+    @Test func aFailedRemoveKeepsARowAddedMeanwhile() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in ownPage(["a", "b"], sections: "s1") }
+        loader.sections = { _, _ in
+            Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
+        }
+        loader.edit = { _, edits, _ in
+            if case .add(let id) = edits[0] { return [AddedPlaylistRow(videoId: id, setVideoId: "s" + id)] }
+            try await Task.sleep(for: .milliseconds(100))
+            throw Failure()
+        }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        model.loadSections()
+        #expect(await waitUntil { content(model)?.sections.count == 1 })
+        model.removeRows(["sb"])
+        model.add(song("x"))
+        #expect(await waitUntil { trackIds(model) == ["a", "x"] })
+        #expect(await waitUntil { toasts.message == "Couldn't update the playlist" })
+        #expect(trackIds(model) == ["a", "b", "x"])
     }
 
     @Test func guestOrNonOwnerCannotEdit() async {
