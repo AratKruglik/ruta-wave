@@ -210,6 +210,8 @@ final class EntityModel {
     }
 
     /// The new row is appended with the `setVideoId` from the response; a skipped duplicate appends nothing.
+    /// An empty response for a song not in the list means the response wasn't understood, so the page reloads.
+    /// shortcut: "not in the list" trusts `tracks` to be complete, which holds while Suggestions load only after the last page.
     func add(_ song: Song) {
         guard !isRetired, case .playlist(let browseId) = kind, let credentials = credentials() else { return }
         let captured = generation
@@ -217,15 +219,18 @@ final class EntityModel {
             do {
                 let added = try await loader.edit(browseId, [.add(videoId: song.videoId)], credentials)
                 guard generation == captured else { return }
+                var needsReload = false
                 update { content in
                     if let row = added.first(where: { $0.videoId == song.videoId }) {
                         let newSong = song.inPlaylist(setVideoId: row.setVideoId)
-                        content.tracks.append(newSong)
-                        seen.insert(newSong.rowKey)
+                        if seen.insert(newSong.rowKey).inserted { content.tracks.append(newSong) }
+                    } else if !content.tracks.contains(where: { $0.videoId == song.videoId }) {
+                        needsReload = true
                     }
                     content.sections = content.sections.removing(videoId: song.videoId)
                 }
                 toasts.show("Added to playlist")
+                if needsReload { retry() }
             } catch {
                 guard generation == captured else { return }
                 toasts.show("Couldn't add to the playlist")

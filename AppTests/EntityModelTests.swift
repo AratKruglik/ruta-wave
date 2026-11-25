@@ -402,6 +402,26 @@ struct EntityModelTests {
 
     @Test func addingADuplicateSuggestionLeavesTheTracks() async {
         var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a", "x"], sections: "s1", owned: true) }
+        loader.sections = { _, _ in
+            Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
+        }
+        loader.edit = { _, _, _ in [] }
+        let toasts = ToastCenter()
+        let model = makeModel(loader: loader, toasts: toasts)
+        await model.load()
+        let key = model.loadKey
+        model.loadSections()
+        #expect(await waitUntil { content(model)?.sections.count == 1 })
+        model.add(song("x"))
+        #expect(await waitUntil { toasts.message != nil })
+        #expect(content(model)?.sections[0].items.isEmpty == true)
+        #expect(trackIds(model) == ["a", "x"])
+        #expect(model.loadKey == key)
+    }
+
+    @Test func anUnreadableAddResponseReloadsThePage() async {
+        var loader = EntityLoader.stub
         loader.playlist = { _, _ in playlistPage(["a"], sections: "s1", owned: true) }
         loader.sections = { _, _ in
             Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
@@ -410,12 +430,30 @@ struct EntityModelTests {
         let toasts = ToastCenter()
         let model = makeModel(loader: loader, toasts: toasts)
         await model.load()
+        let key = model.loadKey
         model.loadSections()
         #expect(await waitUntil { content(model)?.sections.count == 1 })
         model.add(song("x"))
         #expect(await waitUntil { toasts.message != nil })
-        #expect(content(model)?.sections[0].items.isEmpty == true)
-        #expect(trackIds(model) == ["a"])
+        #expect(model.loadKey != key)
+    }
+
+    @Test func aRowAlreadyLoadedIsNotAppendedTwice() async {
+        var loader = EntityLoader.stub
+        loader.playlist = { _, _ in playlistPage(["a"], sections: "s1", owned: true) }
+        loader.sections = { _, _ in
+            Page(items: [Shelf(title: "Suggestions", layout: .list, items: [.song(song("x"))])], continuation: nil)
+        }
+        loader.edit = { _, _, _ in [AddedPlaylistRow(videoId: "x", setVideoId: "sx")] }
+        let model = makeModel(loader: loader, toasts: ToastCenter())
+        await model.load()
+        model.loadSections()
+        #expect(await waitUntil { content(model)?.sections.count == 1 })
+        model.add(song("x"))
+        #expect(await waitUntil { trackIds(model) == ["a", "x"] })
+        model.add(song("x"))
+        try? await Task.sleep(for: .milliseconds(50))
+        #expect(trackIds(model) == ["a", "x"])
     }
 
     @Test func cancelInFlightDropsALateResponse() async {
