@@ -86,7 +86,7 @@ Consequences we accept:
   - `applicationNameForUserAgent = SignInRules.safariApplicationName` — the same Safari identity as the sign-in window;
   - a `WKUserScript` with the bridge, injected `atDocumentEnd`, main frame only.
 - A guest loads `https://music.youtube.com/watch?v=<id>&list=<playlistId>`. Signed-in playback always loads
-  `https://music.youtube.com/signin?action_handle_signin=true&authuser=<authUserIndex>&next=<encoded /watch?...>`,
+  `https://music.youtube.com/signin?action_handle_signin=true&authuser=0&next=<encoded /watch?...>`,
   index 0 included: the site ignores `authuser` on `/watch` and keeps the last account it switched to (MC-8, 2026-11-19).
   IDs must match `^[A-Za-z0-9_-]{1,64}$`, otherwise nothing is loaded.
 - **Navigation lock.** The view holds the Google-wide session, so the main frame
@@ -250,12 +250,10 @@ Everything in this section is **[known]** from open projects and is verified at 
   - `Cookie` — session cookies;
   - `Authorization: SAPISIDHASH <ts>_<sha1("<ts> <SAPISID> <origin>")>`;
   - `X-Origin: https://music.youtube.com`, same for `Origin`;
-  - `X-Goog-AuthUser: <authUserIndex>` — the selected account, 0 by default.
+  - `X-Goog-AuthUser: 0` — the app works with one account.
 - Headers of a guest request: `Content-Type`, `Origin`, `X-Origin`, `User-Agent`, and `X-Goog-Visitor-Id` once known;
   never `Cookie`, `Authorization` or `X-Goog-AuthUser`. `visitorData` comes from `responseContext.visitorData` of a
   guest response (the latest valid value wins), is kept in memory only and is reset on sign-in and sign-out.
-- `GET https://music.youtube.com/getAccountSwitcherEndpoint` — same headers, no body; the JSON may start with the
-  XSSI prefix `)]}'`, which is optional. The app always sends it with `X-Goog-AuthUser: 0`.
 
 ### 5.2. Endpoints
 
@@ -270,9 +268,10 @@ Everything in this section is **[known]** from open projects and is verified at 
 | `subscription/subscribe`, `subscription/unsubscribe` | artist subscription |
 | `feedback` | remove a search-history entry or a History row by `feedbackToken` |
 | `account/account_menu` | account name and avatar, session check |
-| `GET /getAccountSwitcherEndpoint` | the session's Google accounts; `authuser` comes from `signinUrl` (brand accounts are skipped) |
 
-Mutations are signed-only (a guest call throws `signInRequired` before any request) and are never retried. Feedback tokens and `playlistSetVideoId` values are bound to the account that fetched them: send them only with that account's credentials, and cancel any delayed send (Undo window) on sign-out or account switch.
+Mutations are signed-only (a guest call throws `signInRequired` before any request) and are never retried. Feedback tokens and `playlistSetVideoId` values are bound to the account that fetched them: send them only with that account's credentials, and cancel any delayed send (Undo window) on sign-out.
+
+Single account: the multi-account switcher (backlog 1.3) was removed. On the first launch after that update `AuthSession` wipes every signed-in session once (WebKit data, then the Keychain item) and starts as a guest, because a multi-login session cannot be reduced to one account without signing in again. The `singleAccountMigrated` flag in `UserDefaults` marks it done; it is written only after the Keychain item is gone, so a failed wipe is retried on the next launch. The old `authUserIndex` key is deleted at the same time.
 
 ### 5.3. Module layout
 

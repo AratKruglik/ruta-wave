@@ -3,8 +3,7 @@ import Testing
 @testable import InnerTube
 
 private let credentials = Credentials(
-    cookies: [HTTPCookie(properties: [.name: "SAPISID", .value: "test-sapisid", .domain: ".youtube.com", .path: "/"])!],
-    authUserIndex: 2)
+    cookies: [HTTPCookie(properties: [.name: "SAPISID", .value: "test-sapisid", .domain: ".youtube.com", .path: "/"])!])
 
 private func body(_ request: URLRequest) throws -> JSONValue {
     try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))
@@ -36,7 +35,7 @@ private func body(_ request: URLRequest) throws -> JSONValue {
         let home = try await script.client().home(credentials: credentials)
         let request = script.requests[0]
         #expect(request.value(forHTTPHeaderField: "Authorization")?.hasPrefix("SAPISIDHASH ") == true)
-        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "2")
+        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "0")
         #expect(home.shelves.items.map(\.title) == ["Listen again", "Mixed for you"])
     }
 

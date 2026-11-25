@@ -20,7 +20,6 @@ public final class PlayerEngine {
     @ObservationIgnored var queueOffset = 0
     public private(set) var isAd = false
     public private(set) var isBuffering = false
-    public private(set) var authUserIndex = 0
     /// Set by the app: the engine has no InnerTube dependency, so a like is written through this closure.
     @ObservationIgnored public var rate: (@MainActor (_ videoId: String, _ status: LikeStatus) async throws -> Void)?
 
@@ -69,9 +68,7 @@ public final class PlayerEngine {
 
     private static let terminationReason = "Player web view is active"
 
-    /// Starts the player for a session. A switch to another signed-in account stops the old one first,
-    /// so its track does not stay in Control Centre or resume under the new account.
-    public func start(_ state: AuthSession.State, authUserIndex: Int = 0) async {
+    public func start(_ state: AuthSession.State) async {
         let ephemeral: Bool
         let cookies: [HTTPCookie]
         switch state {
@@ -83,10 +80,7 @@ public final class PlayerEngine {
             stop()
             return
         }
-        let reuses = webView != nil && PlayerRules.reusesPlayer(
-            running: (isEphemeral, self.authUserIndex), wanted: (ephemeral, authUserIndex))
-        self.authUserIndex = authUserIndex
-        if reuses { return }
+        if webView != nil, isEphemeral == ephemeral { return }
         stop()
 
         let store = ephemeral ? WKWebsiteDataStore.nonPersistent() : WKWebsiteDataStore.default()
@@ -148,7 +142,7 @@ public final class PlayerEngine {
             Self.log.error("load ignored: player not started")
             return
         }
-        guard let url = PlayerRules.loadURL(videoId: videoId, playlistId: playlistId, authUserIndex: isEphemeral ? nil : authUserIndex) else {
+        guard let url = PlayerRules.loadURL(videoId: videoId, playlistId: playlistId, signedIn: !isEphemeral) else {
             Self.log.error("load ignored: invalid id")
             return
         }
@@ -257,7 +251,7 @@ public final class PlayerEngine {
             return nil
         }
         attempts += 1
-        return PlayerRules.loadURL(videoId: target.videoId, playlistId: target.playlistId, authUserIndex: isEphemeral ? nil : authUserIndex)
+        return PlayerRules.loadURL(videoId: target.videoId, playlistId: target.playlistId, signedIn: !isEphemeral)
     }
 
     /// A page that stalled and came back resumes on its own; one that gave up is reloaded where it was.

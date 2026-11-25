@@ -55,7 +55,7 @@ private func makeModel(
     toasts: ToastCenter = ToastCenter(), onLibraryChange: @escaping @MainActor (EntityModel.LibraryChange) -> Void = { _ in }
 ) -> EntityModel {
     EntityModel(
-        kind: kind, loader: loader, credentials: { signedIn ? Credentials(cookies: [], authUserIndex: 0) : nil }, toasts: toasts,
+        kind: kind, loader: loader, credentials: { signedIn ? Credentials(cookies: []) : nil }, toasts: toasts,
         onLibraryChange: onLibraryChange)
 }
 
@@ -645,7 +645,7 @@ struct EntityModelTests {
         let store = BrowseStore(
             loader: BrowseLoader(page: { _, _ in throw Failure() }, more: { _, _ in throw Failure() }),
             searchLoader: .stub, entityLoader: entityLoader, libraryLoader: .stub, toasts: ToastCenter(),
-            credentials: { Credentials(cookies: [], authUserIndex: 0) })
+            credentials: { Credentials(cookies: []) })
         let route = Route.playlist(browseId: "VLPL1")
         let model = store.entityModel(for: route)
         await model?.load()

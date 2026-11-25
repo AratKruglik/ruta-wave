@@ -100,9 +100,9 @@ private let visitor = "CgtTWU5USEVUSUMxMjM%3D"
     @Test func signedContinuationRequestCarriesTokenAndAuth() throws {
         let cookie = HTTPCookie(properties: [.name: "SAPISID", .value: "v", .domain: ".youtube.com", .path: "/"])!
         let request = try InnerTubeRequest.make(
-            endpoint: "browse", body: ["continuation": "t"], cookies: [cookie], authUserIndex: 1, now: Date(), locale: .current)
+            endpoint: "browse", body: ["continuation": "t"], cookies: [cookie], now: Date(), locale: .current)
         #expect(request.value(forHTTPHeaderField: "Authorization")?.hasPrefix("SAPISIDHASH ") == true)
-        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "1")
+        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "0")
         let body = try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))
         #expect(body["continuation"]?.string == "t")
     }

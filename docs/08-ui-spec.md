@@ -29,7 +29,7 @@ Every part is described with the same headings:
 
 - One observable flag, `AuthSession.isSignedIn`, decides everything below;
   views never inspect cookies. **[decision, 1.4]**
-- Switching mode (sign in, sign out, switch account) reloads every visible
+- Switching mode (sign in, sign out) reloads every visible
   screen and the sidebar, keeps playback going and keeps the navigation stack
   (pages that make no sense for the new mode, such as Library for a guest,
   fall back to Home). **[decision]**
@@ -167,7 +167,7 @@ fallback `browse FEmusic_liked_playlists`.
   sheet).
 - Drop songs (dragged from any track row) on a playlist row: adds them to it.
 - Refreshes after creating, deleting, saving or removing a playlist, and on
-  account switch.
+  sign-in or sign-out.
 
 **States:** loading → three skeleton rows; error → "Couldn't load playlists"
 with a **Retry** link; the rest of the app keeps working.
@@ -478,10 +478,9 @@ type and mode **[decision]**:
 - **Stage:** 4.6.
 
 ## 13. Account popover
-Opens from the avatar. Shows: header (64 pt avatar, name, handle), the row of
-34 pt avatars of the session's accounts (active one ringed; click switches),
-**Add account**, **History**, **Settings…** (⌘,), **Sign out**. Behaviour of
-the existing pieces is 1.1–1.3; moving them into the popover is 4.1.
+Opens from the avatar. Shows: header (64 pt avatar, name, handle),
+**History**, **Settings…** (⌘,), **Sign out**. The app works with one Google
+account. Behaviour of the existing pieces is 1.1–1.3; moving them into the popover is 4.1.
 
 ## 14. Cross-cutting behaviour
 

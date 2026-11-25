@@ -3,11 +3,8 @@ import SwiftUI
 
 struct AccountView: View {
     let state: AccountModel.State
-    let authUserIndex: Int
     let isSigningOut: Bool
     let signOutFailed: Bool
-    let onSwitch: (Int) -> Void
-    let onAddAccount: () -> Void
     let onHistory: () -> Void
     let onSignOut: () -> Void
     let onRetry: () -> Void
@@ -17,21 +14,12 @@ struct AccountView: View {
             switch state {
             case .loading:
                 ProgressView()
-            case .loaded(let info, let accounts):
+            case .loaded(let info):
                 AccountHeader(info: info)
-                if let accounts {
-                    AccountRows(accounts: accounts, authUserIndex: authUserIndex, isDisabled: isSigningOut, onSelect: onSwitch)
-                } else {
-                    retry("Couldn't load other accounts")
-                }
-            case .failed(let accounts):
+            case .failed:
                 retry("Couldn't load your account")
-                if let accounts {
-                    AccountRows(accounts: accounts, authUserIndex: authUserIndex, isDisabled: isSigningOut, onSelect: onSwitch)
-                }
             }
             Divider().overlay(.strokeSubtle)
-            MenuRow(title: "Add account", action: onAddAccount).disabled(isSigningOut)
             MenuRow(title: "History", action: onHistory)
             SettingsLink {
                 Text("Settings…")
@@ -86,25 +74,6 @@ private struct MenuRow: View {
     }
 }
 
-private struct AccountRows: View {
-    let accounts: [AccountListItem]
-    let authUserIndex: Int
-    let isDisabled: Bool
-    let onSelect: (Int) -> Void
-
-    var body: some View {
-        if accounts.count > 1 {
-            HStack(spacing: Metrics.space12) {
-                ForEach(accounts) { item in
-                    AccountRow(
-                        item: item, isActive: item.authUserIndex == authUserIndex, isDisabled: isDisabled,
-                        onSelect: { onSelect(item.authUserIndex) })
-                }
-            }
-        }
-    }
-}
-
 private struct AccountHeader: View {
     let info: AccountInfo
 
@@ -119,42 +88,14 @@ private struct AccountHeader: View {
     }
 }
 
-private struct AccountRow: View {
-    let item: AccountListItem
-    let isActive: Bool
-    let isDisabled: Bool
-    let onSelect: () -> Void
-
-    var body: some View {
-        Button(action: onSelect) {
-            AccountAvatar(url: item.avatarURL, size: 34)
-                .padding(2)
-                .overlay { Circle().stroke(.strokeFocus, lineWidth: isActive ? 2 : 0) }
-        }
-        .buttonStyle(.plain)
-        .disabled(isActive || isDisabled)
-        .help(Text(verbatim: item.name))
-        .accessibilityLabel(Text(verbatim: item.name))
-        .accessibilityAddTraits(isActive ? .isSelected : [])
-    }
-}
-
 #if DEBUG
 #Preview("Loaded") {
     AccountView(
-        state: .loaded(
-            PreviewFixtures.account,
-            accounts: [
-                AccountListItem(name: "Test User 1", handle: "@testhandle1", avatarURL: nil, authUserIndex: 0, isSelected: true),
-                AccountListItem(name: "Test User 2", handle: nil, avatarURL: nil, authUserIndex: 1, isSelected: false),
-            ]),
-        authUserIndex: 0, isSigningOut: false, signOutFailed: false,
-        onSwitch: { _ in }, onAddAccount: {}, onHistory: {}, onSignOut: {}, onRetry: {})
+        state: .loaded(PreviewFixtures.account), isSigningOut: false, signOutFailed: false,
+        onHistory: {}, onSignOut: {}, onRetry: {})
 }
 #endif
 
 #Preview("Failed") {
-    AccountView(
-        state: .failed(accounts: nil), authUserIndex: 0, isSigningOut: false, signOutFailed: true,
-        onSwitch: { _ in }, onAddAccount: {}, onHistory: {}, onSignOut: {}, onRetry: {})
+    AccountView(state: .failed, isSigningOut: false, signOutFailed: true, onHistory: {}, onSignOut: {}, onRetry: {})
 }

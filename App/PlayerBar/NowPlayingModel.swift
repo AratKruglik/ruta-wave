@@ -173,8 +173,7 @@ final class NowPlayingModel {
         skip = nil
     }
 
-    /// Brings back the last session's track, paused where it was. Only the first player start of a launch does this,
-    /// so a restart for another account (#81) does not.
+    /// Brings back the last session's track, paused where it was. Only the first player start of a launch does this.
     func resumeLastSession() {
         guard !hasResumed else { return }
         hasResumed = true

@@ -71,6 +71,7 @@ targets:
       - App/Components/TrackSelection.swift
       - App/Entity/EntityLoader.swift
       - App/Entity/EntityModel.swift
+      - App/AccountModel.swift
       - App/Library/HistoryModel.swift
       - App/Library/LibraryLoader.swift
       - App/Library/LibraryModel.swift
@@ -96,6 +97,7 @@ targets:
       - App/Theme/Glass.swift
       - App/Theme/ThemeColor.swift
     dependencies:
+      - package: Auth
       - package: PlayerEngine
       - package: InnerTube
       - package: AppSettings

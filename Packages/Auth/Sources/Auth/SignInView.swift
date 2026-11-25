@@ -51,7 +51,7 @@ private struct SignInWebView: NSViewRepresentable {
         webView.uiDelegate = context.coordinator
         webView.configuration.websiteDataStore.httpCookieStore.add(context.coordinator)
         context.coordinator.webView = webView
-        webView.load(URLRequest(url: session.isAddingAccount ? SignInRules.addAccountURL : SignInRules.signInURL))
+        webView.load(URLRequest(url: SignInRules.signInURL))
         return webView
     }
 
@@ -120,8 +120,7 @@ private struct SignInWebView: NSViewRepresentable {
         }
 
         private var isSignInActive: Bool {
-            if case .signedOut = session.state { return true }
-            return session.isAddingAccount
+            if case .signedOut = session.state { true } else { false }
         }
     }
 }

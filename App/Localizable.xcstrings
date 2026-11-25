@@ -81,16 +81,6 @@
         }
       }
     },
-    "Add account" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Додати обліковий запис"
-          }
-        }
-      }
-    },
     "Add to playlist…" : {
       "localizations" : {
         "uk" : {
@@ -447,16 +437,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося завантажити більше"
-          }
-        }
-      }
-    },
-    "Couldn't load other accounts" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не вдалося завантажити інші облікові записи"
           }
         }
       }

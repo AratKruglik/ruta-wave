@@ -10,18 +10,16 @@ public final class AuthSession {
         case keychainUnavailable(KeychainError)
     }
 
-    private static let authUserIndexKey = "authUserIndex"
+    private static let migrationKey = "singleAccountMigrated"
+    private static let legacyIndexKey = "authUserIndex"
 
     public private(set) var state: State = .signedOut
     public private(set) var signInError: (any Error)?
     public private(set) var signOutError: KeychainError?
-    public private(set) var isAddingAccount = false
     public private(set) var isSigningOut = false
     public private(set) var isSessionExpired = false
 
-    public var authUserIndex: Int {
-        didSet { defaults.set(authUserIndex, forKey: Self.authUserIndexKey) }
-    }
+    @ObservationIgnored var migration: Task<Void, Never>?
 
     private let keychain: any KeychainStore
     private let defaults: UserDefaults
@@ -33,7 +31,6 @@ public final class AuthSession {
     init(keychain: any KeychainStore, defaults: UserDefaults) {
         self.keychain = keychain
         self.defaults = defaults
-        authUserIndex = defaults.integer(forKey: Self.authUserIndexKey)
         restore()
     }
 
@@ -43,27 +40,39 @@ public final class AuthSession {
             data = try keychain.read()
         } catch {
             state = .keychainUnavailable(error)
+            migrateToSingleAccount()
             return
         }
         switch SessionCookies.restore(from: data, now: Date()) {
         case .signedIn(let cookies):
             state = .signedIn(cookies: cookies)
         case .signedOut, .corrupt:
-            if data != nil {
-                try? keychain.delete()
-                authUserIndex = 0
-            }
+            if data != nil { try? keychain.delete() }
             state = .signedOut
         }
+        migrateToSingleAccount()
     }
 
-    public func addAccount() {
-        guard !isSigningOut else { return }
-        isAddingAccount = true
-    }
-
-    public func cancelAddAccount() {
-        isAddingAccount = false
+    // A pre-single-account session may hold several Google accounts; one wipe leaves a single account after the next sign-in.
+    // The signed-out state is set before anything else can read the session, so no request goes out with the old cookies.
+    private func migrateToSingleAccount() {
+        guard !defaults.bool(forKey: Self.migrationKey) else { return }
+        defaults.removeObject(forKey: Self.legacyIndexKey)
+        switch state {
+        case .keychainUnavailable:
+            return
+        case .signedOut:
+            defaults.set(true, forKey: Self.migrationKey)
+        case .signedIn:
+            state = .signedOut
+            isSigningOut = true
+            migration = Task { @MainActor in
+                defer { isSigningOut = false }
+                await wipeWebData()
+                guard (try? keychain.delete()) != nil else { return }
+                defaults.set(true, forKey: Self.migrationKey)
+            }
+        }
     }
 
     public func clearSignInError() {
@@ -94,7 +103,6 @@ public final class AuthSession {
         isSigningOut = true
         defer { isSigningOut = false }
         signOutError = nil
-        isAddingAccount = false
         // WebKit first: a crash mid-wipe must not leave an empty Keychain next to live google.com cookies.
         await wipeWebData()
         do {
@@ -103,7 +111,6 @@ public final class AuthSession {
             signOutError = error
             return
         }
-        authUserIndex = 0
         state = .signedOut
     }
 
@@ -116,16 +123,14 @@ public final class AuthSession {
 
     // Returns false while the cookie set is still incomplete, so the caller keeps observing.
     func completeSignIn(with cookies: [HTTPCookie]) -> Bool {
-        guard !isSigningOut else { return false }
+        guard case .signedOut = state, !isSigningOut else { return false }
         do {
             let data = try SessionCookies.encode(cookies)
             guard case .signedIn(let restored) = SessionCookies.restore(from: data, now: Date()) else { return false }
             try keychain.write(data)
-            if !isAddingAccount { authUserIndex = 0 }
             state = .signedIn(cookies: restored)
             isSessionExpired = false
             signInError = nil
-            isAddingAccount = false
         } catch {
             signInError = error
         }

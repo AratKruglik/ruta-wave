@@ -37,8 +37,10 @@ private struct PlayerHostView: View {
     var body: some View {
         PlayerHost(engine: player)
             .frame(width: 1, height: 1)
-            .onChange(of: session.state.isSignedIn) { InnerTubeClient.resetGuestVisitor() }
-            .onChange(of: session.contentIdentity) { onIdentityChange() }
+            .onChange(of: session.state.isSignedIn) {
+                InnerTubeClient.resetGuestVisitor()
+                onIdentityChange()
+            }
             .task(id: PlayerSession(session)) { await startPlayer() }
     }
 
@@ -51,17 +53,14 @@ private struct PlayerHostView: View {
             case .indifferent: .indifferent
             }
             try await InnerTubeClient().rate(
-                videoId: videoId, rating, credentials: Credentials(cookies: cookies, authUserIndex: session.authUserIndex))
+                videoId: videoId, rating, credentials: Credentials(cookies: cookies))
         }
         switch PlayerSession(session) {
         case .off:
             player.stop()
             return
-        case .guest:
+        case .guest, .account:
             await player.start(session.state)
-        case .account(let authUserIndex):
-            // The engine owns the index: it restarts the player when the account changes (#81).
-            await player.start(session.state, authUserIndex: authUserIndex)
         }
         guard !Task.isCancelled else { return }
         onStarted()
@@ -74,14 +73,13 @@ private struct PlayerHostView: View {
 }
 
 // Tears the signed-in web view down as soon as sign-out starts; the wipe of the shared store may already be running.
-// The account index is part of the key, so switching accounts restarts the player for the new one.
 private enum PlayerSession: Equatable {
-    case guest, account(Int), off
+    case guest, account, off
 
     @MainActor init(_ session: AuthSession) {
         switch session.state {
         case .keychainUnavailable: self = .off
-        case .signedIn: self = session.isSigningOut ? .off : .account(session.authUserIndex)
+        case .signedIn: self = session.isSigningOut ? .off : .account
         case .signedOut: self = .guest
         }
     }

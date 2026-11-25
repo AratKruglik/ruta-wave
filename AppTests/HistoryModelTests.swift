@@ -3,7 +3,7 @@ import Testing
 
 private struct Failure: Error {}
 
-private let credentials = Credentials(cookies: [], authUserIndex: 0)
+private let credentials = Credentials(cookies: [])
 
 private func entry(_ id: String, token: String? = "tok") -> HistoryEntry {
     HistoryEntry(song: Song(videoId: id, title: id), feedbackToken: token.map { "\($0)-\(id)" })

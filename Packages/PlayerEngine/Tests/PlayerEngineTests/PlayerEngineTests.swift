@@ -48,26 +48,12 @@ struct PlayerEngineTests {
         #expect(await iterator.next() == .stopped)
     }
 
-    @Test func switchingAccountsStopsThePlayerAndStartsAFreshOne() async {
+    @Test func restartingSignedInKeepsThePlayer() async {
         let engine = makeEngine()
-        await engine.start(.signedIn(cookies: []), authUserIndex: 0)
+        await engine.start(.signedIn(cookies: []))
         let first = engine.webView
         engine.commit(makeSong("a"))
-        var iterator = engine.events().makeAsyncIterator()
-        await engine.start(.signedIn(cookies: []), authUserIndex: 1)
-        defer { engine.stop() }
-        #expect(await iterator.next() == .stopped)
-        #expect(engine.song == nil)
-        #expect(engine.authUserIndex == 1)
-        #expect(engine.webView != nil && engine.webView !== first)
-    }
-
-    @Test func restartingTheSameAccountKeepsThePlayer() async {
-        let engine = makeEngine()
-        await engine.start(.signedIn(cookies: []), authUserIndex: 1)
-        let first = engine.webView
-        engine.commit(makeSong("a"))
-        await engine.start(.signedIn(cookies: []), authUserIndex: 1)
+        await engine.start(.signedIn(cookies: []))
         defer { engine.stop() }
         #expect(engine.webView === first)
         #expect(engine.song?.videoId == "a")

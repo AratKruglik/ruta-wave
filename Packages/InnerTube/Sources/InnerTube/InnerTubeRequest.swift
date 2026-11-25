@@ -8,13 +8,12 @@ enum InnerTubeRequest {
         endpoint: String,
         body: [String: any Sendable] = [:],
         cookies: [HTTPCookie],
-        authUserIndex: Int,
         now: Date,
         locale: Locale
     ) throws(InnerTubeError) -> URLRequest {
         var request = try signed(
             URL(string: "\(origin)/youtubei/v1/\(endpoint)?prettyPrint=false")!,
-            cookies: cookies, authUserIndex: authUserIndex, now: now)
+            cookies: cookies, now: now)
         try attachPayload(&request, body: body, locale: locale)
         return request
     }
@@ -33,17 +32,6 @@ enum InnerTubeRequest {
         return request
     }
 
-    static func makeGet(
-        path: String,
-        cookies: [HTTPCookie],
-        authUserIndex: Int,
-        now: Date
-    ) throws(InnerTubeError) -> URLRequest {
-        var request = try signed(URL(string: origin + path)!, cookies: cookies, authUserIndex: authUserIndex, now: now)
-        request.httpMethod = "GET"
-        return request
-    }
-
     static func makePage() -> URLRequest {
         var request = unauthenticated(URL(string: origin + "/")!)
         request.httpMethod = "GET"
@@ -53,7 +41,6 @@ enum InnerTubeRequest {
     private static func signed(
         _ url: URL,
         cookies: [HTTPCookie],
-        authUserIndex: Int,
         now: Date
     ) throws(InnerTubeError) -> URLRequest {
         guard let sapisid = cookies.first(where: { $0.name == "SAPISID" && isYouTubeRoot($0.domain) })?.value else {
@@ -64,7 +51,7 @@ enum InnerTubeRequest {
         let hash = SAPISIDHash.make(sapisid: sapisid, timestamp: Int(now.timeIntervalSince1970), origin: origin)
         var headers = HTTPCookie.requestHeaderFields(with: live)
         headers["Authorization"] = "SAPISIDHASH \(hash)"
-        headers["X-Goog-AuthUser"] = "\(authUserIndex)"
+        headers["X-Goog-AuthUser"] = "0"
         for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
         return request
     }

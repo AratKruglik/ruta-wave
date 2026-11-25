@@ -377,7 +377,7 @@ the player bar.
 | Screen today | In the designed shell |
 |---|---|
 | `SignInView` (sheet / window with Google's page) | unchanged; opened from the **Sign in** pill or the avatar menu |
-| `AccountView` (header + row of 34 pt avatars, Add account, Sign out) | becomes the avatar popover in the top bar (stage 4.1): header, avatars row, Add account, Settings, Sign out |
+| `AccountView` (header, History, Settings, Sign out) | becomes the avatar popover in the top bar (stage 4.1) |
 | Guest placeholder (1.4) | replaced by the real shell in 4.1 |
 
 ## 8. Checklist for every new screen

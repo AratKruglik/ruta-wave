@@ -27,7 +27,7 @@ private func serverSorts(selected: Int = 0) -> [LibrarySort] {
 
 private let landing = BrowseTarget.libraryLanding.browseId
 
-private let credentials = Credentials(cookies: [], authUserIndex: 0)
+private let credentials = Credentials(cookies: [])
 
 @MainActor
 private func makeModel(_ loader: LibraryLoader, preferences: Preferences = makePreferences()) -> LibraryModel {

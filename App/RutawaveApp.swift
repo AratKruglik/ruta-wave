@@ -87,6 +87,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let preferences = Preferences()
+        // The single-account migration signs out in AuthSession.init, before any isSignedIn observer exists.
+        if session.isSigningOut { preferences.lastPlayback = nil }
         if preferences.resumeOnStart, let videoId = preferences.lastPlayback?.videoId {
             trackNotifier.skipRestored(videoId: videoId)
         }

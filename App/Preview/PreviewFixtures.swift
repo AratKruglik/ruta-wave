@@ -44,7 +44,7 @@ enum PreviewFixtures {
     static func nowPlaying(_ player: PreviewPlayer = PreviewPlayer(), signedIn: Bool = true) -> NowPlayingModel {
         NowPlayingModel(
             player: player, toasts: ToastCenter(), preferences: preferences,
-            credentials: { signedIn ? Credentials(cookies: [], authUserIndex: 0) : nil }, client: nil)
+            credentials: { signedIn ? Credentials(cookies: []) : nil }, client: nil)
     }
 
     static func trackTabs() -> TrackTabsModel {
@@ -174,7 +174,7 @@ enum PreviewFixtures {
             save: { _, _, _ in }, subscribe: { _, _, _ in }, edit: { _, _, _ in [] })
         let isGuest = variant == .guest
         return EntityModel(
-            kind: kind, loader: loader, credentials: { isGuest ? nil : Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
+            kind: kind, loader: loader, credentials: { isGuest ? nil : Credentials(cookies: []) }, toasts: ToastCenter())
     }
 
     enum SearchVariant { case all, filtered, loading, empty, failing }
@@ -223,7 +223,7 @@ enum PreviewFixtures {
             suggestions: { _, _ in suggestions }, search: { _, _, _ in throw InnerTubeError.unexpectedResponse },
             more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in })
         let model = SearchFieldModel(
-            loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter(), sleep: { _ in })
+            loader: loader, credentials: { Credentials(cookies: []) }, toasts: ToastCenter(), sleep: { _ in })
         model.focusChanged(true)
         return model
     }
@@ -240,7 +240,7 @@ enum PreviewFixtures {
             },
             create: { _, _ in "VLNEW" }, edit: { _, _, _ in [] }, delete: { _, _ in }, removeFromLibrary: { _, _ in }, isOwned: { _, _ in false })
         return SidebarModel(
-            loader: loader, credentials: { variant == .guest ? nil : Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
+            loader: loader, credentials: { variant == .guest ? nil : Credentials(cookies: []) }, toasts: ToastCenter())
     }
 
     enum LibraryVariant { case playlists, songs, albums, artists, empty, loading, failed }
@@ -283,7 +283,7 @@ enum PreviewFixtures {
             reload: { _, _ in LibraryPage(sections: chips, sortOptions: sorts, items: Page(items: items, continuation: nil)) },
             more: { _, _ in Page(items: [], continuation: nil) }, history: { _ in [] }, feedback: { _, _ in })
         preferences.librarySection = section.browseId
-        return LibraryModel(loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, preferences: preferences)
+        return LibraryModel(loader: loader, credentials: { Credentials(cookies: []) }, preferences: preferences)
     }
 
     enum HistoryVariant { case loaded, empty, loading, failed }
@@ -301,7 +301,7 @@ enum PreviewFixtures {
                 return variant == .empty ? [] : days
             },
             feedback: { _, _ in })
-        return HistoryModel(loader: loader, credentials: { Credentials(cookies: [], authUserIndex: 0) }, toasts: ToastCenter())
+        return HistoryModel(loader: loader, credentials: { Credentials(cookies: []) }, toasts: ToastCenter())
     }
 }
 #endif
