@@ -1,4 +1,4 @@
-# 07. Designbook — how Rutawave looks
+# 07. Designbook — how RutaWave looks
 
 This file fixes the **visual** language of the app: layout, tokens, components
 and their states. What every part of the interface **does** is described in
@@ -25,13 +25,13 @@ and their states. What every part of the interface **does** is described in
   colour, proportions and composition, never as sizes. **[decision]**
 - Labels in this document:
   - **[observed]** — measured on the live site or sampled from the screenshots;
-  - **[decision]** — a choice for Rutawave.
+  - **[decision]** — a choice for RutaWave.
 
 ### What we deliberately do not copy
 
-| In the reference | In Rutawave | Why |
+| In the reference | In RutaWave | Why |
 |---|---|---|
-| YouTube Music logo and red play mark in the top bar | Rutawave wordmark and the app's own icon | trademarks, [05 §2.2](05-risks-and-scope.md#2-legal-and-policy-constraints) |
+| YouTube Music logo and red play mark in the top bar | RutaWave wordmark and the app's own icon | trademarks, [05 §2.2](05-risks-and-scope.md#2-legal-and-policy-constraints) |
 | YouTube Sans, Roboto | SF Pro (system font) with the same sizes and weights | YouTube Sans is proprietary; no bundled fonts ([02 §1](02-architecture.md#1-key-decisions)) |
 | Download button on the playlist header | not shown | downloading is excluded ([05 §3](05-risks-and-scope.md#3-what-we-deliberately-do-not-do)) |
 | Hamburger that collapses the sidebar | the system sidebar toggle of `NavigationSplitView` | native behaviour, same result |
@@ -43,7 +43,7 @@ and their states. What every part of the interface **does** is described in
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ ● ● ●  [≡] Rutawave      [ 🔍 Search songs, albums, artists ]             ‹ › (A) │ top bar, 64 pt
+│ ● ● ●  [≡] RutaWave      [ 🔍 Search songs, albums, artists ]             ‹ › (A) │ top bar, 64 pt
 ├──────────────┬───────────────────────────────────────────────────────────────┤
 │ ⌂ Home       │                                                               │
 │ ◎ Explore    │                                                               │
@@ -114,7 +114,7 @@ model within 1–2 % **[observed]**:
     base at 400 pt (screenshots 2, 3, 7);
   - the base animates to a new colour over 0.6 s ease-in-out on track change;
     with Reduce Motion it switches instantly.
-- Rutawave is **dark only**, like the reference. Light appearance is not
+- RutaWave is **dark only**, like the reference. Light appearance is not
   supported; the window forces `.preferredColorScheme(.dark)`. **[decision]**
 
 ### 3.3. Tokens
@@ -225,7 +225,7 @@ Each entry: anatomy → sizes → states. Behaviour is in [08](08-ui-spec.md).
 The bar has no background; each group below is one `glass.regular` capsule,
 and all of them share one glass container. Before macOS 26 the groups have no
 fill and the bar is opaque `theme.base`.
-- Left group: sidebar toggle (`sidebar.left`) and the Rutawave wordmark
+- Left group: sidebar toggle (`sidebar.left`) and the RutaWave wordmark
   (title 20 / bold).
 - Centre: search field, 480–720 pt wide (flexes), 42 pt high, capsule,
   `glass.regular` (`radius.card` and `surface.field` before macOS 26),
@@ -318,7 +318,7 @@ Two-column layout above 1100 pt (screenshot 2), stacked below it.
   library (bookmark), **Play**, Share, ⋮ (plus Shuffle as a 40 pt button for
   albums and artists).
 - The four thumbs row in the reference comes from the `album-actions` plugin;
-  in Rutawave those actions live in the ⋮ menu ([04](04-plugins.md) #1).
+  in RutaWave those actions live in the ⋮ menu ([04](04-plugins.md) #1).
 
 ### 6.9. Artist header
 Full-width image 16:9 cropped to 360 pt high, `theme.base` gradient at the

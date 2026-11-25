@@ -22,7 +22,7 @@ Everything in this document is a **[decision]** unless labelled otherwise.
 ## 2. Modules
 
 ```
-Rutawave.app
+RutaWave.app
 ├─ App            — entry point, scenes, routing, DI
 ├─ UI             — SwiftUI screens and components; lives in `App/` (decided in 4.1: `Text("key")` resolves against the main bundle, so one String Catalog serves the whole UI and the in-app language override reaches every string)
 ├─ PlayerEngine   — hidden WKWebView, JS bridge, player state

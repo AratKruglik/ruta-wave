@@ -1,0 +1,39 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.90980,0.14510,0.24706,1.00000",
+      "srgb:0.61961,0.05490,0.14118,1.00000"
+    ]
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "play.svg",
+          "name": "play"
+        }
+      ]
+    },
+    {
+      "layers": [
+        {
+          "image-name": "ring-inner.svg",
+          "name": "ring-inner"
+        },
+        {
+          "image-name": "ring-middle.svg",
+          "name": "ring-middle"
+        },
+        {
+          "image-name": "ring-outer.svg",
+          "name": "ring-outer"
+        }
+      ]
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "macOS"
+    ]
+  }
+}

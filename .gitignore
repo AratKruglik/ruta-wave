@@ -12,3 +12,5 @@ build/
 Packages/*/.build/
 # SDLC pipeline local state
 .claude/.sdlc-*.json
+# Superpowers brainstorm mockups and plan ledgers
+.superpowers/

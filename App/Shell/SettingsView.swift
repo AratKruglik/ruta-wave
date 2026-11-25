@@ -50,7 +50,7 @@ private struct GeneralSettings: View {
                 }
                 if language != launchLanguage {
                     HStack {
-                        Text("Restart Rutawave to apply the language.")
+                        Text("Restart RutaWave to apply the language.")
                             .font(.rwCaption)
                             .foregroundStyle(.secondary)
                         Button("Restart now", action: restart)
@@ -67,7 +67,7 @@ private struct GeneralSettings: View {
                 Toggle("Open at login", isOn: Binding(get: { launchAtLogin.isEnabled }, set: { launchAtLogin.set($0) }))
                 if launchAtLogin.needsApproval {
                     HStack {
-                        Text("Allow Rutawave in Login Items to open it at login.")
+                        Text("Allow RutaWave in Login Items to open it at login.")
                             .font(.rwCaption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)

@@ -52,7 +52,7 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Rutawave tracks</string>
+			<string>RutaWave tracks</string>
 			<key>UTTypeIdentifier</key>
 			<string>dev.kruhlyk.rutawave.tracks</string>
 		</dict>

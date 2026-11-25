@@ -1,6 +1,6 @@
-# Rutawave — plan documentation
+# RutaWave — plan documentation
 
-Rutawave is a native YouTube Music client for macOS (name chosen 2026-11-20,
+RutaWave is a native YouTube Music client for macOS (name chosen 2026-11-20,
 see [00-prd.md](00-prd.md#1-name-and-positioning)).
 
 Project goal: reproduce the capabilities of **YouTube Music Desktop**

@@ -19,8 +19,8 @@ final class StatusMenu: NSObject {
         if isVisible, item == nil {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
             if let button = item.button {
-                button.image = NSImage(systemSymbolName: "music.note", accessibilityDescription: "Rutawave")
-                button.toolTip = "Rutawave"
+                button.image = NSImage(systemSymbolName: "music.note", accessibilityDescription: "RutaWave")
+                button.toolTip = "RutaWave"
                 button.target = self
                 button.action = #selector(clicked)
                 button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -40,8 +40,8 @@ final class StatusMenu: NSObject {
         let menu = playbackMenu()
         menu.addItem(.separator())
         menu.addItem(item(String(localized: "Mini Player"), #selector(miniPlayer)))
-        menu.addItem(item(String(localized: "Show Rutawave"), #selector(show)))
-        menu.addItem(withTitle: String(localized: "Quit Rutawave"), action: #selector(NSApplication.terminate), keyEquivalent: "q")
+        menu.addItem(item(String(localized: "Show RutaWave"), #selector(show)))
+        menu.addItem(withTitle: String(localized: "Quit RutaWave"), action: #selector(NSApplication.terminate), keyEquivalent: "q")
         return menu
     }
 

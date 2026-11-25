@@ -1,4 +1,4 @@
-# 00. Product requirements — Rutawave
+# 00. Product requirements — RutaWave
 
 Status: draft 1, 2026-11-18. Owner: Oleksii Kruhlyk.
 
@@ -18,10 +18,10 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
 
 | | |
 |---|---|
-| Name | **Rutawave** **[decision, 2026-11-20]** |
+| Name | **RutaWave** **[decision, 2026-11-20; spelled with a capital W since 2026-11-25]**. Identifiers stay lower case (`rutawave`); the Xcode project, targets, scheme and `RutawaveApp` keep the old spelling. |
 | Subtitle (DMG, README, About window, GitHub description) | *A native YouTube Music client for macOS* |
 | One-liner | YouTube Music as a real Mac app: native SwiftUI interface, media keys, menu bar, plugins — no Electron. |
-| Disclaimer (README, About window) | *Rutawave is an independent project and is not affiliated with, endorsed or sponsored by Google or YouTube.* |
+| Disclaimer (README, About window) | *RutaWave is an independent project and is not affiliated with, endorsed or sponsored by Google or YouTube.* |
 | Previous working names | Redwave (2026-11-18 – 2026-11-20, used in code until backlog 0.4), Tunewave (used in code and docs up to backlog 1.4) |
 
 **Why this name.**
@@ -30,11 +30,12 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
   and red points at YouTube's colour. "Wave" is sound.
 - Redwave was dropped because it was too generic: nothing in it said music.
   "Wave" alone still does not, so the name always goes with the subtitle.
-- "Ruta" alone is used by too many products; "Rutawave" was free on GitHub
+- "Ruta" alone is used by too many products; "RutaWave" was free on GitHub
   on 2026-11-20.
 - "YouTube", "YT" and "YouTube Music" are Google trademarks ([05 §2.2](05-risks-and-scope.md#2-legal-and-policy-constraints)).
   They appear only in the descriptive subtitle ("a client **for** YouTube Music"),
   never in the name, icon or bundle ID.
+- The capital W splits the two parts (Ruta + Wave), so the word reads at a glance.
 - Easy to read in Latin and Cyrillic (Рутавейв), and different from existing
   clients (Pear Desktop and others).
 
@@ -42,11 +43,11 @@ Labels as in the rest of the docs: **[decision]** — a product choice;
 
 | What | Value |
 |---|---|
-| App and product name | `Rutawave` / `Rutawave.app` |
+| App and product name | `RutaWave` / `RutaWave.app` |
 | Bundle ID | `dev.kruhlyk.rutawave` |
 | Keychain service of the session | `dev.kruhlyk.rutawave.session` |
 | Xcode project (generated) | `Rutawave.xcodeproj` |
-| DMG file | `Rutawave-<version>-arm64.dmg` |
+| DMG file | `RutaWave-<version>-arm64.dmg` |
 | URL scheme for links (stage 5.4) | `rutawave://` |
 
 Backlog row **0.4** ([06](06-backlog.md#stage-0-preparation)) moved the code
@@ -55,10 +56,18 @@ renamed build removes the session stores of the previous identifiers on launch,
 as row 0.3 did for Tunewave
 ([05 §2.4](05-risks-and-scope.md#2-legal-and-policy-constraints)).
 
-Not checked yet: whether "Rutawave" is free as a domain and as a registered
-trademark in software (class 9), including the Ukrainian register (УКРНОІВІ).
-"Chervona Ruta" is also the name of a well-known music festival; check that
-the name does not clash with its marks. Do it before the first public release.
+**Name check, 2026-11-25** ([#28](https://github.com/AratKruglik/yt-music-mac/issues/28)). This is a self-check, not legal advice.
+
+- **Domains:** `rutawave.com`, `.app`, `.dev`, `.net`, `.org`, `.io`, `.ua` and `.com.ua` are unregistered (WHOIS / RDAP).
+- **Trademarks:** "RutaWave" has no exact match in TMview, which covers EUIPO, the USPTO, WIPO, the UK, the Ukrainian register and other national offices. The УКРНОІВІ register (СІС) itself was also searched directly by keyword and has no match.
+- **Products:** no software, app or GitHub repository is called RutaWave (web search, the App Store, GitHub).
+- **Nearby marks to keep in mind:**
+  - *RUTA*, two pending applications in classes 9 and 42. EUIPO 019445038 is a figurative mark for software and SaaS, filed 2026-11-04, with opposition open until 2027-02-10. USPTO 98145984 is a word mark for field-service CRM software. RutaWave shares the prefix, but the whole word, the sound and the field (music client vs business software) differ, so the risk is judged low.
+  - *червона рута* is registered in Ukraine in class 9 (m202212262, owned by an individual, filed 2022-10-05).
+  - *червона ruta* is registered in Ukraine in classes 35, 38 and 41 (m201704221, ТОВ «МЮЗІКРАДІО»).
+  - *фестиваль червона рута* was filed in Ukraine in classes 35 and 41 (m202618337, 2026-09-04).
+  - RutaWave uses neither "червона"/"chervona" nor the festival's name, so it does not reproduce these marks; the reference stays in the backstory, not in the name, icon or copy.
+- **Not done:** registering "RutaWave" as a trademark or buying a domain is the owner's decision. Repeat the TMview search before release 0.1, because new applications appear weekly.
 
 ---
 
@@ -342,7 +351,7 @@ Kept in one place, [05](05-risks-and-scope.md). The ones that shape the product:
 
 Open questions that affect this PRD:
 #5 lyrics source, #6 optional plugins, #9 Intel, #10 auto-update.
-Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
+Question #1 (name, bundle ID, icon) is settled here; the icon is done (2026-11-25, [spec](superpowers/specs/2026-11-25-app-icon-design.md)), pending the trademark review of #28.
 
 ---
 
@@ -353,5 +362,5 @@ Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
 | 2026-11-18 | Draft 1. Product named **Redwave** (was Tunewave); bundle ID `dev.kruhlyk.redwave`; rename in code planned as backlog 0.3 |
 | 2026-11-19 | Podcasts and user uploads out of scope (open question #4, #7); F-BRW-5 dropped |
 | 2026-11-19 | Music video mode deferred to later (open question #3, #12); Song/Video toggle removed from F-PLY-5; 02 §4.1 requires a re-parentable web view |
-| 2026-11-20 | Product renamed **Rutawave** (was Redwave: too generic, nothing said music; main audience is Ukrainian); bundle ID `dev.kruhlyk.rutawave`; rename in code planned as backlog 0.4 |
+| 2026-11-20 | Product renamed **RutaWave** (was Redwave: too generic, nothing said music; main audience is Ukrainian); bundle ID `dev.kruhlyk.rutawave`; rename in code planned as backlog 0.4 |
 | 2026-11-20 | Localization decided (open question #7, #15): English and Ukrainian only; in-app language switch in Settings → General, system language by default; removed from non-goals |

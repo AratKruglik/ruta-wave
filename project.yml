@@ -3,6 +3,8 @@ options:
   developmentLanguage: en
   deploymentTarget:
     macOS: "14.0"
+  fileTypes:
+    icon: {file: true, buildPhase: resources}
 packages:
   Auth: {path: Packages/Auth}
   AppSettings: {path: Packages/AppSettings}
@@ -22,7 +24,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: dev.kruhlyk.rutawave.tracks
-            UTTypeDescription: Rutawave tracks
+            UTTypeDescription: RutaWave tracks
             UTTypeConformsTo: [public.data]
         CFBundleURLTypes:
           - CFBundleURLName: dev.kruhlyk.rutawave
@@ -42,7 +44,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.rutawave
-        PRODUCT_NAME: Rutawave
+        PRODUCT_NAME: RutaWave
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "6.0"
