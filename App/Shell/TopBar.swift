@@ -21,7 +21,7 @@ struct TopBar<AccountPopover: View>: View {
             HStack(spacing: Metrics.space4) {
             BarIconButton(symbol: "sidebar.left", size: Metrics.iconBar, label: "Toggle sidebar", action: onToggleSidebar)
             Button(action: onHome) {
-                Text("Rutawave")
+                Text("RutaWave")
                     .font(.rwWordmark)
                     .foregroundStyle(.textPrimary)
                     .lineLimit(1)
@@ -30,7 +30,7 @@ struct TopBar<AccountPopover: View>: View {
             }
             .buttonStyle(.plain)
             .help("Home")
-            .accessibilityLabel("Rutawave, go to Home")
+            .accessibilityLabel("RutaWave, go to Home")
             }
             .padding(.leading, LiquidGlass.isAvailable ? Metrics.space4 : 0)
             .padding(.trailing, LiquidGlass.isAvailable ? Metrics.space12 : 0)

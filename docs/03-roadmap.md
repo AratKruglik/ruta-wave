@@ -12,7 +12,7 @@ The order is by risk: first whatever could stop the project
 ## Stage 0. Preparation
 
 - [ ] `git init`, `.gitignore` for Xcode and Swift.
-- [x] Choose the app name and bundle ID: **Rutawave**, `dev.kruhlyk.rutawave` (was Redwave) ([00](00-prd.md#1-name-and-positioning)); the icon is done (2026-11-25, [spec](superpowers/specs/2026-11-25-app-icon-design.md)), pending the trademark review of [#28](https://github.com/AratKruglik/yt-music-mac/issues/28).
+- [x] Choose the app name and bundle ID: **RutaWave**, `dev.kruhlyk.rutawave` (was Redwave) ([00](00-prd.md#1-name-and-positioning)); the icon is done (2026-11-25, [spec](superpowers/specs/2026-11-25-app-icon-design.md)), pending the trademark review of [#28](https://github.com/AratKruglik/yt-music-mac/issues/28).
 - [ ] Xcode project: macOS 14+, Swift 6, an empty window.
 - [ ] `Packages/` directory with empty packages from [02](02-architecture.md#12-repository-layout).
 

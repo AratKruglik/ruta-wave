@@ -4,7 +4,7 @@ Issue: [#28](https://github.com/AratKruglik/yt-music-mac/issues/28). Size: small
 
 ## Intent
 
-Rutawave needs its own icon for the Dock, Finder, the DMG window and notifications. The icon is a sound wave that is at the same time a rue flower (*Chervona Ruta*, see [PRD §1](../../00-prd.md#1-name-and-positioning)): red background, white graphics.
+RutaWave needs its own icon for the Dock, Finder, the DMG window and notifications. The icon is a sound wave that is at the same time a rue flower (*Chervona Ruta*, see [PRD §1](../../00-prd.md#1-name-and-positioning)): red background, white graphics.
 
 ## Goals, non-goals, anti-goals
 

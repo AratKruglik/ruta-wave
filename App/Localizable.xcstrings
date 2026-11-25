@@ -181,12 +181,12 @@
         }
       }
     },
-    "Allow Rutawave in Login Items to open it at login." : {
+    "Allow RutaWave in Login Items to open it at login." : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дозвольте Rutawave в «Об’єктах входу», щоб програма відкривалася під час входу."
+            "value" : "Дозвольте RutaWave в «Об’єктах входу», щоб програма відкривалася під час входу."
           }
         }
       }
@@ -1596,12 +1596,12 @@
     "Queue (%lld)" : {
       "shouldTranslate" : false
     },
-    "Quit Rutawave" : {
+    "Quit RutaWave" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вийти з Rutawave"
+            "value" : "Вийти з RutaWave"
           }
         }
       }
@@ -1739,12 +1739,12 @@
         }
       }
     },
-    "Restart Rutawave to apply the language." : {
+    "Restart RutaWave to apply the language." : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перезапустіть Rutawave, щоб застосувати мову."
+            "value" : "Перезапустіть RutaWave, щоб застосувати мову."
           }
         }
       }
@@ -1789,15 +1789,15 @@
         }
       }
     },
-    "Rutawave" : {
+    "RutaWave" : {
       "shouldTranslate" : false
     },
-    "Rutawave, go to Home" : {
+    "RutaWave, go to Home" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rutawave, перейти на головну"
+            "value" : "RutaWave, перейти на головну"
           }
         }
       }
@@ -1975,12 +1975,12 @@
         }
       }
     },
-    "Show Rutawave" : {
+    "Show RutaWave" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Показати Rutawave"
+            "value" : "Показати RutaWave"
           }
         }
       }

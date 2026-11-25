@@ -8,7 +8,7 @@ for stages 2.x–5.x of the [backlog](06-backlog.md).
 Behaviour follows YouTube Music; the layout follows the reference screenshots
 (see 07 §1). Labels as in the rest of the docs: **[observed]** — seen on
 `music.youtube.com` or in the screenshots; **[known]** — from open projects,
-verify when implementing; **[decision]** — a Rutawave choice.
+verify when implementing; **[decision]** — a RutaWave choice.
 
 Every part is described with the same headings:
 - **Shows** — content and layout order;
@@ -65,7 +65,7 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 
 ## 2. Top bar
 
-**Shows:** sidebar toggle, Rutawave wordmark, search field, back, forward,
+**Shows:** sidebar toggle, RutaWave wordmark, search field, back, forward,
 avatar (signed in) or **Sign in** pill (guest).
 
 **Actions**
