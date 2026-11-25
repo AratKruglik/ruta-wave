@@ -342,7 +342,7 @@ Kept in one place, [05](05-risks-and-scope.md). The ones that shape the product:
 
 Open questions that affect this PRD:
 #5 lyrics source, #6 optional plugins, #9 Intel, #10 auto-update.
-Question #1 (name, bundle ID, icon) is settled here; the icon is still open.
+Question #1 (name, bundle ID, icon) is settled here; the icon is done (2026-11-25, [spec](superpowers/specs/2026-11-25-app-icon-design.md)), pending the trademark review of #28.
 
 ---
 
