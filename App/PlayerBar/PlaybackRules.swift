@@ -5,6 +5,10 @@ enum PlaybackRules {
     static let volumeStep = 0.05
     static let maxEnqueueBatch = 200
     static let unavailableSkipDelay: Duration = .seconds(3)
+    /// Seconds of playback between two saves of the position for `resumeOnStart`; pausing and quitting save at once.
+    static let positionSaveInterval: TimeInterval = 5
+    /// How close to the saved position a resumed track must report before positions are saved again.
+    static let resumeTolerance: TimeInterval = 3
 
     static func nextRepeat(_ mode: RepeatMode) -> RepeatMode {
         switch mode {

@@ -126,4 +126,66 @@ struct PreferencesTests {
         preferences.setLibrarySort("x", for: "bogus")
         #expect(preferences.librarySort(for: "bogus") == nil)
     }
+
+    @Test func settingsDefaults() {
+        let (preferences, _) = makePreferences()
+        #expect(preferences.resumeOnStart)
+        #expect(preferences.lastPlayback == nil)
+        #expect(preferences.startingPage == nil)
+        #expect(!preferences.alwaysOnTop)
+        #expect(preferences.showDislikeButton)
+    }
+
+    @Test func lastPlaybackRoundTripsThroughItsThreeKeys() {
+        let (preferences, defaults) = makePreferences()
+        preferences.lastPlayback = LastPlayback(videoId: "dQw4w9WgXcQ", playlistId: "RDAMVM_x-1", elapsed: 42.5)
+        #expect(preferences.lastPlayback == LastPlayback(videoId: "dQw4w9WgXcQ", playlistId: "RDAMVM_x-1", elapsed: 42.5))
+        #expect(defaults.string(forKey: "lastVideoId") == "dQw4w9WgXcQ")
+        #expect(defaults.string(forKey: "lastPlaylistId") == "RDAMVM_x-1")
+        #expect(defaults.double(forKey: "lastElapsed") == 42.5)
+        preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: 1)
+        #expect(defaults.object(forKey: "lastPlaylistId") == nil)
+        preferences.lastPlayback = nil
+        for key in ["lastVideoId", "lastPlaylistId", "lastElapsed"] { #expect(defaults.object(forKey: key) == nil) }
+    }
+
+    @Test func lastPlaybackRefusesInvalidIdsAndPositions() {
+        let (preferences, defaults) = makePreferences()
+        preferences.lastPlayback = LastPlayback(videoId: "a b", playlistId: nil, elapsed: 1)
+        #expect(preferences.lastPlayback == nil)
+        preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: "PL/../x", elapsed: -5)
+        #expect(preferences.lastPlayback == LastPlayback(videoId: "abc", playlistId: nil, elapsed: 0))
+        preferences.lastPlayback = LastPlayback(videoId: "abc", playlistId: nil, elapsed: .nan)
+        #expect(preferences.lastPlayback?.elapsed == 0)
+        defaults.set(String(repeating: "a", count: 65), forKey: "lastVideoId")
+        #expect(preferences.lastPlayback == nil)
+        defaults.set("abc", forKey: "lastVideoId")
+        defaults.set("<script>", forKey: "lastPlaylistId")
+        defaults.set(Double.infinity, forKey: "lastElapsed")
+        #expect(preferences.lastPlayback == LastPlayback(videoId: "abc", playlistId: nil, elapsed: 0))
+    }
+
+    @Test func startingPageAcceptsOnlySections() {
+        let (preferences, defaults) = makePreferences()
+        for page in Preferences.startingPages {
+            preferences.startingPage = page
+            #expect(preferences.startingPage == page)
+        }
+        preferences.startingPage = "settings"
+        #expect(preferences.startingPage == "library", "an unknown value is refused, not stored")
+        defaults.set("settings", forKey: "startingPage")
+        #expect(preferences.startingPage == nil)
+        preferences.startingPage = nil
+        #expect(defaults.object(forKey: "startingPage") == nil)
+    }
+
+    @Test func togglesRoundTrip() {
+        let (preferences, _) = makePreferences()
+        preferences.resumeOnStart = false
+        preferences.alwaysOnTop = true
+        preferences.showDislikeButton = false
+        #expect(!preferences.resumeOnStart)
+        #expect(preferences.alwaysOnTop)
+        #expect(!preferences.showDislikeButton)
+    }
 }

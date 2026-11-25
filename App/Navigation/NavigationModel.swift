@@ -31,16 +31,24 @@ final class NavigationModel {
 
     /// Anything unreadable, of another version or implausibly deep starts at Home. Routes that belonged to another
     /// identity than the current one are dropped with the same rules sign-out and account switching use.
-    static func restored(from data: Data?, isSignedIn: Bool, authUserIndex: Int) -> NavigationModel {
+    /// A `startingPage` opens at the root of that section; the other sections keep their stacks.
+    static func restored(
+        from data: Data?, isSignedIn: Bool, authUserIndex: Int, startingPage: SidebarSection? = nil
+    ) -> NavigationModel {
         let model = NavigationModel()
-        guard let data, let saved = try? JSONDecoder().decode(Snapshot.self, from: data), saved.version == 1,
-              saved.paths.values.allSatisfy({ $0.count <= maxRestoredDepth }) else { return model }
-        model.selection = saved.section
-        model.paths = saved.paths
-        if saved.isSignedIn, !isSignedIn {
-            model.dropAccountRoutes()
-        } else if saved.isSignedIn != isSignedIn || saved.authUserIndex != authUserIndex {
-            model.dropIdentityRoutes()
+        if let data, let saved = try? JSONDecoder().decode(Snapshot.self, from: data), saved.version == 1,
+           saved.paths.values.allSatisfy({ $0.count <= maxRestoredDepth }) {
+            model.selection = saved.section
+            model.paths = saved.paths
+            if saved.isSignedIn, !isSignedIn {
+                model.dropAccountRoutes()
+            } else if saved.isSignedIn != isSignedIn || saved.authUserIndex != authUserIndex {
+                model.dropIdentityRoutes()
+            }
+        }
+        if let startingPage {
+            model.selection = startingPage == .library && !isSignedIn ? .home : startingPage
+            model.paths[model.selection] = []
         }
         return model
     }

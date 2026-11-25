@@ -10,7 +10,7 @@ import WebKit
 final class PlayerWindow {
     private let window: NSWindow
 
-    init(session: AuthSession, player: PlayerEngine) {
+    init(session: AuthSession, player: PlayerEngine, onStarted: @escaping @MainActor () -> Void) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1, height: 1), styleMask: .borderless, backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.isRestorable = false
@@ -20,7 +20,7 @@ final class PlayerWindow {
         window.backgroundColor = .clear
         window.hasShadow = false
         window.collectionBehavior = [.transient, .ignoresCycle, .canJoinAllSpaces]
-        window.contentView = NSHostingView(rootView: PlayerHostView(session: session, player: player))
+        window.contentView = NSHostingView(rootView: PlayerHostView(session: session, player: player, onStarted: onStarted))
         window.orderBack(nil)
     }
 }
@@ -28,6 +28,7 @@ final class PlayerWindow {
 private struct PlayerHostView: View {
     let session: AuthSession
     let player: PlayerEngine
+    let onStarted: @MainActor () -> Void
 
     var body: some View {
         PlayerHost(engine: player)
@@ -57,6 +58,8 @@ private struct PlayerHostView: View {
             // The engine owns the index: it restarts the player when the account changes (#81).
             await player.start(session.state, authUserIndex: authUserIndex)
         }
+        guard !Task.isCancelled else { return }
+        onStarted()
         #if DEBUG
         if let videoId = UserDefaults.standard.string(forKey: "debugVideoId") {
             player.load(videoId: videoId, playlistId: UserDefaults.standard.string(forKey: "debugPlaylistId"))

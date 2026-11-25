@@ -25,7 +25,7 @@ struct RutawaveApp: App {
             SidebarCommands()
             AppCommands(nowPlaying: app.nowPlaying)
         }
-        Settings { SettingsView() }
+        Settings { SettingsView(session: app.session) }
         #if DEBUG
         Window("Player Debug", id: "player-debug") { PlayerDebugView(player: app.player) }
         #endif
@@ -58,9 +58,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        playerWindow = PlayerWindow(session: session, player: player)
+        playerWindow = PlayerWindow(session: session, player: player) { [nowPlaying] in nowPlaying.resumeLastSession() }
         network.start()
         Task { await nowPlaying.run() }
         Task { await systemNowPlaying.run(player.events()) }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        nowPlaying.savePosition()
     }
 }

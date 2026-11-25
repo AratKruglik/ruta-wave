@@ -87,7 +87,62 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(newValue, forKey: Key.useArtworkColors) }
     }
 
+    /// Brings back the last track, paused where it was, at launch. On unless switched off.
+    public var resumeOnStart: Bool {
+        get { defaults.object(forKey: Key.resumeOnStart) == nil ? true : defaults.bool(forKey: Key.resumeOnStart) }
+        nonmutating set { defaults.set(newValue, forKey: Key.resumeOnStart) }
+    }
+
+    /// The track that was playing when the app last ran. Only ids and a position are kept, nothing tied to the account.
+    public var lastPlayback: LastPlayback? {
+        get {
+            guard let videoId = defaults.string(forKey: Key.lastVideoId).flatMap(Self.isPlayerId) else { return nil }
+            let elapsed = defaults.double(forKey: Key.lastElapsed)
+            return LastPlayback(
+                videoId: videoId, playlistId: defaults.string(forKey: Key.lastPlaylistId).flatMap(Self.isPlayerId),
+                elapsed: elapsed.isFinite && elapsed > 0 ? elapsed : 0)
+        }
+        nonmutating set {
+            guard let newValue, Self.isPlayerId(newValue.videoId) != nil else {
+                for key in [Key.lastVideoId, Key.lastPlaylistId, Key.lastElapsed] { defaults.removeObject(forKey: key) }
+                return
+            }
+            defaults.set(newValue.videoId, forKey: Key.lastVideoId)
+            if let playlistId = newValue.playlistId.flatMap(Self.isPlayerId) {
+                defaults.set(playlistId, forKey: Key.lastPlaylistId)
+            } else {
+                defaults.removeObject(forKey: Key.lastPlaylistId)
+            }
+            defaults.set(newValue.elapsed.isFinite ? max(newValue.elapsed, 0) : 0, forKey: Key.lastElapsed)
+        }
+    }
+
+    /// The sidebar section the window opens on: `home`, `explore` or `library`. `nil` (the default) reopens the last one.
+    public var startingPage: String? {
+        get { defaults.string(forKey: Key.startingPage).flatMap { Self.startingPages.contains($0) ? $0 : nil } }
+        nonmutating set {
+            if let newValue {
+                if Self.startingPages.contains(newValue) { defaults.set(newValue, forKey: Key.startingPage) }
+            } else {
+                defaults.removeObject(forKey: Key.startingPage)
+            }
+        }
+    }
+
+    /// Keeps the main window above other apps' windows.
+    public var alwaysOnTop: Bool {
+        get { defaults.bool(forKey: Key.alwaysOnTop) }
+        nonmutating set { defaults.set(newValue, forKey: Key.alwaysOnTop) }
+    }
+
+    /// Shows the dislike button in the player bar. On unless switched off.
+    public var showDislikeButton: Bool {
+        get { defaults.object(forKey: Key.showDislikeButton) == nil ? true : defaults.bool(forKey: Key.showDislikeButton) }
+        nonmutating set { defaults.set(newValue, forKey: Key.showDislikeButton) }
+    }
+
     public static let maxNavigationStateBytes = 64 * 1024
+    public static let startingPages: [String] = ["home", "explore", "library"]
 
     /// A sort option's label (or a local id), never the opaque request params.
     public func librarySort(for section: String) -> String? {
@@ -109,6 +164,15 @@ public struct Preferences: @unchecked Sendable {
         (1...8).contains(value.count) && value.allSatisfy { $0.isASCII && $0.isUppercase && $0.isLetter } ? value : nil
     }
 
+    /// The player's own id rule: 1…64 ASCII letters, digits, `-` and `_`.
+    private static func isPlayerId(_ value: String) -> String? {
+        (1...64).contains(value.count) && value.allSatisfy(isIdCharacter) ? value : nil
+    }
+
+    private static func isIdCharacter(_ character: Character) -> Bool {
+        character.isASCII && (character.isLetter || character.isNumber || character == "-" || character == "_")
+    }
+
     private static let repeatModes: Set<String> = ["off", "all", "one"]
 
     private enum Key {
@@ -123,5 +187,25 @@ public struct Preferences: @unchecked Sendable {
         static let appleLanguages = "AppleLanguages"
         static let navigationState = "navigationState"
         static let useArtworkColors = "useArtworkColors"
+        static let resumeOnStart = "resumeOnStart"
+        static let lastVideoId = "lastVideoId"
+        static let lastPlaylistId = "lastPlaylistId"
+        static let lastElapsed = "lastElapsed"
+        static let startingPage = "startingPage"
+        static let alwaysOnTop = "alwaysOnTop"
+        static let showDislikeButton = "showDislikeButton"
+    }
+}
+
+public struct LastPlayback: Sendable, Equatable {
+    public var videoId: String
+    public var playlistId: String?
+    /// Seconds into the track.
+    public var elapsed: TimeInterval
+
+    public init(videoId: String, playlistId: String?, elapsed: TimeInterval) {
+        self.videoId = videoId
+        self.playlistId = playlistId
+        self.elapsed = elapsed
     }
 }
