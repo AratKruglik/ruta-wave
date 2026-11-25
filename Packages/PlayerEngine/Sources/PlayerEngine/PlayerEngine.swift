@@ -20,7 +20,7 @@ public final class PlayerEngine {
     @ObservationIgnored var queueOffset = 0
     public private(set) var isAd = false
     public private(set) var isBuffering = false
-    public var authUserIndex = 0
+    public private(set) var authUserIndex = 0
     /// Set by the app: the engine has no InnerTube dependency, so a like is written through this closure.
     @ObservationIgnored public var rate: (@MainActor (_ videoId: String, _ status: LikeStatus) async throws -> Void)?
 
@@ -67,7 +67,9 @@ public final class PlayerEngine {
 
     private static let terminationReason = "Player web view is active"
 
-    public func start(_ state: AuthSession.State) async {
+    /// Starts the player for a session. A switch to another signed-in account stops the old one first,
+    /// so its track does not stay in Control Centre or resume under the new account.
+    public func start(_ state: AuthSession.State, authUserIndex: Int = 0) async {
         let ephemeral: Bool
         let cookies: [HTTPCookie]
         switch state {
@@ -79,7 +81,10 @@ public final class PlayerEngine {
             stop()
             return
         }
-        if webView != nil, isEphemeral == ephemeral { return }
+        let reuses = webView != nil && PlayerRules.reusesPlayer(
+            running: (isEphemeral, self.authUserIndex), wanted: (ephemeral, authUserIndex))
+        self.authUserIndex = authUserIndex
+        if reuses { return }
         stop()
 
         let store = ephemeral ? WKWebsiteDataStore.nonPersistent() : WKWebsiteDataStore.default()
