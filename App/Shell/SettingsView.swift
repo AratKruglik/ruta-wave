@@ -215,7 +215,7 @@ private struct AccountSettings: View {
                 switch account.state {
                 case .loading:
                     ProgressView().frame(maxWidth: .infinity)
-                case .loaded(let info, _):
+                case .loaded(let info):
                     LabeledContent("Signed in as") {
                         VStack(alignment: .trailing) {
                             Text(verbatim: info.name)
@@ -234,13 +234,8 @@ private struct AccountSettings: View {
         }
         .formStyle(.grouped)
         .fixedSize(horizontal: false, vertical: true)
-        .task(id: AccountKey(isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex)) {
+        .task(id: session.state.isSignedIn) {
             await account.load(session: session)
         }
     }
-}
-
-private struct AccountKey: Equatable {
-    let isSignedIn: Bool
-    let authUserIndex: Int
 }

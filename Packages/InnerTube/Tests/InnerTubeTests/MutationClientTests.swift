@@ -3,8 +3,7 @@ import Testing
 @testable import InnerTube
 
 private let credentials = Credentials(
-    cookies: [HTTPCookie(properties: [.name: "SAPISID", .value: "test-sapisid", .domain: ".youtube.com", .path: "/"])!],
-    authUserIndex: 1)
+    cookies: [HTTPCookie(properties: [.name: "SAPISID", .value: "test-sapisid", .domain: ".youtube.com", .path: "/"])!])
 
 private func body(_ request: URLRequest) throws -> JSONValue {
     try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))
@@ -185,7 +184,7 @@ private func ok(_ json: String = "{}") -> Step { .status(200, json) }
     @Test func unauthorizedAndMissingSAPISID() async {
         let script = Script([.status(401, "{}")])
         await #expect(throws: InnerTubeError.unauthorized) { try await script.client().rate(videoId: "v", .like, credentials: credentials) }
-        let noCookie = Credentials(cookies: [], authUserIndex: 0)
+        let noCookie = Credentials(cookies: [])
         let silent = Script([ok()])
         await #expect(throws: InnerTubeError.missingSAPISID) { try await silent.client().rate(videoId: "v", .like, credentials: noCookie) }
         #expect(silent.requests.isEmpty)

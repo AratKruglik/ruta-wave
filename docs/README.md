@@ -7,7 +7,7 @@ Project goal: reproduce the capabilities of **YouTube Music Desktop**
 (`com.github.th-ch.youtube-music` 3.12.0, the `pear-devs/pear-desktop` project, MIT)
 as a native macOS app written in Swift with a fully native interface.
 
-Status as of 2026-11-18: stages 0 and 1.1–1.3 are merged (skeleton, sign-in, InnerTube core, account switching); guest mode (1.4) is in progress.
+Status as of 2026-11-18: stages 0 and 1.1–1.3 are merged (skeleton, sign-in, InnerTube core); guest mode (1.4) is in progress.
 
 ## Contents
 

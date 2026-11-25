@@ -3,15 +3,6 @@ import Testing
 @testable import PlayerEngine
 
 struct PlayerRulesTests {
-    @Test func aRunningPlayerIsReusedOnlyForTheSameModeAndAccount() {
-        #expect(PlayerRules.reusesPlayer(running: (false, 1), wanted: (false, 1)))
-        #expect(PlayerRules.reusesPlayer(running: (true, 0), wanted: (true, 0)))
-        #expect(PlayerRules.reusesPlayer(running: (true, 2), wanted: (true, 0)))
-        #expect(!PlayerRules.reusesPlayer(running: (false, 0), wanted: (false, 1)))
-        #expect(!PlayerRules.reusesPlayer(running: (true, 0), wanted: (false, 0)))
-        #expect(!PlayerRules.reusesPlayer(running: (false, 0), wanted: (true, 0)))
-    }
-
     @Test func allowsPlayerHost() {
         #expect(PlayerRules.isAllowedMainFrameNavigation(URL(string: "https://music.youtube.com/watch?v=x")))
         #expect(PlayerRules.isAllowedMainFrameNavigation(URL(string: "https://music.youtube.com:443/")))
@@ -50,22 +41,20 @@ struct PlayerRulesTests {
     }
 
     @Test func loadURLForGuestIsWatchURL() {
-        #expect(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", authUserIndex: nil)?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1")
+        #expect(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", signedIn: false)?.absoluteString == "https://music.youtube.com/watch?v=abc&list=PL1")
     }
 
-    @Test(arguments: [0, 2])
-    func loadURLForAccountGoesThroughSignin(_ index: Int) throws {
-        let url = try #require(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", authUserIndex: index))
-        #expect(url.absoluteString == "https://music.youtube.com/signin?action_handle_signin=true&authuser=\(index)&next=/watch%3Fv%3Dabc%26list%3DPL1")
+    @Test func loadURLForAccountGoesThroughSignin() throws {
+        let url = try #require(PlayerRules.loadURL(videoId: "abc", playlistId: "PL1", signedIn: true))
+        #expect(url.absoluteString == "https://music.youtube.com/signin?action_handle_signin=true&authuser=0&next=/watch%3Fv%3Dabc%26list%3DPL1")
         let items = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
         #expect(items.map(\.name) == ["action_handle_signin", "authuser", "next"])
         #expect(items.last?.value == "/watch?v=abc&list=PL1")
         #expect(PlayerRules.isAllowedMainFrameNavigation(url))
     }
 
-    @Test func loadURLRejectsNegativeIndexAndBadIDs() {
-        #expect(PlayerRules.loadURL(videoId: "abc", playlistId: nil, authUserIndex: -1) == nil)
-        #expect(PlayerRules.loadURL(videoId: "a&b", playlistId: nil, authUserIndex: 1) == nil)
+    @Test func loadURLRejectsBadIDs() {
+        #expect(PlayerRules.loadURL(videoId: "a&b", playlistId: nil, signedIn: true) == nil)
     }
 
     @Test(arguments: ["a&list=evil", "a#b", "a=b", "", "a b", String(repeating: "a", count: 65)])

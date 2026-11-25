@@ -28,6 +28,11 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
 
     init() {
         defaults = UserDefaults(suiteName: UUID().uuidString)!
+        defaults.set(true, forKey: "singleAccountMigrated")
+    }
+
+    private func unmigratedDefaults() -> UserDefaults {
+        UserDefaults(suiteName: UUID().uuidString)!
     }
 
     @Test func isSignedInOnlyForSignedIn() {
@@ -49,11 +54,9 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
     @Test func restoreDropsCorruptEntry() {
         let keychain = KeychainSpy()
         keychain.stored = Data("x".utf8)
-        defaults.set(2, forKey: "authUserIndex")
         let session = AuthSession(keychain: keychain, defaults: defaults)
         guard case .signedOut = session.state else { Issue.record("expected signedOut"); return }
         #expect(keychain.deleteCount == 1)
-        #expect(session.authUserIndex == 0)
     }
 
     @Test func cancelSignInKeepsSignedInSession() async throws {
@@ -136,12 +139,10 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
     @Test func expireSessionSignsOutAndFlags() async throws {
         let keychain = KeychainSpy()
         let (session, cookies) = try signedInSession(keychain)
-        session.authUserIndex = 2
         await session.expireSession(cookies: cookies)
         guard case .signedOut = session.state else { Issue.record("expected signedOut"); return }
         #expect(session.isSessionExpired)
         #expect(keychain.deleteCount == 1)
-        #expect(session.authUserIndex == 0)
         await session.expireSession(cookies: cookies)
         #expect(keychain.deleteCount == 1)
     }
@@ -193,5 +194,106 @@ private final class KeychainSpy: KeychainStore, @unchecked Sendable {
         #expect(session.isSessionExpired)
         #expect(session.completeSignIn(with: SessionCookies.requiredNames.map { makeCookie($0) }))
         #expect(!session.isSessionExpired)
+    }
+
+    @Test func completeSignInDoesNotOverwriteSignedInSession() throws {
+        let keychain = KeychainSpy()
+        let (session, cookies) = try signedInSession(keychain)
+        #expect(!session.completeSignIn(with: SessionCookies.requiredNames.map { makeCookie($0, domain: "music.youtube.com") }))
+        guard case .signedIn(let current) = session.state else { Issue.record("expected signedIn"); return }
+        #expect(current == cookies)
+    }
+
+    @Test(arguments: [nil, 1] as [Int?])
+    func migrationWipesSignedInSessionOnce(legacyIndex: Int?) async throws {
+        let fresh = unmigratedDefaults()
+        if let legacyIndex { fresh.set(legacyIndex, forKey: "authUserIndex") }
+        let keychain = KeychainSpy()
+        keychain.stored = try validData()
+        let session = AuthSession(keychain: keychain, defaults: fresh)
+        guard case .signedOut = session.state else { Issue.record("expected signedOut"); return }
+        #expect(session.isSigningOut)
+        #expect(!session.completeSignIn(with: SessionCookies.requiredNames.map { makeCookie($0) }))
+        await session.migration?.value
+        #expect(keychain.deleteCount == 1)
+        #expect(fresh.bool(forKey: "singleAccountMigrated"))
+        #expect(fresh.object(forKey: "authUserIndex") == nil)
+        #expect(!session.isSessionExpired)
+        #expect(!session.isSigningOut)
+        #expect(session.droppedLegacySession)
+    }
+
+    @Test func migrationOfGuestOnlyWritesMarker() {
+        let fresh = unmigratedDefaults()
+        let keychain = KeychainSpy()
+        let session = AuthSession(keychain: keychain, defaults: fresh)
+        #expect(session.migration == nil)
+        #expect(keychain.deleteCount == 0)
+        #expect(fresh.bool(forKey: "singleAccountMigrated"))
+        #expect(!session.droppedLegacySession)
+    }
+
+    @Test func migratedSessionIsKept() throws {
+        let keychain = KeychainSpy()
+        let (session, _) = try signedInSession(keychain)
+        #expect(session.state.isSignedIn)
+        #expect(keychain.deleteCount == 0)
+    }
+
+    @Test func failedMigrationWipeRetriesOnNextLaunch() async throws {
+        let fresh = unmigratedDefaults()
+        let keychain = KeychainSpy()
+        keychain.stored = try validData()
+        keychain.deleteError = KeychainError(status: errSecInteractionNotAllowed)
+        let first = AuthSession(keychain: keychain, defaults: fresh)
+        await first.migration?.value
+        #expect(!fresh.bool(forKey: "singleAccountMigrated"))
+        guard case .signedOut = first.state else { Issue.record("expected signedOut"); return }
+
+        keychain.deleteError = nil
+        let second = AuthSession(keychain: keychain, defaults: fresh)
+        await second.migration?.value
+        #expect(fresh.bool(forKey: "singleAccountMigrated"))
+        #expect(keychain.stored == nil)
+    }
+
+    @Test func migrationWaitsForKeychainAndRunsOnRestore() async throws {
+        let fresh = unmigratedDefaults()
+        let keychain = KeychainSpy()
+        keychain.stored = try validData()
+        keychain.readError = KeychainError(status: errSecInteractionNotAllowed)
+        let session = AuthSession(keychain: keychain, defaults: fresh)
+        #expect(!fresh.bool(forKey: "singleAccountMigrated"))
+        #expect(session.migration == nil)
+        keychain.readError = nil
+        session.restore()
+        await session.migration?.value
+        #expect(keychain.deleteCount == 1)
+        #expect(fresh.bool(forKey: "singleAccountMigrated"))
+    }
+
+    @Test func guestWithUnreadableKeychainWipesWebDataBeforeMigration() async {
+        let fresh = unmigratedDefaults()
+        let keychain = KeychainSpy()
+        keychain.readError = KeychainError(status: errSecInteractionNotAllowed)
+        let session = AuthSession(keychain: keychain, defaults: fresh)
+        session.continueAsGuest()
+        #expect(session.isSigningOut)
+        #expect(session.droppedLegacySession)
+        #expect(!session.completeSignIn(with: SessionCookies.requiredNames.map { makeCookie($0) }))
+        await session.migration?.value
+        #expect(!session.isSigningOut)
+        #expect(keychain.deleteCount == 0)
+        #expect(!fresh.bool(forKey: "singleAccountMigrated"))
+    }
+
+    @Test func guestWithUnreadableKeychainAfterMigrationSkipsWipe() {
+        let keychain = KeychainSpy()
+        keychain.readError = KeychainError(status: errSecInteractionNotAllowed)
+        let session = AuthSession(keychain: keychain, defaults: defaults)
+        session.continueAsGuest()
+        #expect(session.migration == nil)
+        #expect(!session.isSigningOut)
+        #expect(!session.droppedLegacySession)
     }
 }

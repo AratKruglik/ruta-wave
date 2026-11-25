@@ -15,11 +15,6 @@ public enum PlayerRules {
 
     private static let allowedArtworkHostSuffixes = [".googleusercontent.com", ".ggpht.com"]
 
-    /// A running player is kept only for the same mode and, when signed in, the same account.
-    static func reusesPlayer(running: (ephemeral: Bool, authUserIndex: Int), wanted: (ephemeral: Bool, authUserIndex: Int)) -> Bool {
-        running.ephemeral == wanted.ephemeral && (wanted.ephemeral || running.authUserIndex == wanted.authUserIndex)
-    }
-
     static func isAllowedMainFrameNavigation(_ url: URL?) -> Bool {
         guard let url, url.scheme == "https", url.host?.lowercased() == playerHost,
               url.user == nil, url.password == nil else { return false }
@@ -45,12 +40,12 @@ public enum PlayerRules {
         return components.url
     }
 
-    /// `authUserIndex` is nil for a guest. The site ignores `authuser` on `/watch` and keeps the last account it
-    /// switched to, so signed-in playback always goes through `/signin`, the site's own account switch, even for index 0.
-    static func loadURL(videoId: String, playlistId: String?, authUserIndex: Int?) -> URL? {
+    /// The site ignores `authuser` on `/watch` and keeps the last account it switched to,
+    /// so signed-in playback always goes through `/signin`, the site's own account switch, even for index 0.
+    static func loadURL(videoId: String, playlistId: String?, signedIn: Bool) -> URL? {
         guard let watch = watchURL(videoId: videoId, playlistId: playlistId) else { return nil }
-        guard let authUserIndex else { return watch }
-        guard authUserIndex >= 0, let query = watch.query else { return nil }
+        guard signedIn else { return watch }
+        guard let query = watch.query else { return nil }
         var valueAllowed = CharacterSet.urlQueryAllowed
         valueAllowed.remove(charactersIn: "&=?+")
         guard let next = "/watch?\(query)".addingPercentEncoding(withAllowedCharacters: valueAllowed) else { return nil }
@@ -58,7 +53,7 @@ public enum PlayerRules {
         components.scheme = "https"
         components.host = playerHost
         components.path = "/signin"
-        components.percentEncodedQuery = "action_handle_signin=true&authuser=\(authUserIndex)&next=\(next)"
+        components.percentEncodedQuery = "action_handle_signin=true&authuser=0&next=\(next)"
         return components.url
     }
 

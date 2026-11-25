@@ -209,10 +209,10 @@ struct NavigationModelTests {
         #expect(!model.isPlayerPagePresented)
     }
 
-    private func saved(signedIn: Bool = true, user: Int = 0, build: (NavigationModel) -> Void) throws -> Data {
+    private func saved(signedIn: Bool = true, build: (NavigationModel) -> Void) throws -> Data {
         let model = NavigationModel()
         build(model)
-        return try JSONEncoder().encode(model.snapshot(isSignedIn: signedIn, authUserIndex: user))
+        return try JSONEncoder().encode(model.snapshot(isSignedIn: signedIn))
     }
 
     @Test func restoreRoundTripsSectionAndStacks() throws {
@@ -222,7 +222,7 @@ struct NavigationModelTests {
             model.select(.library)
             model.push(.playlist(browseId: "p"))
         }
-        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0)
+        let model = NavigationModel.restored(from: data, isSignedIn: true)
         #expect(model.selection == .library)
         #expect(model.path(for: .library) == [.playlist(browseId: "p")])
         #expect(model.path(for: .home) == [.explore(.charts), .album(browseId: "a")])
@@ -236,7 +236,7 @@ struct NavigationModelTests {
             model.push(.explore(.charts))
             model.push(.album(browseId: "a"))
         }
-        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0)
+        let model = NavigationModel.restored(from: data, isSignedIn: true)
         model.back()
         #expect(model.path(for: .home) == [.explore(.charts)])
         model.back()
@@ -250,7 +250,7 @@ struct NavigationModelTests {
             model.select(.library)
             model.push(.history)
         }
-        let model = NavigationModel.restored(from: data, isSignedIn: false, authUserIndex: 0)
+        let model = NavigationModel.restored(from: data, isSignedIn: false)
         #expect(model.selection == .home)
         #expect(model.path(for: .library).isEmpty)
         #expect(model.path(for: .home) == [.album(browseId: "a")])
@@ -261,28 +261,24 @@ struct NavigationModelTests {
             model.push(.album(browseId: "a"))
             model.push(.search(query: "q", filter: nil))
         }
-        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0)
+        let model = NavigationModel.restored(from: data, isSignedIn: true)
         #expect(model.path(for: .home) == [.album(browseId: "a")])
     }
 
-    @Test func differentAccountDropsIdentityRoutesOnly() throws {
-        let data = try saved(user: 0) { model in
-            model.push(.album(browseId: "a"))
-            model.push(.search(query: "q", filter: nil))
-            model.select(.library)
-        }
-        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 1)
-        #expect(model.selection == .library)
-        #expect(model.path(for: .home) == [.album(browseId: "a")])
+    @Test func snapshotSavedWithLegacyAccountIndexStillRestores() {
+        let json = #"{"version":1,"section":{"home":{}},"isSignedIn":true,"authUserIndex":1,"paths":[{"home":{}},[{"history":{}}]]}"#
+        let model = NavigationModel.restored(from: Data(json.utf8), isSignedIn: true)
+        #expect(model.selection == .home)
+        #expect(model.path(for: .home) == [.history])
     }
 
     @Test func unreadableVersionedOrDeepSnapshotsStartAtHome() throws {
-        let deep = NavigationModel.Snapshot(section: .explore, paths: [.explore: Array(repeating: .history, count: NavigationModel.maxRestoredDepth + 1)], isSignedIn: true, authUserIndex: 0)
+        let deep = NavigationModel.Snapshot(section: .explore, paths: [.explore: Array(repeating: .history, count: NavigationModel.maxRestoredDepth + 1)], isSignedIn: true)
         var future = deep
         future.paths = [:]
         future.version = 2
         for data in [Data("junk".utf8), try JSONEncoder().encode(deep), try JSONEncoder().encode(future), nil] {
-            let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0)
+            let model = NavigationModel.restored(from: data, isSignedIn: true)
             #expect(model.selection == .home)
             #expect(model.path(for: .explore).isEmpty)
         }
@@ -294,7 +290,7 @@ struct StartingPageTests {
     private func saved(build: (NavigationModel) -> Void) throws -> Data {
         let model = NavigationModel()
         build(model)
-        return try JSONEncoder().encode(model.snapshot(isSignedIn: true, authUserIndex: 0))
+        return try JSONEncoder().encode(model.snapshot(isSignedIn: true))
     }
 
     @Test func startingPageOpensAtTheRootOfItsSection() throws {
@@ -303,7 +299,7 @@ struct StartingPageTests {
             model.select(.explore)
             model.push(.explore(.charts))
         }
-        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0, startingPage: .home)
+        let model = NavigationModel.restored(from: data, isSignedIn: true, startingPage: .home)
         #expect(model.selection == .home)
         #expect(model.path(for: .home).isEmpty)
         #expect(model.path(for: .explore) == [.explore(.charts)], "other sections keep their stacks")
@@ -314,18 +310,18 @@ struct StartingPageTests {
             model.select(.explore)
             model.push(.explore(.charts))
         }
-        let model = NavigationModel.restored(from: data, isSignedIn: true, authUserIndex: 0, startingPage: nil)
+        let model = NavigationModel.restored(from: data, isSignedIn: true, startingPage: nil)
         #expect(model.selection == .explore)
         #expect(model.path(for: .explore) == [.explore(.charts)])
     }
 
     @Test func startingPageAppliesWithoutASnapshot() {
-        let model = NavigationModel.restored(from: nil, isSignedIn: true, authUserIndex: 0, startingPage: .library)
+        let model = NavigationModel.restored(from: nil, isSignedIn: true, startingPage: .library)
         #expect(model.selection == .library)
     }
 
     @Test func guestStartingOnLibraryOpensHome() {
-        let model = NavigationModel.restored(from: nil, isSignedIn: false, authUserIndex: 0, startingPage: .library)
+        let model = NavigationModel.restored(from: nil, isSignedIn: false, startingPage: .library)
         #expect(model.selection == .home)
     }
 

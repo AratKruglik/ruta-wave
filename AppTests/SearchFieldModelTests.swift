@@ -15,7 +15,7 @@ private final class Recorder: @unchecked Sendable {
 
 private struct Failure: Error {}
 
-private let signedIn = Credentials(cookies: [], authUserIndex: 0)
+private let signedIn = Credentials(cookies: [])
 
 private func entry(_ query: String) -> SearchHistoryEntry { SearchHistoryEntry(query: query, feedbackToken: "t-\(query)") }
 

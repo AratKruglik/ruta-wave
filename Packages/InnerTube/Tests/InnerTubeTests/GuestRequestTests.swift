@@ -71,7 +71,7 @@ private let syntheticVisitor = "CgtTWU5USEVUSUMxMjM%3D"
     @Test func authenticatedRequestHasNoVisitorHeader() throws {
         let cookie = try #require(HTTPCookie(properties: [.name: "SAPISID", .value: "test-root", .domain: ".youtube.com", .path: "/"]))
         let request = try InnerTubeRequest.make(
-            endpoint: "x", cookies: [cookie], authUserIndex: 0, now: Date(timeIntervalSince1970: 1_700_000_000), locale: .current)
+            endpoint: "x", cookies: [cookie], now: Date(timeIntervalSince1970: 1_700_000_000), locale: .current)
         #expect(request.value(forHTTPHeaderField: "X-Goog-Visitor-Id") == nil)
         #expect(request.value(forHTTPHeaderField: "Authorization") != nil)
     }
@@ -92,9 +92,9 @@ private let syntheticVisitor = "CgtTWU5USEVUSUMxMjM%3D"
 
     @Test func guestRequestIgnoresAmbientSessionCookies() throws {
         let cookie = try #require(HTTPCookie(properties: [.name: "SAPISID", .value: "test-root", .domain: ".youtube.com", .path: "/"]))
-        let signed = try InnerTubeRequest.make(endpoint: "browse", cookies: [cookie], authUserIndex: 1, now: Date(timeIntervalSince1970: 1_700_000_000), locale: .current)
+        let signed = try InnerTubeRequest.make(endpoint: "browse", cookies: [cookie], now: Date(timeIntervalSince1970: 1_700_000_000), locale: .current)
         let guest = try InnerTubeRequest.makeGuest(endpoint: "browse", visitorData: syntheticVisitor, locale: .current)
-        #expect(signed.value(forHTTPHeaderField: "X-Goog-AuthUser") == "1")
+        #expect(signed.value(forHTTPHeaderField: "X-Goog-AuthUser") == "0")
         for header in ["Cookie", "Authorization", "X-Goog-AuthUser"] {
             #expect(guest.value(forHTTPHeaderField: header) == nil)
         }

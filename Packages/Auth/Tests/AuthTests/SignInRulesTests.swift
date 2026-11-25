@@ -73,9 +73,8 @@ func makeCookie(_ name: String, domain: String = ".youtube.com", expires: Date? 
         #expect(SignInRules.musicCookies(kept + dropped).map(\.domain) == kept.map(\.domain))
     }
 
-    @Test func signInURLsStartOnAllowedHostsOverHTTPS() {
+    @Test func signInURLStartsOnAllowedHostOverHTTPS() {
         #expect(SignInRules.isAllowedMainFrameNavigation(SignInRules.signInURL))
-        #expect(SignInRules.isAllowedMainFrameNavigation(SignInRules.addAccountURL))
     }
 
     @Test func safariTokenPresent() {

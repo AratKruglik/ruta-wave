@@ -87,13 +87,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let preferences = Preferences()
+        // The single-account migration signs out without an isSignedIn change, so no observer clears the old account's track.
+        if session.droppedLegacySession { preferences.lastPlayback = nil }
         if preferences.resumeOnStart, let videoId = preferences.lastPlayback?.videoId {
             trackNotifier.skipRestored(videoId: videoId)
         }
         UNUserNotificationCenter.current().delegate = self
         playerWindow = PlayerWindow(
             session: session, player: player,
-            onStarted: { [nowPlaying] in nowPlaying.resumeLastSession() },
+            onStarted: { [nowPlaying, session] in
+                // A migration after "Try again" or "Continue without signing in" runs after launch.
+                if session.droppedLegacySession { Preferences().lastPlayback = nil }
+                nowPlaying.resumeLastSession()
+            },
             onIdentityChange: { [nowPlaying, toasts] in
                 nowPlaying.resetAccountState()
                 toasts.reset()

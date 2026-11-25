@@ -77,47 +77,45 @@ private let sha1OfEmptySapisid = "0eb41bc5ca54cb1b817a11d7817b406798ea2ab5"
     private let base = [cookie("SAPISID", "test-root", domain: ".youtube.com")]
 
     @Test func userAgentAndContentType() throws {
-        let request = try InnerTubeRequest.make(endpoint: "x", cookies: base, authUserIndex: 0, now: now, locale: en)
+        let request = try InnerTubeRequest.make(endpoint: "x", cookies: base, now: now, locale: en)
         #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
         #expect(request.value(forHTTPHeaderField: "User-Agent")?.contains(SignInRules.safariApplicationName) == true)
     }
 
     @Test func bareYoutubeDomainSAPISIDIsAccepted() throws {
         let request = try InnerTubeRequest.make(
-            endpoint: "x", cookies: [cookie("SAPISID", "test-bare", domain: "youtube.com")], authUserIndex: 0, now: now, locale: en)
+            endpoint: "x", cookies: [cookie("SAPISID", "test-bare", domain: "youtube.com")], now: now, locale: en)
         let expected = SAPISIDHash.make(sapisid: "test-bare", timestamp: 1_700_000_000, origin: InnerTubeRequest.origin)
         #expect(request.value(forHTTPHeaderField: "Authorization") == "SAPISIDHASH \(expected)")
     }
 
     @Test func emptyCookieListThrows() {
         #expect(throws: InnerTubeError.missingSAPISID) {
-            try InnerTubeRequest.make(endpoint: "x", cookies: [], authUserIndex: 0, now: now, locale: en)
+            try InnerTubeRequest.make(endpoint: "x", cookies: [], now: now, locale: en)
         }
     }
 
     @Test func cookieExpiringExactlyNowIsDropped() throws {
         let cookies = base + [cookie("EDGE", "test-edge", domain: ".youtube.com", expires: now)]
-        let request = try InnerTubeRequest.make(endpoint: "x", cookies: cookies, authUserIndex: 0, now: now, locale: en)
+        let request = try InnerTubeRequest.make(endpoint: "x", cookies: cookies, now: now, locale: en)
         #expect(request.value(forHTTPHeaderField: "Cookie")?.contains("test-edge") != true)
     }
 
     @Test func futureExpiryAndSessionCookiesAreKept() throws {
         let cookies = base + [cookie("FUT", "test-future", domain: ".youtube.com", expires: now.addingTimeInterval(3600))]
-        let request = try InnerTubeRequest.make(endpoint: "x", cookies: cookies, authUserIndex: 0, now: now, locale: en)
+        let request = try InnerTubeRequest.make(endpoint: "x", cookies: cookies, now: now, locale: en)
         let header = try #require(request.value(forHTTPHeaderField: "Cookie"))
         #expect(header.contains("FUT=test-future"))
         #expect(header.contains("SAPISID=test-root"))
     }
 
-    @Test func authUserIndexIsWrittenVerbatim() throws {
-        for index in [0, 7, 12] {
-            let request = try InnerTubeRequest.make(endpoint: "x", cookies: base, authUserIndex: index, now: now, locale: en)
-            #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "\(index)")
-        }
+    @Test func authUserHeaderIsAlwaysZero() throws {
+        let request = try InnerTubeRequest.make(endpoint: "x", cookies: base, now: now, locale: en)
+        #expect(request.value(forHTTPHeaderField: "X-Goog-AuthUser") == "0")
     }
 
     @Test func languageOnlyLocaleKeepsDefaultRegion() throws {
-        let request = try InnerTubeRequest.make(endpoint: "x", cookies: base, authUserIndex: 0, now: now, locale: Locale(identifier: "de"))
+        let request = try InnerTubeRequest.make(endpoint: "x", cookies: base, now: now, locale: Locale(identifier: "de"))
         let client = try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))["context"]?["client"]
         #expect(client?["hl"]?.string == "de")
         #expect(client?["gl"]?.string == "US")
@@ -125,7 +123,7 @@ private let sha1OfEmptySapisid = "0eb41bc5ca54cb1b817a11d7817b406798ea2ab5"
 
     @Test func contextCannotBeOverriddenByBody() throws {
         let request = try InnerTubeRequest.make(
-            endpoint: "x", body: ["context": "evil"], cookies: base, authUserIndex: 0, now: now, locale: en)
+            endpoint: "x", body: ["context": "evil"], cookies: base, now: now, locale: en)
         let body = try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))
         #expect(body["context"]?["client"]?["clientName"]?.string == "WEB_REMIX")
     }

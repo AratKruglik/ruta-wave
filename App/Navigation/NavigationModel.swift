@@ -20,20 +20,19 @@ final class NavigationModel {
         var section: SidebarSection
         var paths: [SidebarSection: [Route]]
         var isSignedIn: Bool
-        var authUserIndex: Int
     }
 
     static let maxRestoredDepth = 32
 
-    func snapshot(isSignedIn: Bool, authUserIndex: Int) -> Snapshot {
-        Snapshot(section: selection, paths: paths.filter { !$0.value.isEmpty }, isSignedIn: isSignedIn, authUserIndex: authUserIndex)
+    func snapshot(isSignedIn: Bool) -> Snapshot {
+        Snapshot(section: selection, paths: paths.filter { !$0.value.isEmpty }, isSignedIn: isSignedIn)
     }
 
     /// Anything unreadable, of another version or implausibly deep starts at Home. Routes that belonged to another
-    /// identity than the current one are dropped with the same rules sign-out and account switching use.
+    /// identity than the current one are dropped with the same rules sign-out uses.
     /// A `startingPage` opens at the root of that section; the other sections keep their stacks.
     static func restored(
-        from data: Data?, isSignedIn: Bool, authUserIndex: Int, startingPage: SidebarSection? = nil
+        from data: Data?, isSignedIn: Bool, startingPage: SidebarSection? = nil
     ) -> NavigationModel {
         let model = NavigationModel()
         if let data, let saved = try? JSONDecoder().decode(Snapshot.self, from: data), saved.version == 1,
@@ -42,7 +41,7 @@ final class NavigationModel {
             model.paths = saved.paths
             if saved.isSignedIn, !isSignedIn {
                 model.dropAccountRoutes()
-            } else if saved.isSignedIn != isSignedIn || saved.authUserIndex != authUserIndex {
+            } else if saved.isSignedIn != isSignedIn {
                 model.dropIdentityRoutes()
             }
         }

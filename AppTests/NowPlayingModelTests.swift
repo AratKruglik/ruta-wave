@@ -54,7 +54,7 @@ private struct Harness {
     ) {
         let prefs = preferences ?? Preferences(defaults: UserDefaults(suiteName: UUID().uuidString)!)
         self.preferences = prefs
-        let credentials = Credentials(cookies: [], authUserIndex: 0)
+        let credentials = Credentials(cookies: [])
         var resolveQueue: (@MainActor (WatchTarget, Credentials?) async throws -> [String])?
         if let resolve {
             resolveQueue = { target, credentials in

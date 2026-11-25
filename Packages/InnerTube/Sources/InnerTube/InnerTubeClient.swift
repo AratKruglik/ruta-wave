@@ -27,11 +27,9 @@ extension InnerTubeError {
 /// Signed-in identity for a request. A `nil` `Credentials` means a guest.
 public struct Credentials: Sendable {
     public let cookies: [HTTPCookie]
-    public let authUserIndex: Int
 
-    public init(cookies: [HTTPCookie], authUserIndex: Int) {
+    public init(cookies: [HTTPCookie]) {
         self.cookies = cookies
-        self.authUserIndex = authUserIndex
     }
 }
 
@@ -73,14 +71,8 @@ public actor InnerTubeClient {
         ClientVersion.shared.accept(ClientVersion.extract(fromPage: String(decoding: data, as: UTF8.self)))
     }
 
-    public func accountMenu(cookies: [HTTPCookie], authUserIndex: Int) async throws -> AccountInfo {
-        try AccountInfo(accountMenu: await post("account/account_menu", cookies: cookies, authUserIndex: authUserIndex))
-    }
-
-    public func accountSwitcher(cookies: [HTTPCookie], authUserIndex: Int) async throws -> [AccountListItem] {
-        let request = try InnerTubeRequest.makeGet(
-            path: "/getAccountSwitcherEndpoint", cookies: cookies, authUserIndex: authUserIndex, now: Date())
-        return AccountListItem.list(accountSwitcher: try await send(request))
+    public func accountMenu(cookies: [HTTPCookie]) async throws -> AccountInfo {
+        try AccountInfo(accountMenu: await post("account/account_menu", cookies: cookies))
     }
 
     public func connectAsGuest() async throws {
@@ -264,14 +256,12 @@ public actor InnerTubeClient {
     func post(
         _ endpoint: String,
         body: [String: any Sendable] = [:],
-        cookies: [HTTPCookie],
-        authUserIndex: Int
+        cookies: [HTTPCookie]
     ) async throws -> JSONValue {
         let request = try InnerTubeRequest.make(
             endpoint: endpoint,
             body: body,
             cookies: cookies,
-            authUserIndex: authUserIndex,
             now: Date(),
             locale: .current
         )
@@ -291,7 +281,7 @@ public actor InnerTubeClient {
     private func mutate(_ endpoint: String, body: [String: any Sendable], credentials: Credentials?) async throws -> Data {
         guard let credentials else { throw InnerTubeError.signInRequired }
         let request = try InnerTubeRequest.make(
-            endpoint: endpoint, body: body, cookies: credentials.cookies, authUserIndex: credentials.authUserIndex,
+            endpoint: endpoint, body: body, cookies: credentials.cookies,
             now: Date(), locale: .current)
         return try await attemptOnce(request)
     }
@@ -311,7 +301,7 @@ public actor InnerTubeClient {
 
     private func fetch(_ endpoint: String, body: [String: any Sendable], credentials: Credentials?) async throws -> JSONValue {
         guard let credentials else { return try await postGuest(endpoint, body: body) }
-        return try await post(endpoint, body: body, cookies: credentials.cookies, authUserIndex: credentials.authUserIndex)
+        return try await post(endpoint, body: body, cookies: credentials.cookies)
     }
 
     private func send(_ request: URLRequest) async throws -> JSONValue {

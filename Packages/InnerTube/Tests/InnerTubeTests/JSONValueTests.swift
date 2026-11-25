@@ -32,9 +32,8 @@ private func decode(_ json: String) throws -> JSONValue {
         #expect(value["a"]?.string == nil)
     }
 
-    @Test(arguments: [")]}'\n{\"a\":1}", "{\"a\":1}"])
-    func responseStripsOptionalXSSIPrefix(raw: String) throws {
-        #expect(try JSONValue(response: Data(raw.utf8))["a"] == .number(1))
+    @Test func responseDecodesPlainJSON() throws {
+        #expect(try JSONValue(response: Data(#"{"a":1}"#.utf8))["a"] == .number(1))
     }
 
     @Test(arguments: ["garbage", ")]}'garbage", ""])

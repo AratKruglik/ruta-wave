@@ -2,7 +2,6 @@ import Foundation
 
 public enum SignInRules {
     public static let signInURL = URL(string: "https://accounts.google.com/ServiceLogin?ltmpl=music&service=youtube&continue=https%3A%2F%2Fmusic.youtube.com%2F")!
-    public static let addAccountURL = URL(string: "https://accounts.google.com/AddSession?ltmpl=music&service=youtube&continue=https%3A%2F%2Fmusic.youtube.com%2F")!
 
     public static let allowedHosts: Set<String> = [
         "accounts.google.com", "accounts.youtube.com",

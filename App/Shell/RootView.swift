@@ -10,7 +10,7 @@ private struct ThemeKey: Equatable {
 }
 
 private struct ReloadKey: Equatable {
-    let identity: ContentIdentity
+    let identity: Bool
     let attempt: Int
 }
 
@@ -32,7 +32,7 @@ struct RootView: View {
     @State private var isAccountPresented = false
     @State private var isNewPlaylistPresented = false
     @State private var isCreatingPlaylist = false
-    @State private var sidebarIdentity: ContentIdentity?
+    @State private var sidebarIdentity: Bool?
     @State private var accountAttempt = 0
     @State private var sidebarAttempt = 0
     @State private var guestAttempt = 0
@@ -49,7 +49,7 @@ struct RootView: View {
         self.links = links
         let preferences = Preferences()
         _navigation = State(initialValue: .restored(
-            from: preferences.navigationState, isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex,
+            from: preferences.navigationState, isSignedIn: session.state.isSignedIn,
             startingPage: SidebarSection(preference: preferences.startingPage)))
         let client = InnerTubeClient()
         let searchLoader = SearchLoader.live(client)
@@ -103,8 +103,6 @@ struct RootView: View {
                 isAccountPresented = false
                 navigation.dropAccountRoutes()
             }
-        }
-        .onChange(of: session.contentIdentity) {
             browse.reset()
             searchField.reset()
             navigation.dropIdentityRoutes()
@@ -112,7 +110,7 @@ struct RootView: View {
             guest.reset()
             isNewPlaylistPresented = false
         }
-        .onChange(of: navigation.snapshot(isSignedIn: session.state.isSignedIn, authUserIndex: session.authUserIndex)) { _, snapshot in
+        .onChange(of: navigation.snapshot(isSignedIn: session.state.isSignedIn)) { _, snapshot in
             Preferences().navigationState = try? JSONEncoder().encode(snapshot)
         }
         .onChange(of: links.pending, initial: true) { _, link in
@@ -136,9 +134,6 @@ struct RootView: View {
         .onChange(of: session.isSessionExpired, initial: true) { _, expired in
             if expired { isSigningIn = true }
         }
-        .onChange(of: session.isAddingAccount) { _, adding in
-            if !adding { accountAttempt += 1 }
-        }
         .sheet(isPresented: Binding(get: { isSigningIn }, set: { if !$0 { cancelSignIn() } })) {
             SignInSheet(session: session, onCancel: cancelSignIn)
         }
@@ -147,14 +142,11 @@ struct RootView: View {
                 initial: NewPlaylistDraft(videoIds: navigation.pendingPlaylistVideoIds),
                 isCreating: isCreatingPlaylist, onCancel: { isNewPlaylistPresented = false }, onCreate: createPlaylist)
         }
-        .sheet(isPresented: Binding(get: { session.isAddingAccount }, set: { if !$0 { session.cancelAddAccount() } })) {
-            AddAccountSheet(session: session)
-        }
     }
 
     private var shell: some View {
         ShellView(
-            isSignedIn: session.state.isSignedIn, identity: session.contentIdentity, avatarURL: avatarURL,
+            isSignedIn: session.state.isSignedIn, avatarURL: avatarURL,
             sidebar: sidebar, guestFailed: !session.state.isSignedIn && guest.state == .failed, isOffline: !network.isOnline,
             isAccountPresented: $isAccountPresented, onRetrySidebar: { sidebarAttempt += 1 },
             onNewPlaylist: { navigation.requestNewPlaylist() },
@@ -162,13 +154,8 @@ struct RootView: View {
             onRetryGuest: { guestAttempt += 1 }, onSignIn: { isSigningIn = true }
         ) {
             AccountView(
-                state: account.state, authUserIndex: session.authUserIndex, isSigningOut: session.isSigningOut,
+                state: account.state, isSigningOut: session.isSigningOut,
                 signOutFailed: session.signOutError != nil,
-                onSwitch: { session.authUserIndex = $0 },
-                onAddAccount: {
-                    isAccountPresented = false
-                    session.addAccount()
-                },
                 onHistory: {
                     isAccountPresented = false
                     navigation.push(.history)
@@ -176,25 +163,25 @@ struct RootView: View {
                 onSignOut: { Task { await session.signOut() } },
                 onRetry: { accountAttempt += 1 })
         }
-        .task(id: ReloadKey(identity: session.contentIdentity, attempt: accountAttempt)) {
+        .task(id: ReloadKey(identity: session.state.isSignedIn, attempt: accountAttempt)) {
             await account.load(session: session)
         }
-        .task(id: ReloadKey(identity: session.contentIdentity, attempt: sidebarAttempt)) {
+        .task(id: ReloadKey(identity: session.state.isSignedIn, attempt: sidebarAttempt)) {
             // Reset here rather than in `onChange`: a reset that lands after this load started would drop its result.
-            if sidebarIdentity != session.contentIdentity {
+            if sidebarIdentity != session.state.isSignedIn {
                 sidebar.reset()
-                sidebarIdentity = session.contentIdentity
+                sidebarIdentity = session.state.isSignedIn
             }
             await sidebar.load()
         }
-        .task(id: ReloadKey(identity: session.contentIdentity, attempt: guestAttempt)) {
+        .task(id: ReloadKey(identity: session.state.isSignedIn, attempt: guestAttempt)) {
             guard !session.state.isSignedIn else { return }
             await guest.connect()
         }
     }
 
     private var avatarURL: URL? {
-        if case .loaded(let info, _) = account.state { info.avatarURL } else { nil }
+        if case .loaded(let info) = account.state { info.avatarURL } else { nil }
     }
 
     private func retryFailedLoads() {
@@ -255,20 +242,6 @@ private struct SignInSheet: View {
             }
             SignInView(session: session)
             Button("Cancel", action: onCancel)
-                .keyboardShortcut(.cancelAction)
-                .padding(Metrics.space8)
-        }
-        .frame(minWidth: 520, minHeight: 640)
-    }
-}
-
-private struct AddAccountSheet: View {
-    let session: AuthSession
-
-    var body: some View {
-        VStack(spacing: 0) {
-            SignInView(session: session)
-            Button("Cancel") { session.cancelAddAccount() }
                 .keyboardShortcut(.cancelAction)
                 .padding(Metrics.space8)
         }

@@ -3,7 +3,6 @@ import SwiftUI
 
 struct ShellView<AccountPopover: View>: View {
     let isSignedIn: Bool
-    let identity: ContentIdentity
     let avatarURL: URL?
     let sidebar: SidebarModel
     let guestFailed: Bool
@@ -43,7 +42,7 @@ struct ShellView<AccountPopover: View>: View {
                     model: sidebar, onSelectSection: navigation.select, onSelectPlaylist: openPlaylist,
                     onNewPlaylist: onNewPlaylist, onPlaylistRemoved: onPlaylistRemoved, onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
-                .id(identity)
+                .id(isSignedIn)
                 .accessibilityHidden(navigation.isPlayerPagePresented)
                 .safeAreaPadding(.top, Metrics.topBarHeight)
                 .ignoresSafeArea(.container, edges: .top)
@@ -122,7 +121,7 @@ struct ShellView<AccountPopover: View>: View {
                         .ignoresSafeArea(.container, edges: .top)
                 }
         }
-        .id(StackIdentity(section: navigation.selection, content: identity))
+        .id(StackIdentity(section: navigation.selection, content: isSignedIn))
         .contentMargins(.bottom, barInset, for: .scrollContent)
         .disabled(navigation.isPlayerPagePresented)
         .accessibilityHidden(navigation.isPlayerPagePresented)
@@ -168,7 +167,7 @@ struct ShellView<AccountPopover: View>: View {
 
 private struct StackIdentity: Hashable {
     let section: SidebarSection
-    let content: ContentIdentity
+    let content: Bool
 }
 
 private struct GuestBanner: View {
@@ -245,7 +244,7 @@ private struct ShellPreview: View {
 
     var body: some View {
         ShellView(
-            isSignedIn: isSignedIn, identity: ContentIdentity(isSignedIn: isSignedIn, authUserIndex: 0), avatarURL: nil,
+            isSignedIn: isSignedIn, avatarURL: nil,
             sidebar: sidebar, guestFailed: false, isOffline: false,
             isAccountPresented: .constant(false), onRetrySidebar: {}, onNewPlaylist: {}, onPlaylistRemoved: { _, _ in },
             onRetryGuest: {}, onSignIn: {},

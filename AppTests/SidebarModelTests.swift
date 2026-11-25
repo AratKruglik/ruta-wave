@@ -3,7 +3,7 @@ import Testing
 
 private struct Failure: Error {}
 
-private let signedIn = Credentials(cookies: [], authUserIndex: 0)
+private let signedIn = Credentials(cookies: [])
 
 private func playlist(_ id: String, title: String = "T") -> Playlist { Playlist(browseId: id, title: title) }
 

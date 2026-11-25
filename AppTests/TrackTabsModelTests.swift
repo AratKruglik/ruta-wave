@@ -10,7 +10,7 @@ private final class TabsCallLog {
 
 private struct Boom: Error {}
 
-private let tabsCredentials = Credentials(cookies: [], authUserIndex: 0)
+private let tabsCredentials = Credentials(cookies: [])
 
 @MainActor
 private func makeModel(

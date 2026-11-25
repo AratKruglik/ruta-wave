@@ -141,7 +141,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 | F-AUTH-1 | The app starts in guest mode with no sign-in step; browse, search and playback work without an account | P0 | 08 §1.1 | 1.4 |
 | F-AUTH-2 | Sign in on Google's own page inside the app; the password never passes through app code | P0 | 02 §6 | 1.1 ✓ |
 | F-AUTH-3 | The session survives a relaunch | P0 | — | 1.1 ✓ |
-| F-AUTH-4 | Several Google accounts in one session; switching reloads data and keeps playback | P1 | 08 §13 | 1.3 ✓ |
+| F-AUTH-4 | ~~Several Google accounts in one session; switching reloads data and keeps playback~~ — out of scope (decided no, single-account) | P1 | 08 §13 | 1.3 |
 | F-AUTH-5 | Sign out clears the session on this Mac (Keychain + web data) and returns to guest mode | P0 | 05 §2.4 | 1.1 ✓, 1.4 |
 | F-AUTH-6 | Account-only actions stay visible for guests and explain "Sign in to …" with a Sign in button | P0 | 08 §1.2 | 1.4, 4.x |
 | F-AUTH-7 | An expired session leads to a clear re-sign-in, not empty screens | P0 | 08 §14.1 | 2.1 |
@@ -249,9 +249,7 @@ decisions in [04](04-plugins.md).
    playlist → toast with Undo.
 5. **Queue work.** Play an album → open the player page → reorder Up next,
    remove a track, "Play next" from a context menu elsewhere, save queue as playlist.
-6. **Switch account.** Avatar → pick another account → every screen reloads,
-   the current track keeps playing.
-7. **Recover.** Network drops → offline banner → network returns → pages and
+6. **Recover.** Network drops → offline banner → network returns → pages and
    the player continue without a relaunch.
 
 ---
