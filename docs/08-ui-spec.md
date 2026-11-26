@@ -406,6 +406,18 @@ Loaded once per track when the tab is first selected; reset on a mode change.
 If the track changes to one without lyrics while the tab is open, the page
 falls back to Up next.
 
+**Karaoke (timed lyrics).** An experimental mode, switched on in Settings →
+Plugins ("Karaoke lyrics", default off, with a note that it may add load on the
+system while the Lyrics tab is open). With it on,
+each word is one of three states: sung (primary colour), current (filled
+progressively, or switched at once under Reduce Motion) and upcoming (secondary
+colour). The line is semibold while current. YouTube times lines only, so words
+are spread over the line by length and a caption above the lines says "Estimated timing" (tooltip:
+"Word timing is estimated from line timing"). A click on a word seeks to it, a
+click elsewhere on the line seeks to the line start; both do nothing during an
+ad. VoiceOver reads lines, not words. With the setting off, or on a line without
+word timing, the line-only highlight applies.
+
 ### 10.4. Comments tab
 Present in the reference (screenshot 1). **Finding (4.8, 2026-11-24).**
 

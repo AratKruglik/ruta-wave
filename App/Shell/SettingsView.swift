@@ -21,6 +21,8 @@ struct SettingsView: View {
             AccountSettings(session: session)
                 .tabItem { Label("Account", systemImage: "person.crop.circle") }
         }
+        .toggleStyle(.accentSwitch)
+        .focusEffectDisabled()
         .frame(width: 480)
     }
 }
@@ -191,9 +193,27 @@ private struct PluginsSettings: View {
             ForEach(registry.plugins, id: \.pluginId) { plugin in
                 PluginRow(plugin: plugin, state: registry.states[type(of: plugin).id])
             }
+            KaraokeSettings()
         }
         .formStyle(.grouped)
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private struct KaraokeSettings: View {
+    @State private var isOn = Preferences().karaokeEnabled
+
+    var body: some View {
+        Section {
+            Toggle("Karaoke lyrics", isOn: $isOn)
+            Text("Highlights each word as it is sung in the Lyrics tab")
+                .font(.rwCaption)
+                .foregroundStyle(.secondary)
+            Text("Experimental. It may add load on the system while the Lyrics tab is open.")
+                .font(.rwCaption)
+                .foregroundStyle(.secondary)
+        }
+        .onChange(of: isOn) { _, newValue in Preferences().karaokeEnabled = newValue }
     }
 }
 

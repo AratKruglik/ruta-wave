@@ -51,4 +51,12 @@ struct PlaybackRulesTests {
         #expect(PlaybackRules.formatRemaining(7, duration: 227) == "-3:40")
         #expect(PlaybackRules.formatRemaining(300, duration: 227) == "-0:00")
     }
+
+    @Test func extrapolatesBetweenTicks() {
+        let anchor = Date(timeIntervalSince1970: 100)
+        #expect(PlaybackRules.extrapolatedElapsed(10, since: anchor, now: anchor + 0.25, isRunning: false) == 10)
+        #expect(PlaybackRules.extrapolatedElapsed(10, since: anchor, now: anchor + 0.25, isRunning: true) == 10.25)
+        #expect(PlaybackRules.extrapolatedElapsed(10, since: anchor, now: anchor + 3, isRunning: true) == 10.5)
+        #expect(PlaybackRules.extrapolatedElapsed(10, since: anchor, now: anchor - 1, isRunning: true) == 10)
+    }
 }

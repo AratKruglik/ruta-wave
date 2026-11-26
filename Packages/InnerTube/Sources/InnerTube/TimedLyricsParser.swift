@@ -12,15 +12,23 @@ enum TimedLyricsParser {
         }
         if model.musicMessageModel != nil { return nil }
         guard let lyricsData = model.timedLyricsModel?.lyricsData else { throw .unexpectedResponse }
-        var lines: [TimedLyrics.Line] = []
+        var cues: [(text: String, start: TimeInterval, end: TimeInterval?)] = []
         for raw in lyricsData.timedLyricsData {
             guard let cue = raw.cueRange else { return nil }
             guard let milliseconds = Int(cue.startTimeMilliseconds), milliseconds >= 0 else { throw .unexpectedResponse }
             let text = raw.lyricLine.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !text.isEmpty { lines.append(.init(text: text, start: Double(milliseconds) / 1000)) }
+            let end = cue.endTimeMilliseconds.flatMap { Int($0) }.map { Double($0) / 1000 }
+            if !text.isEmpty { cues.append((text, Double(milliseconds) / 1000, end)) }
         }
-        guard !lines.isEmpty else { return nil }
-        return TimedLyrics(lines: lines.sorted { $0.start < $1.start }, source: lyricsData.sourceMessage)
+        guard !cues.isEmpty else { return nil }
+        cues.sort { $0.start < $1.start }
+        let lines = cues.enumerated().map { index, cue in
+            let next = index + 1 < cues.count ? cues[index + 1].start : nil
+            var end = cue.end.flatMap { $0 > cue.start ? $0 : nil } ?? next
+            if let limit = next, let value = end, value > limit { end = limit }
+            return WordTiming.line(cue.text, start: cue.start, end: end)
+        }
+        return TimedLyrics(lines: lines, source: lyricsData.sourceMessage)
     }
 
     private struct Response: Decodable {
@@ -28,7 +36,18 @@ enum TimedLyricsParser {
             struct Timed: Decodable {
                 struct LyricsData: Decodable {
                     struct Line: Decodable {
-                        struct Cue: Decodable { let startTimeMilliseconds: String }
+                        struct Cue: Decodable {
+                            let startTimeMilliseconds: String
+                            let endTimeMilliseconds: String?
+
+                            private enum CodingKeys: String, CodingKey { case startTimeMilliseconds, endTimeMilliseconds }
+
+                            init(from decoder: Decoder) throws {
+                                let container = try decoder.container(keyedBy: CodingKeys.self)
+                                startTimeMilliseconds = try container.decode(String.self, forKey: .startTimeMilliseconds)
+                                endTimeMilliseconds = try? container.decodeIfPresent(String.self, forKey: .endTimeMilliseconds)
+                            }
+                        }
                         let lyricLine: String
                         let cueRange: Cue?
                     }

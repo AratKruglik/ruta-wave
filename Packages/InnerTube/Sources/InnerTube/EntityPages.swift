@@ -231,22 +231,57 @@ public struct Lyrics: Sendable, Equatable {
 
 /// Lines sorted by `start`.
 public struct TimedLyrics: Sendable, Equatable {
+    public enum Timing: Sendable, Equatable { case measured, estimated }
+
+    public struct Word: Sendable, Equatable {
+        public let text: String
+        public let start: TimeInterval
+        public let end: TimeInterval
+
+        public init(text: String, start: TimeInterval, end: TimeInterval) {
+            self.text = text
+            self.start = start
+            self.end = end
+        }
+
+        /// 0...1 share of the word sung at `time`; 1 once a zero-length word is reached.
+        public func progress(at time: TimeInterval) -> Double {
+            guard time >= start else { return 0 }
+            guard end > start else { return 1 }
+            return min((time - start) / (end - start), 1)
+        }
+    }
+
     public struct Line: Sendable, Equatable {
         public let text: String
         public let start: TimeInterval
+        /// `nil` is an unknown end (line-only highlight).
+        public let end: TimeInterval?
+        /// Empty is a line-only highlight.
+        public let words: [Word]
 
-        public init(text: String, start: TimeInterval) {
+        public init(text: String, start: TimeInterval, end: TimeInterval? = nil, words: [Word] = []) {
             self.text = text
             self.start = start
+            self.end = end
+            self.words = words
         }
+    }
+
+    public struct Position: Sendable, Equatable {
+        public let line: Int
+        /// `nil` when the line has no words, or `time` is past the line's end (all sung).
+        public let word: Int?
     }
 
     public let lines: [Line]
     public let source: String?
+    public let timing: Timing
 
-    public init(lines: [Line], source: String?) {
+    public init(lines: [Line], source: String?, timing: Timing = .estimated) {
         self.lines = lines
         self.source = source
+        self.timing = timing
     }
 
     /// The last line that started at or before `time`. `nil` before the first line.
@@ -258,5 +293,15 @@ public struct TimedLyrics: Sendable, Equatable {
             if lines[middle].start <= time { low = middle + 1 } else { high = middle }
         }
         return low == 0 ? nil : low - 1
+    }
+
+    /// `nil` before the first line.
+    public func position(at time: TimeInterval) -> Position? {
+        guard let line = lineIndex(at: time) else { return nil }
+        let current = lines[line]
+        if current.words.isEmpty { return Position(line: line, word: nil) }
+        if let end = current.end, time >= end { return Position(line: line, word: nil) }
+        let word = current.words.lastIndex { $0.start <= time } ?? 0
+        return Position(line: line, word: word)
     }
 }

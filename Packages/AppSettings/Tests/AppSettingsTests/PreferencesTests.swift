@@ -134,6 +134,7 @@ struct PreferencesTests {
         #expect(preferences.startingPage == nil)
         #expect(!preferences.alwaysOnTop)
         #expect(preferences.showDislikeButton)
+        #expect(!preferences.karaokeEnabled)
     }
 
     @Test func lastPlaybackRoundTripsThroughItsThreeKeys() {
@@ -184,6 +185,8 @@ struct PreferencesTests {
         preferences.resumeOnStart = false
         preferences.alwaysOnTop = true
         preferences.showDislikeButton = false
+        preferences.karaokeEnabled = true
+        #expect(preferences.karaokeEnabled)
         #expect(!preferences.resumeOnStart)
         #expect(preferences.alwaysOnTop)
         #expect(!preferences.showDislikeButton)
