@@ -194,9 +194,6 @@ struct PreferencesTests {
         #expect(!preferences.showMenuBarExtra)
         #expect(!preferences.menuBarClickTogglesPlay)
         #expect(!preferences.hideDockIcon)
-        #expect(preferences.trackNotifications)
-        preferences.trackNotifications = false
-        #expect(!preferences.trackNotifications)
     }
 
     @Test func dockIconStaysVisibleWithoutTheMenuBarItem() {

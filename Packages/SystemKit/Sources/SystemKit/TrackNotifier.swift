@@ -42,6 +42,11 @@ public final class TrackNotifier {
         state.announcedVideoId = videoId
     }
 
+    public func cancel() {
+        postTask?.cancel()
+        postTask = nil
+    }
+
     func handle(_ event: PlayerEvent) {
         if case .stopped = event {
             postTask?.cancel()

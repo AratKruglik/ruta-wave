@@ -2,6 +2,7 @@ import Auth
 import AppSettings
 import InnerTube
 import PlayerEngine
+import Plugins
 import SwiftUI
 import SystemKit
 import UserNotifications
@@ -36,7 +37,7 @@ struct RutawaveApp: App {
             .windowResizability(.contentSize)
             .keyboardShortcut("m", modifiers: [.command, .shift])
             .handlesExternalEvents(matching: [])
-        Settings { SettingsView(session: app.session) }
+        Settings { SettingsView(session: app.session, plugins: app.plugins) }
         #if DEBUG
         Window("Player Debug", id: "player-debug") { PlayerDebugView(player: app.player) }
             .handlesExternalEvents(matching: [])
@@ -51,7 +52,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let toasts: ToastCenter
     let nowPlaying: NowPlayingModel
     let systemNowPlaying: SystemNowPlaying
-    let trackNotifier: TrackNotifier
+    let plugins: PluginRegistry
+    let notifications: NotificationsPlugin
     let network = NetworkMonitor()
     let links = LinkInbox()
     static let mainWindowId = "main"
@@ -73,8 +75,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             send: { [nowPlaying] in nowPlaying.perform($0) }, publish: { [player] in player.publishNowPlaying($0) })
         nowPlaying.albumChanged = { systemNowPlaying.setAlbum($1, for: $0) }
         self.systemNowPlaying = systemNowPlaying
-        trackNotifier = TrackNotifier(
-            posting: UserNotificationPosting(), isEnabled: { Preferences().trackNotifications }, isFrontmost: { NSApp.isActive })
+        NotificationsPlugin.migrateLegacySetting()
+        let notifications = NotificationsPlugin(posting: UserNotificationPosting(), isFrontmost: { NSApp.isActive })
+        self.notifications = notifications
+        plugins = PluginRegistry(plugins: [notifications], player: player)
         super.init()
         statusMenu = StatusMenu(
             nowPlaying: nowPlaying, showMainWindow: { [weak self] in self?.showMainWindow() },
@@ -90,7 +94,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // The single-account migration signs out without an isSignedIn change, so no observer clears the old account's track.
         if session.droppedLegacySession { preferences.lastPlayback = nil }
         if preferences.resumeOnStart, let videoId = preferences.lastPlayback?.videoId {
-            trackNotifier.skipRestored(videoId: videoId)
+            notifications.skipRestored(videoId: videoId)
         }
         UNUserNotificationCenter.current().delegate = self
         playerWindow = PlayerWindow(
@@ -107,10 +111,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         network.start()
         Task { await nowPlaying.run() }
         Task { await systemNowPlaying.run(player.events()) }
-        Task { await trackNotifier.run(player.events()) }
+        plugins.sync()
         Task {
             for await _ in NotificationCenter.default.notifications(named: UserDefaults.didChangeNotification) {
                 applyPresentation(revealsOnPolicyChange: true)
+                plugins.sync()
             }
         }
     }

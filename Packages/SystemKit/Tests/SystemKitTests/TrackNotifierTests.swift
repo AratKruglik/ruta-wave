@@ -148,6 +148,24 @@ struct TrackNotifierTests {
         #expect(await posting.posts.map(\.title) == ["A"])
     }
 
+    @Test func cancelStopsAnInFlightPost() async {
+        let posting = FakePosting()
+        let gate = Gate()
+        let started = Gate()
+        let notifier = notifier(posting) { _ in
+            await started.open()
+            await gate.wait()
+            return nil
+        }
+        notifier.handle(.songChanged(song("a", title: "A")))
+        let inFlight = notifier.currentPostTask
+        await started.wait()
+        notifier.cancel()
+        await gate.open()
+        await inFlight?.value
+        #expect(await posting.posts.isEmpty)
+    }
+
     @Test func aLoadedArtworkIsAttached() async {
         let posting = FakePosting()
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).jpg")

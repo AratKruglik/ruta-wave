@@ -34,7 +34,7 @@ RutaWave.app
 ```
 
 Dependencies point downwards: `InnerTube → Auth`, `PlayerEngine → Auth`,
-`Plugins → PlayerEngine, InnerTube, AppSettings`, `SystemKit → PlayerEngine, AppSettings`.
+`Plugins → PlayerEngine, InnerTube, AppSettings, SystemKit`, `SystemKit → PlayerEngine, AppSettings`.
 `InnerTube` and `PlayerEngine` do not know about each other; `Auth` and `AppSettings` are leaves.
 
 ## 3. Why audio goes through a hidden WKWebView
@@ -347,7 +347,7 @@ Principles:
 |---|---|
 | Now Playing in Control Centre | page Media Session, driven from an isolated `WKContentWorld` |
 | Media keys, headphones | Media Session action handlers → `PlayerEvent.remoteCommand` |
-| Track-change notifications | `UNUserNotificationCenter` with artwork |
+| Track-change notifications | the `notifications` plugin, over `UNUserNotificationCenter` with artwork |
 | App menu | SwiftUI `Commands` |
 | Menu bar item | AppKit `NSStatusItem` (`StatusMenu`): click-to-play needs the click itself, and `MenuBarExtra` has no API for it |
 | Dock menu | `NSApplicationDelegate.applicationDockMenu` |
@@ -381,7 +381,7 @@ A typed wrapper over `UserDefaults`. Mapping to the original's options:
 | `alwaysOnTop` | `alwaysOnTop` |
 | `startAtLogin` | `SMAppService` |
 | `tray`, `trayClickPlayPause`, `appVisible` | `showMenuBarExtra`, `menuBarClickTogglesPlay`, `hideDockIcon` (needs `showMenuBarExtra`; the Dock icon returns when the menu bar item is switched off) |
-| `plugins.notifications.enabled` (6.1, #32) | `trackNotifications` (on by default) until the plugin system takes it over |
+| `plugins.notifications.enabled` (6.1, #32) | `plugins.notifications.enabled` (on by default); a stored `trackNotifications` is copied there once at launch and removed |
 | `language` | `appLanguage`: `system` (default), `en`, `uk`; written as `AppleLanguages` in the app's defaults domain (removed for `system`); applies after a relaunch |
 | `proxy` | system proxy; no separate option |
 | `likeButtons`, `swapLikeButtonsOrder` | `showDislikeButton` |
@@ -402,21 +402,28 @@ same choice after the relaunch.
 protocol Plugin: AnyObject {
     static var id: String { get }
     static var title: LocalizedStringResource { get }
-    var isEnabled: Bool { get set }
-
-    func start(context: PluginContext) async
+    static var isEnabledByDefault: Bool { get }
+    func start(context: PluginContext) async throws   // returns promptly; long work in a task the plugin owns
     func stop() async
-    @ViewBuilder var settingsView: AnyView? { get }
 }
 
 struct PluginContext {
-    let player: PlayerControlling           // commands and current state
+    let player: any PlayerControlling       // commands and current state
     let events: AsyncStream<PlayerEvent>    // equivalent of subscribing to SongInfo
-    let innerTube: InnerTubeClient
     let settings: PluginSettings            // the plugins.<id>.* key space
-    let injectScript: (String) async -> Void // for plugins that run inside the page
 }
 ```
+
+`plugins.<id>.enabled` is the only on/off flag. `PluginRegistry.sync()` diffs it
+against the running set on every `UserDefaults` change, and each plugin's
+start/stop transitions run in their own serial chain, so a plugin that throws
+or hangs in `start` never holds up another. A failed start shows "Couldn't
+start" in the Plugins tab and the toggle stays on. A trap inside a plugin
+still crashes the app.
+
+Settings views live in `App/` keyed by plugin id (one String Catalog, UI in
+the app target), so the protocol has no `settingsView`. `innerTube` and
+`injectScript` join `PluginContext` with the first plugin that needs them.
 
 Plugins are built into the app and toggled in settings; there is no dynamic
 loading of third-party code. The list and the split across stages is in
