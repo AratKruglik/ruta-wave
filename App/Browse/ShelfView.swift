@@ -66,26 +66,14 @@ struct ShelfView: View {
                     .buttonStyle(.plain)
             }
             if isCarousel {
-                scrollButton("chevron.left", label: "Scroll left", isEnabled: (firstVisible ?? 0) > 0) { scroll(by: -visibleCount) }
-                scrollButton(
-                    "chevron.right", label: "Scroll right", isEnabled: (firstVisible ?? 0) + visibleCount < carouselCount
+                ScrollArrowButton(symbol: "chevron.left", label: "Scroll left", isEnabled: (firstVisible ?? 0) > 0) {
+                    scroll(by: -visibleCount)
+                }
+                ScrollArrowButton(
+                    symbol: "chevron.right", label: "Scroll right", isEnabled: (firstVisible ?? 0) + visibleCount < carouselCount
                 ) { scroll(by: visibleCount) }
             }
         }
-    }
-
-    private func scrollButton(_ symbol: String, label: LocalizedStringKey, isEnabled: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.rwIcon(Metrics.iconRow))
-                .foregroundStyle(isEnabled ? .textPrimary : .textDisabled)
-                .frame(width: Metrics.shelfControl, height: Metrics.shelfControl)
-                .background(.surfaceFill, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .disabled(!isEnabled)
-        .help(label)
-        .accessibilityHidden(true)
     }
 
     private func scroll(by delta: Int) {
