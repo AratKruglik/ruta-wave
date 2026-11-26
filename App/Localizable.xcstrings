@@ -937,6 +937,36 @@
         }
       }
     },
+    "Karaoke" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Караоке"
+          }
+        }
+      }
+    },
+    "Estimated timing" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Орієнтовний таймінг"
+          }
+        }
+      }
+    },
+    "Word timing is estimated from line timing" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Час слів оцінено за часом рядків"
+          }
+        }
+      }
+    },
     "Lyrics" : {
       "localizations" : {
         "uk" : {

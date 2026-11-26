@@ -142,6 +142,12 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(newValue, forKey: Key.showDislikeButton) }
     }
 
+    /// Highlights the sung word in timed lyrics. On unless switched off.
+    public var karaokeEnabled: Bool {
+        get { defaults.object(forKey: Key.karaokeEnabled) == nil ? true : defaults.bool(forKey: Key.karaokeEnabled) }
+        nonmutating set { defaults.set(newValue, forKey: Key.karaokeEnabled) }
+    }
+
     /// Adds a status item to the menu bar. Off unless switched on.
     public var showMenuBarExtra: Bool {
         get { defaults.bool(forKey: Key.showMenuBarExtra) }
@@ -216,6 +222,7 @@ public struct Preferences: @unchecked Sendable {
         static let startingPage = "startingPage"
         static let alwaysOnTop = "alwaysOnTop"
         static let showDislikeButton = "showDislikeButton"
+        static let karaokeEnabled = "karaokeEnabled"
         static let showMenuBarExtra = "showMenuBarExtra"
         static let menuBarClickTogglesPlay = "menuBarClickTogglesPlay"
         static let hideDockIcon = "hideDockIcon"

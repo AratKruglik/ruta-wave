@@ -51,4 +51,12 @@ enum PlaybackRules {
     static func formatRemaining(_ elapsed: TimeInterval, duration: TimeInterval) -> String {
         "-" + formatTime(max(duration - elapsed, 0))
     }
+
+    /// Longest stretch the clock runs past the last tick, so a stalled player cannot drag the lyrics ahead.
+    static let maxExtrapolation: TimeInterval = 0.5
+
+    static func extrapolatedElapsed(_ elapsed: TimeInterval, since anchor: Date, now: Date, isRunning: Bool) -> TimeInterval {
+        guard isRunning else { return elapsed }
+        return elapsed + min(max(now.timeIntervalSince(anchor), 0), maxExtrapolation)
+    }
 }
