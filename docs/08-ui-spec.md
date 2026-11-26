@@ -291,7 +291,8 @@ year", "N songs • duration" (uploaded tracks and podcast episodes are skipped,
   action row: "N selected", then icon + short label buttons: Next, Queue, Playlist,
   Remove (own), Clear. The full phrase ("Play next", "Add to queue",
   "Add to playlist…", "Remove from playlist", "Clear") is the tooltip and
-  the VoiceOver label.
+  the VoiceOver label. Where the labels do not fit (the Up Next panel), the
+  buttons show icons only.
 - Own playlist editing (Edit): rename, description, privacy, cover is not
   editable; drag rows to reorder; ⌫ removes selected rows. Each change is a
   `browse/edit_playlist` action **[known]** with Undo in a toast.

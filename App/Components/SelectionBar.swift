@@ -48,6 +48,11 @@ private struct TrackSelectionModifier: ViewModifier {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(NavigationModel.self) private var navigation
     @State private var popover: ItemPopover?
+    @State private var availableWidth: CGFloat = 0
+    @State private var fullWidth: CGFloat = 0
+
+    /// Labels drop to icons when the full bar does not fit, as in the narrow Up Next panel.
+    private var isCompact: Bool { fullWidth > availableWidth }
 
     private var order: [String] { songs.map(\.rowKey) }
     private var selectedSongs: [Song] { songs.filter { selection.contains($0.rowKey) } }
@@ -93,30 +98,28 @@ private struct TrackSelectionModifier: ViewModifier {
     private var bar: some View {
         let queueable = selectedSongs.filter(\.isAvailable).map(\.videoId)
         return HStack(spacing: Metrics.space12) {
-            Text("\(selection.count) selected")
-                .font(.rwTitle)
-                .foregroundStyle(.textPrimary)
+            countLabel
             Spacer(minLength: 0)
-            barButton(
-                LocalizedStringResource(
-                    "Play next (short)", defaultValue: "Next", comment: "Selection bar: play the selected songs next"),
-                systemImage: "text.line.first.and.arrowtriangle.forward", help: "Play next", disabled: queueable.isEmpty
-            ) { nowPlaying.enqueue(queueable, playNext: true) }
-            barButton(
-                "Queue", systemImage: "text.line.last.and.arrowtriangle.forward", help: "Add to queue",
-                disabled: queueable.isEmpty
-            ) { nowPlaying.enqueue(queueable, playNext: false) }
-            barButton("Playlist", systemImage: "text.badge.plus", help: "Add to playlist…", disabled: queueable.isEmpty) {
+            barButton(.playNext, help: "Play next", disabled: queueable.isEmpty) {
+                nowPlaying.enqueue(queueable, playNext: true)
+            }
+            barButton(.queue, help: "Add to queue", disabled: queueable.isEmpty) {
+                nowPlaying.enqueue(queueable, playNext: false)
+            }
+            barButton(.playlist, help: "Add to playlist…", disabled: queueable.isEmpty) {
                 popover = nowPlaying.isSignedIn
                     ? .addToPlaylist(videoIds: queueable) : .signIn(reason: String(localized: "Sign in to add songs to playlists"))
             }
             .itemPopover($popover)
             if onRemove != nil {
-                barButton("Remove", systemImage: "minus.circle", help: "Remove from playlist", disabled: false, action: remove)
+                barButton(.remove, help: "Remove from playlist", disabled: false, action: remove)
             }
-            barButton("Clear", systemImage: "xmark", help: "Clear", disabled: false) { selection.clear() }
+            barButton(.clear, help: "Clear", disabled: false) { selection.clear() }
                 .cancelShortcut(if: !navigation.isSearchFocused)
         }
+        .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self, of: \.size.width) { availableWidth = $0 }
+        .background { fullWidthProbe }
         .padding(.horizontal, Metrics.space16)
         .frame(height: Metrics.topBarHeight - Metrics.space16)
         .glassSurface(in: Capsule())
@@ -125,23 +128,78 @@ private struct TrackSelectionModifier: ViewModifier {
         .accessibilityElement(children: .contain)
     }
 
-    private func barButton(
-        _ title: LocalizedStringResource, systemImage: String, help: LocalizedStringKey, disabled: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Label {
-                Text(title)
-            } icon: {
-                Image(systemName: systemImage)
-            }
-            .labelStyle(.titleAndIcon)
+    private var countLabel: some View {
+        Text("\(selection.count) selected")
+            .font(.rwTitle)
+            .foregroundStyle(.textPrimary)
+            .lineLimit(1)
+    }
+
+    /// The bar's natural width with full labels; never drawn, only measured.
+    private var fullWidthProbe: some View {
+        HStack(spacing: Metrics.space12) {
+            countLabel
+            ForEach(BarLabel.shown(includingRemove: onRemove != nil), id: \.systemImage) { label($0, compact: false) }
         }
-        .buttonStyle(.plain)
+        .fixedSize()
+        .hidden()
+        .accessibilityHidden(true)
+        .onGeometryChange(for: CGFloat.self, of: \.size.width) { fullWidth = $0 }
+    }
+
+    private func label(_ label: BarLabel, compact: Bool) -> some View {
+        Label {
+            Text(label.title)
+        } icon: {
+            Image(systemName: label.systemImage)
+        }
+        .labelStyle(BarLabelStyle(compact: compact))
         .font(.rwButton)
-        .foregroundStyle(disabled ? .textDisabled : .textPrimary)
-        .disabled(disabled)
-        .help(help)
-        .accessibilityLabel(help)
+        .lineLimit(1)
+        .fixedSize()
+    }
+
+    private func barButton(
+        _ barLabel: BarLabel, help: LocalizedStringKey, disabled: Bool, action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) { label(barLabel, compact: isCompact) }
+            .buttonStyle(.plain)
+            .foregroundStyle(disabled ? .textDisabled : .textPrimary)
+            .disabled(disabled)
+            .help(help)
+            .accessibilityLabel(help)
+    }
+}
+
+private struct BarLabel {
+    let title: LocalizedStringResource
+    let systemImage: String
+
+    static let playNext = BarLabel(
+        title: LocalizedStringResource(
+            "Play next (short)", defaultValue: "Next", comment: "Selection bar: play the selected songs next"),
+        systemImage: "text.line.first.and.arrowtriangle.forward")
+    static let queue = BarLabel(title: "Queue", systemImage: "text.line.last.and.arrowtriangle.forward")
+    static let playlist = BarLabel(title: "Playlist", systemImage: "text.badge.plus")
+    static let remove = BarLabel(title: "Remove", systemImage: "minus.circle")
+    static let clear = BarLabel(title: "Clear", systemImage: "xmark")
+
+    static func shown(includingRemove: Bool) -> [BarLabel] {
+        includingRemove ? [playNext, queue, playlist, remove, clear] : [playNext, queue, playlist, clear]
+    }
+}
+
+private struct BarLabelStyle: LabelStyle {
+    let compact: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        if compact {
+            configuration.icon
+        } else {
+            HStack(spacing: Metrics.space4) {
+                configuration.icon
+                configuration.title
+            }
+        }
     }
 }
