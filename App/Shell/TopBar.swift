@@ -20,7 +20,7 @@ struct TopBar<AccountPopover: View>: View {
             BarIconButton(symbol: "sidebar.left", size: Metrics.iconBar, label: "Toggle sidebar", action: onToggleSidebar)
                 .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
             .glassSurface(in: Capsule(), fallback: nil)
-            .padding(.leading, Metrics.space8)
+            .padding(.leading, Metrics.space24)
             Spacer(minLength: Metrics.space16)
             SearchField()
                 .frame(minWidth: 240, maxWidth: 720)
