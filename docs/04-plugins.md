@@ -75,8 +75,9 @@ Labels in the "Decision" column:
   name. The Swift version does not implement ad blocking.
 - **Audio plugins** (6, 11, 12, 17, 32, 41) run inside the player page: the app
   injects JS that builds a Web Audio graph around the `<video>` element. Only
-  the settings interface is native. Risk: several such plugins must share one
-  graph, so `bridge.js` needs a common "audio chain".
+  the settings interface is native. Several such plugins share one graph: the
+  chain exists in `bridge.js` as `__bridge.audio`, and plugins insert nodes by
+  key once #32 provides `injectScript`.
 - **Synced lyrics** (original `synced-lyrics`, #34) is not listed above: it is a
   built-in part of the player page Lyrics tab, not a plugin. The first version
   has no romanization; the original's dictionaries (kuromoji, pinyin-pro and
