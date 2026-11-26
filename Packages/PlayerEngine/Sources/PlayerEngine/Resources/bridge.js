@@ -117,8 +117,143 @@
     }
   };
 
+  // Nothing here runs at load: one throwing line would take the whole bridge down.
+  let audioContext = null;
+  let analyser = null;
+  let gainNode = null;
+  let element = null;
+  let source = null;
+  let sourceError = null;
+  let resumeResult = null;
+  let states = [];
+  let inserted = [];
+  // createMediaElementSource throws InvalidStateError on a second call for the same element.
+  const sources = new WeakMap();
+  const errorInfo = (error) => ({ name: error?.name ?? 'Error', message: String(error?.message ?? error) });
+  const quietly = (fn) => {
+    try { fn(); } catch (error) { /* a node that was never connected */ }
+  };
+
+  const rewire = () => {
+    const path = [source, analyser, ...inserted.map((entry) => entry.node), gainNode];
+    path.forEach((node) => quietly(() => node.disconnect()));
+    const chain = [...path, audioContext.destination];
+    // shortcut: a bare disconnect() also cuts side outputs a plugin added to its own node; use {input, output} pairs if #41-#43 need them.
+    chain.forEach((node, i) => { if (i > 0) chain[i - 1].connect(node); });
+  };
+
+  // A node the graph rejects must not leave playback silent or poison later inserts.
+  const commit = (next) => {
+    const previous = inserted;
+    inserted = next;
+    if (!source) return true;
+    try {
+      rewire();
+      return true;
+    } catch (error) {
+      inserted = previous;
+      quietly(rewire);
+      return false;
+    }
+  };
+
+  const attachElement = () => {
+    const current = video();
+    if (!current || current === element) return;
+    try {
+      let next = sources.get(current);
+      if (!next) {
+        next = audioContext.createMediaElementSource(current);
+        sources.set(current, next);
+      }
+      if (source) quietly(() => source.disconnect());
+      source = next;
+      element = current;
+      sourceError = null;
+      rewire();
+    } catch (error) {
+      sourceError = errorInfo(error);
+    }
+  };
+
+  const resume = async () => {
+    if (audioContext.state === 'running') return;
+    // Without a user gesture resume() may never settle.
+    const timeout = new Promise((resolve) => setTimeout(() => resolve('timeout'), 2000));
+    try {
+      resumeResult = await Promise.race([audioContext.resume().then(() => 'resumed'), timeout]);
+    } catch (error) {
+      resumeResult = errorInfo(error).name;
+    }
+  };
+
+  const chainState = () => ({
+    enabled: audioContext !== null,
+    contextState: audioContext?.state ?? null,
+    resumeResult,
+    states: [...states],
+    sourceError,
+    elementCurrent: element !== null && element === video(),
+    src: video()?.currentSrc?.split(':')[0] ?? null,
+    crossOrigin: video()?.crossOrigin ?? null,
+    paused: video()?.paused ?? null,
+    currentTime: video()?.currentTime ?? null,
+    keys: inserted.map((entry) => entry.key),
+    gain: gainNode?.gain.value ?? null,
+  });
+
+  const audio = Object.freeze({
+    enable: async () => {
+      try {
+        if (!audioContext) {
+          audioContext = new AudioContext();
+          audioContext.addEventListener('statechange', () => { states = [...states, audioContext.state].slice(-5); });
+          // The analyser sits before the gain so that gain 0 is not mistaken for a tainted stream, and inline so that nothing relies on WebKit pulling a dangling tap.
+          analyser = audioContext.createAnalyser();
+          gainNode = audioContext.createGain();
+        }
+        attachElement();
+        await resume();
+      } catch (error) {
+        sourceError = errorInfo(error);
+      }
+      return chainState();
+    },
+    context: () => audioContext,
+    insert: (key, node) => {
+      if (!audioContext || typeof key !== 'string' || key === '' || !(node instanceof AudioNode) || node.context !== audioContext) return false;
+      if (node.numberOfInputs === 0 || node.numberOfOutputs === 0) return false;
+      if (inserted.some((entry) => entry.key !== key && entry.node === node)) return false;
+      attachElement();
+      const replaced = inserted.some((entry) => entry.key === key);
+      return commit(replaced ? inserted.map((entry) => (entry.key === key ? { key, node } : entry)) : [...inserted, { key, node }]);
+    },
+    remove: (key) => {
+      if (!inserted.some((entry) => entry.key === key)) return false;
+      return commit(inserted.filter((entry) => entry.key !== key));
+    },
+    setGain: (value) => {
+      if (!gainNode || !Number.isFinite(value)) return false;
+      gainNode.gain.value = Math.min(4, Math.max(0, value));
+      return true;
+    },
+    state: chainState,
+    probe: async () => {
+      if (!audioContext) return null;
+      attachElement();
+      const samples = new Float32Array(analyser.fftSize);
+      let peak = 0;
+      for (let i = 0; i < 5; i++) {
+        analyser.getFloatTimeDomainData(samples);
+        peak = samples.reduce((max, sample) => Math.max(max, Math.abs(sample)), peak);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return { peak, nonZero: peak > 0, attached: source !== null && element === video(), sourceError, contextState: audioContext.state, paused: video()?.paused ?? null, currentTime: video()?.currentTime ?? null };
+    },
+  });
+
   try {
-    Object.defineProperty(window, '__bridge', { value: Object.freeze({ run }), writable: false, configurable: false });
+    Object.defineProperty(window, '__bridge', { value: Object.freeze({ run, audio }), writable: false, configurable: false });
   } catch (error) {
     return;
   }

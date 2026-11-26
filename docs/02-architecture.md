@@ -123,6 +123,7 @@ A single `Resources/bridge.js` file in the `PlayerEngine` target. It:
   before the `videoDetails` guard, and also posted when the page leaves `/watch` before a song arrives there: a missing
   video id makes the page drop back to the home screen with no playability error, so the requested id is read from the
   navigation entry, which keeps the URL that was loaded). `song` is not posted while an ad shows.
+- exposes `window.__bridge.audio` (frozen), a lazy Web Audio chain, **disabled by default**: nothing is created at load. `await enable()` builds the `AudioContext` and routes the `<video>` through `source → analyser → inserted nodes → gain → destination`; `insert(key, node)` / `remove(key)` manage single in-line nodes, `context()`, `setGain(0…4)`, `state()` and `probe()` serve diagnostics. Routing is irreversible for the life of a document ("off" is `setGain(1)` or a reload); a replaced `<video>` is re-attached lazily on the next call. No Swift command drives it: the prototype (#40) is driven from Web Inspector.
 
 Site player methods **[presence verified on the live page, MC-5, 2026-11-19]**: `playVideo()`,
 `pauseVideo()`, `nextVideo()`, `previousVideo()`, `seekTo(sec)`, `setVolume(0…100)`,
