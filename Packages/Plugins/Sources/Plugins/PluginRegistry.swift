@@ -50,6 +50,7 @@ public final class PluginRegistry {
             states[id] = .running
         } catch {
             logger.error("Plugin \(id, privacy: .public) failed to start: \(error.localizedDescription, privacy: .public)")
+            await plugin.stop()
             states[id] = .failed
         }
     }

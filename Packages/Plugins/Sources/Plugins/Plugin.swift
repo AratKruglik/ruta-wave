@@ -2,6 +2,7 @@ import Foundation
 import PlayerEngine
 
 /// A feature the user can switch on and off. `start` must return promptly: long-lived work belongs in a task the plugin owns.
+/// `stop` also runs after a `start` that threw, to release whatever it set up before failing.
 @MainActor
 public protocol Plugin: AnyObject {
     static var id: String { get }

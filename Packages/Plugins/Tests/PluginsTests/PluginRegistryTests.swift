@@ -78,15 +78,16 @@ struct PluginRegistryTests {
         #expect(player.liveStreams == 2)
     }
 
-    @Test func stoppingAfterAFailedStartDoesNotCallStop() async {
+    @Test func aFailedStartIsStoppedOnceAndNotAgainWhenSwitchedOff() async {
         a.failsToStart = true
         let registry = registry()
         registry.sync()
         #expect(await eventually { registry.states["a"] == .failed })
+        #expect(a.stops == 1)
         PluginSettings(id: "a", defaults: defaults).setEnabled(false)
         registry.sync()
         #expect(await eventually { registry.states["a"] == .stopped })
-        #expect(a.stops == 0)
+        #expect(a.stops == 1)
     }
 }
 

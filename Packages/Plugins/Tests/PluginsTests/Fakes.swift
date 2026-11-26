@@ -60,8 +60,8 @@ final class FakePlugin<ID: FakeID>: Plugin {
     func start(context: PluginContext) async throws {
         starts += 1
         if let startGate { await startGate.wait() }
-        if failsToStart { throw StartFailure() }
         events = context.events
+        if failsToStart { throw StartFailure() }
     }
 
     func stop() async {
