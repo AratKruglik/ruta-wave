@@ -22,32 +22,64 @@ struct ChipView: View {
     }
 }
 
-/// One horizontal line; a trailing fade shows when it overflows.
+/// One horizontal line; a trailing fade and scroll arrows show when it overflows.
 struct ChipRow: View {
     let chips: [Chip]
     let onSelect: (Chip) -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var contentWidth: CGFloat = 0
     @State private var viewWidth: CGFloat = 0
+    @State private var firstVisible: Int?
+
+    private var isOverflowing: Bool { contentWidth > viewWidth }
+
+    private var visibleCount: Int {
+        guard contentWidth > 0, !chips.isEmpty else { return 1 }
+        return max(1, Int(viewWidth / (contentWidth / CGFloat(chips.count))))
+    }
 
     var body: some View {
+        HStack(spacing: Metrics.space8) {
+            scroller
+            if isOverflowing {
+                ScrollArrowButton(symbol: "chevron.left", label: "Scroll left", isEnabled: (firstVisible ?? 0) > 0) {
+                    scroll(by: -visibleCount)
+                }
+                ScrollArrowButton(
+                    symbol: "chevron.right", label: "Scroll right", isEnabled: (firstVisible ?? 0) + visibleCount < chips.count
+                ) { scroll(by: visibleCount) }
+            }
+        }
+        .onChange(of: chips.count) { firstVisible = 0 }
+    }
+
+    private var scroller: some View {
         ScrollView(.horizontal) {
             HStack(spacing: Metrics.space8) {
-                ForEach(Array(chips.enumerated()), id: \.offset) { _, chip in
+                ForEach(Array(chips.enumerated()), id: \.offset) { index, chip in
                     ChipView(title: chip.title, isSelected: chip.isSelected) { onSelect(chip) }
+                        .id(index)
                 }
             }
+            .scrollTargetLayout()
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }
         }
+        .scrollPosition(id: $firstVisible, anchor: .leading)
         .scrollIndicators(.hidden)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { viewWidth = $0 }
         .frame(height: Metrics.chipHeight)
         .mask {
             LinearGradient(
-                stops: [.init(color: .black, location: 0), .init(color: .black, location: contentWidth > viewWidth ? 0.94 : 1),
-                        .init(color: contentWidth > viewWidth ? .clear : .black, location: 1)],
+                stops: [.init(color: .black, location: 0), .init(color: .black, location: isOverflowing ? 0.94 : 1),
+                        .init(color: isOverflowing ? .clear : .black, location: 1)],
                 startPoint: .leading, endPoint: .trailing)
         }
+    }
+
+    private func scroll(by delta: Int) {
+        let target = min(max((firstVisible ?? 0) + delta, 0), max(chips.count - 1, 0))
+        withAnimation(Motion.animation(Motion.panel, reduceMotion: reduceMotion)) { firstVisible = target }
     }
 }
 

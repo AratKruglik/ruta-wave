@@ -22,6 +22,7 @@ struct ShellView<AccountPopover: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var width = Metrics.defaultWindowWidth
     @State private var sidebarOverride: Bool?
+    @State private var detailLeadingEdge: CGFloat = 0
     @State private var isSidebarCollapsedPreference = Preferences().sidebarCollapsed
 
     private var isNarrow: Bool { WindowLayout.isNarrow(width: width) }
@@ -50,6 +51,9 @@ struct ShellView<AccountPopover: View>: View {
                 .toolbar(removing: .sidebarToggle)
             } detail: {
                 content
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX + $0.safeAreaInsets.leading } action: {
+                        detailLeadingEdge = $0
+                    }
                     .safeAreaInset(edge: .top, spacing: 0) {
                         if isOffline {
                             OfflineBanner()
@@ -62,14 +66,14 @@ struct ShellView<AccountPopover: View>: View {
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
             // Pushed pages are hosted by the split view itself and draw above anything inside the detail column,
-            // so the player page sits over the whole split view, inset past the sidebar.
+            // so the player page sits over the whole split view, inset to the detail column's live leading edge (the sidebar is resizable).
             .overlay {
                 // The animation stays inside the overlay: an animated transaction over the split view re-shows the stack's root page.
                 ZStack {
                     if navigation.isPlayerPagePresented {
                         PlayerPage { navigation.isPlayerPagePresented = false }
                             .safeAreaPadding(.top, Metrics.topBarHeight)
-                            .padding(.leading, isSidebarVisible ? Metrics.sidebarWidth : 0)
+                            .padding(.leading, isSidebarVisible ? max(detailLeadingEdge, 0) : 0)
                             .transition(.move(edge: .bottom))
                     }
                 }
