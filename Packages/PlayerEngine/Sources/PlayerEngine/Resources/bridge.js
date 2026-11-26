@@ -86,6 +86,12 @@
     },
     // The player bar maps its slider through a curve (50 → 20), while volume events report the player's linear value.
     setVolume: (level) => call(player(), 'setVolume', level) || call(bar(), 'updateVolume', level),
+    unmute: () => {
+      const p = player();
+      if (typeof p?.isMuted !== 'function') return false;
+      if (p.isMuted()) call(p, 'unMute');
+      return !p.isMuted();
+    },
     toggleMute: () => {
       const p = player();
       if (typeof p?.isMuted !== 'function') return call(bar(), 'onVolumeClick');

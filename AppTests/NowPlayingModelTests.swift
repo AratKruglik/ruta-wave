@@ -119,6 +119,71 @@ struct NowPlayingModelTests {
         #expect(h.player.sent == [.setVolume(0.3)])
     }
 
+    @Test func setVolumeAboveZeroWhileMutedUnmutesFirst() {
+        let h = Harness()
+        h.player.isMuted = true
+        h.model.setVolume(0.5)
+        #expect(h.player.sent == [.unmute, .setVolume(0.5)])
+    }
+
+    @Test func setVolumeToZeroWhileMutedDoesNotUnmute() {
+        let h = Harness()
+        h.player.isMuted = true
+        h.model.setVolume(0)
+        #expect(h.player.sent == [.setVolume(0)])
+    }
+
+    @Test func setVolumeWhileNotMutedDoesNotUnmute() {
+        let h = Harness()
+        h.model.setVolume(0.5)
+        #expect(h.player.sent == [.setVolume(0.5)])
+    }
+
+    @Test func unmuteReappliesSavedVolumeOnce() async {
+        var h = Harness()
+        h.preferences.volume = 0.3
+        h.player.isMuted = true
+        await h.start()
+        h.model.toggleMute()
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        await h.settle()
+        #expect(h.player.sent == [.setVolume(0.3), .toggleMute, .setVolume(0.3)])
+    }
+
+    @Test func unmuteKeepsVolumeThePageAlreadyRestored() async {
+        var h = Harness()
+        h.preferences.volume = 0.3
+        h.player.isMuted = true
+        await h.start()
+        h.model.toggleMute()
+        h.player.emit(.volumeChanged(volume: 0.3, isMuted: false))
+        await h.settle()
+        #expect(h.player.sent == [.setVolume(0.3), .toggleMute])
+    }
+
+    @Test func muteDoesNotScheduleAVolumeRestore() async {
+        var h = Harness()
+        h.preferences.volume = 0.3
+        await h.start()
+        h.model.toggleMute()
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        await h.settle()
+        #expect(h.player.sent == [.setVolume(0.3), .toggleMute])
+    }
+
+    @Test func pageReloadCancelsAPendingUnmuteRestore() async {
+        var h = Harness()
+        h.preferences.volume = 0.3
+        h.player.isMuted = true
+        await h.start()
+        h.model.toggleMute()
+        h.player.emit(.ready)
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        await h.settle()
+        #expect(h.player.sent == [.setVolume(0.3), .toggleMute])
+    }
+
     @Test func restoresRepeatAndShuffleOncePerPageLoad() async {
         var h = Harness()
         h.preferences.repeatMode = "one"
