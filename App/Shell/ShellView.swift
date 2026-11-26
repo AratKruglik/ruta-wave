@@ -51,7 +51,7 @@ struct ShellView<AccountPopover: View>: View {
                 .toolbar(removing: .sidebarToggle)
             } detail: {
                 content
-                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX + $0.safeAreaInsets.leading } action: {
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX } action: {
                         detailLeadingEdge = $0
                     }
                     .safeAreaInset(edge: .top, spacing: 0) {
