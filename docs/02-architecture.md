@@ -53,8 +53,9 @@ The alternative is to obtain direct audio stream URLs and play them with
    the web view without any code of ours.
 
 Consequences we accept:
-- audio effects (equalizer, compressor, crossfade) are only possible through
-  Web Audio inside the page, not through `AVAudioEngine`;
+- no audio effects (equalizer, compressor, crossfade): `AVAudioEngine` cannot
+  reach the web view's audio, and Web Audio inside the page is bypassed by
+  WebKit for the MSE stream (spike #40, [05 risk 7](05-risks-and-scope.md));
 - the web view uses memory (roughly 150–300 MB);
 - the page may change its structure — the bridge is isolated in one JS file.
 
@@ -123,7 +124,6 @@ A single `Resources/bridge.js` file in the `PlayerEngine` target. It:
   before the `videoDetails` guard, and also posted when the page leaves `/watch` before a song arrives there: a missing
   video id makes the page drop back to the home screen with no playability error, so the requested id is read from the
   navigation entry, which keeps the URL that was loaded). `song` is not posted while an ad shows.
-- exposes `window.__bridge.audio` (frozen), a lazy Web Audio chain, **disabled by default**: nothing is created at load. `await enable()` builds the `AudioContext` and routes the `<video>` through `source → analyser → inserted nodes → gain → destination`; `insert(key, node)` / `remove(key)` manage single in-line nodes, `context()`, `setGain(0…4)`, `state()` and `probe()` serve diagnostics. Routing is irreversible for the life of a document ("off" is `setGain(1)` or a reload); a replaced `<video>` is re-attached lazily on the next call. No Swift command drives it: the prototype (#40) is driven from Web Inspector.
 
 Site player methods **[presence verified on the live page, MC-5, 2026-11-19]**: `playVideo()`,
 `pauseVideo()`, `nextVideo()`, `previousVideo()`, `seekTo(sec)`, `setVolume(0…100)`,
