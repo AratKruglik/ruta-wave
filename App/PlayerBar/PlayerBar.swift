@@ -162,11 +162,11 @@ struct PlayerBar: View {
             VolumeControl()
             BarIconButton(
                 symbol: player.repeatMode == .one ? "repeat.1" : "repeat", size: Metrics.iconBar, label: "Repeat",
-                isOn: player.repeatMode != .off, action: nowPlaying.cycleRepeat)
+                isOn: player.repeatMode != .off, activeTint: .accentProgress, action: nowPlaying.cycleRepeat)
                 .accessibilityValue(repeatValue)
             BarIconButton(
                 symbol: "shuffle", size: Metrics.iconBar, label: "Shuffle", isOn: player.isShuffled,
-                action: nowPlaying.toggleShuffle)
+                activeTint: .accentProgress, action: nowPlaying.toggleShuffle)
             BarIconButton(
                 symbol: isPlayerPagePresented ? "chevron.down" : "chevron.up", size: Metrics.iconBar,
                 label: isPlayerPagePresented ? "Close player page" : "Open player page",
@@ -266,6 +266,12 @@ private struct LinkText: View {
     player.like = .like
     player.repeatMode = .one
     player.isShuffled = true
+    return PlayerBarPreview(player: player)
+}
+
+#Preview("Repeat all") {
+    let player = PreviewPlayer()
+    player.repeatMode = .all
     return PlayerBarPreview(player: player)
 }
 

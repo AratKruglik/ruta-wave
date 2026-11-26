@@ -97,15 +97,24 @@ private struct TrackSelectionModifier: ViewModifier {
                 .font(.rwTitle)
                 .foregroundStyle(.textPrimary)
             Spacer(minLength: 0)
-            barButton("Play next", disabled: queueable.isEmpty) { nowPlaying.enqueue(queueable, playNext: true) }
-            barButton("Add to queue", disabled: queueable.isEmpty) { nowPlaying.enqueue(queueable, playNext: false) }
-            barButton("Add to playlist…", disabled: queueable.isEmpty) {
+            barButton(
+                LocalizedStringResource(
+                    "Play next (short)", defaultValue: "Next", comment: "Selection bar: play the selected songs next"),
+                systemImage: "text.line.first.and.arrowtriangle.forward", help: "Play next", disabled: queueable.isEmpty
+            ) { nowPlaying.enqueue(queueable, playNext: true) }
+            barButton(
+                "Queue", systemImage: "text.line.last.and.arrowtriangle.forward", help: "Add to queue",
+                disabled: queueable.isEmpty
+            ) { nowPlaying.enqueue(queueable, playNext: false) }
+            barButton("Playlist", systemImage: "text.badge.plus", help: "Add to playlist…", disabled: queueable.isEmpty) {
                 popover = nowPlaying.isSignedIn
                     ? .addToPlaylist(videoIds: queueable) : .signIn(reason: String(localized: "Sign in to add songs to playlists"))
             }
             .itemPopover($popover)
-            if onRemove != nil { barButton("Remove from playlist", disabled: false, action: remove) }
-            barButton("Clear", disabled: false) { selection.clear() }
+            if onRemove != nil {
+                barButton("Remove", systemImage: "minus.circle", help: "Remove from playlist", disabled: false, action: remove)
+            }
+            barButton("Clear", systemImage: "xmark", help: "Clear", disabled: false) { selection.clear() }
                 .cancelShortcut(if: !navigation.isSearchFocused)
         }
         .padding(.horizontal, Metrics.space16)
@@ -116,11 +125,23 @@ private struct TrackSelectionModifier: ViewModifier {
         .accessibilityElement(children: .contain)
     }
 
-    private func barButton(_ title: LocalizedStringKey, disabled: Bool, action: @escaping () -> Void) -> some View {
-        Button(title, action: action)
-            .buttonStyle(.plain)
-            .font(.rwButton)
-            .foregroundStyle(disabled ? .textDisabled : .textPrimary)
-            .disabled(disabled)
+    private func barButton(
+        _ title: LocalizedStringResource, systemImage: String, help: LocalizedStringKey, disabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: systemImage)
+            }
+            .labelStyle(.titleAndIcon)
+        }
+        .buttonStyle(.plain)
+        .font(.rwButton)
+        .foregroundStyle(disabled ? .textDisabled : .textPrimary)
+        .disabled(disabled)
+        .help(help)
+        .accessibilityLabel(help)
     }
 }

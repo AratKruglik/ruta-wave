@@ -1417,6 +1417,24 @@
         }
       }
     },
+    "Play next (short)" : {
+      "comment" : "Selection bar: play the selected songs next",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Далі"
+          }
+        }
+      }
+    },
+
     "Playback" : {
       "localizations" : {
         "uk" : {
@@ -1576,6 +1594,16 @@
     "Queue (%lld)" : {
       "shouldTranslate" : false
     },
+    "Queue" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Черга"
+          }
+        }
+      }
+    },
     "Quit RutaWave" : {
       "localizations" : {
         "uk" : {
@@ -1607,7 +1635,14 @@
       }
     },
     "Remove" : {
-      "shouldTranslate" : false
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прибрати"
+          }
+        }
+      }
     },
     "Remove from history" : {
       "localizations" : {
@@ -1765,19 +1800,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Зростає"
-          }
-        }
-      }
-    },
-    "RutaWave" : {
-      "shouldTranslate" : false
-    },
-    "RutaWave, go to Home" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "RutaWave, перейти на головну"
           }
         }
       }

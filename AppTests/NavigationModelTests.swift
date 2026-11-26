@@ -64,15 +64,6 @@ struct NavigationModelTests {
         #expect(model.path(for: .explore) == [.explore(.charts)])
     }
 
-    @Test func goHomeSelectsHomeAtItsRoot() {
-        let model = NavigationModel()
-        model.push(.album(browseId: "a"))
-        model.select(.explore)
-        model.goHome()
-        #expect(model.selection == .home)
-        #expect(model.path(for: .home).isEmpty)
-    }
-
     @Test func dropAccountRoutesTruncatesAndFallsBackFromLibrary() {
         let model = NavigationModel()
         model.push(.album(browseId: "a"))
@@ -199,10 +190,6 @@ struct NavigationModelTests {
         model.select(.library)
         #expect(!model.isPlayerPagePresented)
         #expect(model.selection == .library)
-
-        model.isPlayerPagePresented = true
-        model.goHome()
-        #expect(!model.isPlayerPagePresented)
 
         model.isPlayerPagePresented = true
         model.forward()
