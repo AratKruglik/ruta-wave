@@ -158,7 +158,7 @@ struct PlayerBar: View {
     }
 
     private var options: some View {
-        HStack(spacing: Metrics.space4) {
+        HStack(spacing: Metrics.space12) {
             VolumeControl()
             BarIconButton(
                 symbol: player.repeatMode == .one ? "repeat.1" : "repeat", size: Metrics.iconBar, label: "Repeat",
