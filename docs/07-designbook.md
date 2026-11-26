@@ -57,7 +57,7 @@ and their states. What every part of the interface **does** is described in
 │ …            │                                                               │
 ├──────────────┴───────────────────────────────────────────────────────────────┤
 │ ━━━━●──────────────────────────────────────────────────────── progress, 3 pt │
-│ ⏮ ▶ ⏭ 0:07 / 3:47   [art] Title / Artist • Album • Year  👍 👎 ⋮   🔈 ⟳ ⤮ ▲ │ player bar, 64 pt
+│ ⏮ ▶ ⏭ 0:07 / 3:47 ⟳ ⤮ [art] Title / Artist • Album • Year  👍 👎 ⋮   🔈 ▲   │ player bar, 64 pt
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -338,12 +338,13 @@ Charts (`chart.line.uptrend.xyaxis`), Moods & genres (`face.smiling`).
   `accent.progress`; on hover it grows to 5 pt and shows a 12 pt knob and a
   time tooltip over the pointer.
 - Left group: previous (28 pt), play/pause (36 pt), next (28 pt), time
-  "0:07 / 3:47" `caption`, `text.secondary`.
+  "0:07 / 3:47" `caption`, `text.secondary`, then repeat (off / all / one:
+  `repeat`, `repeat` filled, `repeat.1`) and shuffle (when on, both show
+  `accent.progress` glyphs over the `surface.fill` circle).
 - Centre group (max 560 pt): artwork 40 pt (square) or 71 × 40 pt (video),
   title `title`, subtitle `body`/`text.secondary`
   ("Artist • Album • Year" or "Channel • N views • N likes"), then 👍 👎 ⋮.
-- Right group: volume (icon; slider appears on hover), repeat (off / all / one:
-  `repeat`, `repeat` filled, `repeat.1`), shuffle (when on, repeat and shuffle show `accent.progress` glyphs over the `surface.fill` circle), expand chevron (`▲` opens the
+- Right group: volume (icon; slider appears on hover), expand chevron (`▲` opens the
   player page, `▼` closes it). Captions **CC** (only for videos with captions,
   `captions-selector`) is deferred with music video mode ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)).
 
