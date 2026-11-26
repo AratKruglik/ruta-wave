@@ -132,6 +132,7 @@ private struct TitleBarDragArea: NSViewRepresentable {
     }
 }
 
+#if DEBUG
 #Preview("Signed in") {
     TopBar(
         isSignedIn: true, avatarURL: nil, canGoBack: true, canGoForward: false, isAccountPresented: .constant(false),
@@ -155,3 +156,4 @@ private struct TitleBarDragArea: NSViewRepresentable {
     .environment(PreviewFixtures.nowPlaying())
     .background(.themeBase)
 }
+#endif
