@@ -168,6 +168,12 @@ public actor InnerTubeClient {
         try LyricsParser.parse(await fetch("browse", body: ["browseId": browseId], credentials: credentials))
     }
 
+    /// `nil` is "no timed lyrics": none exist, or the lines carry no times. Always a guest request, so it never touches the visitor id or the session.
+    public func timedLyrics(_ browseId: String) async throws -> TimedLyrics? {
+        let request = try InnerTubeRequest.makeMobileGuest(endpoint: "browse", body: ["browseId": browseId], locale: .current)
+        return try TimedLyricsParser.parse(await data(for: request))
+    }
+
     /// `country` is a `ChartCountry.code`. Without it the server picks the country from the caller's IP address.
     public func charts(country: String? = nil, credentials: Credentials?) async throws -> ChartsPage {
         var body: [String: any Sendable] = ["browseId": BrowseTarget.charts.browseId]

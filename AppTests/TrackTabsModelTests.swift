@@ -6,6 +6,7 @@ import Testing
 private final class TabsCallLog {
     var lyrics: [(id: String, signedIn: Bool)] = []
     var related: [String] = []
+    var timed: [String] = []
 }
 
 private struct Boom: Error {}
@@ -16,6 +17,7 @@ private let tabsCredentials = Credentials(cookies: [])
 private func makeModel(
     log: TabsCallLog = TabsCallLog(), signedIn: Bool = false,
     lyrics: @escaping @Sendable (String) async throws -> Lyrics? = { _ in Lyrics(text: "la", source: nil) },
+    timed: @escaping @Sendable (String) async throws -> TimedLyrics? = { _ in nil },
     related: @escaping @Sendable (String) async throws -> BrowsePage = { _ in page() }
 ) -> TrackTabsModel {
     TrackTabsModel(
@@ -23,6 +25,10 @@ private func makeModel(
             lyrics: { id, credentials in
                 await MainActor.run { log.lyrics.append((id: id, signedIn: credentials != nil)) }
                 return try await lyrics(id)
+            },
+            timedLyrics: { id in
+                await MainActor.run { log.timed.append(id) }
+                return try await timed(id)
             },
             related: { id, _ in
                 await MainActor.run { log.related.append(id) }
@@ -89,7 +95,7 @@ struct TrackTabsModelTests {
         await model.loadLyrics("a")
         await model.loadRelated("a")
         await model.loadRelated("a")
-        #expect(log.lyrics.count == 1 && log.related.count == 1)
+        #expect(log.lyrics.count == 1 && log.timed.count == 1 && log.related.count == 1)
     }
 
     @Test func relatedWithNothingToShowIsEmpty() async {
@@ -111,12 +117,118 @@ struct TrackTabsModelTests {
             return Lyrics(text: "late", source: nil)
         })
         let task = Task { await model.loadLyrics("a") }
-        await Task.yield()
+        while model.lyrics == nil { await Task.yield() }
         let before = model.generation
         model.reset()
         await gate.open()
         await task.value
         #expect(model.lyrics == nil && model.generation == before + 1)
+    }
+}
+
+private let timedFixture = TimedLyrics(lines: [.init(text: "a", start: 1)], source: "Source: Test")
+
+@MainActor
+struct TrackTabsLyricsPhaseTests {
+    @Test func plainShowsFirstThenTimedSwapsIn() async {
+        let gate = Gate()
+        let model = makeModel(timed: { _ in
+            await gate.wait()
+            return timedFixture
+        })
+        let load = Task { await model.loadLyrics("a") }
+        for _ in 0..<20 { await Task.yield() }
+        guard case .loaded(let before) = model.lyricsPhase("a") else { Issue.record("expected loaded"); return }
+        #expect(before.plain != nil && before.timed == nil)
+        await gate.open()
+        await load.value
+        guard case .loaded(let after) = model.lyricsPhase("a") else { Issue.record("expected loaded"); return }
+        #expect(after.timed == timedFixture)
+    }
+
+    @Test func timedArrivingFirstIsHeldUntilPlainSettles() async {
+        let gate = Gate()
+        let model = makeModel(
+            lyrics: { _ in
+                await gate.wait()
+                return Lyrics(text: "la", source: nil)
+            },
+            timed: { _ in timedFixture })
+        let load = Task { await model.loadLyrics("a") }
+        for _ in 0..<20 { await Task.yield() }
+        guard case .loading = model.lyricsPhase("a") else { Issue.record("expected loading"); return }
+        await gate.open()
+        await load.value
+        guard case .loaded(let content) = model.lyricsPhase("a") else { Issue.record("expected loaded"); return }
+        #expect(content.plain != nil && content.timed == timedFixture)
+    }
+
+    @Test func missingPlainWithPendingTimedIsLoadingThenTimedOnly() async {
+        let gate = Gate()
+        let model = makeModel(
+            lyrics: { _ in nil },
+            timed: { _ in
+                await gate.wait()
+                return timedFixture
+            })
+        let load = Task { await model.loadLyrics("a") }
+        for _ in 0..<20 { await Task.yield() }
+        guard case .loading = model.lyricsPhase("a") else { Issue.record("expected loading"); return }
+        await gate.open()
+        await load.value
+        guard case .loaded(let content) = model.lyricsPhase("a") else { Issue.record("expected loaded"); return }
+        #expect(content.plain == nil && content.timed == timedFixture)
+    }
+
+    @Test func nothingAnywhereIsEmpty() async {
+        let model = makeModel(lyrics: { _ in nil })
+        await model.loadLyrics("a")
+        guard case .empty = model.lyricsPhase("a") else { Issue.record("expected empty"); return }
+    }
+
+    @Test func aTimedFailureFallsBackToPlain() async {
+        let model = makeModel(timed: { _ in throw Boom() })
+        await model.loadLyrics("a")
+        guard case .loaded(let content) = model.lyricsPhase("a") else { Issue.record("expected loaded"); return }
+        #expect(content.plain != nil && content.timed == nil)
+    }
+
+    @Test func aPlainFailureIgnoresTimed() async {
+        let model = makeModel(lyrics: { _ in throw Boom() }, timed: { _ in timedFixture })
+        await model.loadLyrics("a")
+        guard case .failed = model.lyricsPhase("a") else { Issue.record("expected failed"); return }
+    }
+
+    @Test func resetDropsALateTimedReply() async {
+        let gate = Gate()
+        let model = makeModel(timed: { _ in
+            await gate.wait()
+            return timedFixture
+        })
+        let task = Task { await model.loadLyrics("a") }
+        for _ in 0..<20 { await Task.yield() }
+        model.reset()
+        await gate.open()
+        await task.value
+        #expect(model.timedLyrics == nil)
+    }
+
+    @Test func aCancelledTimedLoadIsRefetchedWithoutRefetchingPlain() async {
+        let log = TabsCallLog()
+        let gate = Gate()
+        let model = makeModel(log: log, timed: { _ in
+            await gate.wait()
+            return timedFixture
+        })
+        let task = Task { await model.loadLyrics("a") }
+        for _ in 0..<20 { await Task.yield() }
+        task.cancel()
+        await gate.open()
+        await task.value
+        await model.loadLyrics("a")
+        #expect(log.lyrics.count == 1 && log.timed.count == 2)
+        guard case .loaded(let content) = model.lyricsPhase("a") else { Issue.record("expected loaded"); return }
+        #expect(content.timed == timedFixture)
     }
 }
 

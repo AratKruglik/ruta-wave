@@ -99,4 +99,28 @@ private let syntheticVisitor = "CgtTWU5USEVUSUMxMjM%3D"
             #expect(guest.value(forHTTPHeaderField: header) == nil)
         }
     }
+
+    @Test func mobileGuestRequestLooksLikeTheAndroidAppAndCarriesNothingElse() throws {
+        let request = try InnerTubeRequest.makeMobileGuest(endpoint: "browse", body: ["browseId": "MPLYt_x"], locale: Locale(identifier: "uk_UA"))
+        let body = try JSONDecoder().decode(JSONValue.self, from: #require(request.httpBody))
+        #expect(body["context"]?["client"]?["clientName"]?.string == "ANDROID_MUSIC")
+        #expect(body["context"]?["client"]?["clientVersion"]?.string?.isEmpty == false)
+        #expect(body["browseId"]?.string == "MPLYt_x")
+        #expect(request.value(forHTTPHeaderField: "User-Agent")?.hasPrefix("com.google.android.apps.youtube.music/") == true)
+        for header in ["Cookie", "Authorization", "X-Goog-AuthUser", "X-Goog-Visitor-Id", "Origin", "X-Origin"] {
+            #expect(request.value(forHTTPHeaderField: header) == nil)
+        }
+        #expect(request.httpShouldHandleCookies == false)
+    }
+
+    @Test func mobileGuestRequestIgnoresAmbientSessionCookies() throws {
+        let cookie = try #require(HTTPCookie(properties: [.name: "SAPISID", .value: "test-root", .domain: ".youtube.com", .path: "/"]))
+        let signed = try InnerTubeRequest.make(endpoint: "browse", cookies: [cookie], now: Date(timeIntervalSince1970: 1_700_000_000), locale: .current)
+        let mobile = try InnerTubeRequest.makeMobileGuest(endpoint: "browse", locale: .current)
+        #expect(signed.value(forHTTPHeaderField: "X-Goog-AuthUser") == "0")
+        for header in ["Cookie", "Authorization", "X-Goog-AuthUser"] {
+            #expect(mobile.value(forHTTPHeaderField: header) == nil)
+        }
+        #expect(mobile.httpShouldHandleCookies == false)
+    }
 }
