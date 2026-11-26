@@ -142,9 +142,9 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(newValue, forKey: Key.showDislikeButton) }
     }
 
-    /// Highlights the sung word in timed lyrics. On unless switched off.
+    /// Highlights the sung word in timed lyrics. Experimental, so off until switched on in Settings.
     public var karaokeEnabled: Bool {
-        get { defaults.object(forKey: Key.karaokeEnabled) == nil ? true : defaults.bool(forKey: Key.karaokeEnabled) }
+        get { defaults.bool(forKey: Key.karaokeEnabled) }
         nonmutating set { defaults.set(newValue, forKey: Key.karaokeEnabled) }
     }
 

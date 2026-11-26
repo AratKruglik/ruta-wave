@@ -40,6 +40,7 @@ struct RootView: View {
     @State private var useArtworkColors = Preferences().useArtworkColors
     @State private var alwaysOnTop = Preferences().alwaysOnTop
     @State private var showsDislikeButton = Preferences().showDislikeButton
+    @State private var karaokeEnabled = Preferences().karaokeEnabled
 
     init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor, links: LinkInbox) {
         self.session = session
@@ -73,6 +74,7 @@ struct RootView: View {
         }
         .frame(minWidth: Metrics.minWindowWidth, minHeight: Metrics.minWindowHeight)
         .preferredColorScheme(.dark)
+        .focusEffectDisabled()
         .environment(session)
         .environment(navigation)
         .environment(nowPlaying)
@@ -86,6 +88,7 @@ struct RootView: View {
         .environment(\.themeBase, theme.base)
         .environment(\.themeHeaderTop, theme.headerTop)
         .environment(\.showsDislikeButton, showsDislikeButton)
+        .environment(\.karaokeEnabled, karaokeEnabled)
         .background(WindowLevel(isFloating: alwaysOnTop))
         .task(id: ThemeKey(artworkURL: nowPlaying.player.song?.artworkURL, isEnabled: useArtworkColors)) {
             await theme.update(artworkURL: useArtworkColors ? nowPlaying.player.song?.artworkURL : nil)
@@ -95,6 +98,7 @@ struct RootView: View {
             useArtworkColors = preferences.useArtworkColors
             alwaysOnTop = preferences.alwaysOnTop
             showsDislikeButton = preferences.showDislikeButton
+            karaokeEnabled = preferences.karaokeEnabled
         }
         .onChange(of: session.state.isSignedIn) { _, signedIn in
             if signedIn {

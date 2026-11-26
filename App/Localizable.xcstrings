@@ -937,16 +937,6 @@
         }
       }
     },
-    "Karaoke" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Караоке"
-          }
-        }
-      }
-    },
     "Estimated timing" : {
       "localizations" : {
         "uk" : {
@@ -1464,7 +1454,6 @@
         }
       }
     },
-
     "Playback" : {
       "localizations" : {
         "uk" : {
@@ -2721,6 +2710,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося запустити"
+          }
+        }
+      }
+    },
+    "Karaoke lyrics" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Караоке-текст"
+          }
+        }
+      }
+    },
+    "Highlights each word as it is sung in the Lyrics tab" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підсвічує кожне слово під час співу у вкладці «Текст»"
+          }
+        }
+      }
+    },
+    "Experimental. It may add load on the system while the Lyrics tab is open." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Експериментальна функція. Поки відкрита вкладка «Текст», може додатково навантажувати систему."
           }
         }
       }

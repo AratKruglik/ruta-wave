@@ -1,6 +1,10 @@
-import AppSettings
 import InnerTube
 import SwiftUI
+
+extension EnvironmentValues {
+    /// The `karaokeEnabled` setting, kept live by the root view.
+    @Entry var karaokeEnabled = false
+}
 
 struct TimedLyricsView: View {
     let lyrics: TimedLyrics
@@ -8,11 +12,16 @@ struct TimedLyricsView: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var currentIndex: Int?
-    @State private var karaoke = Preferences().karaokeEnabled
+    @Environment(\.karaokeEnabled) private var karaoke
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.space12) {
-            header
+            if karaoke && lyrics.timing == .estimated {
+                Text("Estimated timing")
+                    .font(.rwCaption)
+                    .foregroundStyle(.textTertiary)
+                    .help("Word timing is estimated from line timing")
+            }
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: Metrics.space24) {
@@ -36,21 +45,6 @@ struct TimedLyricsView: View {
                         proxy.scrollTo(index, anchor: .center)
                     }
                 }
-            }
-        }
-    }
-
-    private var header: some View {
-        HStack(spacing: Metrics.space12) {
-            Toggle("Karaoke", isOn: $karaoke)
-                .toggleStyle(.switch)
-                .controlSize(.small)
-                .onChange(of: karaoke) { _, isOn in Preferences().karaokeEnabled = isOn }
-            if karaoke && lyrics.timing == .estimated {
-                Text("Estimated timing")
-                    .font(.rwCaption)
-                    .foregroundStyle(.textTertiary)
-                    .help("Word timing is estimated from line timing")
             }
         }
     }
