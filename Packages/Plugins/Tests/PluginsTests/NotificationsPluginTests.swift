@@ -84,6 +84,18 @@ struct NotificationsPluginTests {
         await plugin.stop()
     }
 
+    @Test func startingDuringAnAdHoldsTheTrackUntilTheAdEnds() async throws {
+        player.isAd = true
+        let plugin = plugin()
+        try await plugin.start(context: context())
+        player.emit(.songChanged(song("a")))
+        try? await Task.sleep(for: .milliseconds(50))
+        #expect(await posting.titles.isEmpty)
+        player.emit(.adChanged(false))
+        #expect(await eventually { await posting.titles == ["a"] })
+        await plugin.stop()
+    }
+
     @Test func switchingTheSettingOffSuppressesAPostBeforeTheRegistryHearsOfIt() async throws {
         let plugin = plugin()
         try await plugin.start(context: context())

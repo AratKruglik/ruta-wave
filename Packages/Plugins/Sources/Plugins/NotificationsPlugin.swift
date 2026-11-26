@@ -38,6 +38,7 @@ public final class NotificationsPlugin: Plugin {
             isFrontmost: isFrontmost, loadArtwork: loadArtwork)
         if let videoId = context.player.song?.videoId ?? restoredVideoId { notifier.skipRestored(videoId: videoId) }
         restoredVideoId = nil
+        if context.player.isAd { notifier.markAdPlaying() }
         self.notifier = notifier
         let events = context.events
         runTask = Task { await notifier.run(events) }

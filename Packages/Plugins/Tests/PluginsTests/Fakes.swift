@@ -12,7 +12,7 @@ final class FakePlayer: PlayerControlling {
     let isPaused = false
     let isReady = true
     let isBuffering = false
-    let isAd = false
+    var isAd = false
     let volume = 1.0
     let isMuted = false
     let like = LikeStatus.indifferent
