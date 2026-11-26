@@ -104,6 +104,7 @@ public enum PlayerRules {
         case .setVolume(let volume):
             return volume.isFinite ? ("setVolume", [(min(max(volume, 0), 1) * 100).rounded()]) : nil
         case .toggleMute: return ("toggleMute", [])
+        case .unmute: return ("unmute", [])
         case .toggleShuffle: return ("toggleShuffle", [])
         case .cycleRepeat: return ("cycleRepeat", [])
         case .playQueueItem(let index):

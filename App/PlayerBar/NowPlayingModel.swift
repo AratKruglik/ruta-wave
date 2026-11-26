@@ -71,6 +71,7 @@ final class NowPlayingModel {
     @ObservationIgnored private var unavailableStreak = 0
     @ObservationIgnored private var syncsRepeat = false
     @ObservationIgnored private var syncsShuffle = false
+    @ObservationIgnored private var restoresVolume = false
     @ObservationIgnored private var hasResumed = false
     @ObservationIgnored private var pendingLink: WatchTarget?
     /// The position a resumed track is being brought back to; positions are not saved until the player reaches it.
@@ -118,6 +119,7 @@ final class NowPlayingModel {
         case .ready:
             syncsRepeat = true
             syncsShuffle = true
+            restoresVolume = false
         case .repeatChanged(let reported) where syncsRepeat:
             syncsRepeat = false
             let target = RepeatMode(preference: preferences.repeatMode)
@@ -125,6 +127,9 @@ final class NowPlayingModel {
         case .shuffleChanged(let reported) where syncsShuffle:
             syncsShuffle = false
             if reported != preferences.shuffle { player.send(.toggleShuffle) }
+        case .volumeChanged(let level, isMuted: false) where restoresVolume:
+            restoresVolume = false
+            if level != preferences.volume { player.send(.setVolume(preferences.volume)) }
         case .songChanged(let song):
             rememberTrack(song)
             unavailableStreak = 0
@@ -224,6 +229,7 @@ final class NowPlayingModel {
     func skip(by seconds: TimeInterval) { perform(.skip(by: seconds)) }
 
     func setVolume(_ level: Double) {
+        if level > 0, player.isMuted { player.send(.unmute) }
         player.send(.setVolume(level))
         if player.isReady { preferences.volume = level }
     }
@@ -232,7 +238,10 @@ final class NowPlayingModel {
         setVolume(PlaybackRules.volume(player.volume, steppedBy: steps))
     }
 
-    func toggleMute() { player.send(.toggleMute) }
+    func toggleMute() {
+        if player.isMuted { restoresVolume = true }
+        player.send(.toggleMute)
+    }
 
     func cycleRepeat() {
         if player.isReady { preferences.repeatMode = PlaybackRules.nextRepeat(player.repeatMode).preference }

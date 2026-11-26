@@ -7,7 +7,7 @@ public enum PlayerCommand: Sendable, Equatable {
     case skip(by: TimeInterval)
     /// 0…1, clamped. NaN and infinity are refused.
     case setVolume(Double)
-    case toggleMute, toggleShuffle, cycleRepeat
+    case toggleMute, unmute, toggleShuffle, cycleRepeat
     /// Signed-in only: goes through `PlayerEngine.rate`, never the page.
     case setLike(LikeStatus)
     /// An index refers to a position in the last `queueChanged`.
