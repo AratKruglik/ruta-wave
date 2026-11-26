@@ -1,0 +1,328 @@
+{
+  "contents": {
+    "elementRenderer": {
+      "newElement": {
+        "properties": {
+          "identifierProperties": {
+            "identifier": "timed_lyrics.eml-ja|8d2d4b4773334739",
+            "uniqueLoggingIdentifier": "0"
+          }
+        },
+        "type": {
+          "componentType": {
+            "model": {
+              "timedLyricsModel": {
+                "context": {
+                  "adsContext": {
+                    "experimentFlags": {
+                      "darkCompanionInLightMode": true,
+                      "disableShortsImageAdsTooltip": true,
+                      "enableAiDisclosureForAdTextImageInnertube": true,
+                      "enableCardifiedBasicImmersive": true,
+                      "enableCarouselZeroWidthFallback": true,
+                      "enableCompactSurveyA11yFix": true,
+                      "enableConditionalRenderingForDelayedDescription": true,
+                      "enableDarkInstreamCompactSurveyInLightMode": true,
+                      "enableEngagementHeaderFocusableA11yFix": true,
+                      "enableFeedCompactSurvey": true,
+                      "enableFeedCompactSurveyA11yFix": true,
+                      "enableFeedCompactSurveyColorSampling": true,
+                      "enableFixAdAvatarMonogramFontSize": true,
+                      "enableFixMiniAppAdCompanionBannerPopulator": true,
+                      "enableMinWindowHeightGateOnReelsAdFlexCard": true,
+                      "enablePanelCarouselAdAvatarLockupRtlFix": true,
+                      "enablePartnershipAdsInStream": true,
+                      "enablePivotButtonAndKeepRhsAndThreeDotsPositionOnElements": true,
+                      "enablePivotButtonOnElements": true,
+                      "enableRtlFlipForImageAdsOnIos": true,
+                      "enableShortsImageAdDarkScrimFix": true,
+                      "enableSwapCarouselAndMetadataForImageInfeedLayouts": true,
+                      "enableWatchWhileFeedMutationAnimation": true,
+                      "enableWrappedSponsoredBadgeFoldable": true,
+                      "forceDarkModeForLandscapeEp": true,
+                      "reelsAdFlexCardClickCloseDelaySeconds": 1,
+                      "simplifyReelsAdFlexCardTransition": true,
+                      "stickyBottomCtaLandscapeEp": true,
+                      "stickyBottomCtaShoppingLandscapeEp": true
+                    }
+                  },
+                  "javascriptContext": {
+                    "moduleSetVersion": "13898103192996901733"
+                  },
+                  "mainAppContext": {
+                    "experiments": {
+                      "enableA11yFixForThreeDotMenuButton": true,
+                      "enableAvatarStackStandardizedBorderWidth": true,
+                      "enableBuenosAiresListOptionPattern": true,
+                      "enableButtonIconDelhiSize": true,
+                      "enableCairoRefresh": true,
+                      "enableCairoRefreshRingo2": true,
+                      "enableIconCustomImageMigrationBatch1": true,
+                      "enableIconCustomImageMigrationBatch10": true,
+                      "enableIconCustomImageMigrationBatch2": true,
+                      "enableIconCustomImageMigrationBatch3": true,
+                      "enableIconCustomImageMigrationBatch4": true,
+                      "enableIconCustomImageMigrationBatch5": true,
+                      "enableIconCustomImageMigrationBatch6": true,
+                      "enableIconCustomImageMigrationBatch7": true,
+                      "enableIconCustomImageMigrationBatch8": true,
+                      "enableIconCustomImageMigrationBatch9": true,
+                      "enableModernButtons": true,
+                      "enableModernChipsV1": true,
+                      "enableModernDialog": true,
+                      "enableModernizedBadges": true,
+                      "enableResponsiveAvatarRowBreakpoint": 840,
+                      "enableRoundedBadgesForServer": true,
+                      "enableRoundedThumbs": true,
+                      "enableTypographyTokensMigration": true,
+                      "enableTypographyTokensMigrationM2": true,
+                      "enableTypographyTokensMigrationM3": true,
+                      "enableTypographyTokensMigrationM5": true,
+                      "enableTypographyTokensMigrationMusic": true,
+                      "enableVideoLockupMetadataModernTypeServer": true,
+                      "showVideoCollaborators": true,
+                      "ycEnableUnifiedChannelCreationFlow": true
+                    }
+                  },
+                  "musicContext": {
+                    "experiments": {
+                      "allowMusicListItemFlexGrow": true,
+                      "enableA11yButtonTraitOnPlaylistsInMusicPlaylistsPickerModel": true,
+                      "enableEmlCollectionScalingWithFontScaleAndroid": true,
+                      "enableLibraryEntityQueryInDownloadsBadgeComponent": true,
+                      "enablePlaybackProgressModernization": true,
+                      "enableYoutubeLoggingDirectivesMusicListItem": true
+                    }
+                  },
+                  "shoppingAppContext": {
+                    "experiments": {
+                      "enableMetadataRearrangementForFeaturedProductBanner": true
+                    }
+                  },
+                  "staticDeviceEnvDataContext": {
+                    "clientName": "ANDROID_MUSIC",
+                    "platformName": "PLATFORM_NAME_ANDROID"
+                  },
+                  "subscriptionsContext": {
+                    "experiments": {
+                      "forceModernSubscribeButton": true
+                    }
+                  },
+                  "themeKey": "\n\u0016theme|eefe8d3185d78d46",
+                  "typographyContext": {}
+                },
+                "loggingDirectives": {
+                  "visibility": {
+                    "types": "12"
+                  }
+                },
+                "lyricsData": {
+                  "backgroundImage": {
+                    "sources": [
+                      {
+                        "url": "https://example.invalid/placeholder.jpg"
+                      }
+                    ]
+                  },
+                  "collectionKey": "lyrics_collection",
+                  "colorSamplePaletteEntityKey": "PLACEHOLDER_ENTITY",
+                  "experiments": {
+                    "enableAsyncInitController": false,
+                    "enableFixedBackgroundHeight": false,
+                    "enableLyricLine": false,
+                    "enableLyricsEpSplitView": false,
+                    "enableLyricsShareLanguageSettingsFix": false,
+                    "enableLyricsSharingSplitSmallTonalButton": false,
+                    "enableLyricsTextDirectionOverride": false,
+                    "enableScreenAlwaysOn": false,
+                    "enableTextWithTranslation": false,
+                    "enableTimedLyricsWhileCasting": false,
+                    "enableUnifiedTimedLyricsScreenAlwaysOn": false,
+                    "updatedLyricTimeMs": 0
+                  },
+                  "loggingCommand": {
+                    "logLyricEventCommand": {
+                      "serializedLyricInfo": "PLACEHOLDER_LYRIC_INFO"
+                    }
+                  },
+                  "sourceMessage": "Source: Musixmatch",
+                  "timedLyricsCommand": {
+                    "logLyricEventCommand": {
+                      "serializedLyricInfo": "PLACEHOLDER_LYRIC_INFO"
+                    }
+                  },
+                  "timedLyricsData": [
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "7120",
+                        "metadata": {
+                          "id": "0"
+                        },
+                        "startTimeMilliseconds": "170"
+                      },
+                      "lyricLine": "Placeholder line 1"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "14830",
+                        "metadata": {
+                          "id": "1"
+                        },
+                        "startTimeMilliseconds": "7120"
+                      },
+                      "lyricLine": "Placeholder line 2"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "25140",
+                        "metadata": {
+                          "id": "2"
+                        },
+                        "startTimeMilliseconds": "14830"
+                      },
+                      "lyricLine": "Placeholder line 3"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "30730",
+                        "metadata": {
+                          "id": "3"
+                        },
+                        "startTimeMilliseconds": "25140"
+                      },
+                      "lyricLine": "Placeholder line 4"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "38590",
+                        "metadata": {
+                          "id": "4"
+                        },
+                        "startTimeMilliseconds": "30730"
+                      },
+                      "lyricLine": "Placeholder line 5"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "50990",
+                        "metadata": {
+                          "id": "5"
+                        },
+                        "startTimeMilliseconds": "38590"
+                      },
+                      "lyricLine": "Placeholder line 6"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "55690",
+                        "metadata": {
+                          "id": "6"
+                        },
+                        "startTimeMilliseconds": "50990"
+                      },
+                      "lyricLine": "Placeholder line 7"
+                    },
+                    {
+                      "cueRange": {
+                        "endTimeMilliseconds": "61890",
+                        "metadata": {
+                          "id": "7"
+                        },
+                        "startTimeMilliseconds": "55690"
+                      },
+                      "lyricLine": "Placeholder line 8"
+                    }
+                  ]
+                }
+              }
+            },
+            "subscriptionConfig": {
+              "capabilitiesSubscriptionConfig": {
+                "mappings": {
+                  "identifier": "capabilities|8a8dcf37c2f2aed4",
+                  "resultPath": [
+                    1
+                  ]
+                },
+                "resultField": 465160965
+              },
+              "controllerSubscriptionConfig": {
+                "createControllerCommand": {
+                  "functionName": "createTimedLyricsController|91d5f07a98218013",
+                  "moduleIdentifier": "timed_lyrics_controller|b100f7795d1f596c",
+                  "moduleSetVersion": "13898103192996901733",
+                  "persistentContextEffect": "PERSISTENT_CONTEXT_EFFECT_NONE"
+                },
+                "destroyControllerCommand": {
+                  "functionName": "destroyTimedLyricsController|91d5f07a98218013",
+                  "moduleIdentifier": "timed_lyrics_controller|b100f7795d1f596c",
+                  "moduleSetVersion": "13898103192996901733",
+                  "persistentContextEffect": "PERSISTENT_CONTEXT_EFFECT_CLEAR"
+                },
+                "modelExtension": 465160965,
+                "notifyModelUpdateControllerCommand": {
+                  "functionName": "notifyModelUpdateTimedLyricsController|91d5f07a98218013",
+                  "moduleIdentifier": "timed_lyrics_controller|b100f7795d1f596c",
+                  "moduleSetVersion": "13898103192996901733",
+                  "persistentContextEffect": "PERSISTENT_CONTEXT_EFFECT_NONE"
+                },
+                "skipModelUpdates": true,
+                "stateExtension": 465353514,
+                "stateField": 3
+              },
+              "dataStoreSubscriptionConfig": {
+                "mappings": [
+                  {
+                    "identifier": "EipZVE1fUExBWUVSX0NPTE9SX1NBTVBMRV9QQUxFVFRFX0VOVElUWV9LRVkgiwMoAQ%3D%3D",
+                    "resultField": 7,
+                    "resultPath": [
+                      7
+                    ]
+                  }
+                ],
+                "resultField": 465160965
+              },
+              "environmentSubscriptionConfig": {
+                "environmentDataField": 6,
+                "resultField": 465160965,
+                "subscription": {
+                  "environmentDataFilter": [
+                    "SUBSCRIPTION_WINDOW_SIZE",
+                    "SUBSCRIPTION_DEVICE_ORIENTATION",
+                    "SUBSCRIPTION_IS_SCREEN_READER_ACTIVE"
+                  ]
+                }
+              },
+              "themeSubscriptionConfig": {
+                "mappings": [
+                  {
+                    "identifier": "\n\u0016theme|eefe8d3185d78d46",
+                    "resultPath": [
+                      2
+                    ]
+                  }
+                ],
+                "resultField": 465160965
+              }
+            },
+            "templateConfig": {
+              "uriTemplateConfig": {
+                "uri": "timed_lyrics.eml-ja|8d2d4b4773334739"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "frameworkUpdates": {
+    "entityBatchUpdate": {
+      "mutations": [
+        {
+          "entityKey": "PLACEHOLDER_ENTITY",
+          "type": "ENTITY_MUTATION_TYPE_REPLACE"
+        }
+      ]
+    }
+  }
+}

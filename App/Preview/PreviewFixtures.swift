@@ -52,6 +52,11 @@ enum PreviewFixtures {
         return TrackTabsModel(
             loader: TrackTabsLoader(
                 lyrics: { _, _ in Lyrics(text: "First line\nSecond line\n\nChorus line", source: "Source: LyricFind") },
+                timedLyrics: { _ in
+                    TimedLyrics(
+                        lines: (0..<8).map { TimedLyrics.Line(text: "Preview lyric line \($0 + 1)", start: Double($0) * 10 + 60) },
+                        source: "Source: Musixmatch")
+                },
                 related: { _, _ in
                     BrowsePage(
                         title: nil, chips: [], shelves: Page(items: shelves, continuation: nil),

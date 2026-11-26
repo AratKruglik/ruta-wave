@@ -69,6 +69,16 @@ These shapes only occur when signed in or could not be reproduced as a guest. Th
 | `edit-playlist.json` | `browse/edit_playlist` response: `STATUS_SUCCEEDED` and two `playlistEditVideoAddedResultData` entries. Shape after `ytmusicapi` (`edit_playlist`, `add_playlist_items`). |
 | `feedback.json` | `feedback` response with two processed entries. Shape after `ytmusicapi` (`remove_history_items`). |
 
+### Mobile captures (timed lyrics)
+
+`browse` as a guest with `ANDROID_MUSIC` 7.27.52, the Android app User-Agent and no visitor header (2026-11-26). After `scrub-fixture.py` (which drops `frameworkUpdates`) the lyric text was replaced by `Placeholder line N`, the tracking blobs by placeholders, and a `frameworkUpdates` stub was re-added by hand to prove the parser skips it.
+
+| File | Request body (besides `context`) | Trim |
+|---|---|---|
+| `timed-lyrics.json` | `{"browseId":"MPLYt_eEpQf8QskKl-11"}`: a song with timed lines (`cueRange` in milliseconds) and "Source: Musixmatch". | 8 lines |
+| `timed-lyrics-untimed.json` | `{"browseId":"MPLYt_wUbiMNbaE6O"}`: the music video of the same song; `timedLyricsModel` lines without `cueRange`. | 6 lines |
+| `timed-lyrics-none.json` | `{"browseId":"MPLYt_JL3tq9xT4hB-12"}`: an instrumental; a `musicMessageModel` "Lyrics not available at this time." | as returned |
+
 ## Adding a real signed-in capture
 
 1. Capture the response with your own account. Keep the raw file outside the repository.

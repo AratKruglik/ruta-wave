@@ -1,0 +1,261 @@
+{
+  "contents": {
+    "elementRenderer": {
+      "newElement": {
+        "properties": {
+          "identifierProperties": {
+            "identifier": "timed_lyrics.eml-ja|8d2d4b4773334739",
+            "uniqueLoggingIdentifier": "0"
+          }
+        },
+        "type": {
+          "componentType": {
+            "model": {
+              "timedLyricsModel": {
+                "context": {
+                  "adsContext": {
+                    "experimentFlags": {
+                      "darkCompanionInLightMode": true,
+                      "disableShortsImageAdsTooltip": true,
+                      "enableAiDisclosureForAdTextImageInnertube": true,
+                      "enableCardifiedBasicImmersive": true,
+                      "enableCompactSurveyA11yFix": true,
+                      "enableConditionalRenderingForDelayedDescription": true,
+                      "enableDarkInstreamCompactSurveyInLightMode": true,
+                      "enableEngagementHeaderFocusableA11yFix": true,
+                      "enableFeedCompactSurvey": true,
+                      "enableFeedCompactSurveyA11yFix": true,
+                      "enableFeedCompactSurveyColorSampling": true,
+                      "enableFixAdAvatarMonogramFontSize": true,
+                      "enableFixMiniAppAdCompanionBannerPopulator": true,
+                      "enableMinWindowHeightGateOnReelsAdFlexCard": true,
+                      "enablePanelCarouselAdAvatarLockupRtlFix": true,
+                      "enablePartnershipAdsInStream": true,
+                      "enablePivotButtonAndKeepRhsAndThreeDotsPositionOnElements": true,
+                      "enablePivotButtonOnElements": true,
+                      "enableRtlFlipForImageAdsOnIos": true,
+                      "enableShortsImageAdDarkScrimFix": true,
+                      "enableSwapCarouselAndMetadataForImageInfeedLayouts": true,
+                      "enableWatchWhileFeedMutationAnimation": true,
+                      "enableWrappedSponsoredBadgeFoldable": true,
+                      "forceDarkModeForLandscapeEp": true,
+                      "reelsAdFlexCardClickCloseDelaySeconds": 1,
+                      "simplifyReelsAdFlexCardTransition": true,
+                      "stickyBottomCtaLandscapeEp": true,
+                      "stickyBottomCtaShoppingLandscapeEp": true
+                    }
+                  },
+                  "javascriptContext": {
+                    "moduleSetVersion": "13898103192996901733"
+                  },
+                  "mainAppContext": {
+                    "experiments": {
+                      "enableA11yFixForThreeDotMenuButton": true,
+                      "enableAvatarStackStandardizedBorderWidth": true,
+                      "enableBuenosAiresListOptionPattern": true,
+                      "enableButtonIconDelhiSize": true,
+                      "enableCairoRefresh": true,
+                      "enableCairoRefreshRingo2": true,
+                      "enableIconCustomImageMigrationBatch1": true,
+                      "enableIconCustomImageMigrationBatch10": true,
+                      "enableIconCustomImageMigrationBatch2": true,
+                      "enableIconCustomImageMigrationBatch3": true,
+                      "enableIconCustomImageMigrationBatch4": true,
+                      "enableIconCustomImageMigrationBatch5": true,
+                      "enableIconCustomImageMigrationBatch6": true,
+                      "enableIconCustomImageMigrationBatch7": true,
+                      "enableIconCustomImageMigrationBatch8": true,
+                      "enableIconCustomImageMigrationBatch9": true,
+                      "enableModernButtons": true,
+                      "enableModernChipsV1": true,
+                      "enableModernDialog": true,
+                      "enableModernizedBadges": true,
+                      "enableResponsiveAvatarRowBreakpoint": 840,
+                      "enableRoundedBadgesForServer": true,
+                      "enableRoundedThumbs": true,
+                      "enableShelfHeaderButtonA11yFix": true,
+                      "enableTypographyTokensMigration": true,
+                      "enableTypographyTokensMigrationM2": true,
+                      "enableTypographyTokensMigrationM3": true,
+                      "enableTypographyTokensMigrationM5": true,
+                      "enableTypographyTokensMigrationMusic": true,
+                      "enableVideoLockupMetadataModernTypeServer": true,
+                      "showVideoCollaborators": true,
+                      "ycEnableUnifiedChannelCreationFlow": true
+                    }
+                  },
+                  "musicContext": {
+                    "experiments": {
+                      "allowMusicListItemFlexGrow": true,
+                      "enableA11yButtonTraitOnPlaylistsInMusicPlaylistsPickerModel": true,
+                      "enableEmlCollectionScalingWithFontScaleAndroid": true,
+                      "enableLibraryEntityQueryInDownloadsBadgeComponent": true,
+                      "enablePlaybackProgressModernization": true,
+                      "enableYoutubeLoggingDirectivesMusicListItem": true
+                    }
+                  },
+                  "shoppingAppContext": {
+                    "experiments": {
+                      "enableMetadataRearrangementForFeaturedProductBanner": true
+                    }
+                  },
+                  "staticDeviceEnvDataContext": {
+                    "clientName": "ANDROID_MUSIC",
+                    "platformName": "PLATFORM_NAME_ANDROID"
+                  },
+                  "subscriptionsContext": {
+                    "experiments": {
+                      "forceModernSubscribeButton": true
+                    }
+                  },
+                  "themeKey": "\n\u0016theme|eefe8d3185d78d46",
+                  "typographyContext": {}
+                },
+                "loggingDirectives": {
+                  "visibility": {
+                    "types": "12"
+                  }
+                },
+                "lyricsData": {
+                  "backgroundImage": {
+                    "sources": [
+                      {
+                        "url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg"
+                      }
+                    ]
+                  },
+                  "colorSamplePaletteEntityKey": "PLACEHOLDER_ENTITY",
+                  "experiments": {
+                    "enableAsyncInitController": false,
+                    "enableFixedBackgroundHeight": false,
+                    "enableLyricLine": false,
+                    "enableLyricsEpSplitView": false,
+                    "enableLyricsShareLanguageSettingsFix": false,
+                    "enableLyricsSharingSplitSmallTonalButton": false,
+                    "enableLyricsTextDirectionOverride": false,
+                    "enableScreenAlwaysOn": false,
+                    "enableTextWithTranslation": false,
+                    "enableTimedLyricsWhileCasting": false,
+                    "enableUnifiedTimedLyricsScreenAlwaysOn": false,
+                    "updatedLyricTimeMs": 0
+                  },
+                  "loggingCommand": {
+                    "logLyricEventCommand": {
+                      "serializedLyricInfo": "PLACEHOLDER_LYRIC_INFO"
+                    }
+                  },
+                  "sourceMessage": "Source: Musixmatch",
+                  "staticLayout": true,
+                  "timedLyricsData": [
+                    {
+                      "lyricLine": "Placeholder line 1"
+                    },
+                    {
+                      "lyricLine": "Placeholder line 2"
+                    },
+                    {
+                      "lyricLine": "Placeholder line 3"
+                    },
+                    {
+                      "lyricLine": "Placeholder line 4"
+                    },
+                    {
+                      "lyricLine": "Placeholder line 5"
+                    },
+                    {
+                      "lyricLine": "Placeholder line 6"
+                    }
+                  ]
+                }
+              }
+            },
+            "subscriptionConfig": {
+              "capabilitiesSubscriptionConfig": {
+                "mappings": {
+                  "identifier": "capabilities|8a8dcf37c2f2aed4",
+                  "resultPath": [
+                    1
+                  ]
+                },
+                "resultField": 465160965
+              },
+              "controllerSubscriptionConfig": {
+                "createControllerCommand": {
+                  "functionName": "createTimedLyricsController|91d5f07a98218013",
+                  "moduleIdentifier": "timed_lyrics_controller|b100f7795d1f596c",
+                  "moduleSetVersion": "13898103192996901733",
+                  "persistentContextEffect": "PERSISTENT_CONTEXT_EFFECT_NONE"
+                },
+                "destroyControllerCommand": {
+                  "functionName": "destroyTimedLyricsController|91d5f07a98218013",
+                  "moduleIdentifier": "timed_lyrics_controller|b100f7795d1f596c",
+                  "moduleSetVersion": "13898103192996901733",
+                  "persistentContextEffect": "PERSISTENT_CONTEXT_EFFECT_CLEAR"
+                },
+                "modelExtension": 465160965,
+                "notifyModelUpdateControllerCommand": {
+                  "functionName": "notifyModelUpdateTimedLyricsController|91d5f07a98218013",
+                  "moduleIdentifier": "timed_lyrics_controller|b100f7795d1f596c",
+                  "moduleSetVersion": "13898103192996901733",
+                  "persistentContextEffect": "PERSISTENT_CONTEXT_EFFECT_NONE"
+                },
+                "skipModelUpdates": true,
+                "stateExtension": 465353514,
+                "stateField": 3
+              },
+              "dataStoreSubscriptionConfig": {
+                "mappings": [
+                  {
+                    "identifier": "EipZVE1fUExBWUVSX0NPTE9SX1NBTVBMRV9QQUxFVFRFX0VOVElUWV9LRVkgiwMoAQ%3D%3D",
+                    "resultField": 7,
+                    "resultPath": [
+                      7
+                    ]
+                  }
+                ],
+                "resultField": 465160965
+              },
+              "environmentSubscriptionConfig": {
+                "environmentDataField": 6,
+                "resultField": 465160965,
+                "subscription": {
+                  "environmentDataFilter": [
+                    "SUBSCRIPTION_WINDOW_SIZE",
+                    "SUBSCRIPTION_DEVICE_ORIENTATION",
+                    "SUBSCRIPTION_IS_SCREEN_READER_ACTIVE"
+                  ]
+                }
+              },
+              "themeSubscriptionConfig": {
+                "mappings": [
+                  {
+                    "identifier": "\n\u0016theme|eefe8d3185d78d46",
+                    "resultPath": [
+                      2
+                    ]
+                  }
+                ],
+                "resultField": 465160965
+              }
+            },
+            "templateConfig": {
+              "uriTemplateConfig": {
+                "uri": "timed_lyrics.eml-ja|8d2d4b4773334739"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "frameworkUpdates": {
+    "entityBatchUpdate": {
+      "mutations": [
+        {
+          "entityKey": "PLACEHOLDER_ENTITY",
+          "type": "ENTITY_MUTATION_TYPE_REPLACE"
+        }
+      ]
+    }
+  }
+}

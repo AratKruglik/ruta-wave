@@ -228,3 +228,35 @@ public struct Lyrics: Sendable, Equatable {
         self.source = source
     }
 }
+
+/// Lines sorted by `start`.
+public struct TimedLyrics: Sendable, Equatable {
+    public struct Line: Sendable, Equatable {
+        public let text: String
+        public let start: TimeInterval
+
+        public init(text: String, start: TimeInterval) {
+            self.text = text
+            self.start = start
+        }
+    }
+
+    public let lines: [Line]
+    public let source: String?
+
+    public init(lines: [Line], source: String?) {
+        self.lines = lines
+        self.source = source
+    }
+
+    /// The last line that started at or before `time`. `nil` before the first line.
+    public func lineIndex(at time: TimeInterval) -> Int? {
+        var low = 0
+        var high = lines.count
+        while low < high {
+            let middle = (low + high) / 2
+            if lines[middle].start <= time { low = middle + 1 } else { high = middle }
+        }
+        return low == 0 ? nil : low - 1
+    }
+}

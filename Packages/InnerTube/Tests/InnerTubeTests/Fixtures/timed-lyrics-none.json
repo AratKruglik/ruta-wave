@@ -1,0 +1,180 @@
+{
+  "contents": {
+    "elementRenderer": {
+      "newElement": {
+        "properties": {
+          "identifierProperties": {
+            "identifier": "music_message.eml|f4b9434bc56cd8c6",
+            "uniqueLoggingIdentifier": "0"
+          }
+        },
+        "type": {
+          "componentType": {
+            "model": {
+              "musicMessageModel": {
+                "backgroundImageData": {
+                  "primaryImage": {
+                    "sources": [
+                      {
+                        "url": "https://example.invalid/placeholder.jpg"
+                      }
+                    ]
+                  }
+                },
+                "context": {
+                  "adsContext": {
+                    "experimentFlags": {
+                      "darkCompanionInLightMode": true,
+                      "disableShortsImageAdsTooltip": true,
+                      "enableAiDisclosureForAdTextImageInnertube": true,
+                      "enableCardifiedBasicImmersive": true,
+                      "enableCompactSurveyA11yFix": true,
+                      "enableConditionalRenderingForDelayedDescription": true,
+                      "enableDarkInstreamCompactSurveyInLightMode": true,
+                      "enableEngagementHeaderFocusableA11yFix": true,
+                      "enableFeedCompactSurvey": true,
+                      "enableFeedCompactSurveyA11yFix": true,
+                      "enableFeedCompactSurveyColorSampling": true,
+                      "enableFixAdAvatarMonogramFontSize": true,
+                      "enableFixMiniAppAdCompanionBannerPopulator": true,
+                      "enableMinWindowHeightGateOnReelsAdFlexCard": true,
+                      "enablePanelCarouselAdAvatarLockupRtlFix": true,
+                      "enablePartnershipAdsInStream": true,
+                      "enablePivotButtonAndKeepRhsAndThreeDotsPositionOnElements": true,
+                      "enablePivotButtonOnElements": true,
+                      "enableReelsProgressiveCta": true,
+                      "enableRtlFlipForImageAdsOnIos": true,
+                      "enableShortsImageAdDarkScrimFix": true,
+                      "enableSwapCarouselAndMetadataForImageInfeedLayouts": true,
+                      "enableWatchWhileFeedMutationAnimation": true,
+                      "enableWrappedSponsoredBadgeFoldable": true,
+                      "forceDarkModeForLandscapeEp": true,
+                      "reelsAdButtonExpandedDelaySeconds": 9,
+                      "reelsAdButtonLargeColorDelaySeconds": 4,
+                      "reelsAdButtonLargeDelaySeconds": 3,
+                      "reelsAdButtonMiniDelaySeconds": -1,
+                      "reelsAdFlexCardClickCloseDelaySeconds": 1,
+                      "simplifyReelsAdFlexCardTransition": true,
+                      "stickyBottomCtaLandscapeEp": true,
+                      "stickyBottomCtaShoppingLandscapeEp": true
+                    }
+                  },
+                  "mainAppContext": {
+                    "experiments": {
+                      "enableA11yFixForThreeDotMenuButton": true,
+                      "enableAvatarStackStandardizedBorderWidth": true,
+                      "enableBuenosAiresListOptionPattern": true,
+                      "enableButtonIconDelhiSize": true,
+                      "enableCairoRefresh": true,
+                      "enableCairoRefreshRingo2": true,
+                      "enableIconCustomImageMigrationBatch1": true,
+                      "enableIconCustomImageMigrationBatch10": true,
+                      "enableIconCustomImageMigrationBatch2": true,
+                      "enableIconCustomImageMigrationBatch3": true,
+                      "enableIconCustomImageMigrationBatch4": true,
+                      "enableIconCustomImageMigrationBatch5": true,
+                      "enableIconCustomImageMigrationBatch6": true,
+                      "enableIconCustomImageMigrationBatch7": true,
+                      "enableIconCustomImageMigrationBatch8": true,
+                      "enableIconCustomImageMigrationBatch9": true,
+                      "enableModernButtons": true,
+                      "enableModernChipsV1": true,
+                      "enableModernDialog": true,
+                      "enableModernizedBadges": true,
+                      "enableResponsiveAvatarRowBreakpoint": 840,
+                      "enableRoundedBadgesForServer": true,
+                      "enableRoundedThumbs": true,
+                      "enableTypographyTokensMigration": true,
+                      "enableTypographyTokensMigrationM2": true,
+                      "enableTypographyTokensMigrationM3": true,
+                      "enableTypographyTokensMigrationM5": true,
+                      "enableTypographyTokensMigrationMusic": true,
+                      "enableVideoLockupMetadataModernTypeServer": true,
+                      "showVideoCollaborators": true,
+                      "ycEnableUnifiedChannelCreationFlow": true
+                    }
+                  },
+                  "musicContext": {
+                    "experiments": {
+                      "allowMusicListItemFlexGrow": true,
+                      "enableA11yButtonTraitOnPlaylistsInMusicPlaylistsPickerModel": true,
+                      "enableEmlCollectionScalingWithFontScaleAndroid": true,
+                      "enableLibraryEntityQueryInDownloadsBadgeComponent": true,
+                      "enablePlaybackProgressModernization": true,
+                      "enableYoutubeLoggingDirectivesMusicListItem": true
+                    }
+                  },
+                  "shoppingAppContext": {
+                    "experiments": {
+                      "enableMetadataRearrangementForFeaturedProductBanner": true
+                    }
+                  },
+                  "staticDeviceEnvDataContext": {
+                    "clientName": "ANDROID_MUSIC",
+                    "platformName": "PLATFORM_NAME_ANDROID"
+                  },
+                  "subscriptionsContext": {
+                    "experiments": {
+                      "forceModernSubscribeButton": true
+                    }
+                  },
+                  "themeKey": "\n\u0016theme|eefe8d3185d78d46",
+                  "typographyContext": {}
+                },
+                "style": "MUSIC_MESSAGE_STYLE_ZERO_STATE",
+                "text": "Lyrics not available at this time."
+              }
+            },
+            "subscriptionConfig": {
+              "capabilitiesSubscriptionConfig": {
+                "mappings": {
+                  "identifier": "capabilities|8a8dcf37c2f2aed4",
+                  "resultPath": [
+                    6
+                  ]
+                },
+                "resultField": 480784106
+              },
+              "environmentSubscriptionConfig": {
+                "environmentDataField": 3,
+                "resultField": 480784106,
+                "subscription": {
+                  "environmentDataFilter": [
+                    "SUBSCRIPTION_WINDOW_SIZE",
+                    "SUBSCRIPTION_WINDOW_SAFE_AREA_INSETS"
+                  ]
+                }
+              },
+              "themeSubscriptionConfig": {
+                "mappings": [
+                  {
+                    "identifier": "\n\u0016theme|eefe8d3185d78d46",
+                    "resultPath": [
+                      4
+                    ]
+                  }
+                ],
+                "resultField": 480784106
+              }
+            },
+            "templateConfig": {
+              "uriTemplateConfig": {
+                "uri": "music_message.eml|f4b9434bc56cd8c6"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "frameworkUpdates": {
+    "entityBatchUpdate": {
+      "mutations": [
+        {
+          "entityKey": "PLACEHOLDER_ENTITY",
+          "type": "ENTITY_MUTATION_TYPE_REPLACE"
+        }
+      ]
+    }
+  }
+}

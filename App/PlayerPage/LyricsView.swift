@@ -34,9 +34,7 @@ struct LyricsView: View {
     @Environment(TrackTabsModel.self) private var trackTabs
     @State private var attempt = 0
 
-    private var phase: TrackTabsModel.Phase<Lyrics> {
-        trackTabs.lyrics.flatMap { $0.id == browseId ? $0.phase : nil } ?? .loading
-    }
+    private var phase: TrackTabsModel.Phase<TrackTabsModel.LyricsContent> { trackTabs.lyricsPhase(browseId) }
 
     var body: some View {
         content
@@ -51,13 +49,22 @@ struct LyricsView: View {
     private var content: some View {
         switch phase {
         case .loading: skeleton
-        case .loaded(let lyrics): loaded(lyrics)
+        case .loaded(let content): loaded(content)
         case .empty: PanelMessage(text: "Lyrics aren't available")
         case .failed: PageErrorView { attempt += 1 }
         }
     }
 
-    private func loaded(_ lyrics: Lyrics) -> some View {
+    @ViewBuilder
+    private func loaded(_ content: TrackTabsModel.LyricsContent) -> some View {
+        if let timed = content.timed {
+            TimedLyricsView(lyrics: timed).id(browseId)
+        } else if let plain = content.plain {
+            plainLyrics(plain)
+        }
+    }
+
+    private func plainLyrics(_ lyrics: Lyrics) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Metrics.space24) {
                 Text(verbatim: lyrics.text)
@@ -90,6 +97,7 @@ struct LyricsView: View {
         .frame(width: 400, height: 500)
         .padding()
         .environment(PreviewFixtures.trackTabs())
+        .environment(PreviewFixtures.nowPlaying())
         .background(.themeBase)
 }
 #endif

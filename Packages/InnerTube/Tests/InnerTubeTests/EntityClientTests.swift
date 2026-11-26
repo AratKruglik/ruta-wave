@@ -113,6 +113,15 @@ private func body(_ request: URLRequest) throws -> JSONValue {
         #expect(more.items.count == 2)
     }
 
+    @Test func timedLyricsRetriesATransientFailureAndSendsNoVisitor() async throws {
+        let script = Script([.status(503, ""), try .fixture("timed-lyrics")])
+        let lyrics = try await script.client().timedLyrics("MPLYt_a")
+        #expect(lyrics?.lines.count == 8)
+        #expect(script.requests.count == 2)
+        #expect(try body(script.requests[1])["browseId"]?.string == "MPLYt_a")
+        #expect(script.requests[1].value(forHTTPHeaderField: "X-Goog-Visitor-Id") == nil)
+    }
+
     @Test func lyricsReturnsTextOrNil() async throws {
         let script = Script([try .fixture("lyrics"), try .fixture("lyrics-none")])
         let client = script.client()

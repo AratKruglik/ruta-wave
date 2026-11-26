@@ -3,6 +3,9 @@ import Foundation
 
 enum InnerTubeRequest {
     static let origin = "https://music.youtube.com"
+    private static let mobileClientName = "ANDROID_MUSIC"
+    private static let mobileClientVersion = "7.27.52"
+    private static let mobileUserAgent = "com.google.android.apps.youtube.music/\(mobileClientVersion) (Linux; U; Android 14) gzip"
 
     static func make(
         endpoint: String,
@@ -29,6 +32,21 @@ enum InnerTubeRequest {
             request.setValue(visitorData, forHTTPHeaderField: "X-Goog-Visitor-Id")
         }
         try attachPayload(&request, body: body, locale: locale)
+        return request
+    }
+
+    /// No Safari UA, `Origin` or visitor id: the mobile client answers a guest with the timed lyrics only when it looks like the app.
+    static func makeMobileGuest(
+        endpoint: String,
+        body: [String: any Sendable] = [:],
+        locale: Locale
+    ) throws(InnerTubeError) -> URLRequest {
+        var request = URLRequest(url: URL(string: "\(origin)/youtubei/v1/\(endpoint)?prettyPrint=false")!)
+        request.httpShouldHandleCookies = false
+        request.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
+        try attachPayload(
+            &request, body: body, locale: locale,
+            clientName: mobileClientName, clientVersion: mobileClientVersion)
         return request
     }
 
@@ -68,12 +86,18 @@ enum InnerTubeRequest {
         return request
     }
 
-    private static func attachPayload(_ request: inout URLRequest, body: [String: any Sendable], locale: Locale) throws(InnerTubeError) {
+    private static func attachPayload(
+        _ request: inout URLRequest,
+        body: [String: any Sendable],
+        locale: Locale,
+        clientName: String = "WEB_REMIX",
+        clientVersion: String = ClientVersion.shared.current
+    ) throws(InnerTubeError) {
         var payload: [String: Any] = body
         payload["context"] = [
             "client": [
-                "clientName": "WEB_REMIX",
-                "clientVersion": ClientVersion.shared.current,
+                "clientName": clientName,
+                "clientVersion": clientVersion,
                 "hl": locale.language.languageCode?.identifier ?? "en",
                 "gl": locale.region?.identifier ?? "US",
             ],
