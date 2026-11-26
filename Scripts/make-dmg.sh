@@ -19,6 +19,7 @@ xcodebuild build \
   -configuration Release \
   -derivedDataPath "$DERIVED" \
   -quiet \
+  ARCHS=arm64 \
   MARKETING_VERSION="$VERSION" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
 
