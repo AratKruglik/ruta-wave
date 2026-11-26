@@ -31,7 +31,7 @@ and their states. What every part of the interface **does** is described in
 
 | In the reference | In RutaWave | Why |
 |---|---|---|
-| YouTube Music logo and red play mark in the top bar | RutaWave wordmark and the app's own icon | trademarks, [05 §2.2](05-risks-and-scope.md#2-legal-and-policy-constraints) |
+| YouTube Music logo and red play mark in the top bar | The app's own icon | trademarks, [05 §2.2](05-risks-and-scope.md#2-legal-and-policy-constraints) |
 | YouTube Sans, Roboto | SF Pro (system font) with the same sizes and weights | YouTube Sans is proprietary; no bundled fonts ([02 §1](02-architecture.md#1-key-decisions)) |
 | Download button on the playlist header | not shown | downloading is excluded ([05 §3](05-risks-and-scope.md#3-what-we-deliberately-do-not-do)) |
 | Hamburger that collapses the sidebar | the system sidebar toggle of `NavigationSplitView` | native behaviour, same result |
@@ -43,7 +43,7 @@ and their states. What every part of the interface **does** is described in
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ ● ● ●  [≡] RutaWave      [ 🔍 Search songs, albums, artists ]             ‹ › (A) │ top bar, 64 pt
+│ ● ● ●  [≡]      [ 🔍 Search songs, albums, artists ]             ‹ › (A) │ top bar, 64 pt
 ├──────────────┬───────────────────────────────────────────────────────────────┤
 │ ⌂ Home       │                                                               │
 │ ◎ Explore    │                                                               │
@@ -57,7 +57,7 @@ and their states. What every part of the interface **does** is described in
 │ …            │                                                               │
 ├──────────────┴───────────────────────────────────────────────────────────────┤
 │ ━━━━●──────────────────────────────────────────────────────── progress, 3 pt │
-│ ⏮ ▶ ⏭ 0:07 / 3:47   [art] Title / Artist • Album • Year  👍 👎 ⋮   🔈 ⟳ ⤮ ▲ │ player bar, 64 pt
+│ ⏮ ▶ ⏭ 0:07 / 3:47 ⟳ ⤮ [art] Title / Artist • Album • Year  👍 👎 ⋮   🔈 ▲   │ player bar, 64 pt
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -136,7 +136,7 @@ come from the site's tokens **[observed]** unless stated.
 | `text.tertiary` | `#aaaaaa` | inactive tab labels, captions, placeholder |
 | `text.onInverse` | `#0f0f0f` | text on `surface.inverse` |
 | `text.disabled` | `#717171` | disabled controls |
-| `accent.progress` | `#ff0033` | played part of the progress line and its knob |
+| `accent.progress` | `#ff0033` | played part of the progress line and its knob; volume slider fill; on state of Repeat and Shuffle (glyph, over the `surface.fill` circle) |
 | `accent.link` | `#3ea6ff` | links inside descriptions and lyrics source |
 | `stroke.subtle` | white 20 % | outlined pill ("More"), field border, separators |
 | `stroke.focus` | `#f1f1f1`, 2 pt | keyboard focus ring (screenshot 6) |
@@ -225,8 +225,7 @@ Each entry: anatomy → sizes → states. Behaviour is in [08](08-ui-spec.md).
 The bar has no background; each group below is one `glass.regular` capsule,
 and all of them share one glass container. Before macOS 26 the groups have no
 fill and the bar is opaque `theme.base`.
-- Left group: sidebar toggle (`sidebar.left`) and the RutaWave wordmark
-  (title 20 / bold).
+- Left group: sidebar toggle (`sidebar.left`).
 - Centre: search field, 480–720 pt wide (flexes), 42 pt high, capsule,
   `glass.regular` (`radius.card` and `surface.field` before macOS 26),
   magnifier icon 20 pt at 12 pt inset, placeholder in `text.tertiary`.
@@ -339,12 +338,13 @@ Charts (`chart.line.uptrend.xyaxis`), Moods & genres (`face.smiling`).
   `accent.progress`; on hover it grows to 5 pt and shows a 12 pt knob and a
   time tooltip over the pointer.
 - Left group: previous (28 pt), play/pause (36 pt), next (28 pt), time
-  "0:07 / 3:47" `caption`, `text.secondary`.
+  "0:07 / 3:47" `caption`, `text.secondary`, then repeat (off / all / one:
+  `repeat`, `repeat` filled, `repeat.1`) and shuffle (when on, both show
+  `accent.progress` glyphs over the `surface.fill` circle).
 - Centre group (max 560 pt): artwork 40 pt (square) or 71 × 40 pt (video),
   title `title`, subtitle `body`/`text.secondary`
   ("Artist • Album • Year" or "Channel • N views • N likes"), then 👍 👎 ⋮.
-- Right group: volume (icon; slider appears on hover), repeat (off / all / one:
-  `repeat`, `repeat` filled, `repeat.1`), shuffle, expand chevron (`▲` opens the
+- Right group: volume (icon; slider appears on hover), expand chevron (`▲` opens the
   player page, `▼` closes it). Captions **CC** (only for videos with captions,
   `captions-selector`) is deferred with music video mode ([#12](https://github.com/AratKruglik/yt-music-mac/issues/12)).
 

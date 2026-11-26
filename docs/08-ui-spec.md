@@ -65,12 +65,11 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 
 ## 2. Top bar
 
-**Shows:** sidebar toggle, RutaWave wordmark, search field, back, forward,
+**Shows:** sidebar toggle, search field, back, forward,
 avatar (signed in) or **Sign in** pill (guest).
 
 **Actions**
 - Sidebar toggle (⌃⌘S): collapses / expands the sidebar; state is remembered.
-- Wordmark: goes to Home (root of its stack).
 - Back / forward: see 1.3; disabled when there is nowhere to go.
 - Avatar: opens the account popover (§13).
 - **Sign in** (guest): opens the sign-in window; on success the app switches to
@@ -289,8 +288,11 @@ year", "N songs • duration" (uploaded tracks and podcast episodes are skipped,
 - Row click plays the playlist from that row. Double-click is the same.
 - Hover actions on a row: 👍, 👎, ⋮, checkbox.
 - Multi-select: the checkbox, ⌘-click, ⇧-click; a selection bar replaces the
-  action row: "N selected", Play next, Add to queue, Add to playlist, Remove
-  from playlist (own), Clear.
+  action row: "N selected", then icon + short label buttons: Next, Queue, Playlist,
+  Remove (own), Clear. The full phrase ("Play next", "Add to queue",
+  "Add to playlist…", "Remove from playlist", "Clear") is the tooltip and
+  the VoiceOver label. Where the labels do not fit (the Up Next panel), the
+  buttons show icons only.
 - Own playlist editing (Edit): rename, description, privacy, cover is not
   editable; drag rows to reorder; ⌫ removes selected rows. Each change is a
   `browse/edit_playlist` action **[known]** with Undo in a toast.

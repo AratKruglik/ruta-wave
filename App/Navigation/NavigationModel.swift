@@ -78,12 +78,6 @@ final class NavigationModel {
         }
     }
 
-    func goHome() {
-        isPlayerPagePresented = false
-        selection = .home
-        popToRoot(.home)
-    }
-
     func push(_ route: Route) {
         isPlayerPagePresented = false
         paths[selection, default: []].append(route)

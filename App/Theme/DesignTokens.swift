@@ -51,7 +51,6 @@ extension Font {
     static let rwTitle = Font.system(size: 14, weight: .medium)
     static let rwCaption = Font.system(size: 12)
     static let rwButton = Font.system(size: 14, weight: .medium)
-    static let rwWordmark = Font.system(size: 20, weight: .bold)
 
     static func rwIcon(_ size: CGFloat) -> Font { .system(size: size) }
 }

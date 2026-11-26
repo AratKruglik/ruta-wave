@@ -31,4 +31,17 @@ struct LocalizationCatalogTests {
         let missing = catalog().filter { $0.value["shouldTranslate"] as? Bool != false && !hasTranslation($0.value) }.keys.sorted()
         #expect(missing.isEmpty, "Missing uk translation: \(missing)")
     }
+
+    @Test func selectionBarAndRemoveKeysAreTranslated() {
+        let strings = catalog()
+        for key in ["Play next (short)", "Queue", "Remove"] {
+            #expect(strings[key].map(hasTranslation) == true, "Missing uk translation: \(key)")
+        }
+    }
+
+    @Test func retiredWordmarkKeysAreGone() {
+        let strings = catalog()
+        #expect(strings["RutaWave"] == nil)
+        #expect(strings["RutaWave, go to Home"] == nil)
+    }
 }

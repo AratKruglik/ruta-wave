@@ -8,7 +8,6 @@ struct TopBar<AccountPopover: View>: View {
     let canGoForward: Bool
     @Binding var isAccountPresented: Bool
     let onToggleSidebar: () -> Void
-    let onHome: () -> Void
     let onBack: () -> Void
     let onForward: () -> Void
     let onSignIn: () -> Void
@@ -18,23 +17,10 @@ struct TopBar<AccountPopover: View>: View {
 
     var body: some View {
         HStack(spacing: Metrics.space8) {
-            HStack(spacing: Metrics.space4) {
             BarIconButton(symbol: "sidebar.left", size: Metrics.iconBar, label: "Toggle sidebar", action: onToggleSidebar)
-            Button(action: onHome) {
-                Text("RutaWave")
-                    .font(.rwWordmark)
-                    .foregroundStyle(.textPrimary)
-                    .lineLimit(1)
-                    .frame(minHeight: Metrics.hitTarget)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .help("Home")
-            .accessibilityLabel("RutaWave, go to Home")
-            }
-            .padding(.leading, LiquidGlass.isAvailable ? Metrics.space4 : 0)
-            .padding(.trailing, LiquidGlass.isAvailable ? Metrics.space12 : 0)
+                .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
             .glassSurface(in: Capsule(), fallback: nil)
+            .padding(.leading, Metrics.space24)
             Spacer(minLength: Metrics.space16)
             SearchField()
                 .frame(minWidth: 240, maxWidth: 720)
@@ -105,6 +91,7 @@ struct BarIconButton: View {
     let size: CGFloat
     let label: LocalizedStringKey
     var isOn = false
+    var activeTint: Color = .textPrimary
     let action: () -> Void
     @Environment(\.isEnabled) private var isEnabled
 
@@ -112,7 +99,7 @@ struct BarIconButton: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.rwIcon(size))
-                .foregroundStyle(isEnabled ? (isOn ? .textPrimary : .textSecondary) : .textDisabled)
+                .foregroundStyle(isEnabled ? (isOn ? activeTint : .textSecondary) : .textDisabled)
                 .frame(width: max(size, Metrics.hitTarget), height: max(size, Metrics.hitTarget))
                 .background(isOn ? .surfaceFill : Color.clear, in: Circle())
                 .contentShape(Rectangle())
@@ -148,7 +135,7 @@ private struct TitleBarDragArea: NSViewRepresentable {
 #Preview("Signed in") {
     TopBar(
         isSignedIn: true, avatarURL: nil, canGoBack: true, canGoForward: false, isAccountPresented: .constant(false),
-        onToggleSidebar: {}, onHome: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
+        onToggleSidebar: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
     )
     .frame(width: 1100)
     .environment(PreviewFixtures.searchFieldModel(.empty))
@@ -160,7 +147,7 @@ private struct TitleBarDragArea: NSViewRepresentable {
 #Preview("Guest") {
     TopBar(
         isSignedIn: false, avatarURL: nil, canGoBack: false, canGoForward: false, isAccountPresented: .constant(false),
-        onToggleSidebar: {}, onHome: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
+        onToggleSidebar: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
     )
     .frame(width: 960)
     .environment(PreviewFixtures.searchFieldModel(.empty))

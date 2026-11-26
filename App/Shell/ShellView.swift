@@ -80,7 +80,7 @@ struct ShellView<AccountPopover: View>: View {
                 TopBar(
                     isSignedIn: isSignedIn, avatarURL: avatarURL, canGoBack: navigation.canGoBack,
                     canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
-                    onToggleSidebar: { setSidebarVisible(!isSidebarVisible) }, onHome: navigation.goHome,
+                    onToggleSidebar: { setSidebarVisible(!isSidebarVisible) },
                     onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
                     .accessibilityHidden(navigation.isPlayerPagePresented)
             }

@@ -62,6 +62,20 @@ struct PlayerBar: View {
                 .disabled(player.isAd)
             TimeLabel()
                 .padding(.leading, Metrics.space8)
+            playbackModes
+                .padding(.leading, Metrics.space8)
+        }
+    }
+
+    private var playbackModes: some View {
+        HStack(spacing: Metrics.space12) {
+            BarIconButton(
+                symbol: player.repeatMode == .one ? "repeat.1" : "repeat", size: Metrics.iconBar, label: "Repeat",
+                isOn: player.repeatMode != .off, activeTint: .accentProgress, action: nowPlaying.cycleRepeat)
+                .accessibilityValue(repeatValue)
+            BarIconButton(
+                symbol: "shuffle", size: Metrics.iconBar, label: "Shuffle", isOn: player.isShuffled,
+                activeTint: .accentProgress, action: nowPlaying.toggleShuffle)
         }
     }
 
@@ -158,15 +172,8 @@ struct PlayerBar: View {
     }
 
     private var options: some View {
-        HStack(spacing: Metrics.space4) {
+        HStack(spacing: Metrics.space12) {
             VolumeControl()
-            BarIconButton(
-                symbol: player.repeatMode == .one ? "repeat.1" : "repeat", size: Metrics.iconBar, label: "Repeat",
-                isOn: player.repeatMode != .off, action: nowPlaying.cycleRepeat)
-                .accessibilityValue(repeatValue)
-            BarIconButton(
-                symbol: "shuffle", size: Metrics.iconBar, label: "Shuffle", isOn: player.isShuffled,
-                action: nowPlaying.toggleShuffle)
             BarIconButton(
                 symbol: isPlayerPagePresented ? "chevron.down" : "chevron.up", size: Metrics.iconBar,
                 label: isPlayerPagePresented ? "Close player page" : "Open player page",
@@ -266,6 +273,12 @@ private struct LinkText: View {
     player.like = .like
     player.repeatMode = .one
     player.isShuffled = true
+    return PlayerBarPreview(player: player)
+}
+
+#Preview("Repeat all") {
+    let player = PreviewPlayer()
+    player.repeatMode = .all
     return PlayerBarPreview(player: player)
 }
 

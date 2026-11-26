@@ -24,6 +24,7 @@ struct VolumeControl: View {
             .accessibilityLabel(player.isMuted ? "Unmute" : "Mute")
             Slider(value: Binding(get: { level }, set: { nowPlaying.setVolume($0) }), in: 0...1)
                 .frame(width: Self.sliderWidth)
+                .tint(.accentProgress)
                 .opacity(isHovering ? 1 : 0)
                 .accessibilityLabel("Volume")
         }
