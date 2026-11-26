@@ -1,12 +1,14 @@
 import AppKit
 import AppSettings
 import Auth
+import Plugins
 import ServiceManagement
 import SwiftUI
 import UserNotifications
 
 struct SettingsView: View {
     let session: AuthSession
+    let plugins: PluginRegistry
 
     var body: some View {
         TabView {
@@ -14,6 +16,8 @@ struct SettingsView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             PlaybackSettings()
                 .tabItem { Label("Playback", systemImage: "play.circle") }
+            PluginsSettings(registry: plugins)
+                .tabItem { Label("Plugins", systemImage: "puzzlepiece.extension") }
             AccountSettings(session: session)
                 .tabItem { Label("Account", systemImage: "person.crop.circle") }
         }
@@ -148,20 +152,8 @@ private final class LaunchAtLogin {
     }
 }
 
-/// The system owns this permission, so it is read from the notification centre rather than stored.
-@MainActor @Observable
-private final class NotificationPermission {
-    private(set) var isDenied = false
-
-    func refresh() async {
-        isDenied = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
-    }
-}
-
 private struct PlaybackSettings: View {
     @State private var resumeOnStart = Preferences().resumeOnStart
-    @State private var trackNotifications = Preferences().trackNotifications
-    @State private var permission = NotificationPermission()
     @State private var showDislikeButton = Preferences().showDislikeButton
 
     private let preferences = Preferences()
@@ -173,8 +165,80 @@ private struct PlaybackSettings: View {
                 Text("The track opens paused where you stopped.")
             }
             Toggle("Show the dislike button", isOn: $showDislikeButton)
-            Toggle("Notify when the track changes", isOn: $trackNotifications)
-            if trackNotifications, permission.isDenied {
+        }
+        .formStyle(.grouped)
+        .fixedSize(horizontal: false, vertical: true)
+        .onChange(of: resumeOnStart) { _, newValue in preferences.resumeOnStart = newValue }
+        .onChange(of: showDislikeButton) { _, newValue in preferences.showDislikeButton = newValue }
+    }
+}
+
+/// The system owns this permission, so it is read from the notification centre rather than stored.
+@MainActor @Observable
+private final class NotificationPermission {
+    private(set) var isDenied = false
+
+    func refresh() async {
+        isDenied = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
+    }
+}
+
+private struct PluginsSettings: View {
+    let registry: PluginRegistry
+
+    var body: some View {
+        Form {
+            ForEach(registry.plugins, id: \.pluginId) { plugin in
+                PluginRow(plugin: plugin, state: registry.states[type(of: plugin).id])
+            }
+        }
+        .formStyle(.grouped)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private extension Plugin {
+    var pluginId: String { Self.id }
+}
+
+private struct PluginRow: View {
+    let plugin: any Plugin
+    let state: PluginRegistry.RunState?
+    @State private var isOn: Bool
+
+    init(plugin: any Plugin, state: PluginRegistry.RunState?) {
+        self.plugin = plugin
+        self.state = state
+        let type = type(of: plugin)
+        _isOn = State(initialValue: PluginSettings(id: type.id).isEnabled(default: type.isEnabledByDefault))
+    }
+
+    var body: some View {
+        Section {
+            Toggle(isOn: $isOn) { Text(type(of: plugin).title) }
+            if state == .failed, isOn {
+                Text("Couldn't start")
+                    .font(.rwCaption)
+                    .foregroundStyle(.secondary)
+            }
+            if type(of: plugin).id == NotificationsPlugin.id {
+                NotificationsPluginSettings(isOn: isOn)
+            }
+        }
+        .onChange(of: isOn) { _, newValue in PluginSettings(id: type(of: plugin).id).setEnabled(newValue) }
+    }
+}
+
+private struct NotificationsPluginSettings: View {
+    let isOn: Bool
+    @State private var permission = NotificationPermission()
+
+    var body: some View {
+        Group {
+            Text("Notify when the track changes")
+                .font(.rwCaption)
+                .foregroundStyle(.secondary)
+            if isOn, permission.isDenied {
                 HStack {
                     Text("Notifications are off in System Settings.")
                         .font(.rwCaption)
@@ -186,11 +250,6 @@ private struct PlaybackSettings: View {
                 }
             }
         }
-        .formStyle(.grouped)
-        .fixedSize(horizontal: false, vertical: true)
-        .onChange(of: resumeOnStart) { _, newValue in preferences.resumeOnStart = newValue }
-        .onChange(of: showDislikeButton) { _, newValue in preferences.showDislikeButton = newValue }
-        .onChange(of: trackNotifications) { _, newValue in preferences.trackNotifications = newValue }
         .task { await permission.refresh() }
         // The user can change the permission in System Settings while this window is open.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in

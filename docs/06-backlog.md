@@ -88,7 +88,7 @@ Decisions on the open questions of [05](05-risks-and-scope.md#4-open-questions) 
 
 | ID | Branch | What | Depends on | Run |
 |---|---|---|---|---|
-| [ ] 6.1 [#32](https://github.com/AratKruglik/yt-music-mac/issues/32) | `feature/plugin-infra` | `Plugin` protocol, registry, toggles, `PluginContext`; `notifications` as a plugin | R1 | `/sdlc:start "Plugin infrastructure and notifications plugin" --type=feature` |
+| [x] 6.1 [#32](https://github.com/AratKruglik/yt-music-mac/issues/32) | `feature/plugin-infra` | `Plugin` protocol, registry, toggles, `PluginContext`; `notifications` as a plugin | R1 | `/sdlc:start "Plugin infrastructure and notifications plugin" --type=feature` |
 | [ ] 6.2 [#34](https://github.com/AratKruglik/yt-music-mac/issues/34) | `feature/synced-lyrics` | Synced lyrics built into the Lyrics tab (not a plugin) | 4.8 | `/sdlc:start "Synced lyrics in the player page Lyrics tab" --type=feature` |
 | [ ] 6.2a [#79](https://github.com/AratKruglik/yt-music-mac/issues/79) | `feature/karaoke-lyrics` | Karaoke lyrics: word-by-word highlight in real time, estimated timing when only lines are timed | 6.2, 4.7 | `/sdlc:start "Karaoke mode for lyrics: highlight the current word in real time" --type=feature` |
 | [ ] 6.3 [#35](https://github.com/AratKruglik/yt-music-mac/issues/35) | `feature/plugin-scrobbler` | Last.fm + ListenBrainz, keys in the Keychain | 6.1 | `/sdlc:start "scrobbler plugin for Last.fm and ListenBrainz" --type=feature` |

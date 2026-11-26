@@ -2635,6 +2635,43 @@
           }
         }
       }
+    },
+    "Plugins" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плагіни"
+          }
+        }
+      }
+    },
+    "Notifications" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сповіщення"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications"
+          }
+        }
+      },
+      "extractionState" : "manual"
+    },
+    "Couldn't start" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося запустити"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

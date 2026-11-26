@@ -42,6 +42,16 @@ public final class TrackNotifier {
         state.announcedVideoId = videoId
     }
 
+    /// For a notifier started mid-ad: the player sent its ad flag before this notifier was listening.
+    public func markAdPlaying() {
+        state.isAd = true
+    }
+
+    public func cancel() {
+        postTask?.cancel()
+        postTask = nil
+    }
+
     func handle(_ event: PlayerEvent) {
         if case .stopped = event {
             postTask?.cancel()
