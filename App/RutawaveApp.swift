@@ -138,7 +138,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         #if DEBUG
-        guard !UITestFixtures.isEnabled else { return }
+        guard !UITestFixtures.isEnabled else {
+            // UI test launches come up without a main window, so the fixture run opens one itself.
+            DispatchQueue.main.async { self.showMainWindow() }
+            return
+        }
         #endif
         let preferences = Preferences()
         // The single-account migration signs out without an isSignedIn change, so no observer clears the old account's track.
