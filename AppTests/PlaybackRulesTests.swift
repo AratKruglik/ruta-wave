@@ -42,14 +42,19 @@ struct PlaybackRulesTests {
     }
 
     @Test func formatsTime() {
-        #expect(PlaybackRules.formatTime(7) == "0:07")
-        #expect(PlaybackRules.formatTime(227) == "3:47")
-        #expect(PlaybackRules.formatTime(3723) == "1:02:03")
-        #expect(PlaybackRules.formatTime(-5) == "0:00")
-        #expect(PlaybackRules.formatTime(.infinity) == "0:00")
-        #expect(PlaybackRules.formatTime(1e300) == "277777:46:39")
-        #expect(PlaybackRules.formatRemaining(7, duration: 227) == "-3:40")
-        #expect(PlaybackRules.formatRemaining(300, duration: 227) == "-0:00")
+        let posix = Locale(identifier: "en_US_POSIX")
+        #expect(PlaybackRules.formatTime(7, locale: posix) == "0:07")
+        #expect(PlaybackRules.formatTime(227, locale: posix) == "3:47")
+        #expect(PlaybackRules.formatTime(3723, locale: posix) == "1:02:03")
+        #expect(PlaybackRules.formatTime(-5, locale: posix) == "0:00")
+        for (seconds, text) in [(0.0, "0:00"), (59, "0:59"), (60, "1:00"), (3599, "59:59"), (3600, "1:00:00"), (3661, "1:01:01")] {
+            #expect(PlaybackRules.formatDuration(seconds, locale: posix) == text)
+        }
+        #expect(PlaybackRules.formatDuration(.nan, locale: posix) == "0:00")
+        #expect(PlaybackRules.formatTime(.infinity, locale: posix) == "0:00")
+        #expect(PlaybackRules.formatTime(1e300, locale: posix) == PlaybackRules.formatTime(999_999_999, locale: posix))
+        #expect(PlaybackRules.formatRemaining(7, duration: 227, locale: posix) == "-3:40")
+        #expect(PlaybackRules.formatRemaining(300, duration: 227, locale: posix) == "-0:00")
     }
 
     @Test func extrapolatesBetweenTicks() {

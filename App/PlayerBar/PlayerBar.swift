@@ -14,6 +14,9 @@ struct PlayerBar: View {
     @Environment(\.requestSignIn) private var requestSignIn
     @Environment(\.showsDislikeButton) private var showsDislikeButton
     @State private var popover: ItemPopover?
+    @State private var showsVolumeSlider = false
+
+    private nonisolated static let volumeSliderMinBarWidth: CGFloat = 1100
 
     private var player: any PlayerControlling { nowPlaying.player }
 
@@ -22,13 +25,15 @@ struct PlayerBar: View {
             transport
             Spacer(minLength: 0)
             nowPlayingInfo
-                .frame(maxWidth: Metrics.playerBarCenterMaxWidth)
+                .frame(maxWidth: Metrics.playerBarCenterMaxWidth, alignment: .leading)
             Spacer(minLength: 0)
             options
         }
         .padding(.horizontal, Metrics.space16)
         .frame(height: Metrics.playerBarHeight)
+        .onGeometryChange(for: Bool.self) { $0.size.width >= Self.volumeSliderMinBarWidth } action: { showsVolumeSlider = $0 }
         .glassSurface(in: RoundedRectangle(cornerRadius: cornerRadius))
+        .modifier(PreGlassScrim(cornerRadius: cornerRadius))
         .overlay(alignment: .top) { ProgressLine().padding(.horizontal, cornerRadius) }
         .padding([.horizontal, .bottom], LiquidGlass.isAvailable ? Metrics.space8 : 0)
         .dropDestination(for: TrackDrag.self) { drags, _ in
@@ -47,8 +52,10 @@ struct PlayerBar: View {
                     if player.isBuffering {
                         ProgressView().controlSize(.small)
                     } else {
-                        Image(systemName: player.isPaused ? "play.fill" : "pause.fill")
+                        Label(player.isPaused ? "Play" : "Pause", systemImage: player.isPaused ? "play.fill" : "pause.fill")
+                            .labelStyle(.iconOnly)
                             .font(.rwIcon(Metrics.iconPlay - 12))
+                            .contentTransition(.symbolEffect(.replace))
                     }
                 }
                 .foregroundStyle(.textPrimary)
@@ -103,6 +110,7 @@ struct PlayerBar: View {
                 .help("Open player page")
                 subtitle
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .layoutPriority(1)
             ratings
         }
@@ -132,13 +140,17 @@ struct PlayerBar: View {
     private var ratings: some View {
         HStack(spacing: 0) {
             BarIconButton(
-                symbol: player.like == .like ? "hand.thumbsup.fill" : "hand.thumbsup", size: Metrics.iconBar,
+                symbol: "hand.thumbsup", size: Metrics.iconBar,
                 label: "Like", isOn: player.like == .like, action: nowPlaying.toggleLike)
+                .symbolVariant(player.like == .like ? .fill : .none)
+                .contentTransition(.symbolEffect(.replace))
                 .guestPrompt(isPresented: promptBinding(.like), reason: "Sign in to like songs", onSignIn: requestSignIn.perform)
             if showsDislikeButton {
                 BarIconButton(
-                    symbol: player.like == .dislike ? "hand.thumbsdown.fill" : "hand.thumbsdown", size: Metrics.iconBar,
+                    symbol: "hand.thumbsdown", size: Metrics.iconBar,
                     label: "Dislike", isOn: player.like == .dislike, action: nowPlaying.toggleDislike)
+                    .symbolVariant(player.like == .dislike ? .fill : .none)
+                    .contentTransition(.symbolEffect(.replace))
                     .guestPrompt(isPresented: promptBinding(.dislike), reason: "Sign in to dislike songs", onSignIn: requestSignIn.perform)
             }
             moreMenu
@@ -173,7 +185,7 @@ struct PlayerBar: View {
 
     private var options: some View {
         HStack(spacing: Metrics.space12) {
-            VolumeControl()
+            VolumeControl(alwaysShowsSlider: showsVolumeSlider)
             BarIconButton(
                 symbol: isPlayerPagePresented ? "chevron.down" : "chevron.up", size: Metrics.iconBar,
                 label: isPlayerPagePresented ? "Close player page" : "Open player page",
@@ -218,8 +230,11 @@ private struct SubtitleLinks: View {
                     if index > 0 { separator(", ") }
                     link(artist) { .artist(channelId: $0) }
                 }
+                if details.artists.isEmpty, !song.artist.isEmpty {
+                    Text(verbatim: song.artist).font(.rwBody).foregroundStyle(.textSecondary)
+                }
                 if let album = details.album {
-                    separator(" • ")
+                    if !details.artists.isEmpty || !song.artist.isEmpty { separator(" • ") }
                     link(album) { .album(browseId: $0) }
                 }
             } else {
@@ -258,7 +273,27 @@ private struct LinkText: View {
                 .underline(isHovering)
         }
         .buttonStyle(.plain)
+        .modifier(LinkPointer())
         .onHover { isHovering = $0 }
+    }
+}
+
+private struct LinkPointer: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 15, *) { content.pointerStyle(.link) } else { content }
+    }
+}
+
+private struct PreGlassScrim: ViewModifier {
+    let cornerRadius: CGFloat
+    @Environment(\.themeBase) private var themeBase
+
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content
+        } else {
+            content.background(themeBase.opacity(0.7), in: RoundedRectangle(cornerRadius: cornerRadius))
+        }
     }
 }
 
@@ -296,6 +331,18 @@ private struct LinkText: View {
 
 #Preview("Minimum window width") {
     PlayerBarPreview(player: PreviewPlayer(), width: Metrics.minWindowWidth)
+}
+
+#Preview("Video") {
+    let player = PreviewPlayer()
+    let model = PreviewFixtures.nowPlaying(player)
+    model.details = TrackDetails(
+        videoId: PreviewFixtures.song.videoId, artists: [], album: nil, isVideo: true,
+        lyricsBrowseId: nil, relatedBrowseId: nil)
+    return PlayerBar(isPlayerPagePresented: .constant(false))
+        .environment(model)
+        .environment(NavigationModel())
+        .frame(width: 1100)
 }
 
 #Preview("Guest") {

@@ -19,6 +19,11 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(min(max(newValue, 0), 1), forKey: Key.volume) }
     }
 
+    public var isMuted: Bool {
+        get { defaults.bool(forKey: Key.isMuted) }
+        nonmutating set { defaults.set(newValue, forKey: Key.isMuted) }
+    }
+
     /// `off`, `all` or `one`. AppSettings is a leaf package, so it cannot use the player's `RepeatMode`.
     public var repeatMode: String {
         get { defaults.string(forKey: Key.repeatMode).flatMap { Self.repeatModes.contains($0) ? $0 : nil } ?? "off" }
@@ -206,6 +211,7 @@ public struct Preferences: @unchecked Sendable {
     private enum Key {
         static let sidebarCollapsed = "sidebarCollapsed"
         static let volume = "volume"
+        static let isMuted = "isMuted"
         static let repeatMode = "repeatMode"
         static let shuffle = "shuffle"
         static let chartCountry = "chartCountry"
