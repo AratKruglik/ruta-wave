@@ -68,10 +68,14 @@ final class TrackTabsModel {
     func loadRelated(_ id: String) async {
         let loader = loader
         await load(id, into: \.related) { credentials in
-            let page = try await loader.related(id, credentials)
+            let page: BrowsePage
+            do { page = try await loader.related(id, credentials) } catch InnerTubeError.unexpectedResponse, InnerTubeError.notAvailable { return nil }
             return page.shelves.items.isEmpty && page.about == nil ? nil : page
         }
     }
+
+    /// Drops an empty or failed Related entry so the next load refetches instead of keeping the cached answer.
+    func discardRelated() { related = nil }
 
     /// A sign-in, sign-out or account switch changes what the server returns.
     func reset() {

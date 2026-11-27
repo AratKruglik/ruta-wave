@@ -5,22 +5,13 @@ struct PlayerPage: View {
     let onClose: () -> Void
 
     private enum Tab: CaseIterable {
-        case upNext, lyrics, comments, related
+        case upNext, lyrics, related
 
         var title: LocalizedStringKey {
             switch self {
             case .upNext: "Up next"
             case .lyrics: "Lyrics"
-            case .comments: "Comments"
             case .related: "Related"
-            }
-        }
-
-        var disabledHint: LocalizedStringKey? {
-            switch self {
-            case .lyrics: "Lyrics aren't available"
-            case .comments: "Comments aren't available yet"
-            case .upNext, .related: nil
             }
         }
     }
@@ -41,7 +32,6 @@ struct PlayerPage: View {
 
     private func isDisabled(_ tab: Tab) -> Bool {
         switch tab {
-        case .comments: true
         case .lyrics: isLyricsUnavailable
         case .upNext, .related: false
         }
@@ -50,7 +40,10 @@ struct PlayerPage: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             HStack(alignment: .top, spacing: Metrics.space32) {
-                artwork
+                VStack(spacing: Metrics.space16) {
+                    artwork
+                    titles
+                }
                 VStack(alignment: .leading, spacing: Metrics.space16) {
                     tabs
                     tabContent
@@ -89,27 +82,44 @@ struct PlayerPage: View {
     @ViewBuilder
     private var tabContent: some View {
         switch selection {
-        case .upNext, .comments:
+        case .upNext:
             UpNextView(onClose: onClose, selection: $upNextSelection)
         case .lyrics:
             detailsGated(\.lyricsBrowseId, unavailable: "Lyrics aren't available") { LyricsView(browseId: $0) }
         case .related:
-            detailsGated(\.relatedBrowseId, unavailable: "Nothing related for this track") { RelatedView(browseId: $0) }
+            detailsGated(\.relatedBrowseId, unavailable: "Nothing related for this track", isRelated: true) { RelatedView(browseId: $0) }
         }
     }
 
     @ViewBuilder
     private func detailsGated<Content: View>(
-        _ browseId: KeyPath<TrackDetails, String?>, unavailable: LocalizedStringKey, @ViewBuilder content: (String) -> Content
+        _ browseId: KeyPath<TrackDetails, String?>, unavailable: LocalizedStringKey, isRelated: Bool = false,
+        @ViewBuilder content: (String) -> Content
     ) -> some View {
         if let details = currentDetails {
             if let id = details[keyPath: browseId] { content(id) } else { PanelMessage(text: unavailable) }
         } else if nowPlaying.detailsFailed {
-            PageErrorView {
-                if let song = nowPlaying.player.song { Task { await nowPlaying.loadDetails(for: song) } }
-            }
+            let retry = { if let song = nowPlaying.player.song { Task { await nowPlaying.loadDetails(for: song) } } }
+            if isRelated { RelatedErrorView(onRetry: retry) } else { PageErrorView(onRetry: retry) }
         } else {
             SkeletonRows(count: 6).accessibilityHidden(true)
+        }
+    }
+
+    @ViewBuilder
+    private var titles: some View {
+        let player = nowPlaying.player
+        if player.isAd {
+            Text("Ad").font(.rwShelfTitle).foregroundStyle(.textPrimary)
+        } else if let song = player.song {
+            VStack(spacing: Metrics.space4) {
+                Text(verbatim: song.title).font(.rwShelfTitle).foregroundStyle(.textPrimary)
+                Text(verbatim: song.artist).font(.rwBody).foregroundStyle(.textSecondary)
+            }
+            .lineLimit(2)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: Metrics.playerArtworkMax)
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -130,34 +140,14 @@ struct PlayerPage: View {
     }
 
     private var tabs: some View {
-        HStack(spacing: Metrics.space24) {
+        let binding = Binding(get: { selection }, set: { if !isDisabled($0) { selection = $0 } })
+        return Picker("Player page tabs", selection: binding) {
             ForEach(Tab.allCases, id: \.self) { tab in
-                tabButton(tab)
+                Text(tab.title).tag(tab).disabled(isDisabled(tab))
             }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Player page tabs")
-    }
-
-    private func tabButton(_ tab: Tab) -> some View {
-        let isSelected = tab == selection
-        let isDisabled = isDisabled(tab)
-        let hint: LocalizedStringKey = isDisabled ? (tab.disabledHint ?? "") : ""
-        return Button { selection = tab } label: {
-            Text(tab.title)
-                .font(.rwTab)
-                .foregroundStyle(isSelected ? .textPrimary : (isDisabled ? .textDisabled : .textTertiary))
-                .padding(.bottom, Metrics.space4)
-                .overlay(alignment: .bottom) {
-                    if isSelected { Rectangle().fill(.textPrimary).frame(height: 2) }
-                }
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(isDisabled)
-        .help(hint)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityHint(hint)
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 }
 

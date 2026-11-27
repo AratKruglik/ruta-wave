@@ -33,7 +33,8 @@ struct RutawaveApp: App {
             AppCommands(nowPlaying: app.nowPlaying, showMainWindow: { [app] in app.showMainWindow() })
         }
         .handlesExternalEvents(matching: [])
-        Window("Mini Player", id: AppDelegate.miniPlayerWindowId) { MiniPlayerView(nowPlaying: app.nowPlaying) }
+        Window("Mini Player", id: AppDelegate.miniPlayerWindowId) { MiniPlayerView(nowPlaying: app.nowPlaying, showMainWindow: app.showMainWindow) }
+            .windowStyle(.hiddenTitleBar)
             .windowResizability(.contentSize)
             .keyboardShortcut("m", modifiers: [.command, .shift])
             .handlesExternalEvents(matching: [])

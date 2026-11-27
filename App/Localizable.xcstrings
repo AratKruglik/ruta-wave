@@ -451,6 +451,26 @@
         }
       }
     },
+    "Couldn't load Related" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити схоже"
+          }
+        }
+      }
+    },
+    "Check your connection and try again" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірте з'єднання та спробуйте ще раз"
+          }
+        }
+      }
+    },
     "Couldn't load this page" : {
       "localizations" : {
         "uk" : {
