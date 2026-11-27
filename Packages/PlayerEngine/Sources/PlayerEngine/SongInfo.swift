@@ -86,8 +86,7 @@ public struct SongInfo: Equatable, Sendable {
         let details = response.videoDetails
         guard let url = PlayerRules.watchURL(videoId: details.videoId) else { return nil }
         let original = details.thumbnail?.thumbnails.last
-            .flatMap { URL(string: $0.url) }
-            .flatMap { PlayerRules.isAllowedArtworkHost($0) ? $0 : nil }
+            .flatMap { PlayerRules.artworkURL(from: $0.url) }
         var stripped = original.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }
         stripped?.query = nil
         let song = SongInfo(
