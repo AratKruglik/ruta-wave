@@ -65,12 +65,18 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 
 ## 2. Top bar
 
-**Shows:** sidebar toggle, back, forward, search field,
-avatar (signed in) or **Sign in** pill (guest).
+**Shows:** a real window toolbar on the split view. Leading (`.navigation`):
+sidebar toggle, back, forward. Principal: the custom search field. Trailing:
+avatar (signed in) or **Sign in** pill (guest). While the sidebar is collapsed
+a **Go** menu next to the toggle lists the sidebar sections.
 
-Pages reserve the bar's height as a safe area (the player bar's too). On
-macOS 26 and later content scrolls under both bars behind the system scroll
-edge effect; earlier systems get an opaque top bar.
+Pages reserve the player bar's height as a safe area. On macOS 26 and later
+content scrolls under the toolbar behind the system scroll edge effect; macOS
+14 and 15 get an opaque strip. There is no custom title-bar drag area: the
+toolbar is draggable and double-click zooms the window as the system does.
+
+The suggestion list (§3) is a non-key child panel of the window. It opens only
+on a user action: click, typing, ⌘F / ⌘L, ↑ / ↓.
 
 **Actions**
 - Sidebar toggle (⌃⌘S): collapses / expands the sidebar; state is remembered.
@@ -78,8 +84,10 @@ edge effect; earlier systems get an opaque top bar.
 - Avatar: opens the account popover (§13).
 - **Sign in** (guest): opens the sign-in window; on success the app switches to
   signed-in mode in place; on cancel nothing changes.
-- Double-click on the empty part of the bar zooms the window (system
-  behaviour of a title bar).
+
+**Decision: no `.searchable`.** The custom field stays. `.searchable`
+suggestions cannot express the history and entity rows with artwork, the
+keyboard highlight, or the three Esc levels (§3).
 
 **Stage:** 4.1.
 

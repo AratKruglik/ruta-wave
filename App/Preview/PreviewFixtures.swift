@@ -48,9 +48,12 @@ enum PreviewFixtures {
     }
 
     static func trackTabs() -> TrackTabsModel {
+        TrackTabsModel(loader: trackTabsLoader(), credentials: { nil })
+    }
+
+    static func trackTabsLoader() -> TrackTabsLoader {
         let shelves = shelves
-        return TrackTabsModel(
-            loader: TrackTabsLoader(
+        return TrackTabsLoader(
                 lyrics: { _, _ in Lyrics(text: "First line\nSecond line\n\nChorus line", source: "Source: LyricFind") },
                 timedLyrics: { _ in
                     TimedLyrics(
@@ -61,8 +64,7 @@ enum PreviewFixtures {
                     BrowsePage(
                         title: nil, chips: [], shelves: Page(items: shelves, continuation: nil),
                         about: DescriptionShelf(title: "About the artist", text: String(repeating: "A long biography sentence. ", count: 12)))
-                }),
-            credentials: { nil })
+                })
     }
 
     static func details(for song: SongInfo = song) -> TrackDetails {
@@ -109,13 +111,17 @@ enum PreviewFixtures {
     enum BrowseVariant { case signedIn, guest, loading, failing, empty }
 
     static func browseModel(_ variant: BrowseVariant) -> BrowseModel {
+        BrowseModel(source: .home(chipParams: nil), loader: browseLoader(variant), credentials: { nil }, preferences: preferences)
+    }
+
+    static func browseLoader(_ variant: BrowseVariant) -> BrowseLoader {
         let items = switch variant {
         case .signedIn: shelves
         case .guest: Array(shelves.dropFirst())
         default: [Shelf]()
         }
         let pageChips = items.isEmpty ? [] : chips
-        let loader = BrowseLoader(
+        return BrowseLoader(
             page: { _, _ in
                 if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
                 if variant == .failing { throw InnerTubeError.unexpectedResponse }
@@ -124,7 +130,6 @@ enum PreviewFixtures {
                     countries: [], selectedCountry: nil)
             },
             more: { _, _ in Page(items: [], continuation: nil) })
-        return BrowseModel(source: .home(chipParams: nil), loader: loader, credentials: { nil }, preferences: preferences)
     }
 
     enum EntityVariant { case album, artist, playlist, ownPlaylist, guest, loading, notAvailable, partialError }
@@ -135,6 +140,12 @@ enum PreviewFixtures {
         case .artist: .artist(browseId: "UCpreview")
         default: .playlist(browseId: "VLPL1")
         }
+        let isGuest = variant == .guest
+        return EntityModel(
+            kind: kind, loader: entityLoader(variant), credentials: { isGuest ? nil : Credentials(cookies: []) }, toasts: ToastCenter())
+    }
+
+    static func entityLoader(_ variant: EntityVariant) -> EntityLoader {
         let tracks = songs.enumerated().map { index, song in
             index == 2 ? Song(videoId: song.videoId, title: song.title, artists: song.artists, album: song.album, duration: song.duration, isAvailable: false) : song
         }
@@ -145,7 +156,7 @@ enum PreviewFixtures {
             artists: [ItemRef(name: "Test Owner", browseId: "UCpreview")], play: WatchTarget(playlistId: "PL1"))
         let isOwned = variant == .ownPlaylist
         let isPartial = variant == .partialError
-        let loader = EntityLoader(
+        return EntityLoader(
             album: { _, _ in
                 AlbumPage(
                     header: header, type: "Album", year: "1997", audioPlaylistId: "OLAK1",
@@ -177,9 +188,6 @@ enum PreviewFixtures {
                 Page(items: [Shelf(title: "Suggestions", layout: .list, items: tracks.suffix(3).map(MusicItem.song))], continuation: nil)
             },
             save: { _, _, _ in }, subscribe: { _, _, _ in }, edit: { _, _, _ in [] })
-        let isGuest = variant == .guest
-        return EntityModel(
-            kind: kind, loader: loader, credentials: { isGuest ? nil : Credentials(cookies: []) }, toasts: ToastCenter())
     }
 
     enum SearchVariant { case all, filtered, loading, empty, failing }
@@ -194,6 +202,13 @@ enum PreviewFixtures {
 
     static func searchModel(_ variant: SearchVariant) -> SearchModel {
         let filtered = variant == .filtered
+        return SearchModel(
+            query: "radiohead", filter: filtered ? searchChips[0].searchParams : nil, chips: variant == .loading ? searchChips : [],
+            loader: searchLoader(variant), toasts: ToastCenter(), credentials: { nil })
+    }
+
+    static func searchLoader(_ variant: SearchVariant) -> SearchLoader {
+        let filtered = variant == .filtered
         let chips = filtered
             ? searchChips.enumerated().map { Chip(title: $1.title, searchParams: $1.searchParams, isSelected: $0 == 0) }
             : searchChips
@@ -201,7 +216,7 @@ enum PreviewFixtures {
         let filteredItems = songs.map(MusicItem.song)
         let topResult = MusicItem.artist(
             Artist(browseId: "UC1", name: "Test Artist", subtitle: "1.2M subscribers", isSubscribed: false, channelId: "UCchannel1"))
-        let loader = SearchLoader(
+        return SearchLoader(
             suggestions: { _, _ in SearchSuggestions() },
             search: { _, _, _ in
                 if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
@@ -214,9 +229,6 @@ enum PreviewFixtures {
             },
             more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in },
             subscribe: { _, _, _ in })
-        return SearchModel(
-            query: "radiohead", filter: filtered ? searchChips[0].searchParams : nil, chips: variant == .loading ? searchChips : [],
-            loader: loader, toasts: ToastCenter(), credentials: { nil })
     }
 
     enum SearchFieldVariant { case empty, history, suggestions }
@@ -239,50 +251,61 @@ enum PreviewFixtures {
     enum SidebarVariant { case loaded, loading, failed, guest }
 
     static func sidebarModel(_ variant: SidebarVariant) -> SidebarModel {
+        SidebarModel(
+            loader: sidebarLoader(variant), credentials: { variant == .guest ? nil : Credentials(cookies: []) }, toasts: ToastCenter())
+    }
+
+    static func sidebarLoader(_ variant: SidebarVariant) -> SidebarLoader {
         let list = playlists
-        let loader = SidebarLoader(
+        return SidebarLoader(
             playlists: { _ in
                 if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
                 if variant == .failed { throw InnerTubeError.unexpectedResponse }
                 return list
             },
             create: { _, _ in "VLNEW" }, edit: { _, _, _ in [] }, delete: { _, _ in }, removeFromLibrary: { _, _ in }, isOwned: { _, _ in false })
-        return SidebarModel(
-            loader: loader, credentials: { variant == .guest ? nil : Credentials(cookies: []) }, toasts: ToastCenter())
     }
 
     enum LibraryVariant { case playlists, songs, albums, artists, empty, loading, failed }
 
     static func libraryModel(_ variant: LibraryVariant) -> LibraryModel {
+        preferences.librarySection = librarySection(variant).browseId
+        return LibraryModel(loader: libraryLoader(variant), credentials: { Credentials(cookies: []) }, preferences: preferences)
+    }
+
+    private static func librarySection(_ variant: LibraryVariant) -> BrowseTarget {
+        switch variant {
+        case .playlists, .loading, .failed: .likedPlaylists
+        case .albums: .likedAlbums
+        case .artists: .libraryArtists
+        case .songs, .empty: .likedSongs
+        }
+    }
+
+    static func libraryLoader(_ variant: LibraryVariant) -> LibraryLoader {
         let chips = [
             Chip(title: "Playlists", target: .likedPlaylists), Chip(title: "Songs", target: .likedSongs),
             Chip(title: "Albums", target: .likedAlbums), Chip(title: "Artists", target: .libraryArtists),
             Chip(title: "Subscriptions", target: .librarySubscriptions),
         ]
-        let section: BrowseTarget
         let items: [MusicItem]
         switch variant {
         case .playlists, .loading, .failed:
-            section = .likedPlaylists
             items = (1...6).map { .playlist(Playlist(browseId: "VLPL\($0)", title: "Test Playlist \($0)", subtitle: "Test Owner")) }
         case .songs:
-            section = .likedSongs
             items = songs.map(MusicItem.song)
         case .albums:
-            section = .likedAlbums
             items = (1...6).map { .album(Album(browseId: "MPREb\($0)", title: "Test Album \($0)", subtitle: "Album • Test Artist")) }
         case .artists:
-            section = .libraryArtists
             items = (1...6).map { .artist(Artist(browseId: "UC\($0)", name: "Test Artist \($0)", subtitle: "\($0)M subscribers")) }
         case .empty:
-            section = .likedSongs
             items = []
         }
         let sorts = variant == .playlists
             ? ["Recent activity", "A to Z", "Z to A"].enumerated().map {
                 LibrarySort(title: $1, continuation: "p\($0)", isSelected: $0 == 0)
             } : []
-        let loader = LibraryLoader(
+        return LibraryLoader(
             page: { _, _ in
                 if variant == .loading { try await Task.sleep(for: .seconds(3600)) }
                 if variant == .failed { throw InnerTubeError.unexpectedResponse }
@@ -290,8 +313,6 @@ enum PreviewFixtures {
             },
             reload: { _, _ in LibraryPage(sections: chips, sortOptions: sorts, items: Page(items: items, continuation: nil)) },
             more: { _, _ in Page(items: [], continuation: nil) }, history: { _ in [] }, feedback: { _, _ in })
-        preferences.librarySection = section.browseId
-        return LibraryModel(loader: loader, credentials: { Credentials(cookies: []) }, preferences: preferences)
     }
 
     enum HistoryVariant { case loaded, empty, loading, failed }

@@ -1,3 +1,4 @@
+import AppKit
 import AppSettings
 import SwiftUI
 
@@ -20,6 +21,7 @@ struct ShellView<AccountPopover: View>: View {
     @Environment(ToastCenter.self) private var toasts
     @Environment(SearchFieldModel.self) private var search
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.themeBase) private var themeBase
     @State private var width = Metrics.defaultWindowWidth
     @State private var sidebarOverride: Bool?
     @State private var detailLeadingEdge: CGFloat = 0
@@ -44,6 +46,7 @@ struct ShellView<AccountPopover: View>: View {
                     onNewPlaylist: onNewPlaylist, onPlaylistRemoved: onPlaylistRemoved, onRetry: onRetrySidebar, onSignIn: onSignIn
                 )
                 .id(isSignedIn)
+                .focusSection()
                 .accessibilityHidden(navigation.isPlayerPagePresented)
                 .barClearance(.bottom, playerBarClearance)
                 .barClearance(.top, Metrics.topBarHeight)
@@ -65,8 +68,17 @@ struct ShellView<AccountPopover: View>: View {
                     .barClearance(.bottom, playerBarClearance)
                     .barClearance(.top, Metrics.topBarHeight)
                     .ignoresSafeArea(.container, edges: .top)
+                    .focusSection()
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
+            .toolbar {
+                TopBar(
+                    isSignedIn: isSignedIn, avatarURL: avatarURL, canGoBack: navigation.canGoBack || navigation.isPlayerPagePresented,
+                    canGoForward: navigation.canGoForward, isSidebarVisible: isSidebarVisible, selection: navigation.selection,
+                    isAccountPresented: $isAccountPresented, onToggleSidebar: { setSidebarVisible(!isSidebarVisible) },
+                    onBack: navigation.back, onForward: navigation.forward, onSelectSection: navigation.select, onSignIn: onSignIn,
+                    accountPopover: accountPopover)
+            }
             // Pushed pages are hosted by the split view itself and draw above anything inside the detail column,
             // so the player page sits over the whole split view, inset to the detail column's live leading edge (the sidebar is resizable).
             .overlay {
@@ -80,21 +92,16 @@ struct ShellView<AccountPopover: View>: View {
                             .transition(.move(edge: .bottom))
                     }
                 }
-                .animation(Motion.animation(Motion.panel, reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
-            }
-            // The bar floats over both columns so content scrolls under its glass.
-            .overlay(alignment: .top) {
-                TopBar(
-                    isSignedIn: isSignedIn, avatarURL: avatarURL, canGoBack: navigation.canGoBack,
-                    canGoForward: navigation.canGoForward, isAccountPresented: $isAccountPresented,
-                    onToggleSidebar: { setSidebarVisible(!isSidebarVisible) },
-                    onBack: navigation.back, onForward: navigation.forward, onSignIn: onSignIn, accountPopover: accountPopover)
-                    .accessibilityHidden(navigation.isPlayerPagePresented)
+                .animation(Motion.pageAnimation(reduceMotion: reduceMotion), value: navigation.isPlayerPagePresented)
             }
         }
-        // The split view's window toolbar reserves a strip above the custom top bar even under .hiddenTitleBar;
-        // hiding the toolbar itself would also remove the window buttons.
+        // Every column reserves the toolbar strip itself (barClearance), so the container's top safe area is ignored.
         .ignoresSafeArea(.container, edges: .top)
+        .overlay(alignment: .top) {
+            if !LiquidGlass.isAvailable {
+                themeBase.frame(height: Metrics.topBarHeight).allowsHitTesting(false).accessibilityHidden(true)
+            }
+        }
         .windowFrameMonitor { newWidth in
             if WindowLayout.crossesCollapseThreshold(from: width, to: newWidth) { sidebarOverride = nil }
             width = newWidth
@@ -103,10 +110,15 @@ struct ShellView<AccountPopover: View>: View {
         .windowBackdrop()
         .noInitialFocus()
         .focusedSceneValue(\.navigation, navigation)
+        .background {
+            Button("Search") { navigation.requestSearchFocus() }
+                .keyboardShortcut("l")
+                .hidden()
+        }
         .background(
             WindowEventMonitor(
                 onBack: navigation.back, onForward: navigation.forward, onTogglePlay: nowPlaying.togglePlay,
-                onMouseDown: search.mouseDownInWindow))
+                onMouseDown: search.mouseDown(at:)))
     }
 
     /// The bar's footprint including the gap under its glass, so the last row ends above it.
@@ -141,6 +153,7 @@ struct ShellView<AccountPopover: View>: View {
             }
             if isBarVisible {
                 PlayerBar(isPlayerPagePresented: Bindable(navigation).isPlayerPagePresented)
+                    .focusSection()
             }
         }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: toasts.message == nil)
@@ -167,7 +180,11 @@ struct ShellView<AccountPopover: View>: View {
             navigation.isPlayerPagePresented = false
             return
         }
-        navigation.push(.playlist(browseId: browseId))
+        if NSApp.currentEvent?.type == .keyDown, selectedPlaylistId != nil {
+            navigation.replaceLast(.playlist(browseId: browseId))
+        } else {
+            navigation.push(.playlist(browseId: browseId))
+        }
     }
 }
 
