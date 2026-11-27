@@ -3,17 +3,23 @@ import SwiftUI
 
 struct VolumeControl: View {
     @Environment(NowPlayingModel.self) private var nowPlaying
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
 
     private static let sliderWidth: CGFloat = 80
     private static let preciseScrollPerStep: CGFloat = 12
 
+    let alwaysShowsSlider: Bool
+
     var body: some View {
         let player = nowPlaying.player
         let level = player.isMuted ? 0 : player.volume
         HStack(spacing: Metrics.space4) {
+            if alwaysShowsSlider { slider(level: level) }
             Button(action: nowPlaying.toggleMute) {
-                Image(systemName: symbol(level: level))
+                Label(player.isMuted ? "Unmute" : "Mute", systemImage: symbol(level: level))
+                    .labelStyle(.iconOnly)
+                    .contentTransition(.symbolEffect(.replace))
                     .font(.rwIcon(Metrics.iconBar))
                     .foregroundStyle(.textSecondary)
                     .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
@@ -21,16 +27,29 @@ struct VolumeControl: View {
             }
             .buttonStyle(.plain)
             .help(player.isMuted ? "Unmute" : "Mute")
-            .accessibilityLabel(player.isMuted ? "Unmute" : "Mute")
-            Slider(value: Binding(get: { level }, set: { nowPlaying.setVolume($0) }), in: 0...1)
-                .frame(width: Self.sliderWidth)
-                .tint(.accentProgress)
-                .opacity(isHovering ? 1 : 0)
-                .accessibilityLabel("Volume")
+            .accessibilityValue(Text(level, format: .percent))
+            .accessibilityAdjustableAction { nowPlaying.adjustVolume(steps: $0 == .increment ? 1 : -1) }
         }
+        .overlay(alignment: .leading) {
+            if !alwaysShowsSlider, isHovering {
+                slider(level: level)
+                    .padding(.horizontal, Metrics.space8)
+                    .background(.themeBase, in: Capsule())
+                    .alignmentGuide(.leading) { $0[.trailing] + Metrics.space4 }
+                    .transition(.opacity)
+            }
+        }
+        .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: isHovering)
         .onHover { isHovering = $0 }
         .background(ScrollWheelReader(preciseScrollPerStep: Self.preciseScrollPerStep) { nowPlaying.adjustVolume(steps: $0) })
         .accessibilityElement(children: .contain)
+    }
+
+    private func slider(level: Double) -> some View {
+        Slider(value: Binding(get: { level }, set: { nowPlaying.setVolume($0) }), in: 0...1)
+            .frame(width: Self.sliderWidth)
+            .tint(.accentProgress)
+            .accessibilityLabel("Volume")
     }
 
     private func symbol(level: Double) -> String {
@@ -91,9 +110,12 @@ private struct ScrollWheelReader: NSViewRepresentable {
 
 #if DEBUG
 #Preview {
-    VolumeControl()
-        .environment(PreviewFixtures.nowPlaying())
-        .padding()
-        .background(.themeBase)
+    VStack {
+        VolumeControl(alwaysShowsSlider: true)
+        VolumeControl(alwaysShowsSlider: false)
+    }
+    .environment(PreviewFixtures.nowPlaying())
+    .padding()
+    .background(.themeBase)
 }
 #endif

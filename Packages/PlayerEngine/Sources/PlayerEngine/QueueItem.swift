@@ -41,7 +41,7 @@ public struct QueueItem: Sendable, Equatable {
             videoId: raw.videoId,
             title: String(decoding: raw.title.utf8.prefix(maxNameBytes), as: UTF8.self),
             artist: String(decoding: raw.artist.utf8.prefix(maxNameBytes), as: UTF8.self),
-            artworkURL: raw.artwork.flatMap(URL.init(string:)).flatMap { PlayerRules.isAllowedArtworkHost($0) ? $0 : nil },
+            artworkURL: raw.artwork.flatMap(PlayerRules.artworkURL(from:)),
             duration: duration,
             isCurrent: raw.selected ?? false,
             playlistSetVideoId: raw.setId

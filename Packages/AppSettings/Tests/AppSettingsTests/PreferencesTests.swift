@@ -15,6 +15,7 @@ struct PreferencesTests {
         let (preferences, _) = makePreferences()
         #expect(!preferences.sidebarCollapsed)
         #expect(preferences.volume == 1)
+        #expect(!preferences.isMuted)
         #expect(preferences.repeatMode == "off")
         #expect(!preferences.shuffle)
         #expect(preferences.appLanguage == nil)
@@ -70,10 +71,12 @@ struct PreferencesTests {
         let (preferences, _) = makePreferences()
         preferences.sidebarCollapsed = true
         preferences.volume = 0.4
+        preferences.isMuted = true
         preferences.repeatMode = "one"
         preferences.shuffle = true
         #expect(preferences.sidebarCollapsed)
         #expect(preferences.volume == 0.4)
+        #expect(preferences.isMuted)
         #expect(preferences.repeatMode == "one")
         #expect(preferences.shuffle)
     }

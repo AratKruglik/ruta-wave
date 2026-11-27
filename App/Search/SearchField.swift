@@ -21,7 +21,9 @@ struct SearchField: View {
                 .font(.rwIcon(Metrics.iconBar))
                 .foregroundStyle(.textTertiary)
                 .accessibilityHidden(true)
-            TextField("Search songs, albums, artists", text: Binding(get: { model.text }, set: model.edit))
+            TextField(text: Binding(get: { model.text }, set: model.edit), prompt: Text("Search songs, albums, artists").foregroundStyle(.textSecondary)) {
+                Text("Search songs, albums, artists")
+            }
                 .textFieldStyle(.plain)
                 .font(.rwBody)
                 .foregroundStyle(.textPrimary)

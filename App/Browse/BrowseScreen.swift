@@ -49,7 +49,7 @@ struct BrowseScreen<Header: View>: View {
                     }
                     .id(topAnchor)
                     ForEach(Array(page.shelves.enumerated()), id: \.offset) { index, shelf in
-                        ShelfView(shelf: shelf) { navigation.push(Route(target: $0)) }
+                        ShelfView(shelf: shelf, onMore: { navigation.push(Route(target: $0)) }, pageMargin: padding)
                             .id(index)
                     }
                     footer(page.paging)

@@ -57,8 +57,8 @@ struct TopResultCard: View {
 
     private func pills(primary: (LocalizedStringKey, () -> Void), secondary: (LocalizedStringKey, () -> Void)) -> some View {
         HStack(spacing: Metrics.space8) {
-            Button(action: primary.1) { InversePillLabel(title: primary.0) }
-                .buttonStyle(.plain)
+            Button(action: primary.1) { Text(primary.0) }
+                .buttonStyle(PillButtonStyle(isProminent: true))
             Button(action: secondary.1) { SecondaryPill(title: secondary.0) }
                 .buttonStyle(.plain)
         }

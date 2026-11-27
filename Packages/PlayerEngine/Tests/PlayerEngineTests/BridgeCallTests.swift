@@ -32,7 +32,7 @@ struct BridgeCallTests {
     @Test func plainCommandsMapToNamedActions() {
         let expected: [(PlayerCommand, String)] = [
             (.play, "play"), (.pause, "pause"), (.togglePlay, "togglePlay"), (.next, "next"), (.previous, "previous"),
-            (.toggleMute, "toggleMute"), (.unmute, "unmute"), (.toggleShuffle, "toggleShuffle"), (.cycleRepeat, "cycleRepeat"),
+            (.toggleMute, "toggleMute"), (.mute, "mute"), (.unmute, "unmute"), (.toggleShuffle, "toggleShuffle"), (.cycleRepeat, "cycleRepeat"),
         ]
         for (command, action) in expected {
             #expect(PlayerRules.bridgeCall(for: command, queue: [])?.action == action)

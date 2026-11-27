@@ -104,6 +104,27 @@ struct TrackTabsModelTests {
         guard case .empty = model.related?.phase else { Issue.record("expected empty"); return }
     }
 
+    @Test func discardedEmptyRelatedLoadsAgain() async {
+        let log = TabsCallLog()
+        let model = makeModel(log: log, related: { _ in page(shelves: 0) })
+        await model.loadRelated("a")
+        model.discardRelated()
+        await model.loadRelated("a")
+        #expect(log.related.count == 2)
+    }
+
+    @Test func relatedThatIsNotAMusicPageIsEmpty() async {
+        let model = makeModel(related: { _ in throw InnerTubeError.unexpectedResponse })
+        await model.loadRelated("a")
+        guard case .empty = model.related?.phase else { Issue.record("expected empty"); return }
+    }
+
+    @Test func relatedNetworkFailureStaysFailed() async {
+        let model = makeModel(related: { _ in throw InnerTubeError.network(.notConnectedToInternet) })
+        await model.loadRelated("a")
+        guard case .failed = model.related?.phase else { Issue.record("expected failed"); return }
+    }
+
     @Test func relatedWithOnlyAboutIsLoaded() async {
         let model = makeModel(related: { _ in page(shelves: 0, about: "bio") })
         await model.loadRelated("a")

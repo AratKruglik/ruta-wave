@@ -113,10 +113,8 @@ struct SearchScreen: View {
                     header(section.kind.title)
                     Spacer(minLength: Metrics.space16)
                     if let params = section.showAllParams {
-                        Button { navigation.push(.search(query: model.query, filter: params)) } label: {
-                            InversePillLabel(title: "Show all")
-                        }
-                        .buttonStyle(.plain)
+                        Button("Show all") { navigation.push(.search(query: model.query, filter: params)) }
+                            .buttonStyle(PillButtonStyle())
                     }
                 }
                 sectionBody(section)
@@ -139,7 +137,7 @@ struct SearchScreen: View {
             }
             .trackSelection($selection, songs: section.kind == .songs ? songs : [])
         case .albums, .artists, .playlists:
-            ShelfView(shelf: Shelf(title: nil, layout: .cards, items: section.items)) { navigation.push(Route(target: $0)) }
+            ShelfView(shelf: Shelf(title: nil, layout: .cards, items: section.items), onMore: { navigation.push(Route(target: $0)) }, pageMargin: padding)
         }
     }
 
