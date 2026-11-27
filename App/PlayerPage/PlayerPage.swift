@@ -61,7 +61,7 @@ struct PlayerPage: View {
             }
             .padding(.horizontal, Metrics.space32)
             .padding(.top, Metrics.space48)
-            .padding(.bottom, Metrics.playerBarHeight + Metrics.space16)
+            .padding(.bottom, Metrics.space16)
             Button(action: onClose) {
                 Image(systemName: "chevron.down")
                     .font(.rwIcon(Metrics.iconBar))

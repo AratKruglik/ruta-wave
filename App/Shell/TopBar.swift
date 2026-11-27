@@ -21,10 +21,6 @@ struct TopBar<AccountPopover: View>: View {
                 .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
             .glassSurface(in: Capsule(), fallback: nil)
             .padding(.leading, Metrics.space24)
-            Spacer(minLength: Metrics.space16)
-            SearchField()
-                .frame(minWidth: 240, maxWidth: 720)
-            Spacer(minLength: Metrics.space16)
             HStack(spacing: Metrics.space8) {
                 BarIconButton(symbol: "chevron.left", size: Metrics.iconBar, label: "Back", action: onBack)
                     .disabled(!canGoBack)
@@ -33,6 +29,10 @@ struct TopBar<AccountPopover: View>: View {
             }
             .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
             .glassSurface(in: Capsule(), fallback: nil, interactive: true)
+            Spacer(minLength: Metrics.space16)
+            SearchField()
+                .frame(minWidth: 240, maxWidth: 720)
+            Spacer(minLength: Metrics.space16)
             trailing
         }
         .padding(.leading, Metrics.trafficLightsInset)
@@ -43,7 +43,7 @@ struct TopBar<AccountPopover: View>: View {
         .background(backdrop)
     }
 
-    /// Content scrolls under the bar: every control sits on glass there, older systems get the opaque bar.
+    /// On macOS 26 the pages' scroll edge effect covers the content under the bar; older systems get the opaque bar.
     private var backdrop: Color { LiquidGlass.isAvailable ? .clear : themeBase }
 
     @ViewBuilder private var trailing: some View {

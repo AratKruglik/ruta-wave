@@ -67,6 +67,7 @@ struct ChipRow: View {
         }
         .scrollPosition(id: $firstVisible, anchor: .leading)
         .scrollIndicators(.hidden)
+        .contentMargins(.vertical, 0, for: .scrollContent)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { viewWidth = $0 }
         .frame(height: Metrics.chipHeight)
         .mask {
@@ -127,5 +128,16 @@ struct LinkChipGrid: View {
     }
     .padding()
     .frame(width: 700)
+    .background(.themeBase)
+}
+
+#Preview("Chips under a bottom content margin") {
+    VStack(alignment: .leading) {
+        ChipRow(chips: [Chip(title: "Playlists", isSelected: true), Chip(title: "Songs"), Chip(title: "Albums")], onSelect: { _ in })
+        Spacer()
+    }
+    .contentMargins(.bottom, 112, for: .scrollContent)
+    .padding()
+    .frame(width: 500, height: 200)
     .background(.themeBase)
 }
