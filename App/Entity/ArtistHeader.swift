@@ -1,20 +1,6 @@
 import InnerTube
 import SwiftUI
 
-private struct SecondaryPillLabel: View {
-    let title: LocalizedStringKey
-
-    var body: some View {
-        Text(title)
-            .font(.rwButton)
-            .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Metrics.space16)
-            .frame(height: Metrics.pillHeight)
-            .background(.surfaceFill, in: Capsule())
-            .fixedSize()
-    }
-}
-
 struct ArtistHeader: View {
     let model: EntityModel
     let artist: ArtistPage
@@ -55,8 +41,8 @@ struct ArtistHeader: View {
                     .buttonStyle(PillButtonStyle(isProminent: true))
             }
             if let radio = artist.radio {
-                Button { nowPlaying.play(radio) } label: { SecondaryPillLabel(title: "Radio") }
-                    .buttonStyle(.plain)
+                Button("Radio") { nowPlaying.play(radio) }
+                    .buttonStyle(PillButtonStyle())
             }
             if let isSubscribed {
                 Button {

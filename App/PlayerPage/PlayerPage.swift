@@ -62,7 +62,7 @@ struct PlayerPage: View {
                     .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .cancelShortcut(if: upNextSelection.isEmpty)
             .help("Close player page")
             .accessibilityLabel("Close player page")
