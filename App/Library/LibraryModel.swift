@@ -263,8 +263,10 @@ final class LibraryModel {
         let kind = Self.kind(of: fetched.section)
         seen = [Route.likedMusicBrowseId]
         rawItems = fresh(fetched.page.items.items)
-        let liked: Playlist? = kind == .playlists ? (fetched.page.items.items.compactMap(\.likedMusic).first ?? Playlist(
-            browseId: Route.likedMusicBrowseId, title: String(localized: "Liked music"))) : nil
+        let server = fetched.page.items.items.compactMap(\.likedMusic).first
+        let liked: Playlist? = kind == .playlists ? Playlist(
+            browseId: Route.likedMusicBrowseId, title: String(localized: "Liked music"), subtitle: String(localized: "Auto-generated"),
+            thumbnailURL: server?.thumbnailURL, playTarget: server?.playTarget) : nil
         let finished = fetched.page.items.continuation == nil
         continuation = fetched.page.items.continuation
         state = .loaded(Content(kind: kind, items: sorted(rawItems), likedMusic: liked, paging: finished ? .done : .idle))

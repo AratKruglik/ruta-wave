@@ -5,6 +5,7 @@ struct LibraryScreen: View {
     let model: LibraryModel
 
     @Environment(NavigationModel.self) private var navigation
+    @Environment(NowPlayingModel.self) private var nowPlaying
     @State private var width = Metrics.defaultWindowWidth
     @State private var selection = TrackSelection()
 
@@ -35,7 +36,7 @@ struct LibraryScreen: View {
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: Metrics.space16)
             if !model.sortOptions.isEmpty { sortMenu }
-            Button { navigation.push(.history) } label: { HeaderIcon(symbol: "clock") }
+            Button { navigation.push(.history) } label: { HeaderPill(symbol: "clock", title: Text("History")) }
                 .buttonStyle(.plain)
                 .help("History")
                 .accessibilityLabel("History")
@@ -50,7 +51,7 @@ struct LibraryScreen: View {
                 }
             }
         } label: {
-            HeaderIcon(symbol: "arrow.up.arrow.down")
+            HeaderPill(symbol: "arrow.up.arrow.down", title: model.sortOptions.first(where: \.isSelected).map { Text($0.title) } ?? Text("Sort"))
         }
         .menuStyle(.button)
         .menuIndicator(.hidden)
@@ -89,7 +90,7 @@ struct LibraryScreen: View {
         switch content.kind {
         case .playlists, .albums:
             LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
+                columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .topLeading)],
                 alignment: .leading, spacing: Metrics.space24
             ) {
                 if content.kind == .playlists { NewPlaylistCard { navigation.requestNewPlaylist() } }
@@ -102,10 +103,11 @@ struct LibraryScreen: View {
         case .songs:
             let songs = content.items.compactMap { if case .song(let song) = $0 { song } else { nil } }
             let order = songs.map(\.rowKey)
+            if !songs.isEmpty { songActions }
             LazyVStack(spacing: 0) {
                 ForEach(Array(content.items.enumerated()), id: \.element.libraryKey) { index, item in
                     if case .song(let song) = item {
-                        TrackRow(song: song, density: .detailed, selection: $selection.row(for: song, order: order, songs: songs))
+                        TrackRow(song: song, density: .detailed, knownRating: .like, selection: $selection.row(for: song, order: order, songs: songs))
                             .onAppear { prefetch(index, of: content.items.count) }
                     }
                 }
@@ -127,6 +129,16 @@ struct LibraryScreen: View {
                     hint("Artists you listen to appear here")
                 }
             }
+        }
+    }
+
+    private var songActions: some View {
+        let liked = MusicItem.playlist(Playlist(browseId: Route.likedMusicBrowseId, title: String(localized: "Liked music")))
+        return HStack(spacing: Metrics.space12) {
+            Button { nowPlaying.play(liked) } label: { InversePillLabel(title: "Play") }
+                .buttonStyle(.plain)
+            Button { nowPlaying.shuffle(liked) } label: { HeaderPill(symbol: "shuffle", title: Text("Shuffle")) }
+                .buttonStyle(.plain)
         }
     }
 
@@ -152,23 +164,26 @@ struct LibraryScreen: View {
     }
 }
 
-private struct HeaderIcon: View {
+private struct HeaderPill: View {
     let symbol: String
+    let title: Text
 
     var body: some View {
-        Image(systemName: symbol)
-            .font(.rwIcon(Metrics.iconRow))
+        Label { title } icon: { Image(systemName: symbol) }
+            .font(.rwButton)
             .foregroundStyle(.textPrimary)
-            .frame(width: Metrics.shelfControl, height: Metrics.shelfControl)
-            .background(.surfaceFill, in: Circle())
-            .contentShape(Circle())
+            .padding(.horizontal, Metrics.space12)
+            .frame(height: Metrics.shelfControl)
+            .background(.surfaceFill, in: Capsule())
+            .contentShape(Capsule())
+            .fixedSize()
     }
 }
 
 private struct SkeletonCards: View {
     var body: some View {
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
+            columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .topLeading)],
             alignment: .leading, spacing: Metrics.space24
         ) {
             ForEach(0..<8, id: \.self) { _ in
