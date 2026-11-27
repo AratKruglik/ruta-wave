@@ -13,6 +13,7 @@ struct PlayerBar: View {
     @Environment(NavigationModel.self) private var navigation
     @Environment(\.requestSignIn) private var requestSignIn
     @Environment(\.showsDislikeButton) private var showsDislikeButton
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var popover: ItemPopover?
     @State private var showsVolumeSlider = false
 
@@ -32,7 +33,7 @@ struct PlayerBar: View {
         .padding(.horizontal, Metrics.space16)
         .frame(height: Metrics.playerBarHeight)
         .onGeometryChange(for: Bool.self) { $0.size.width >= Self.volumeSliderMinBarWidth } action: { showsVolumeSlider = $0 }
-        .glassSurface(in: RoundedRectangle(cornerRadius: cornerRadius))
+        .glassSurface(in: barShape)
         .modifier(PreGlassScrim(cornerRadius: cornerRadius))
         .overlay(alignment: .top) { ProgressLine().padding(.horizontal, cornerRadius) }
         .padding([.horizontal, .bottom], LiquidGlass.isAvailable ? Metrics.space8 : 0)
@@ -43,6 +44,14 @@ struct PlayerBar: View {
     }
 
     private var cornerRadius: CGFloat { LiquidGlass.isAvailable ? Metrics.radiusBar : 0 }
+
+    private var barShape: AnyShape {
+        if #available(macOS 26, *) {
+            AnyShape(ConcentricRectangle(corners: .concentric(minimum: .fixed(Metrics.radiusBar))))
+        } else {
+            AnyShape(RoundedRectangle(cornerRadius: cornerRadius))
+        }
+    }
 
     private var transport: some View {
         HStack(spacing: Metrics.space4) {
@@ -55,14 +64,14 @@ struct PlayerBar: View {
                         Label(player.isPaused ? "Play" : "Pause", systemImage: player.isPaused ? "play.fill" : "pause.fill")
                             .labelStyle(.iconOnly)
                             .font(.rwIcon(Metrics.iconPlay - 12))
-                            .contentTransition(.symbolEffect(.replace))
+                            .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
                     }
                 }
                 .foregroundStyle(.textPrimary)
                 .frame(width: Metrics.iconPlay, height: Metrics.iconPlay)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .help(player.isPaused ? "Play" : "Pause")
             .accessibilityLabel(player.isPaused ? "Play" : "Pause")
             BarIconButton(symbol: "forward.fill", size: Metrics.iconTransport - 8, label: "Next", action: nowPlaying.next)
@@ -142,15 +151,11 @@ struct PlayerBar: View {
             BarIconButton(
                 symbol: "hand.thumbsup", size: Metrics.iconBar,
                 label: "Like", isOn: player.like == .like, action: nowPlaying.toggleLike)
-                .symbolVariant(player.like == .like ? .fill : .none)
-                .contentTransition(.symbolEffect(.replace))
                 .guestPrompt(isPresented: promptBinding(.like), reason: "Sign in to like songs", onSignIn: requestSignIn.perform)
             if showsDislikeButton {
                 BarIconButton(
                     symbol: "hand.thumbsdown", size: Metrics.iconBar,
                     label: "Dislike", isOn: player.like == .dislike, action: nowPlaying.toggleDislike)
-                    .symbolVariant(player.like == .dislike ? .fill : .none)
-                    .contentTransition(.symbolEffect(.replace))
                     .guestPrompt(isPresented: promptBinding(.dislike), reason: "Sign in to dislike songs", onSignIn: requestSignIn.perform)
             }
             moreMenu
@@ -172,7 +177,7 @@ struct PlayerBar: View {
         } label: {
             Image(systemName: "ellipsis")
                 .font(.rwIcon(Metrics.iconBar))
-                .foregroundStyle(.textSecondary)
+                .foregroundStyle(.textPrimary)
                 .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                 .contentShape(Rectangle())
         }

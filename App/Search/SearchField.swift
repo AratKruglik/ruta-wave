@@ -52,7 +52,7 @@ struct SearchField: View {
                         .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(IconButtonStyle())
                 .help("Clear search")
                 .accessibilityLabel("Clear search")
             }

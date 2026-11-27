@@ -157,14 +157,3 @@ extension EnvironmentValues {
     /// The window's base colour: neutral, or tinted by the playing artwork. Previews fall back to the neutral token.
     @Entry var themeBase: Color = .themeBase
 }
-
-struct AccentSwitchToggleStyle: ToggleStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        // shortcut: kept so SettingsView still compiles; the global AccentColor tints the switch, so call sites can use .switch and this type can go.
-        Toggle(configuration).toggleStyle(.switch)
-    }
-}
-
-extension ToggleStyle where Self == AccentSwitchToggleStyle {
-    static var accentSwitch: AccentSwitchToggleStyle { AccentSwitchToggleStyle() }
-}

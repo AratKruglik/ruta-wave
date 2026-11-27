@@ -163,8 +163,8 @@ private struct TrackSelectionModifier: ViewModifier {
         _ barLabel: BarLabel, help: LocalizedStringKey, disabled: Bool, action: @escaping () -> Void
     ) -> some View {
         Button(action: action) { label(barLabel, compact: isCompact) }
-            .buttonStyle(.plain)
-            .foregroundStyle(disabled ? .textDisabled : .textPrimary)
+            .buttonStyle(IconButtonStyle())
+            .foregroundStyle(.textPrimary)
             .disabled(disabled)
             .help(help)
             .accessibilityLabel(help)

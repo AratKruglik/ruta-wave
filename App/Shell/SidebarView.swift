@@ -153,17 +153,10 @@ private struct NewPlaylistButton: View {
         } label: {
             HStack(spacing: Metrics.space8) {
                 Image(systemName: "plus").font(.rwIcon(Metrics.iconRow))
-                Text("New playlist")
-                    .font(.rwButton)
-                    .lineLimit(1)
+                Text("New playlist").lineLimit(1)
             }
-            .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Metrics.space16)
-            .frame(height: Metrics.pillHeight)
-            .background(.surfaceFill, in: Capsule())
-            .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PillButtonStyle())
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, Metrics.space12)
         .help("New playlist")
@@ -326,16 +319,8 @@ private struct GuestCard: View {
                 .font(.rwCaption)
                 .foregroundStyle(.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-            Button(action: onSignIn) {
-                Text("Sign in")
-                    .font(.rwButton)
-                    .foregroundStyle(.textPrimary)
-                    .lineLimit(1)
-                    .padding(.horizontal, Metrics.space16)
-                    .frame(height: Metrics.pillHeight)
-                    .background(.surfaceFill, in: Capsule())
-            }
-            .buttonStyle(.plain)
+            Button(action: onSignIn) { Text("Sign in").lineLimit(1) }
+                .buttonStyle(PillButtonStyle())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Metrics.space12)

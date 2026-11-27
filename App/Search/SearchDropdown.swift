@@ -91,7 +91,7 @@ private struct HistoryRow: View {
                     .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .padding(.trailing, Metrics.space8)
             .help("Remove from recent searches")
             .accessibilityLabel("Remove from recent searches")

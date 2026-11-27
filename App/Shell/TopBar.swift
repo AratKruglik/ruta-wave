@@ -58,16 +58,8 @@ struct TopBar<AccountPopover: View>: ToolbarContent {
             .accessibilityLabel("Account")
             .popover(isPresented: $isAccountPresented) { accountPopover() }
         } else {
-            Button(action: onSignIn) {
-                Text("Sign in")
-                    .font(.rwButton)
-                    .foregroundStyle(.textOnInverse)
-                    .lineLimit(1)
-                    .padding(.horizontal, Metrics.space16)
-                    .frame(height: Metrics.pillHeight)
-                    .background(.surfaceInverse, in: Capsule())
-            }
-            .buttonStyle(.plain)
+            Button(action: onSignIn) { Text("Sign in").lineLimit(1) }
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
     }
 }

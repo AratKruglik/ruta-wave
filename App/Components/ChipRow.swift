@@ -16,7 +16,7 @@ struct ChipView: View {
                 .background(isSelected ? .surfaceInverse : .surfaceFill, in: Capsule())
                 .fixedSize()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(IconButtonStyle())
         .onReturn(action)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
@@ -103,7 +103,7 @@ struct LinkChipGrid: View {
                 Button { onOpen(link) } label: {
                     HStack(spacing: Metrics.space12) {
                         Rectangle()
-                            .fill(link.stripeColor.map { Color(argb: $0) } ?? Color.white.opacity(0.20))
+                            .fill(link.stripeColor.map { Color(argb: $0) } ?? Color.strokeSubtle)
                             .frame(width: Metrics.space4)
                         Text(link.title)
                             .font(.rwTitle)
