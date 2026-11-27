@@ -25,7 +25,7 @@ struct SettingsView: View {
         }
         .preferredColorScheme(.dark)
         .scrollIndicators(.never)
-        .toggleStyle(.accentSwitch)
+        .toggleStyle(.switch)
         .focusEffectDisabled()
         .frame(width: 480)
     }

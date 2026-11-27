@@ -56,16 +56,8 @@ struct TopBar<AccountPopover: View>: View {
             .accessibilityLabel("Account")
             .popover(isPresented: $isAccountPresented) { accountPopover() }
         } else {
-            Button(action: onSignIn) {
-                Text("Sign in")
-                    .font(.rwButton)
-                    .foregroundStyle(.textOnInverse)
-                    .lineLimit(1)
-                    .padding(.horizontal, Metrics.space16)
-                    .frame(height: Metrics.pillHeight)
-                    .background(.surfaceInverse, in: Capsule())
-            }
-            .buttonStyle(.plain)
+            Button(action: onSignIn) { Text("Sign in").lineLimit(1) }
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
     }
 }
@@ -83,31 +75,6 @@ struct AccountAvatar: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .accessibilityHidden(true)
-    }
-}
-
-struct BarIconButton: View {
-    let symbol: String
-    let size: CGFloat
-    let label: LocalizedStringKey
-    var isOn = false
-    var activeTint: Color = .textPrimary
-    let action: () -> Void
-    @Environment(\.isEnabled) private var isEnabled
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.rwIcon(size))
-                .foregroundStyle(isEnabled ? (isOn ? activeTint : .textSecondary) : .textDisabled)
-                .frame(width: max(size, Metrics.hitTarget), height: max(size, Metrics.hitTarget))
-                .background(isOn ? .surfaceFill : Color.clear, in: Circle())
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help(label)
-        .accessibilityLabel(label)
-        .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 }
 

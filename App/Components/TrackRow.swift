@@ -150,6 +150,9 @@ struct TrackRow: View {
     private var titles: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: Metrics.space4) {
+                if isCurrent && !showsArtwork && density != .numbered {
+                    nowPlayingGlyph.font(.rwIcon(Metrics.iconPin)).foregroundStyle(.accentLink).accessibilityHidden(true)
+                }
                 Text(song.title)
                     .help(song.title)
                     .font(.rwTitle)
@@ -222,16 +225,17 @@ struct TrackRow: View {
 
     private func actionButton(_ symbol: String, label: LocalizedStringKey, field: Field, isOn: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol)
+            Label(label, systemImage: symbol)
+                .labelStyle(.iconOnly)
+                .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
                 .font(.rwIcon(Metrics.iconRow))
                 .foregroundStyle(.textPrimary)
                 .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(IconButtonStyle())
         .focused($focus, equals: field)
         .help(label)
-        .accessibilityLabel(label)
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 

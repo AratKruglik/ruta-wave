@@ -10,15 +10,8 @@ struct GuestPromptContent: View {
                 .font(.rwBody)
                 .foregroundStyle(.textPrimary)
                 .multilineTextAlignment(.center)
-            Button(action: onSignIn) {
-                Text("Sign in")
-                    .font(.rwButton)
-                    .foregroundStyle(.textOnInverse)
-                    .padding(.horizontal, Metrics.space16)
-                    .frame(height: Metrics.pillHeight)
-                    .background(.surfaceInverse, in: Capsule())
-            }
-            .buttonStyle(.plain)
+            Button("Sign in", action: onSignIn)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
         .padding(Metrics.space16)
     }

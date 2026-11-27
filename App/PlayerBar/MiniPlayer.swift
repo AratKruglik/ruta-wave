@@ -6,6 +6,7 @@ struct MiniPlayerView: View {
     let nowPlaying: NowPlayingModel
     let showMainWindow: () -> Void
     @State private var isHovering = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var player: any PlayerControlling { nowPlaying.player }
 
@@ -63,22 +64,24 @@ struct MiniPlayerView: View {
                     if player.isBuffering {
                         ProgressView().controlSize(.small)
                     } else {
-                        Image(systemName: player.isPaused ? "play.fill" : "pause.fill")
+                        Label(player.isPaused ? "Play" : "Pause", systemImage: player.isPaused ? "play.fill" : "pause.fill")
+                            .labelStyle(.iconOnly)
                             .font(.rwIcon(Metrics.iconPlay - 12))
+                            .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
                     }
                 }
-                .foregroundStyle(hasSong ? .textPrimary : .textDisabled)
+                .foregroundStyle(.textPrimary)
                 .frame(width: Metrics.iconPlay, height: Metrics.iconPlay)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .disabled(!hasSong)
             .help(player.isPaused ? "Play" : "Pause")
             .accessibilityLabel(player.isPaused ? "Play" : "Pause")
             BarIconButton(symbol: "forward.fill", size: Metrics.iconTransport - 8, label: "Next", action: nowPlaying.next)
                 .disabled(!hasSong || player.isAd)
             BarIconButton(
-                symbol: player.like == .like ? "hand.thumbsup.fill" : "hand.thumbsup", size: Metrics.iconTransport - 8,
+                symbol: "hand.thumbsup", size: Metrics.iconTransport - 8,
                 label: "Like", isOn: player.like == .like, action: nowPlaying.toggleLike)
                 .disabled(!hasSong || player.isAd || !nowPlaying.isSignedIn)
         }
