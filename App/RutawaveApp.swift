@@ -120,10 +120,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // The Mini Player counts as a visible window, so this ignores `hasVisibleWindows`; false stops a second default reopen.
+    // The Mini Player counts as a visible window, so this ignores `hasVisibleWindows`.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         showMainWindow()
-        return false
+        return true
     }
 
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {

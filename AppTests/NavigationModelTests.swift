@@ -277,6 +277,19 @@ struct NavigationModelTests {
         #expect(model.path(for: .home).isEmpty)
     }
 
+    @Test func reopenWhileSignedOutDropsAccountRoutes() throws {
+        let data = try saved { model in
+            model.push(.album(browseId: "a"))
+            model.push(.playlist(browseId: "p"))
+            model.select(.library)
+            model.push(.history)
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: false, startingPage: nil, isLaunch: false)
+        #expect(model.selection == .home)
+        #expect(model.path(for: .home) == [.album(browseId: "a")])
+        #expect(model.path(for: .library).isEmpty)
+    }
+
     @Test func guestSnapshotRestoredSignedInDropsIdentityRoutes() throws {
         let data = try saved(signedIn: false) { model in
             model.push(.album(browseId: "a"))
