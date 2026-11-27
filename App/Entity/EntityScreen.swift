@@ -45,8 +45,7 @@ struct EntityScreen: View {
                     }
                 }
                 .padding(.bottom, padding)
-                // The artist photo runs under the bar to the window top, like the header gradient of the other pages.
-                .padding(.top, isArtist ? -Metrics.topBarHeight : padding)
+                .padding(.top, isArtist ? artistTopOffset : padding)
                 .background(alignment: .top) {
                     if !isArtist { ThemeHeaderGradient().padding(.top, -Metrics.topBarHeight) }
                 }
@@ -63,6 +62,11 @@ struct EntityScreen: View {
         case .playlist: content.tracks
         case .artist: []
         }
+    }
+
+    /// Before macOS 26 the artist photo is lifted under the bar to the window top, like the header gradient of the other pages.
+    private var artistTopOffset: CGFloat {
+        if #available(macOS 26, *) { 0 } else { -Metrics.topBarHeight }
     }
 
     private var isArtist: Bool {
