@@ -30,15 +30,16 @@ final class NavigationModel {
 
     /// Anything unreadable, of another version or implausibly deep starts at Home. Routes that belonged to another
     /// identity than the current one are dropped with the same rules sign-out uses.
-    /// A `startingPage` opens at the root of that section; the other sections keep their stacks.
+    /// A launch keeps only the active section's stack, so a sidebar click never lands on a stale page; a window reopen
+    /// keeps every stack. A `startingPage` opens at the root of that section.
     static func restored(
-        from data: Data?, isSignedIn: Bool, startingPage: SidebarSection? = nil
+        from data: Data?, isSignedIn: Bool, startingPage: SidebarSection? = nil, isLaunch: Bool = true
     ) -> NavigationModel {
         let model = NavigationModel()
         if let data, let saved = try? JSONDecoder().decode(Snapshot.self, from: data), saved.version == 1,
            saved.paths.values.allSatisfy({ $0.count <= maxRestoredDepth }) {
             model.selection = saved.section
-            model.paths = saved.paths
+            model.paths = isLaunch ? saved.paths.filter { $0.key == saved.section } : saved.paths
             if saved.isSignedIn, !isSignedIn {
                 model.dropAccountRoutes()
             } else if saved.isSignedIn != isSignedIn {
@@ -47,6 +48,7 @@ final class NavigationModel {
         }
         if let startingPage {
             model.selection = startingPage == .library && !isSignedIn ? .home : startingPage
+            if isLaunch { model.paths = [:] }
             model.paths[model.selection] = []
         }
         return model
@@ -150,8 +152,7 @@ final class NavigationModel {
     }
 
     private func popToRoot(_ section: SidebarSection) {
-        paths[section] = []
-        forwardRoutes[section] = []
+        setPath([], for: section)
         scrollToTopRequests[section, default: 0] += 1
     }
 }

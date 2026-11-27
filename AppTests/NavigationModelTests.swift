@@ -50,8 +50,18 @@ struct NavigationModelTests {
         model.push(.artist(channelId: "b"))
         model.select(.home)
         #expect(model.path(for: .home).isEmpty)
-        #expect(!model.canGoForward)
+        #expect(model.canGoForward)
         #expect(model.scrollToTopRequests[.home] == 1)
+        model.forward()
+        #expect(model.path(for: .home) == [.artist(channelId: "b")])
+    }
+
+    @Test func reselectingAtRootKeepsForward() {
+        let model = NavigationModel()
+        model.push(.album(browseId: "a"))
+        model.back()
+        model.select(.home)
+        #expect(model.canGoForward)
     }
 
     @Test func switchingSectionKeepsStacks() {
@@ -212,10 +222,34 @@ struct NavigationModelTests {
         let model = NavigationModel.restored(from: data, isSignedIn: true)
         #expect(model.selection == .library)
         #expect(model.path(for: .library) == [.playlist(browseId: "p")])
-        #expect(model.path(for: .home) == [.explore(.charts), .album(browseId: "a")])
+        #expect(model.path(for: .home).isEmpty)
         #expect(!model.canGoForward)
         model.back()
         #expect(model.path(for: .library).isEmpty)
+    }
+
+    @Test func relaunchRestoresOnlyTheActiveSection() throws {
+        let data = try saved { model in
+            model.push(.album(browseId: "a"))
+            model.select(.explore)
+            model.push(.explore(.charts))
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: true)
+        #expect(model.selection == .explore)
+        #expect(model.path(for: .explore) == [.explore(.charts)])
+        #expect(model.path(for: .home).isEmpty)
+    }
+
+    @Test func reopenKeepsEveryStack() throws {
+        let data = try saved { model in
+            model.push(.album(browseId: "a"))
+            model.select(.explore)
+            model.push(.explore(.charts))
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: true, startingPage: nil, isLaunch: false)
+        #expect(model.selection == .explore)
+        #expect(model.path(for: .home) == [.album(browseId: "a")])
+        #expect(model.path(for: .explore) == [.explore(.charts)])
     }
 
     @Test func backAfterRestoreWalksTheStack() throws {
@@ -240,7 +274,20 @@ struct NavigationModelTests {
         let model = NavigationModel.restored(from: data, isSignedIn: false)
         #expect(model.selection == .home)
         #expect(model.path(for: .library).isEmpty)
+        #expect(model.path(for: .home).isEmpty)
+    }
+
+    @Test func reopenWhileSignedOutDropsAccountRoutes() throws {
+        let data = try saved { model in
+            model.push(.album(browseId: "a"))
+            model.push(.playlist(browseId: "p"))
+            model.select(.library)
+            model.push(.history)
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: false, startingPage: nil, isLaunch: false)
+        #expect(model.selection == .home)
         #expect(model.path(for: .home) == [.album(browseId: "a")])
+        #expect(model.path(for: .library).isEmpty)
     }
 
     @Test func guestSnapshotRestoredSignedInDropsIdentityRoutes() throws {
@@ -289,7 +336,17 @@ struct StartingPageTests {
         let model = NavigationModel.restored(from: data, isSignedIn: true, startingPage: .home)
         #expect(model.selection == .home)
         #expect(model.path(for: .home).isEmpty)
-        #expect(model.path(for: .explore) == [.explore(.charts)], "other sections keep their stacks")
+        #expect(model.path(for: .explore).isEmpty)
+    }
+
+    @Test func startingPageOnReopenKeepsOtherStacks() throws {
+        let data = try saved { model in
+            model.select(.explore)
+            model.push(.explore(.charts))
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: true, startingPage: .home, isLaunch: false)
+        #expect(model.selection == .home)
+        #expect(model.path(for: .explore) == [.explore(.charts)])
     }
 
     @Test func noStartingPageReopensTheLastSection() throws {

@@ -271,22 +271,22 @@
         }
       }
     },
-    "Check the spelling or try different keywords." : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перевірте написання або спробуйте інші слова."
-          }
-        }
-      }
-    },
     "Clear" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Очистити"
+          }
+        }
+      }
+    },
+    "Clear search" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистити пошук"
           }
         }
       }
@@ -447,6 +447,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося завантажити плейлисти"
+          }
+        }
+      }
+    },
+    "Couldn't load Related" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити схоже"
+          }
+        }
+      }
+    },
+    "Check your connection and try again" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірте з'єднання та спробуйте ще раз"
           }
         }
       }
@@ -763,16 +783,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Перейти"
-          }
-        }
-      }
-    },
-    "Go to Search Field" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перейти до поля пошуку"
           }
         }
       }
@@ -1167,16 +1177,6 @@
         }
       }
     },
-    "No results for “%@”" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нічого не знайдено за запитом «%@»"
-          }
-        }
-      }
-    },
     "Not playing" : {
       "localizations" : {
         "uk" : {
@@ -1363,6 +1363,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пауза"
+          }
+        }
+      }
+    },
+    "Paused" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На паузі"
           }
         }
       }
@@ -2026,6 +2036,16 @@
         }
       }
     },
+    "Shortcuts" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скорочення"
+          }
+        }
+      }
+    },
     "Shuffle" : {
       "localizations" : {
         "uk" : {
@@ -2215,6 +2235,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тут з’являться пісні, які ви слухаєте"
+          }
+        }
+      }
+    },
+    "Space" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробіл"
           }
         }
       }

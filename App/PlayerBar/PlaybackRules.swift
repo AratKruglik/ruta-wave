@@ -40,16 +40,20 @@ enum PlaybackRules {
         return min(max(stepped, 0), 1)
     }
 
-    static func formatTime(_ seconds: TimeInterval) -> String {
+    static func formatDuration(_ seconds: TimeInterval, locale: Locale = .autoupdatingCurrent) -> String {
         let total = seconds.isFinite ? Int(min(max(seconds, 0), 999_999_999)) : 0
-        let (hours, minutes, secs) = (total / 3600, total % 3600 / 60, total % 60)
-        return hours > 0
-            ? String(format: "%d:%02d:%02d", hours, minutes, secs)
-            : String(format: "%d:%02d", minutes, secs)
+        let duration = Duration.seconds(total)
+        let pattern: Duration.TimeFormatStyle.Pattern =
+            total >= 3600 ? .hourMinuteSecond(padHourToLength: 1) : .minuteSecond(padMinuteToLength: 1)
+        return duration.formatted(.time(pattern: pattern).locale(locale))
     }
 
-    static func formatRemaining(_ elapsed: TimeInterval, duration: TimeInterval) -> String {
-        "-" + formatTime(max(duration - elapsed, 0))
+    static func formatTime(_ seconds: TimeInterval, locale: Locale = .autoupdatingCurrent) -> String {
+        formatDuration(seconds, locale: locale)
+    }
+
+    static func formatRemaining(_ elapsed: TimeInterval, duration: TimeInterval, locale: Locale = .autoupdatingCurrent) -> String {
+        "-" + formatTime(max(duration - elapsed, 0), locale: locale)
     }
 
     /// Longest stretch the clock runs past the last tick, so a stalled player cannot drag the lyrics ahead.

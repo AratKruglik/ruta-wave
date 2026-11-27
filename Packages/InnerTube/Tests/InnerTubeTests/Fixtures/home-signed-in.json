@@ -117,6 +117,40 @@
                ]
               }
              }
+            },
+            {
+             "musicTwoRowItemRenderer": {
+              "navigationEndpoint": {
+               "browseEndpoint": {
+                "browseEndpointContextSupportedConfigs": {
+                 "browseEndpointContextMusicConfig": {
+                  "pageType": "MUSIC_PAGE_TYPE_PLAYLIST"
+                 }
+                },
+                "browseId": "VLLM"
+               }
+              },
+              "thumbnailRenderer": {
+               "musicThumbnailRenderer": {
+                "thumbnail": {
+                 "thumbnails": [
+                  {
+                   "height": 226,
+                   "url": "https://www.gstatic.com/placeholder/liked-music-576.png",
+                   "width": 226
+                  }
+                 ]
+                }
+               }
+              },
+              "title": {
+               "runs": [
+                {
+                 "text": "Placeholder Liked Music"
+                }
+               ]
+              }
+             }
             }
            ],
            "header": {
@@ -179,6 +213,36 @@
                "runs": [
                 {
                  "text": "Placeholder Mix"
+                }
+               ]
+              }
+             }
+            },
+            {
+             "musicTwoRowItemRenderer": {
+              "navigationEndpoint": {
+               "watchPlaylistEndpoint": {
+                "params": "wAEB",
+                "playlistId": "RDPLACEHOLDERMIX0002"
+               }
+              },
+              "thumbnailRenderer": {
+               "croppedSquareThumbnailRenderer": {
+                "thumbnail": {
+                 "thumbnails": [
+                  {
+                   "height": 226,
+                   "url": "https://www.gstatic.com/placeholder/supermix=w226-h226",
+                   "width": 226
+                  }
+                 ]
+                }
+               }
+              },
+              "title": {
+               "runs": [
+                {
+                 "text": "Placeholder Supermix"
                 }
                ]
               }

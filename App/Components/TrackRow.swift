@@ -15,12 +15,15 @@ struct TrackRow: View {
 
     let song: Song
     let density: Density
+    var knownRating: Rating?
     var selection: RowSelection?
     /// Replaces the chart rank in the leading column (an album's track number).
     var number: Int?
     var onPlay: (() -> Void)?
     /// Queue rows decide for themselves: the same video can appear twice.
     var isCurrentRow: Bool?
+    /// Off for an album whose tracks have no covers, so the title does not sit behind a dead gap.
+    var showsArtwork = true
     var place: ItemPlace = .plain
     /// Set on own-playlist rows so a drop on another row of the same playlist reorders.
     var sourcePlaylistId: String?
@@ -40,7 +43,7 @@ struct TrackRow: View {
     private var item: MusicItem { .song(song) }
     private var isCurrent: Bool { isCurrentRow ?? nowPlaying.isPlaying(item) }
     private var showsActions: Bool { isHovering || focus != nil || selection?.isSelected == true }
-    private var rating: Rating? { nowPlaying.rowRatings[song.videoId] }
+    private var rating: Rating? { nowPlaying.rowRatings[song.videoId] ?? knownRating }
 
     private var height: CGFloat {
         switch density {
@@ -51,15 +54,15 @@ struct TrackRow: View {
     }
 
     private var thumbSize: CGFloat { density == .numbered ? Metrics.rowThumbCompact : Metrics.rowThumb }
+    private var slotWidth: CGFloat { thumbSize * 16 / 9 }
+    private var isPaused: Bool { nowPlaying.player.isPaused }
 
     var body: some View {
         ZStack(alignment: .trailing) {
             Button(action: play) {
                 HStack(spacing: Metrics.space12) {
                     if density == .numbered { rank }
-                    ArtworkImage(
-                        url: song.thumbnailURL, width: song.isVideo ? thumbSize * 16 / 9 : thumbSize, height: thumbSize,
-                        cornerRadius: Metrics.radiusThumb)
+                    if showsArtwork { artwork }
                     titles
                     if density == .detailed, let album = song.album {
                         Text(album.name)
@@ -122,10 +125,33 @@ struct TrackRow: View {
         if let onPlay { onPlay() } else { nowPlaying.play(item) }
     }
 
+    private var artwork: some View {
+        ArtworkImage(
+            url: song.thumbnailURL, width: song.isVideo ? slotWidth : thumbSize, height: thumbSize, cornerRadius: Metrics.radiusThumb)
+            .overlay {
+                if isCurrent {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: Metrics.radiusThumb).fill(.scrim)
+                        nowPlayingGlyph.font(.rwIcon(Metrics.iconRow)).foregroundStyle(.textPrimary)
+                    }
+                    .accessibilityHidden(true)
+                }
+            }
+            .frame(width: slotWidth)
+    }
+
+    private var nowPlayingGlyph: some View {
+        Image(systemName: "waveform")
+            .symbolVariant(.fill)
+            .symbolEffect(.variableColor.iterative, isActive: !reduceMotion && !isPaused)
+            .opacity(isPaused ? 0.5 : 1)
+    }
+
     private var titles: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: Metrics.space4) {
                 Text(song.title)
+                    .help(song.title)
                     .font(.rwTitle)
                     .foregroundStyle(isCurrent ? .accentLink : .textPrimary)
                     .lineLimit(density == .compact ? 2 : 1)
@@ -143,14 +169,16 @@ struct TrackRow: View {
 
     private var artistLine: String? {
         let names = song.artists.map(\.name).joined(separator: ", ")
-        return names.isEmpty ? song.subtitle : names
+        if !names.isEmpty { return names }
+        guard density == .detailed, let album = song.album?.name, let subtitle = song.subtitle else { return song.subtitle }
+        let kept = subtitle.components(separatedBy: " • ").filter { $0 != album }
+        return kept.isEmpty ? nil : kept.joined(separator: " • ")
     }
 
     private var rank: some View {
         HStack(spacing: Metrics.space4) {
-            if isCurrent {
-                Image(systemName: "waveform")
-                    .symbolEffect(.variableColor.iterative, isActive: !reduceMotion && !nowPlaying.player.isPaused)
+            if isCurrent && !showsArtwork {
+                nowPlayingGlyph
             } else if let position = number ?? song.rank?.position {
                 Text("\(position)").monospacedDigit()
             }
@@ -218,6 +246,7 @@ struct TrackRow: View {
     private var accessibilityLabel: String {
         var parts = [number.map(String.init), song.title, artistLine, song.album?.name, song.duration]
         if isCurrent { parts.append(String(localized: "Now playing")) }
+        if isCurrent && isPaused { parts.append(String(localized: "Paused")) }
         if !song.isAvailable { parts.append(String(localized: "Unavailable")) }
         return parts.compactMap { $0 }.joined(separator: ", ")
     }

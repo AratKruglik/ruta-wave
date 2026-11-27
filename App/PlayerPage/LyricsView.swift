@@ -28,6 +28,27 @@ struct PanelMessage: View {
     }
 }
 
+enum LyricsStyle {
+    static let size: CGFloat = 18
+    static let currentSize: CGFloat = 20
+    static let lineSpacing: CGFloat = 8
+    static let fadeHeight = Metrics.space48
+}
+
+extension View {
+    /// Fades the scroll area out at the bottom so the last line never meets a hard edge above the player bar.
+    func lyricsBottomFade() -> some View {
+        contentMargins(.bottom, LyricsStyle.fadeHeight + Metrics.space24, for: .scrollContent)
+            .mask {
+                VStack(spacing: 0) {
+                    Color.black
+                    LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                        .frame(height: LyricsStyle.fadeHeight)
+                }
+            }
+    }
+}
+
 struct LyricsView: View {
     let browseId: String
 
@@ -68,17 +89,20 @@ struct LyricsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Metrics.space24) {
                 Text(verbatim: lyrics.text)
-                    .font(.rwBody)
+                    .font(.system(size: LyricsStyle.size))
+                    .lineSpacing(LyricsStyle.lineSpacing)
                     .foregroundStyle(.textPrimary)
                     .textSelection(.enabled)
                 if let source = lyrics.source {
                     Text(verbatim: source)
                         .font(.rwCaption)
                         .foregroundStyle(.textSecondary)
+                        .textSelection(.enabled)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .lyricsBottomFade()
     }
 
     private var skeleton: some View {

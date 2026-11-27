@@ -51,7 +51,29 @@ struct SearchScreen: View {
     }
 
     private func select(_ chip: Chip) {
-        navigation.replaceLast(.search(query: model.query, filter: chip.isSelected ? nil : chip.searchParams))
+        let route = Route.search(query: model.query, filter: chip.isSelected ? nil : chip.searchParams)
+        let path = navigation.path(for: navigation.selection)
+        if path.count >= 2, path[path.count - 2] == route { navigation.back() } else { navigation.replaceLast(route) }
+    }
+
+    @ViewBuilder
+    private var skeleton: some View {
+        if model.isAllSelected {
+            VStack(alignment: .leading, spacing: Metrics.space32) {
+                VStack(alignment: .leading, spacing: Metrics.space16) {
+                    header("Top result")
+                    TopResultCard(item: .placeholder)
+                }
+                .placeholderStyle()
+                SkeletonRows(count: 4)
+                SkeletonShelf()
+            }
+        } else {
+            switch SearchSection.Kind(filter: model.filter) {
+            case .albums, .artists, .playlists: SkeletonCardGrid()
+            case .songs, .videos, .none: SkeletonRows(count: 8)
+            }
+        }
     }
 
     @ViewBuilder
@@ -59,33 +81,13 @@ struct SearchScreen: View {
         switch model.state {
         case .loading:
             ScrollView {
-                if model.isAllSelected {
-                    VStack(alignment: .leading, spacing: Metrics.space24) {
-                        SkeletonTopResult()
-                        SkeletonRows(count: 4)
-                        SkeletonShelf()
-                    }
-                    .padding(padding)
-                } else {
-                    SkeletonRows(count: 8).padding(padding)
-                }
+                skeleton.padding(padding)
             }
             .scrollDisabled(true)
         case .failed:
             PageErrorView(onRetry: model.retry)
         case .empty:
-            VStack(spacing: Metrics.space8) {
-                Text("No results for “\(model.query)”")
-                    .font(.rwTitle)
-                    .foregroundStyle(.textPrimary)
-                    .lineLimit(2)
-                Text("Check the spelling or try different keywords.")
-                    .font(.rwBody)
-                    .foregroundStyle(.textSecondary)
-            }
-            .multilineTextAlignment(.center)
-            .padding(padding)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ContentUnavailableView.search(text: model.query)
         case .loaded(let content):
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Metrics.space32) {
@@ -102,7 +104,7 @@ struct SearchScreen: View {
         if let top = content.topResult {
             VStack(alignment: .leading, spacing: Metrics.space16) {
                 header("Top result")
-                MusicCard(item: top)
+                TopResultCard(item: top)
             }
         }
         ForEach(content.sections, id: \.kind) { section in
@@ -111,10 +113,8 @@ struct SearchScreen: View {
                     header(section.kind.title)
                     Spacer(minLength: Metrics.space16)
                     if let params = section.showAllParams {
-                        Button { navigation.replaceLast(.search(query: model.query, filter: params)) } label: {
-                            InversePillLabel(title: "Show all")
-                        }
-                        .buttonStyle(.plain)
+                        Button("Show all") { navigation.push(.search(query: model.query, filter: params)) }
+                            .buttonStyle(PillButtonStyle())
                     }
                 }
                 sectionBody(section)
@@ -137,7 +137,7 @@ struct SearchScreen: View {
             }
             .trackSelection($selection, songs: section.kind == .songs ? songs : [])
         case .albums, .artists, .playlists:
-            ShelfView(shelf: Shelf(title: nil, layout: .cards, items: section.items)) { navigation.push(Route(target: $0)) }
+            ShelfView(shelf: Shelf(title: nil, layout: .cards, items: section.items), onMore: { navigation.push(Route(target: $0)) }, pageMargin: padding)
         }
     }
 
@@ -163,7 +163,8 @@ struct SearchScreen: View {
             .trackSelection($selection, songs: songs)
         } else {
             LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: Metrics.videoCardWidth), spacing: Metrics.space16, alignment: .top)],
+                columns: [GridItem(
+                    .adaptive(minimum: items.first?.isVideoCard == true ? Metrics.videoCardWidth : Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
                 alignment: .leading, spacing: Metrics.space24
             ) {
                 ForEach(Array(items.enumerated()), id: \.offset) { index, item in

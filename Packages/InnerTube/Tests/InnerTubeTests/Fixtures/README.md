@@ -48,7 +48,7 @@ These shapes only occur when signed in or could not be reproduced as a guest. Th
 
 | File | What it stands for |
 |---|---|
-| `home-signed-in.json` | Home with a chip row, a "Listen again" shelf with a strapline and a "Mixed for you" shelf with a radio card |
+| `home-signed-in.json` | Home with a chip row, a "Listen again" shelf with a strapline and a "Mixed for you" shelf with a radio card, a mix card with a cropped-square gstatic cover and a Liked music card |
 | `search-empty.json` | A search that has chips and no results (Google returns fuzzy results for every guest query, so this could not be captured) |
 | `suggestions-history.json` | History suggestions with `feedbackToken`. Shape checked against the `parse_search_suggestions` function of the public `ytmusicapi` project (`historySuggestionRenderer`, `serviceEndpoint.feedbackEndpoint.feedbackToken`, `navigationEndpoint.searchEndpoint.query`). |
 | `playlist-own.json` | An own playlist: the header wrapped in `musicEditablePlaylistDetailHeaderRenderer`, 2 tracks and a section-list continuation. Shape after `ytmusicapi` (`get_playlist`). |

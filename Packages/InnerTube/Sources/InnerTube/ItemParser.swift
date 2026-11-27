@@ -58,7 +58,12 @@ enum ItemParser {
         build(
             destination: destination(renderer["onTap"]), title: renderer["title"].flatMap(text),
             subtitleRuns: renderer["subtitle"]?["runs"]?.array ?? [],
-            thumbnail: renderer["thumbnail"]?["musicThumbnailRenderer"]?["thumbnail"], renderer: renderer)
+            thumbnail: thumbnail(renderer["thumbnail"]), renderer: renderer)
+    }
+
+    /// A cover sits in a `musicThumbnailRenderer`, or a `croppedSquareThumbnailRenderer` on generated mixes.
+    static func thumbnail(_ container: JSONValue?) -> JSONValue? {
+        container?["musicThumbnailRenderer"]?["thumbnail"] ?? container?["croppedSquareThumbnailRenderer"]?["thumbnail"]
     }
 
     static func chips(_ chipCloud: JSONValue?) -> [Chip] {
@@ -126,7 +131,7 @@ enum ItemParser {
         return build(
             destination: destination(endpoint), title: renderer["title"].flatMap(text),
             subtitleRuns: renderer["subtitle"]?["runs"]?.array ?? [],
-            thumbnail: renderer["thumbnailRenderer"]?["musicThumbnailRenderer"]?["thumbnail"], renderer: renderer,
+            thumbnail: thumbnail(renderer["thumbnailRenderer"]), renderer: renderer,
             playTarget: playTarget)
     }
 
@@ -150,7 +155,7 @@ enum ItemParser {
             destination: destination, title: columns.first.flatMap(text),
             subtitleRuns: details.flatMap { $0["runs"]?.array ?? [] },
             subtitle: details.compactMap(text).joined(separator: " • "), durationRuns: fixed,
-            thumbnail: renderer["thumbnail"]?["musicThumbnailRenderer"]?["thumbnail"], renderer: renderer)
+            thumbnail: thumbnail(renderer["thumbnail"]), renderer: renderer)
     }
 
     private static func link(_ renderer: JSONValue) -> MusicItem? {

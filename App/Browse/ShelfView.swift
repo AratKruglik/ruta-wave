@@ -6,6 +6,7 @@ struct ShelfView: View {
     let onMore: (BrowseTarget) -> Void
     var moreTitle: LocalizedStringKey = "More"
     var isPanel = false
+    var pageMargin: CGFloat = 0
 
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
@@ -13,11 +14,20 @@ struct ShelfView: View {
     @State private var firstVisible: Int?
     @State private var width: CGFloat = 0
 
-    private var isCarousel: Bool { shelf.layout == .cards || (shelf.layout == .rows && !isPanel) }
+    private var isCarousel: Bool {
+        guard !shelf.isExploreTiles, !shelf.isLinkGrid else { return false }
+        return shelf.layout == .cards || (shelf.layout == .rows && !isPanel)
+    }
+
+    private var rowFit: (count: Int, itemWidth: CGFloat) {
+        let isArtists = if case .artist = shelf.items.first { true } else { false }
+        return ShelfGeometry.fit(
+            width: width, minimum: isArtists ? Metrics.artistColumnWidth : Metrics.rowColumnWidth, spacing: Metrics.space16)
+    }
 
     private var itemWidth: CGFloat {
         switch shelf.layout {
-        case .rows: Metrics.rowColumnWidth
+        case .rows: rowFit.itemWidth
         default: shelf.items.first?.isVideoCard == true ? Metrics.videoCardWidth : Metrics.cardSize
         }
     }
@@ -30,7 +40,9 @@ struct ShelfView: View {
 
     private var carouselCount: Int { shelf.layout == .rows ? columns.count : shelf.items.count }
 
-    private var visibleCount: Int { max(1, Int((width + Metrics.space16) / (itemWidth + Metrics.space16))) }
+    private var visibleCount: Int {
+        shelf.layout == .rows ? rowFit.count : max(1, Int((width + Metrics.space16) / (itemWidth + Metrics.space16)))
+    }
 
     var body: some View {
         let content = VStack(alignment: .leading, spacing: Metrics.space16) {
@@ -62,10 +74,10 @@ struct ShelfView: View {
             }
             Spacer(minLength: Metrics.space16)
             if let more = shelf.more {
-                Button { onMore(more) } label: { InversePillLabel(title: moreTitle) }
-                    .buttonStyle(.plain)
+                Button(moreTitle) { onMore(more) }
+                    .buttonStyle(PillButtonStyle())
             }
-            if isCarousel {
+            if isCarousel, width > 0, carouselCount > visibleCount {
                 ScrollArrowButton(symbol: "chevron.left", label: "Scroll left", isEnabled: (firstVisible ?? 0) > 0) {
                     scroll(by: -visibleCount)
                 }
@@ -86,7 +98,7 @@ struct ShelfView: View {
         if shelf.isExploreTiles {
             ExploreTiles(links: links)
         } else if shelf.isLinkGrid {
-            LinkChipGrid(links: links) { navigation.push(Route(target: $0.target)) }
+            LinkChipGrid(links: links, maxRows: shelf.more == nil ? nil : 2) { navigation.push(Route(target: $0.target)) }
         } else {
             switch shelf.layout {
             case .cards: carousel { index in MusicCard(item: shelf.items[index]) }
@@ -121,16 +133,19 @@ struct ShelfView: View {
             }
             .scrollTargetLayout()
         }
+        .scrollTargetBehavior(.viewAligned)
+        .contentMargins(.horizontal, pageMargin, for: .scrollContent)
         .scrollPosition(id: $firstVisible, anchor: .leading)
         .scrollIndicators(.hidden)
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .onGeometryChange(for: CGFloat.self) { max($0.size.width - 2 * pageMargin, 0) } action: { width = $0 }
+        .padding(.horizontal, -pageMargin)
     }
 
     private func rowColumn(_ items: [MusicItem]) -> some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in listRow(item, startsRadio: true) }
         }
-        .frame(width: Metrics.rowColumnWidth)
+        .containerRelativeFrame(.horizontal, count: rowFit.count, spacing: Metrics.space16)
     }
 
     @ViewBuilder
@@ -138,6 +153,8 @@ struct ShelfView: View {
         if case .song(let song) = item {
             let density: TrackRow.Density = song.rank != nil ? .numbered : (shelf.layout == .list ? .detailed : .compact)
             TrackRow(song: song, density: density, onPlay: startsRadio ? { nowPlaying.startRadio(song) } : nil)
+        } else if case .artist(let artist) = item, artist.rank != nil {
+            ArtistRow(artist: artist, isRanked: true)
         } else {
             MusicCard(item: item)
         }

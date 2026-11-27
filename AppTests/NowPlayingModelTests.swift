@@ -167,9 +167,89 @@ struct NowPlayingModelTests {
         h.preferences.volume = 0.3
         await h.start()
         h.model.toggleMute()
-        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: true))
         await h.settle()
         #expect(h.player.sent == [.setVolume(0.3), .toggleMute])
+    }
+
+    @Test func toggleMutePersistsMute() {
+        let h = Harness()
+        h.model.toggleMute()
+        #expect(h.preferences.isMuted)
+        h.player.isMuted = true
+        h.model.toggleMute()
+        #expect(!h.preferences.isMuted)
+    }
+
+    @Test func toggleMuteWhileNotReadyDoesNotPersist() {
+        let h = Harness()
+        h.player.isReady = false
+        h.model.toggleMute()
+        #expect(!h.preferences.isMuted)
+    }
+
+    @Test func reappliesSavedMuteWhenThePageReportsUnmuted() async {
+        var h = Harness()
+        h.preferences.isMuted = true
+        await h.start()
+        h.player.emit(.ready)
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        await h.settle()
+        #expect(h.player.sent.last == .mute)
+    }
+
+    @Test func reappliesSavedMuteOnSongChange() async {
+        var h = Harness()
+        h.preferences.isMuted = true
+        await h.start()
+        h.player.emit(.songChanged(song("a")))
+        await h.settle()
+        #expect(h.player.sent.last == .mute)
+    }
+
+    @Test func songChangeWhileUnmutedSendsNoMuteCommand() async {
+        var h = Harness()
+        await h.start()
+        h.player.emit(.songChanged(song("a")))
+        await h.settle()
+        #expect(!h.player.sent.contains(.mute))
+    }
+
+    @Test func unmutesWhenThePageReportsMutedButSavedStateIsUnmuted() async {
+        var h = Harness()
+        await h.start()
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: true))
+        await h.settle()
+        #expect(h.player.sent.last == .unmute)
+    }
+
+    @Test func matchingMuteStateSendsNothing() async {
+        var h = Harness()
+        h.preferences.isMuted = true
+        await h.start()
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: true))
+        await h.settle()
+        #expect(h.player.sent == [.setVolume(1)])
+    }
+
+    @Test func dragAboveZeroWhileMutedClearsSavedMute() {
+        let h = Harness()
+        h.preferences.isMuted = true
+        h.player.isMuted = true
+        h.model.setVolume(0.5)
+        #expect(!h.preferences.isMuted)
+    }
+
+    @Test func unmuteAfterRelaunchRestoresSavedVolume() async {
+        var h = Harness()
+        h.preferences.isMuted = true
+        h.preferences.volume = 0.3
+        h.player.isMuted = true
+        await h.start()
+        h.model.toggleMute()
+        h.player.emit(.volumeChanged(volume: 0.5, isMuted: false))
+        await h.settle()
+        #expect(h.player.sent == [.setVolume(0.3), .toggleMute, .setVolume(0.3)])
     }
 
     @Test func pageReloadCancelsAPendingUnmuteRestore() async {
@@ -252,6 +332,17 @@ struct NowPlayingModelTests {
         h.player.volume = 0.5
         h.model.adjustVolume(steps: 2)
         #expect(h.player.sent == [.setVolume(0.6)])
+    }
+
+    @Test func queueRowDurationsUseTheSharedFormatter() {
+        let h = Harness()
+        h.player.queue = [
+            PlayerQueueItem(videoId: "long", title: "T", artist: "A", artworkURL: nil, duration: 3782, isCurrent: true),
+            PlayerQueueItem(videoId: "short", title: "T", artist: "A", artworkURL: nil, duration: 185, isCurrent: false)
+        ]
+        let durations = h.model.queueSongs.map(\.duration)
+        #expect(durations == [PlaybackRules.formatTime(3782), PlaybackRules.formatTime(185)])
+        #expect(durations[0]?.contains("63:") == false)
     }
 
     @Test func unavailableTrackShowsToastAndSkipsAfterDelay() async {
@@ -987,5 +1078,28 @@ struct ResumeOnStartTests {
         h.player.emit(.timeChanged(50))
         await h.settle()
         #expect(h.preferences.lastPlayback?.elapsed == 50)
+    }
+
+    @Test func currentRowFollowsTheQueuePositionAmongDuplicates() {
+        let h = Harness()
+        let songs = [Song(videoId: "a", title: "T"), Song(videoId: "b", title: "T"), Song(videoId: "a", title: "T")]
+        h.player.song = song("a")
+        h.player.queue = [item("a", current: false), item("b", current: false), item("a", current: true)]
+        #expect(h.model.currentRow(in: songs) == 2)
+    }
+
+    @Test func currentRowFallsBackToTheFirstMatch() {
+        let h = Harness()
+        let songs = [Song(videoId: "a", title: "T"), Song(videoId: "b", title: "T"), Song(videoId: "a", title: "T")]
+        h.player.song = song("a")
+        h.player.queue = [item("b", current: true)]
+        #expect(h.model.currentRow(in: songs) == 0)
+        h.player.queue = [item("x", current: false), item("y", current: false), item("z", current: false), item("a", current: true)]
+        #expect(h.model.currentRow(in: songs) == 0)
+    }
+
+    @Test func currentRowIsNilWithoutASong() {
+        let h = Harness()
+        #expect(h.model.currentRow(in: [Song(videoId: "a", title: "T")]) == nil)
     }
 }

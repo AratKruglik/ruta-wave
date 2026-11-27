@@ -1,42 +1,23 @@
+import InnerTube
 import SwiftUI
 
-struct InversePillLabel: View {
-    let title: LocalizedStringKey
-
-    var body: some View {
-        Text(title)
-            .font(.rwButton)
-            .foregroundStyle(.textOnInverse)
-            .padding(.horizontal, Metrics.space16)
-            .frame(height: Metrics.pillHeight)
-            .background(.surfaceInverse, in: Capsule())
-            .fixedSize()
+extension View {
+    func placeholderStyle() -> some View {
+        redacted(reason: .placeholder).disabled(true).allowsHitTesting(false).accessibilityHidden(true)
     }
 }
 
 struct SkeletonChips: View {
     var body: some View {
-        HStack(spacing: Metrics.space8) {
-            ForEach(0..<6, id: \.self) { _ in
-                Capsule().fill(.surfaceFill).frame(width: 88, height: Metrics.chipHeight)
-            }
-        }
-        .accessibilityHidden(true)
+        ChipRow(chips: Array(repeating: Chip(title: "Placeholder"), count: 6), onSelect: { _ in })
+            .placeholderStyle()
     }
 }
 
 struct SkeletonShelf: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: Metrics.space16) {
-            RoundedRectangle(cornerRadius: Metrics.radiusThumb).fill(.surfaceFill).frame(width: 220, height: 28)
-            HStack(spacing: Metrics.space16) {
-                ForEach(0..<6, id: \.self) { _ in
-                    RoundedRectangle(cornerRadius: Metrics.radiusCard).fill(.surfaceFill)
-                        .frame(width: Metrics.cardSize, height: Metrics.cardSize)
-                }
-            }
-        }
-        .accessibilityHidden(true)
+        ShelfView(shelf: .placeholder(layout: .cards), onMore: { _ in })
+            .placeholderStyle()
     }
 }
 
@@ -46,20 +27,10 @@ struct SkeletonRows: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(0..<count, id: \.self) { _ in
-                HStack(spacing: Metrics.space12) {
-                    RoundedRectangle(cornerRadius: Metrics.radiusThumb).fill(.surfaceFill)
-                        .frame(width: Metrics.rowThumb, height: Metrics.rowThumb)
-                    VStack(alignment: .leading, spacing: Metrics.space8) {
-                        Capsule().fill(.surfaceFill).frame(width: 220, height: 12)
-                        Capsule().fill(.surfaceFill).frame(width: 140, height: 10)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, Metrics.space8)
-                .frame(height: Metrics.rowHeightDetailed)
+                TrackRow(song: .placeholder, density: .detailed)
             }
         }
-        .accessibilityHidden(true)
+        .placeholderStyle()
     }
 }
 
@@ -71,8 +42,8 @@ struct PageErrorView: View {
             Text("Couldn't load this page")
                 .font(.rwTitle)
                 .foregroundStyle(.textPrimary)
-            Button(action: onRetry) { InversePillLabel(title: "Retry") }
-                .buttonStyle(.plain)
+            Button("Retry", action: onRetry)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .contain)
@@ -88,8 +59,8 @@ struct UnavailableView: View {
             Text(title)
                 .font(.rwTitle)
                 .foregroundStyle(.textPrimary)
-            Button(action: onBack) { InversePillLabel(title: "Back") }
-                .buttonStyle(.plain)
+            Button("Back", action: onBack)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .contain)
@@ -138,56 +109,44 @@ struct EmptyPageView: View {
 
 struct SkeletonTitle: View {
     var body: some View {
-        Capsule().fill(.surfaceFill).frame(width: 280, height: 40)
-            .accessibilityHidden(true)
+        Text(verbatim: "Placeholder title")
+            .font(.rwDisplay)
+            .placeholderStyle()
     }
 }
 
 struct SkeletonTiles: View {
     var body: some View {
-        HStack(spacing: Metrics.space16) {
-            ForEach(0..<3, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: Metrics.radiusTile).fill(.surfaceFill)
-                    .frame(maxWidth: .infinity, minHeight: Metrics.tileHeight, maxHeight: Metrics.tileHeight)
-            }
-        }
-        .accessibilityHidden(true)
+        ShelfView(shelf: .placeholderLinks([.newReleases, .charts, .moodsAndGenres]), onMore: { _ in })
+            .placeholderStyle()
     }
 }
 
-struct SkeletonGrid: View {
-    let count: Int
-
+struct SkeletonCardGrid: View {
     var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16)], spacing: Metrics.space24) {
-            ForEach(0..<count, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: Metrics.radiusCard).fill(.surfaceFill)
-                    .aspectRatio(1, contentMode: .fit)
-            }
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
+            alignment: .leading, spacing: Metrics.space24
+        ) {
+            ForEach(0..<12, id: \.self) { _ in MusicCard(item: .placeholder) }
         }
-        .accessibilityHidden(true)
+        .placeholderStyle()
     }
 }
 
-struct SkeletonTopResult: View {
+struct SkeletonChipGrid: View {
     var body: some View {
-        HStack(spacing: Metrics.space16) {
-            RoundedRectangle(cornerRadius: Metrics.radiusCard).fill(.surfaceFill)
-                .frame(width: Metrics.cardSize, height: Metrics.cardSize)
-            VStack(alignment: .leading, spacing: Metrics.space8) {
-                Capsule().fill(.surfaceFill).frame(width: 200, height: 20)
-                Capsule().fill(.surfaceFill).frame(width: 120, height: 12)
-            }
-            Spacer(minLength: 0)
-        }
-        .accessibilityHidden(true)
+        ShelfView(shelf: .placeholderLinks(Array(repeating: .moodCategory(params: ""), count: 12), title: "Placeholder shelf title"), onMore: { _ in })
+            .placeholderStyle()
     }
 }
 
+#if DEBUG
 #Preview("States") {
     VStack(spacing: Metrics.space24) {
         SkeletonChips()
         SkeletonShelf()
+        SkeletonChipGrid()
         InlineErrorRow(onRetry: {})
         PageErrorView(onRetry: {}).frame(height: 120)
         UnavailableView(title: "This album isn't available", onBack: {}).frame(height: 120)
@@ -195,5 +154,8 @@ struct SkeletonTopResult: View {
     }
     .padding()
     .frame(width: 800)
+    .environment(NavigationModel())
+    .environment(PreviewFixtures.nowPlaying())
     .background(.themeBase)
 }
+#endif

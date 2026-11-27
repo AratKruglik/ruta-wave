@@ -36,6 +36,7 @@ struct ArtistHeader: View {
 
     private var hero: some View {
         ArtworkImage(url: artist.thumbnailURL, width: width, height: Metrics.artistHeroHeight, cornerRadius: 0)
+            .extendedUnderChrome()
             .overlay(alignment: .bottomLeading) {
                 Text(artist.name)
                     .font(.rwDisplay)
@@ -50,8 +51,8 @@ struct ArtistHeader: View {
     private var actions: some View {
         HStack(spacing: Metrics.space12) {
             if let shuffle = artist.shuffle {
-                Button { nowPlaying.play(shuffle) } label: { InversePillLabel(title: "Shuffle") }
-                    .buttonStyle(.plain)
+                Button("Shuffle") { nowPlaying.play(shuffle) }
+                    .buttonStyle(PillButtonStyle(isProminent: true))
             }
             if let radio = artist.radio {
                 Button { nowPlaying.play(radio) } label: { SecondaryPillLabel(title: "Radio") }
@@ -61,9 +62,9 @@ struct ArtistHeader: View {
                 Button {
                     if nowPlaying.isSignedIn { model.toggleSubscribed() } else { isSubscribePromptShown = true }
                 } label: {
-                    if isSubscribed { SecondaryPillLabel(title: "Subscribed") } else { InversePillLabel(title: "Subscribe") }
+                    Text(isSubscribed ? LocalizedStringKey("Subscribed") : LocalizedStringKey("Subscribe"))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PillButtonStyle())
                 .accessibilityAddTraits(isSubscribed ? .isSelected : [])
                 .guestPrompt(isPresented: $isSubscribePromptShown, reason: "Sign in to subscribe", onSignIn: requestSignIn.perform)
             }
@@ -92,5 +93,13 @@ struct ArtistAbout: View {
                 }
             }
         }
+    }
+}
+
+extension View {
+    /// Mirrors the hero under the top bar and the sidebar; before macOS 26 `EntityScreen` lifts the page under the bar instead.
+    @ViewBuilder
+    func extendedUnderChrome() -> some View {
+        if #available(macOS 26, *) { backgroundExtensionEffect() } else { self }
     }
 }

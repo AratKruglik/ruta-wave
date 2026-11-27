@@ -65,8 +65,12 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 
 ## 2. Top bar
 
-**Shows:** sidebar toggle, search field, back, forward,
+**Shows:** sidebar toggle, back, forward, search field,
 avatar (signed in) or **Sign in** pill (guest).
+
+Pages reserve the bar's height as a safe area (the player bar's too). On
+macOS 26 and later content scrolls under both bars behind the system scroll
+edge effect; earlier systems get an opaque top bar.
 
 **Actions**
 - Sidebar toggle (⌃⌘S): collapses / expands the sidebar; state is remembered.
@@ -82,9 +86,12 @@ avatar (signed in) or **Sign in** pill (guest).
 ## 3. Search
 
 ### 3.1. Field and dropdown
-**Shows:** placeholder "Search songs, albums, artists". Focusing the
+**Shows:** placeholder "Search songs, albums, artists". Clicking the
 empty field opens the dropdown with recent searches (signed in) — up to 7
-**[observed]**. Typing replaces them with suggestions: plain text suggestions
+**[observed]**. The dropdown opens only on a click in the field, typing, ⌘F or ↓;
+focus handed back after a popover or sheet closes does not open it. A divider
+separates the text rows from the entity rows. A clear (×) button appears while
+the field has text. Leaving the results page empties the field. Typing replaces them with suggestions: plain text suggestions
 first, then entity suggestions (artist, album, song) with thumbnails.
 
 **Data:** `music/get_search_suggestions` with the typed text (debounced
@@ -93,7 +100,7 @@ returns the history for a signed-in user **[known]**. Removing a history entry
 sends its `feedbackToken` to `feedback` **[known]**.
 
 **Actions**
-- ⌘F or ⌘L focuses the field from anywhere; Esc closes the dropdown, a second
+- ⌘F or ⌘L focuses the field from anywhere and opens the dropdown; Esc closes the dropdown, a second
   Esc clears the field, a third returns focus to the content.
 - ↑ / ↓ move the highlight through the dropdown, Return runs the highlighted
   item, Return with no highlight runs the typed query.
@@ -118,8 +125,9 @@ hides silently (suggestions are optional).
    are shown) **[known]**. The Podcasts, Episodes and Profiles filters are never
    shown, even when offered; the parser drops them by `params`, not by label (#7).
 2. With **All**: the top result card (large artwork, type, title, subtitle,
-   **Play** and **Shuffle** / **Subscribe** buttons), then one section per
-   type with 3–4 rows and a **Show all** button that switches the chip.
+   **Play** / **Shuffle** and **Radio** buttons; **Subscribe** for an artist is
+   pending the parser reading the subscription state), then one section per
+   type with 3–4 rows and a **Show all** button that opens the filtered page.
 3. With a filter: a single list of that type, paged with `continuation` while
    scrolling (load the next page 600 pt before the end).
 4. A "Did you mean / Showing results for" line when the response corrects the
@@ -128,11 +136,12 @@ hides silently (suggestions are optional).
 **Data:** `search` with `query` and the filter's `params` **[known]**.
 
 **Actions:** rows and cards behave as everywhere (§11); the query stays in the
-field; changing the chip keeps the query and replaces the history entry, so
-Back returns to the previous filter.
+field; changing the chip keeps the query and replaces the history entry. **Show all**
+pushes a history entry, so Back returns to All at the same scroll position;
+choosing All on a Show all page goes back instead of stacking a second All.
 
-**States:** loading → skeleton rows; no results → "No results for "query"" with
-a hint to check spelling; error → message with **Retry**.
+**States:** loading → skeletons in the final layout (§14.1); no results → the system search empty state
+(`ContentUnavailableView.search`); error → message with **Retry**.
 
 **Guest:** same results; account actions follow 1.2.
 
@@ -480,7 +489,7 @@ type and mode **[decision]**:
 | Remove from history (History rows) | ✓ | ✓ | — | — | — | — |
 | Share → Copy link / system share | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-"Play next" and "Add to queue" show a toast with **Undo**. **Stage:** 4.6, 2.4.
+"Play next" and "Add to queue" show a toast with **Undo**. A toast with Undo stays 6 s and pauses while the pointer or keyboard focus is on it. **Stage:** 4.6, 2.4.
 
 ## 12. Selection and drag and drop
 - Any track list supports multi-select (checkbox, ⌘-click, ⇧-click, ⌘A when
@@ -501,8 +510,8 @@ account. Behaviour of the existing pieces is 1.1–1.3; moving them into the pop
 ### 14.1. States
 | State | Rule |
 |---|---|
-| Loading | skeletons in the final layout (no layout shift); a spinner only for actions under 1 s |
-| Empty | a short sentence that says what will appear and how; no illustrations |
+| Loading | skeletons are the real layout on placeholder data, redacted (no layout shift); a spinner only for actions under 1 s |
+| Empty | a short sentence that says what will appear and how; no illustrations (exception: the system search empty state, which shows a magnifying-glass symbol) |
 | Error | page error → full-page message + **Retry**; part error → inline message + **Retry**; action error → toast; 401 → session expired flow of 2.1 |
 | Offline | banner under the top bar "You're offline", pages keep what they loaded, retries resume automatically when the network returns (`NWPathMonitor`) |
 

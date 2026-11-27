@@ -30,8 +30,7 @@ extension PageHeader {
             let link = owner["rendererContext"]?["commandContext"]?["onTap"]?["innertubeCommand"]?["browseEndpoint"]?["browseId"]?.string
             artists = [ItemRef(name: name, browseId: link)]
         }
-        let thumbnail = header["thumbnail"]?["musicThumbnailRenderer"]?["thumbnail"]
-            ?? header["thumbnail"]?["croppedSquareThumbnailRenderer"]?["thumbnail"]
+        let thumbnail = ItemParser.thumbnail(header["thumbnail"])
         self.init(
             title: title,
             subtitle: header["subtitle"].flatMap(text),

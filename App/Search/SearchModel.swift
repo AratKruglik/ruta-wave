@@ -9,10 +9,19 @@ struct SearchSection: Equatable {
     let showAllParams: String?
 }
 
+extension SearchSection.Kind {
+    init?(filter params: String?) {
+        guard let params, let kind = Self.allCases.first(where: {
+            SearchSection.paramsPrefixes[$0]?.contains(where: params.hasPrefix) == true
+        }) else { return nil }
+        self = kind
+    }
+}
+
 extension SearchSection {
     static let rowLimit = Metrics.searchSectionRows
 
-    private static let paramsPrefixes: [Kind: [String]] = [
+    fileprivate static let paramsPrefixes: [Kind: [String]] = [
         .songs: ["EgWKAQII"], .videos: ["EgWKAQIQ"], .albums: ["EgWKAQIY"], .artists: ["EgWKAQIg"],
         .playlists: ["EgeKAQQoAEAB", "EgeKAQQoADgB"],
     ]

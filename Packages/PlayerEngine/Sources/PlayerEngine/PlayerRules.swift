@@ -13,7 +13,7 @@ public enum PlayerRules {
     // shortcut: one get_queue request for the whole restored tail; split it if the endpoint caps the id count.
     static let maxRestoredQueueItems = 200
 
-    private static let allowedArtworkHostSuffixes = [".googleusercontent.com", ".ggpht.com"]
+    private static let allowedArtworkHostSuffixes = [".googleusercontent.com", ".ggpht.com", ".gstatic.com"]
 
     static func isAllowedMainFrameNavigation(_ url: URL?) -> Bool {
         guard let url, url.scheme == "https", url.host?.lowercased() == playerHost,
@@ -104,6 +104,7 @@ public enum PlayerRules {
         case .setVolume(let volume):
             return volume.isFinite ? ("setVolume", [(min(max(volume, 0), 1) * 100).rounded()]) : nil
         case .toggleMute: return ("toggleMute", [])
+        case .mute: return ("mute", [])
         case .unmute: return ("unmute", [])
         case .toggleShuffle: return ("toggleShuffle", [])
         case .cycleRepeat: return ("cycleRepeat", [])
@@ -157,7 +158,12 @@ public enum PlayerRules {
 
     public static func isAllowedArtworkHost(_ url: URL) -> Bool {
         guard url.scheme == "https", let host = url.host?.lowercased() else { return false }
-        return host == "i.ytimg.com" || allowedArtworkHostSuffixes.contains { host.hasSuffix($0) }
+        return host == "i.ytimg.com" || host == "gstatic.com" || allowedArtworkHostSuffixes.contains { host.hasSuffix($0) }
+    }
+
+    static func artworkURL(from raw: String) -> URL? {
+        let upgraded = raw.hasPrefix("//") ? "https:" + raw : raw
+        return URL(string: upgraded).flatMap { isAllowedArtworkHost($0) ? $0 : nil }
     }
 
     static func resolveArtwork(stripped: URL?, original: URL?, isReachable: @Sendable (URL) async -> Bool) async -> URL? {

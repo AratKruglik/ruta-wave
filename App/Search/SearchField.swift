@@ -21,7 +21,9 @@ struct SearchField: View {
                 .font(.rwIcon(Metrics.iconBar))
                 .foregroundStyle(.textTertiary)
                 .accessibilityHidden(true)
-            TextField("Search songs, albums, artists", text: Binding(get: { model.text }, set: model.edit))
+            TextField(text: Binding(get: { model.text }, set: model.edit), prompt: Text("Search songs, albums, artists").foregroundStyle(.textSecondary)) {
+                Text("Search songs, albums, artists")
+            }
                 .textFieldStyle(.plain)
                 .font(.rwBody)
                 .foregroundStyle(.textPrimary)
@@ -39,6 +41,21 @@ struct SearchField: View {
                     return .handled
                 }
                 .onExitCommand { if !model.escape() { isFocused = false } }
+            if !model.text.isEmpty {
+                Button {
+                    model.edit("")
+                    isFocused = true
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.rwIcon(Metrics.iconRow))
+                        .foregroundStyle(.textTertiary)
+                        .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Clear search")
+                .accessibilityLabel("Clear search")
+            }
         }
         .padding(.horizontal, Metrics.space12)
         .frame(height: Metrics.searchFieldHeight)
@@ -58,7 +75,11 @@ struct SearchField: View {
         }
         .onChange(of: navigation.searchFocusRequests) {
             isFocused = true
-            model.focusChanged(true)
+            model.open()
+        }
+        .onChange(of: navigation.path(for: navigation.selection).last, initial: true) { _, route in
+            if case .search(let query, _) = route { model.showQuery(query) } else { model.showQuery("") }
+            isFocused = false
         }
         .task(id: SuggestKey(text: model.text, isOpen: model.isOpen)) { await model.suggest() }
     }
@@ -107,7 +128,7 @@ private struct SearchFieldPreview: View {
             .environment(PreviewFixtures.nowPlaying())
             .background(.themeBase)
             .task {
-                if variant == .suggestions { model.edit("rad") } else if variant == .history { model.focusChanged(true) }
+                if variant == .suggestions { model.edit("rad") } else if variant == .history { model.open() }
                 await model.suggest()
             }
     }

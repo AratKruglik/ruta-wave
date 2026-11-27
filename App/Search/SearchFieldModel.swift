@@ -88,15 +88,17 @@ final class SearchFieldModel {
 
     func focusChanged(_ focused: Bool) {
         if focused {
-            isOpen = true
+            if isPointerOverField { isOpen = true }
         } else if !isPointerOverDropdown {
             close()
         }
     }
 
+    func open() { isOpen = true }
+
     func moveHighlight(_ delta: Int) {
-        guard !rows.isEmpty else { return }
         isOpen = true
+        guard !rows.isEmpty else { return }
         guard let current = highlighted else {
             highlighted = delta > 0 ? 0 : rows.count - 1
             return

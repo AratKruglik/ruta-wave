@@ -80,7 +80,6 @@ struct EntityHeader: View {
     let model: EntityModel
     let header: PageHeader
     let isSaved: Bool
-    let showsShuffle: Bool
     let isWide: Bool
 
     @Environment(NavigationModel.self) private var navigation
@@ -98,7 +97,8 @@ struct EntityHeader: View {
             : AnyLayout(VStackLayout(alignment: .leading, spacing: Metrics.space24))
         layout {
             ArtworkImage(
-                url: header.thumbnailURL, width: Metrics.entityCover, height: Metrics.entityCover, cornerRadius: Metrics.radiusCover)
+                url: header.thumbnailURL, width: Metrics.entityCover, height: Metrics.entityCover, cornerRadius: Metrics.radiusCover,
+                placeholderSymbol: model.playlistBrowseId == Route.likedMusicBrowseId ? "heart.fill" : "music.note")
             VStack(alignment: .leading, spacing: Metrics.space12) {
                 HStack(spacing: Metrics.space8) {
                     Text(header.title)
@@ -138,15 +138,6 @@ struct EntityHeader: View {
 
     private var actions: some View {
         HStack(spacing: Metrics.space12) {
-            if model.canSave {
-                CircleIconButton(
-                    symbol: isSaved ? "bookmark.fill" : "bookmark", label: isSaved ? "Remove from library" : "Save to library",
-                    isSelected: isSaved
-                ) {
-                    if nowPlaying.isSignedIn { model.toggleSaved() } else { isSavePromptShown = true }
-                }
-                .guestPrompt(isPresented: $isSavePromptShown, reason: "Sign in to save to your library", onSignIn: requestSignIn.perform)
-            }
             Button(action: play) {
                 Image(systemName: "play.fill")
                     .font(.rwIcon(Metrics.iconBar))
@@ -158,8 +149,15 @@ struct EntityHeader: View {
             .buttonStyle(.plain)
             .help("Play (⌥-click to shuffle)")
             .accessibilityLabel("Play")
-            if showsShuffle {
-                CircleIconButton(symbol: "shuffle", label: "Shuffle") { nowPlaying.play(model.shuffleTarget) }
+            CircleIconButton(symbol: "shuffle", label: "Shuffle") { nowPlaying.play(model.shuffleTarget) }
+            if model.canSave {
+                CircleIconButton(
+                    symbol: isSaved ? "bookmark.fill" : "bookmark", label: isSaved ? "Remove from library" : "Save to library",
+                    isSelected: isSaved
+                ) {
+                    if nowPlaying.isSignedIn { model.toggleSaved() } else { isSavePromptShown = true }
+                }
+                .guestPrompt(isPresented: $isSavePromptShown, reason: "Sign in to save to your library", onSignIn: requestSignIn.perform)
             }
             if let url = model.shareURL {
                 CircleIconButton(symbol: "link", label: "Share") {
