@@ -56,6 +56,19 @@ struct AccessibilityThemeTests {
         #expect(try variant("AccentColor", highContrast: false).rgb == (1, 0, 0x33 / 255.0))
         #expect(abs(try variant("RWTextTertiary", highContrast: false).rgb.r - 0xAA / 255.0) < 0.001)
         #expect(abs(try variant("RWTextDisabled", highContrast: false).rgb.r - 0x71 / 255.0) < 0.001)
+        for (set, grey) in [("RWThemeBase", 0x31), ("RWSurfaceInverse", 0xF1), ("RWTextPrimary", 0xF1), ("RWTextOnInverse", 0x0F), ("RWStrokeFocus", 0xF1)] {
+            let rgb = try variant(set, highContrast: false).rgb
+            #expect(abs(rgb.r - Double(grey) / 255.0) < 0.001 && abs(rgb.g - Double(grey) / 255.0) < 0.001 && abs(rgb.b - Double(grey) / 255.0) < 0.001, "\(set)")
+        }
+        let link = try variant("RWAccentLink", highContrast: false).rgb
+        #expect(abs(link.r - 0x3E / 255.0) < 0.001 && abs(link.g - 0xA6 / 255.0) < 0.001 && abs(link.b - 0xFF / 255.0) < 0.001)
+    }
+
+    @Test(arguments: ["RWTextPrimary", "RWStrokeFocus", "RWAccentLink"])
+    func highContrastVariantDiffersFromDefault(set: String) throws {
+        let high = try variant(set, highContrast: true).rgb
+        let normal = try variant(set, highContrast: false).rgb
+        #expect(high.r + high.g + high.b > normal.r + normal.g + normal.b)
     }
 
     @Test func defaultSecondaryTextKeepsFourPointFive() throws {
@@ -102,7 +115,7 @@ struct AccessibilityThemeTests {
 
     @Test func everyReferencedAssetExistsInTheCatalog() throws {
         let names = try referencedAssetNames()
-        #expect(names.count >= 8)
+        #expect(names.count >= 14)
         for name in names {
             let contents = catalogURL.appending(path: "\(name).colorset/Contents.json")
             #expect(FileManager.default.fileExists(atPath: contents.path), "missing colorset \(name)")

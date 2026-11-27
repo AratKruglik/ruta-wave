@@ -46,7 +46,7 @@ struct ShareButtons: View {
             Menu { ShareLink(item: url) } label: { CircleIcon(symbol: "ellipsis") }
                 .menuStyle(.button)
                 .menuIndicator(.hidden)
-                .buttonStyle(.plain)
+                .buttonStyle(IconButtonStyle())
                 .help("More actions")
                 .accessibilityLabel("More actions")
         }
@@ -200,7 +200,7 @@ struct EntityHeader: View {
             } label: { CircleIcon(symbol: "ellipsis") }
                 .menuStyle(.button)
                 .menuIndicator(.hidden)
-                .buttonStyle(.plain)
+                .buttonStyle(IconButtonStyle())
                 .help("More actions")
                 .accessibilityLabel("More actions")
         }

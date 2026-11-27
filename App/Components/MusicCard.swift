@@ -100,7 +100,7 @@ struct MusicCard: View {
                         .frame(width: Metrics.cardPlayButton, height: Metrics.cardPlayButton)
                         .background(.surfaceInverse, in: Circle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(IconButtonStyle())
                 .focused($focus, equals: .play)
                 .opacity(showsControls ? 1 : 0)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
@@ -118,7 +118,7 @@ struct MusicCard: View {
             }
             .menuStyle(.button)
             .menuIndicator(.hidden)
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .focused($focus, equals: .menu)
             .opacity(showsControls ? 1 : 0)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
