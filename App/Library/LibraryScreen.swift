@@ -15,7 +15,7 @@ struct LibraryScreen: View {
         VStack(alignment: .leading, spacing: Metrics.space16) {
             header
             if !model.sections.isEmpty {
-                ChipRow(chips: model.sections, onSelect: model.selectSection)
+                sectionPicker
             } else if case .loading = model.state {
                 SkeletonChips()
             }
@@ -41,6 +41,21 @@ struct LibraryScreen: View {
                 .help("History")
                 .accessibilityLabel("History")
         }
+    }
+
+    private var sectionPicker: some View {
+        let selection = Binding(
+            get: { model.section },
+            set: { id in if let chip = model.sections.first(where: { $0.target?.browseId == id }) { model.selectSection(chip) } }
+        )
+        return Picker("Library", selection: selection) {
+            ForEach(model.sections, id: \.title) { chip in
+                Text(chip.title).tag(chip.target?.browseId ?? chip.title)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .fixedSize()
     }
 
     private var sortMenu: some View {
