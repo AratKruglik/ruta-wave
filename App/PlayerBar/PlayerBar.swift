@@ -181,8 +181,10 @@ struct PlayerBar: View {
                 .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                 .contentShape(Rectangle())
         }
-        .menuStyle(.borderlessButton)
+        .menuStyle(.button)
         .menuIndicator(.hidden)
+        .buttonStyle(IconButtonStyle())
+        .fixedSize()
         .itemPopover($popover)
         .help("More")
         .accessibilityLabel("More")

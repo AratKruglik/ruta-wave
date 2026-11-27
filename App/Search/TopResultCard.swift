@@ -59,24 +59,9 @@ struct TopResultCard: View {
         HStack(spacing: Metrics.space8) {
             Button(action: primary.1) { Text(primary.0) }
                 .buttonStyle(PillButtonStyle(isProminent: true))
-            Button(action: secondary.1) { SecondaryPill(title: secondary.0) }
-                .buttonStyle(.plain)
+            Button(action: secondary.1) { Text(secondary.0) }
+                .buttonStyle(PillButtonStyle())
         }
-    }
-}
-
-// Duplicates the private pill in ArtistHeader.swift, which another agent owns.
-private struct SecondaryPill: View {
-    let title: LocalizedStringKey
-
-    var body: some View {
-        Text(title)
-            .font(.rwButton)
-            .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Metrics.space16)
-            .frame(height: Metrics.pillHeight)
-            .overlay(Capsule().stroke(.strokeSubtle))
-            .fixedSize()
     }
 }
 

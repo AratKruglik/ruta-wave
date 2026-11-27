@@ -36,8 +36,8 @@ struct LibraryScreen: View {
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: Metrics.space16)
             if !model.sortOptions.isEmpty { sortMenu }
-            Button { navigation.push(.history) } label: { HeaderPill(symbol: "clock", title: Text("History")) }
-                .buttonStyle(.plain)
+            Button { navigation.push(.history) } label: { Label("History", systemImage: "clock") }
+                .buttonStyle(PillButtonStyle())
                 .help("History")
                 .accessibilityLabel("History")
         }
@@ -66,11 +66,11 @@ struct LibraryScreen: View {
                 }
             }
         } label: {
-            HeaderPill(symbol: "arrow.up.arrow.down", title: model.sortOptions.first(where: \.isSelected).map { Text($0.title) } ?? Text("Sort"))
+            Label { model.sortOptions.first(where: \.isSelected).map { Text($0.title) } ?? Text("Sort") } icon: { Image(systemName: "arrow.up.arrow.down") }
         }
         .menuStyle(.button)
         .menuIndicator(.hidden)
-        .buttonStyle(.plain)
+        .buttonStyle(PillButtonStyle())
         .fixedSize()
         .help("Sort")
         .accessibilityLabel("Sort")
@@ -152,8 +152,8 @@ struct LibraryScreen: View {
         return HStack(spacing: Metrics.space12) {
             Button("Play") { nowPlaying.play(liked) }
                 .buttonStyle(PillButtonStyle(isProminent: true))
-            Button { nowPlaying.shuffle(liked) } label: { HeaderPill(symbol: "shuffle", title: Text("Shuffle")) }
-                .buttonStyle(.plain)
+            Button { nowPlaying.shuffle(liked) } label: { Label("Shuffle", systemImage: "shuffle") }
+                .buttonStyle(PillButtonStyle())
         }
     }
 
@@ -176,22 +176,6 @@ struct LibraryScreen: View {
         case .idle: Color.clear.frame(height: 1).onAppear { model.loadMore() }
         case .done: EmptyView()
         }
-    }
-}
-
-private struct HeaderPill: View {
-    let symbol: String
-    let title: Text
-
-    var body: some View {
-        Label { title } icon: { Image(systemName: symbol) }
-            .font(.rwButton)
-            .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Metrics.space12)
-            .frame(height: Metrics.shelfControl)
-            .background(.surfaceFill, in: Capsule())
-            .contentShape(Capsule())
-            .fixedSize()
     }
 }
 

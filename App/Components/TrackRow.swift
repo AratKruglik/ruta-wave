@@ -214,7 +214,7 @@ struct TrackRow: View {
             }
             .menuStyle(.button)
             .menuIndicator(.hidden)
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .focused($focus, equals: .menu)
             .help("More actions")
             .accessibilityLabel("More actions")
