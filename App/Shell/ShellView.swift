@@ -45,7 +45,8 @@ struct ShellView<AccountPopover: View>: View {
                 )
                 .id(isSignedIn)
                 .accessibilityHidden(navigation.isPlayerPagePresented)
-                .safeAreaPadding(.top, Metrics.topBarHeight)
+                .barClearance(.bottom, playerBarClearance)
+                .barClearance(.top, Metrics.topBarHeight)
                 .ignoresSafeArea(.container, edges: .top)
                 .navigationSplitViewColumnWidth(Metrics.sidebarWidth)
                 .toolbar(removing: .sidebarToggle)
@@ -61,7 +62,8 @@ struct ShellView<AccountPopover: View>: View {
                             GuestBanner(onRetry: onRetryGuest)
                         }
                     }
-                    .safeAreaPadding(.top, Metrics.topBarHeight)
+                    .barClearance(.bottom, playerBarClearance)
+                    .barClearance(.top, Metrics.topBarHeight)
                     .ignoresSafeArea(.container, edges: .top)
             }
             .toolbarBackground(.hidden, for: .windowToolbar)
@@ -72,7 +74,8 @@ struct ShellView<AccountPopover: View>: View {
                 ZStack {
                     if navigation.isPlayerPagePresented {
                         PlayerPage { navigation.isPlayerPagePresented = false }
-                            .safeAreaPadding(.top, Metrics.topBarHeight)
+                            .barClearance(.bottom, playerBarClearance)
+                            .barClearance(.top, Metrics.topBarHeight)
                             .padding(.leading, isSidebarVisible ? max(detailLeadingEdge, 0) : 0)
                             .transition(.move(edge: .bottom))
                     }
@@ -109,7 +112,8 @@ struct ShellView<AccountPopover: View>: View {
                 onMouseDown: search.mouseDownInWindow))
     }
 
-    private var barInset: CGFloat { isBarVisible ? Metrics.playerBarHeight + Metrics.contentBottomMargin : 0 }
+    /// The bar's footprint including the gap under its glass, so the last row ends above it.
+    private var playerBarClearance: CGFloat { isBarVisible ? Metrics.playerBarHeight + Metrics.space8 : 0 }
 
     private var content: some View {
         NavigationStack(path: Binding(
@@ -119,16 +123,15 @@ struct ShellView<AccountPopover: View>: View {
             SectionRoot(section: navigation.selection, isSignedIn: isSignedIn)
                 .cappedContentWidth()
                 .navigationDestination(for: Route.self) {
-                    // Pushed pages are hosted outside the stack's modifiers, so they need the bar inset of their own.
+                    // Pushed pages are hosted outside the stack's modifiers, so they need the bar clearance of their own.
                     RouteScreen(route: $0)
                         .cappedContentWidth()
-                        .contentMargins(.bottom, barInset, for: .scrollContent)
-                        .safeAreaPadding(.top, Metrics.topBarHeight)
+                        .barClearance(.bottom, playerBarClearance)
+                        .barClearance(.top, Metrics.topBarHeight)
                         .ignoresSafeArea(.container, edges: .top)
                 }
         }
         .id(StackIdentity(section: navigation.selection, content: isSignedIn))
-        .contentMargins(.bottom, barInset, for: .scrollContent)
         .disabled(navigation.isPlayerPagePresented)
         .accessibilityHidden(navigation.isPlayerPagePresented)
     }
@@ -174,6 +177,32 @@ struct ShellView<AccountPopover: View>: View {
 private extension View {
     func cappedContentWidth() -> some View {
         frame(maxWidth: Metrics.contentMaxWidth).frame(maxWidth: .infinity)
+    }
+}
+
+/// The bars float over the split view because a safe area set outside it does not reach the columns, so every column,
+/// pushed page and the player page reserves their space itself. On macOS 26 the reserved space is a bar, which gives
+/// the scroll views under it the system scroll edge effect.
+private struct BarClearance: ViewModifier {
+    let edge: VerticalEdge
+    let height: CGFloat
+
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content
+                .safeAreaBar(edge: edge, spacing: 0) {
+                    Color.clear.frame(height: height).allowsHitTesting(false).accessibilityHidden(true)
+                }
+                .scrollEdgeEffectStyle(edge == .top ? .hard : .soft, for: edge == .top ? .top : .bottom)
+        } else {
+            content.safeAreaPadding(edge == .top ? .top : .bottom, height)
+        }
+    }
+}
+
+private extension View {
+    func barClearance(_ edge: VerticalEdge, _ height: CGFloat) -> some View {
+        modifier(BarClearance(edge: edge, height: height))
     }
 }
 

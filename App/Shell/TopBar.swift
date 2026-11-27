@@ -43,12 +43,8 @@ struct TopBar<AccountPopover: View>: View {
         .background(backdrop)
     }
 
-    /// Solid over the controls, fading out at the lower edge so content does not show between them.
-    private var backdrop: some ShapeStyle {
-        LiquidGlass.isAvailable
-            ? AnyShapeStyle(LinearGradient(stops: [.init(color: themeBase, location: 0.7), .init(color: themeBase.opacity(0), location: 1)], startPoint: .top, endPoint: .bottom))
-            : AnyShapeStyle(themeBase)
-    }
+    /// On macOS 26 the pages' scroll edge effect covers the content under the bar; older systems get the opaque bar.
+    private var backdrop: Color { LiquidGlass.isAvailable ? .clear : themeBase }
 
     @ViewBuilder private var trailing: some View {
         if isSignedIn {
