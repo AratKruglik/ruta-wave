@@ -67,6 +67,7 @@ struct ChipRow: View {
         }
         .scrollPosition(id: $firstVisible, anchor: .leading)
         .scrollIndicators(.hidden)
+        .contentMargins(.vertical, 0, for: .scrollContent)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { viewWidth = $0 }
         .frame(height: Metrics.chipHeight)
         .mask {
@@ -86,11 +87,19 @@ struct ChipRow: View {
 /// Mood and genre buttons with their coloured edge.
 struct LinkChipGrid: View {
     let links: [InnerTube.NavigationLink]
+    var maxRows: Int?
     let onOpen: (InnerTube.NavigationLink) -> Void
+
+    @State private var width: CGFloat = 0
+
+    private var shownLinks: ArraySlice<InnerTube.NavigationLink> {
+        guard let maxRows else { return links[...] }
+        return links.prefix(maxRows * ShelfGeometry.fit(width: width, minimum: 180, spacing: Metrics.space16).count)
+    }
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: Metrics.space16)], spacing: Metrics.space16) {
-            ForEach(Array(links.enumerated()), id: \.offset) { _, link in
+            ForEach(Array(shownLinks.enumerated()), id: \.offset) { _, link in
                 Button { onOpen(link) } label: {
                     HStack(spacing: Metrics.space12) {
                         Rectangle()
@@ -111,6 +120,7 @@ struct LinkChipGrid: View {
                 .onReturn { onOpen(link) }
             }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
     }
 }
 
@@ -127,5 +137,16 @@ struct LinkChipGrid: View {
     }
     .padding()
     .frame(width: 700)
+    .background(.themeBase)
+}
+
+#Preview("Chips under a bottom content margin") {
+    VStack(alignment: .leading) {
+        ChipRow(chips: [Chip(title: "Playlists", isSelected: true), Chip(title: "Songs"), Chip(title: "Albums")], onSelect: { _ in })
+        Spacer()
+    }
+    .contentMargins(.bottom, 112, for: .scrollContent)
+    .padding()
+    .frame(width: 500, height: 200)
     .background(.themeBase)
 }

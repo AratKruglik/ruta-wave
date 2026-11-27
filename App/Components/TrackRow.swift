@@ -15,6 +15,7 @@ struct TrackRow: View {
 
     let song: Song
     let density: Density
+    var knownRating: Rating?
     var selection: RowSelection?
     /// Replaces the chart rank in the leading column (an album's track number).
     var number: Int?
@@ -42,7 +43,7 @@ struct TrackRow: View {
     private var item: MusicItem { .song(song) }
     private var isCurrent: Bool { isCurrentRow ?? nowPlaying.isPlaying(item) }
     private var showsActions: Bool { isHovering || focus != nil || selection?.isSelected == true }
-    private var rating: Rating? { nowPlaying.rowRatings[song.videoId] }
+    private var rating: Rating? { nowPlaying.rowRatings[song.videoId] ?? knownRating }
 
     private var height: CGFloat {
         switch density {
@@ -168,7 +169,10 @@ struct TrackRow: View {
 
     private var artistLine: String? {
         let names = song.artists.map(\.name).joined(separator: ", ")
-        return names.isEmpty ? song.subtitle : names
+        if !names.isEmpty { return names }
+        guard density == .detailed, let album = song.album?.name, let subtitle = song.subtitle else { return song.subtitle }
+        let kept = subtitle.components(separatedBy: " • ").filter { $0 != album }
+        return kept.isEmpty ? nil : kept.joined(separator: " • ")
     }
 
     private var rank: some View {

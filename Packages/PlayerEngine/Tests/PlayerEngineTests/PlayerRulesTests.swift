@@ -72,6 +72,19 @@ struct PlayerRulesTests {
         #expect(!PlayerRules.isAllowedArtworkHost(URL(string: "https://evilggpht.com/a")!))
     }
 
+    @Test func artworkURLAcceptsGstaticAndUpgradesProtocolRelative() {
+        #expect(PlayerRules.artworkURL(from: "https://www.gstatic.com/a.png")?.absoluteString == "https://www.gstatic.com/a.png")
+        #expect(PlayerRules.artworkURL(from: "//lh3.googleusercontent.com/a")?.absoluteString == "https://lh3.googleusercontent.com/a")
+    }
+
+    @Test(arguments: [
+        "https://evilgstatic.com/a.png", "//evil.example/a", "//lh3.googleusercontent.com@evil.example/a",
+        "http://www.gstatic.com/a.png",
+    ])
+    func artworkURLRejectsUntrusted(_ raw: String) {
+        #expect(PlayerRules.artworkURL(from: raw) == nil)
+    }
+
     @Test func remoteCommandMapsKnownActions() {
         #expect(PlayerRules.remoteCommand(from: ["action": "play"]) == .play)
         #expect(PlayerRules.remoteCommand(from: ["action": "pause"]) == .pause)

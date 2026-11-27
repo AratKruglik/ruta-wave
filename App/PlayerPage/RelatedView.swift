@@ -1,5 +1,6 @@
 import InnerTube
 import SwiftUI
+import SystemKit
 
 struct RelatedView: View {
     let browseId: String
@@ -26,9 +27,14 @@ struct RelatedView: View {
         switch phase {
         case .loading: SkeletonRows(count: 6).accessibilityHidden(true)
         case .loaded(let page): loaded(page)
-        case .empty: PanelMessage(text: "Nothing related for this track")
-        case .failed: PageErrorView { attempt += 1 }
+        case .empty: RelatedEmptyView(onRetry: retry)
+        case .failed: RelatedErrorView(onRetry: retry)
         }
+    }
+
+    private func retry() {
+        trackTabs.discardRelated()
+        attempt += 1
     }
 
     private func loaded(_ page: BrowsePage) -> some View {
@@ -55,6 +61,39 @@ struct RelatedView: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(about.title ?? "")
+    }
+}
+
+struct RelatedEmptyView: View {
+    let onRetry: () -> Void
+
+    var body: some View {
+        ContentUnavailableView {
+            Text("Nothing related for this track").font(.rwTitle)
+        } actions: {
+            Button("Retry", action: onRetry)
+                .buttonStyle(PillButtonStyle(isProminent: true))
+        }
+    }
+}
+
+struct RelatedErrorView: View {
+    let onRetry: () -> Void
+    @Environment(NetworkMonitor.self) private var network: NetworkMonitor?
+
+    private var reason: LocalizedStringKey {
+        network?.isOnline == false ? "You're offline" : "Check your connection and try again"
+    }
+
+    var body: some View {
+        ContentUnavailableView {
+            Text("Couldn't load Related").font(.rwTitle)
+        } description: {
+            Text(reason)
+        } actions: {
+            Button("Retry", action: onRetry)
+                .buttonStyle(PillButtonStyle(isProminent: true))
+        }
     }
 }
 

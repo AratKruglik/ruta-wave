@@ -127,11 +127,14 @@ final class NowPlayingModel {
         case .shuffleChanged(let reported) where syncsShuffle:
             syncsShuffle = false
             if reported != preferences.shuffle { player.send(.toggleShuffle) }
+        case .volumeChanged(_, let isMuted) where isMuted != preferences.isMuted:
+            player.send(preferences.isMuted ? .mute : .unmute)
         case .volumeChanged(let level, isMuted: false) where restoresVolume:
             restoresVolume = false
             if level != preferences.volume { player.send(.setVolume(preferences.volume)) }
         case .songChanged(let song):
             rememberTrack(song)
+            if preferences.isMuted { player.send(.mute) }
             unavailableStreak = 0
             if skip?.videoId != song.videoId { cancelSkip() }
             // Loaded here rather than from a view, so Now Playing gets the album with every window closed (#82).
@@ -229,7 +232,10 @@ final class NowPlayingModel {
     func skip(by seconds: TimeInterval) { perform(.skip(by: seconds)) }
 
     func setVolume(_ level: Double) {
-        if level > 0, player.isMuted { player.send(.unmute) }
+        if level > 0, player.isMuted {
+            if player.isReady { preferences.isMuted = false }
+            player.send(.unmute)
+        }
         player.send(.setVolume(level))
         if player.isReady { preferences.volume = level }
     }
@@ -240,6 +246,7 @@ final class NowPlayingModel {
 
     func toggleMute() {
         if player.isMuted { restoresVolume = true }
+        if player.isReady { preferences.isMuted = !player.isMuted }
         player.send(.toggleMute)
     }
 
@@ -407,10 +414,9 @@ final class NowPlayingModel {
     var queueSongs: [Song] {
         player.queue.enumerated().map { index, item in
             let ref = queueRefs[item.videoId]
-            let seconds = Int(item.duration)
             return Song(
                 videoId: item.videoId, title: item.title, artists: ref?.artists ?? [ItemRef(name: item.artist, browseId: nil)],
-                album: ref?.album, duration: "\(seconds / 60):" + String(format: "%02d", seconds % 60), thumbnailURL: item.artworkURL,
+                album: ref?.album, duration: PlaybackRules.formatTime(item.duration), thumbnailURL: item.artworkURL,
                 playlistSetVideoId: Self.queueKey(index))
         }
     }

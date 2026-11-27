@@ -10,7 +10,15 @@ struct UpNextView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var popover: ItemPopover?
 
-    private var songs: [Song] { nowPlaying.queueSongs }
+    // queueSongs formats durations as m:ss only; the player's own value goes through the shared formatter.
+    private var songs: [Song] {
+        zip(nowPlaying.queueSongs, nowPlaying.player.queue).map { song, item in
+            Song(
+                videoId: song.videoId, title: song.title, artists: song.artists, album: song.album,
+                duration: PlaybackRules.formatTime(item.duration), thumbnailURL: song.thumbnailURL,
+                playlistSetVideoId: song.playlistSetVideoId)
+        }
+    }
     private var currentIndex: Int? { nowPlaying.player.queue.firstIndex(where: \.isCurrent) }
 
     var body: some View {
@@ -68,11 +76,11 @@ struct UpNextView: View {
             Button("New playlist…") { save(newPlaylist: true) }
             Button("Add to playlist…") { save(newPlaylist: false) }
         } label: {
-            InversePillLabel(title: "Save")
+            Text("Save")
         }
         .menuStyle(.button)
         .menuIndicator(.hidden)
-        .buttonStyle(.plain)
+        .buttonStyle(PillButtonStyle())
         .fixedSize()
         .itemPopover($popover)
         .help("Save the queue as a playlist")

@@ -57,6 +57,7 @@ extension Font {
 
 enum Metrics {
     static let unavailableOpacity = 0.4
+    static let pressedOpacity = 0.7
     static let space4: CGFloat = 4
     static let space8: CGFloat = 8
     static let space12: CGFloat = 12
@@ -66,6 +67,7 @@ enum Metrics {
     static let space48: CGFloat = 48
 
     static let topBarHeight: CGFloat = 64
+    static let contentMaxWidth: CGFloat = 1200
     static let radiusBar: CGFloat = 20
     static let trafficLightsInset: CGFloat = 76
     static let playerBarHeight: CGFloat = 64
@@ -115,6 +117,7 @@ enum Metrics {
     static let explicitBadge: CGFloat = 14
     static let quickPickRows = 4
     static let rowColumnWidth: CGFloat = 440
+    static let artistColumnWidth: CGFloat = 280
     static let widePageWidth: CGFloat = 1100
     static let playerArtworkMax: CGFloat = 560
     static let playerPanelMinWidth: CGFloat = 360
@@ -134,6 +137,7 @@ enum Motion {
     static let hover = 0.12
     static let panel = 0.2
     static let toastDuration: Duration = .seconds(3)
+    static let toastActionDuration: Duration = .seconds(6)
 
     static func animation(_ duration: Double, reduceMotion: Bool) -> Animation? {
         reduceMotion ? nil : .easeOut(duration: duration)

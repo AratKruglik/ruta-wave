@@ -25,7 +25,7 @@ struct TimedLyricsView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: Metrics.space24) {
-                        LazyVStack(alignment: .leading, spacing: Metrics.space12) {
+                        LazyVStack(alignment: .leading, spacing: Metrics.space16) {
                             ForEach(Array(lyrics.lines.enumerated()), id: \.offset) { index, line in
                                 row(line, isCurrent: index == currentIndex)
                             }
@@ -34,10 +34,12 @@ struct TimedLyricsView: View {
                             Text(verbatim: source)
                                 .font(.rwCaption)
                                 .foregroundStyle(.textSecondary)
+                                .textSelection(.enabled)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .lyricsBottomFade()
                 .background { LyricsLineTracker(lyrics: lyrics, karaoke: karaoke, currentIndex: $currentIndex) }
                 .onChange(of: currentIndex, initial: true) { _, index in
                     guard let index else { return }
@@ -70,8 +72,8 @@ struct TimedLyricsView: View {
                     .onTapGesture { seek(to: word.start) }
             }
         }
-        .font(.rwBody)
-        .fontWeight(isCurrent ? .semibold : .regular)
+        .font(lineFont(isCurrent: isCurrent))
+        .lineSpacing(LyricsStyle.lineSpacing)
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .onTapGesture { seek(to: line.start) }
@@ -79,6 +81,10 @@ struct TimedLyricsView: View {
         .accessibilityLabel(Text(verbatim: line.text))
         .accessibilityAddTraits(isCurrent ? [.isButton, .isSelected] : .isButton)
         .accessibilityAction { seek(to: line.start) }
+    }
+
+    private func lineFont(isCurrent: Bool) -> Font {
+        isCurrent ? .system(size: LyricsStyle.currentSize, weight: .semibold) : .system(size: LyricsStyle.size)
     }
 
     private func progress(of word: TimedLyrics.Word, at time: TimeInterval?) -> Double {
@@ -95,8 +101,8 @@ struct TimedLyricsView: View {
     private func lineButton(_ line: TimedLyrics.Line, isCurrent: Bool) -> some View {
         Button { nowPlaying.seek(to: line.start) } label: {
             Text(verbatim: line.text)
-                .font(.rwBody)
-                .fontWeight(isCurrent ? .semibold : .regular)
+                .font(lineFont(isCurrent: isCurrent))
+                .lineSpacing(LyricsStyle.lineSpacing)
                 .foregroundStyle(isCurrent ? .textPrimary : .textSecondary)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)

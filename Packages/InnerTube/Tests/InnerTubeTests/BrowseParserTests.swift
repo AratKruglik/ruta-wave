@@ -136,6 +136,7 @@ private func shelf(_ page: BrowsePage, _ title: String) throws -> Shelf {
         #expect(moods.title == "Moods & genres")
         #expect(moods.shelves.items.map(\.title) == ["Moods & moments", "Genres"])
         #expect(moods.shelves.items.allSatisfy { $0.layout == .grid })
+        #expect(moods.shelves.items.allSatisfy { $0.more == nil })
     }
 
     @Test func moodCategoryHasTitleAndMoreTargetsWithParams() throws {
