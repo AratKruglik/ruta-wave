@@ -10,7 +10,7 @@ struct CircleIconButton: View {
 
     var body: some View {
         Button(action: action) { CircleIcon(symbol: symbol) }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .help(label)
             .accessibilityLabel(label)
             .accessibilityAddTraits(isSelected ? .isSelected : [])
@@ -147,7 +147,7 @@ struct EntityHeader: View {
                     .background(.surfaceInverse, in: Circle())
                     .contentShape(Circle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .help("Play (⌥-click to shuffle)")
             .accessibilityLabel("Play")
             CircleIconButton(symbol: "shuffle", label: "Shuffle") { nowPlaying.play(model.shuffleTarget) }

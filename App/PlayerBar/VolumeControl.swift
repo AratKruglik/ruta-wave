@@ -19,13 +19,13 @@ struct VolumeControl: View {
             Button(action: nowPlaying.toggleMute) {
                 Label(player.isMuted ? "Unmute" : "Mute", systemImage: symbol(level: level))
                     .labelStyle(.iconOnly)
-                    .contentTransition(.symbolEffect(.replace))
+                    .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
                     .font(.rwIcon(Metrics.iconBar))
-                    .foregroundStyle(.textSecondary)
+                    .foregroundStyle(.textPrimary)
                     .frame(width: Metrics.hitTarget, height: Metrics.hitTarget)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .help(player.isMuted ? "Unmute" : "Mute")
             .accessibilityValue(Text(level, format: .percent))
             .accessibilityAdjustableAction { nowPlaying.adjustVolume(steps: $0 == .increment ? 1 : -1) }
@@ -48,7 +48,6 @@ struct VolumeControl: View {
     private func slider(level: Double) -> some View {
         Slider(value: Binding(get: { level }, set: { nowPlaying.setVolume($0) }), in: 0...1)
             .frame(width: Self.sliderWidth)
-            .tint(.accentProgress)
             .accessibilityLabel("Volume")
     }
 
