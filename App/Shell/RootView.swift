@@ -42,6 +42,9 @@ struct RootView: View {
     @State private var showsDislikeButton = Preferences().showDislikeButton
     @State private var karaokeEnabled = Preferences().karaokeEnabled
 
+    /// Later main windows (a Dock reopen after closing) keep the page the user left instead of re-running launch rules.
+    @MainActor private static var hasRestoredLaunchState = false
+
     init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor, links: LinkInbox) {
         self.session = session
         self.nowPlaying = nowPlaying
@@ -49,9 +52,11 @@ struct RootView: View {
         self.network = network
         self.links = links
         let preferences = Preferences()
+        let isLaunch = !Self.hasRestoredLaunchState
+        Self.hasRestoredLaunchState = true
         _navigation = State(initialValue: .restored(
             from: preferences.navigationState, isSignedIn: session.state.isSignedIn,
-            startingPage: SidebarSection(preference: preferences.startingPage)))
+            startingPage: isLaunch ? SidebarSection(preference: preferences.startingPage) : nil, isLaunch: isLaunch))
         let client = InnerTubeClient()
         let searchLoader = SearchLoader.live(client)
         _browse = State(initialValue: BrowseStore(
