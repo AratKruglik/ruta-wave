@@ -68,6 +68,7 @@ targets:
       - App/Browse/BrowseRouting.swift
       - App/Browse/BrowseStore.swift
       - App/Components/ItemActions.swift
+      - App/Components/Placeholders.swift
       - App/Components/ShelfGeometry.swift
       - App/Components/TrackDrag.swift
       - App/Components/TrackSelection.swift

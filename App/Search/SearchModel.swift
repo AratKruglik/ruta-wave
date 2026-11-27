@@ -65,6 +65,8 @@ final class SearchModel {
         var correction: SearchCorrection?
         var isFiltered: Bool
         var paging: Paging
+        /// nil = no Subscribe pill: not an artist, or the subscription state or channel id is missing.
+        var isTopResultSubscribed: Bool?
     }
 
     enum State {
@@ -94,18 +96,21 @@ final class SearchModel {
     @ObservationIgnored private var attempt = 0
     @ObservationIgnored private var lastLoadFailed = false
     @ObservationIgnored private var generation = 0
+    @ObservationIgnored private var subscribeIntent = 0
+    @ObservationIgnored private let toasts: ToastCenter
     @ObservationIgnored private var loadedKey: LoadKey?
     @ObservationIgnored private var continuation: String?
     @ObservationIgnored private var moreTask: Task<Void, Never>?
 
     init(
         query: String, filter: String?, chips: [Chip] = [], loader: SearchLoader,
-        credentials: @escaping @MainActor () -> Credentials?
+        toasts: ToastCenter, credentials: @escaping @MainActor () -> Credentials?
     ) {
         self.query = query
         self.filter = filter
         self.chips = chips
         self.loader = loader
+        self.toasts = toasts
         self.credentials = credentials
     }
 
@@ -175,8 +180,30 @@ final class SearchModel {
         continuation = nil
     }
 
+    /// Optimistic; reverts and toasts on failure. A no-op without credentials or a channel id.
+    func toggleTopResultSubscribed() {
+        guard case .loaded(let content) = state, let subscribed = content.isTopResultSubscribed,
+              case .artist(let artist)? = content.topResult, let channelId = artist.channelId,
+              let credentials = credentials() else { return }
+        setSubscribed(!subscribed)
+        subscribeIntent += 1
+        let intent = subscribeIntent
+        let captured = generation
+        Task { [loader] in
+            do {
+                try await loader.subscribe(channelId, !subscribed, credentials)
+            } catch {
+                guard generation == captured, subscribeIntent == intent else { return }
+                setSubscribed(subscribed)
+                toasts.show("Couldn't update the subscription")
+            }
+        }
+    }
+
     private func apply(_ results: SearchResults) {
         moreTask?.cancel()
+        // A fresh response is the truth; a late failure must not revert it.
+        subscribeIntent += 1
         chips = results.chips
         let isFiltered = results.chips.contains(where: \.isSelected)
         guard results.topResult != nil || !results.items.items.isEmpty else {
@@ -187,7 +214,8 @@ final class SearchModel {
         state = .loaded(Content(
             topResult: results.topResult, items: results.items.items,
             sections: isFiltered ? [] : SearchSection.sections(results.items.items, chips: results.chips),
-            correction: results.correction, isFiltered: isFiltered, paging: continuation == nil ? .done : .idle))
+            correction: results.correction, isFiltered: isFiltered, paging: continuation == nil ? .done : .idle,
+            isTopResultSubscribed: topResultSubscription(results.topResult)))
     }
 
     private func append(_ page: Page<MusicItem>, requestedWith token: String) {
@@ -197,6 +225,17 @@ final class SearchModel {
         let finished = fresh.isEmpty || page.continuation == nil || page.continuation == token
         continuation = finished ? nil : page.continuation
         content.paging = finished ? .done : .idle
+        state = .loaded(content)
+    }
+
+    private func topResultSubscription(_ item: MusicItem?) -> Bool? {
+        guard case .artist(let artist)? = item, artist.channelId != nil else { return nil }
+        return artist.isSubscribed
+    }
+
+    private func setSubscribed(_ value: Bool) {
+        guard case .loaded(var content) = state else { return }
+        content.isTopResultSubscribed = value
         state = .loaded(content)
     }
 

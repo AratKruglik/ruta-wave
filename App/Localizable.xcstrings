@@ -23,10 +23,52 @@
     },
     "%lld selected" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld selected"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld selected"
+                }
+              }
+            }
+          }
+        },
         "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вибрано: %lld"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вибрано %lld пісню"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вибрано %lld пісні"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вибрано %lld пісень"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вибрано %lld пісні"
+                }
+              }
+            }
           }
         }
       }
@@ -441,6 +483,136 @@
         }
       }
     },
+    "Couldn't load Home" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити головну"
+          }
+        }
+      }
+    },
+    "Couldn't load Charts" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити чарти"
+          }
+        }
+      }
+    },
+    "Couldn't load Explore" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити огляд"
+          }
+        }
+      }
+    },
+    "Couldn't load New releases" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити нові релізи"
+          }
+        }
+      }
+    },
+    "Couldn't load Moods & genres" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити настрої та жанри"
+          }
+        }
+      }
+    },
+    "Couldn't load this category" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити категорію"
+          }
+        }
+      }
+    },
+    "Couldn't load this album" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити альбом"
+          }
+        }
+      }
+    },
+    "Couldn't load this artist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити виконавця"
+          }
+        }
+      }
+    },
+    "Couldn't load this playlist" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити плейлист"
+          }
+        }
+      }
+    },
+    "Couldn't load History" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити історію"
+          }
+        }
+      }
+    },
+    "Couldn't load your library" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити бібліотеку"
+          }
+        }
+      }
+    },
+    "Couldn't load search results" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити результати пошуку"
+          }
+        }
+      }
+    },
+    "Couldn't load lyrics" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося завантажити текст"
+          }
+        }
+      }
+    },
     "Couldn't load more" : {
       "localizations" : {
         "uk" : {
@@ -683,20 +855,124 @@
     },
     "Disliked %lld of %lld songs" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disliked %1$lld of %#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg song"
+                  }
+                  },
+                  "other" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg songs"
+                  }
+                  }
+                }
+              }
+            }
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Не сподобалося пісень: %lld з %lld"
+            "value" : "Не сподобалося %1$lld з %#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісні"
+                  }
+                  },
+                  "few" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісень"
+                  }
+                  },
+                  "many" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісень"
+                  }
+                  },
+                  "other" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісні"
+                  }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "Disliked %lld songs" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Disliked %lld song"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Disliked %lld songs"
+                }
+              }
+            }
+          }
+        },
         "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не сподобалося пісень: %lld"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Не сподобалася %lld пісня"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Не сподобалися %lld пісні"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Не сподобалося %lld пісень"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Не сподобалося %lld пісні"
+                }
+              }
+            }
           }
         }
       }
@@ -919,20 +1195,124 @@
     },
     "Liked %lld of %lld songs" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liked %1$lld of %#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg song"
+                  }
+                  },
+                  "other" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg songs"
+                  }
+                  }
+                }
+              }
+            }
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вподобано пісень: %lld з %lld"
+            "value" : "Вподобано %1$lld з %#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісні"
+                  }
+                  },
+                  "few" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісень"
+                  }
+                  },
+                  "many" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісень"
+                  }
+                  },
+                  "other" : {
+                  "stringUnit" : {
+                    "state" : "translated",
+                    "value" : "%arg пісні"
+                  }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "Liked %lld songs" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Liked %lld song"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Liked %lld songs"
+                }
+              }
+            }
+          }
+        },
         "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вподобано пісень: %lld"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вподобано %lld пісню"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вподобано %lld пісні"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вподобано %lld пісень"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Вподобано %lld пісні"
+                }
+              }
+            }
           }
         }
       }
@@ -1755,10 +2135,52 @@
     },
     "Removed %lld songs" : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Removed %lld song"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Removed %lld songs"
+                }
+              }
+            }
+          }
+        },
         "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Видалено пісень: %lld"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Видалено %lld пісню"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Видалено %lld пісні"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Видалено %lld пісень"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Видалено %lld пісні"
+                }
+              }
+            }
           }
         }
       }
@@ -2431,10 +2853,52 @@
     },
     "Titles can be up to %lld characters." : {
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Titles can be up to %lld character."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Titles can be up to %lld characters."
+                }
+              }
+            }
+          }
+        },
         "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Назва може містити до %lld символів."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Назва може містити до %lld символу."
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Назва може містити до %lld символів."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Назва може містити до %lld символів."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Назва може містити до %lld символу."
+                }
+              }
+            }
           }
         }
       }

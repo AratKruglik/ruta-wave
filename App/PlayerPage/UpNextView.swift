@@ -105,7 +105,10 @@ struct UpNextView: View {
     @ViewBuilder private var queue: some View {
         if songs.isEmpty {
             if isLoadingDetails {
-                SkeletonRows(count: 6)
+                VStack(spacing: 0) {
+                    ForEach(0..<6, id: \.self) { _ in TrackRow(song: .placeholder, density: .compact) }
+                }
+                .placeholderStyle()
             } else {
                 PanelMessage(text: "Your queue is empty", message: "Play a song, or use Play next or Add to queue.")
             }

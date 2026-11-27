@@ -6,9 +6,12 @@ private final class Calls: @unchecked Sendable {
     private let lock = NSLock()
     private var recordedSearches: [String] = []
     private var recordedTokens: [String] = []
+    private var recordedSubscriptions: [String] = []
 
     var searches: [String] { lock.withLock { recordedSearches } }
     var tokens: [String] { lock.withLock { recordedTokens } }
+    var subscriptions: [String] { lock.withLock { recordedSubscriptions } }
+    func record(subscription: String) { lock.withLock { recordedSubscriptions.append(subscription) } }
     func record(search: String) { lock.withLock { recordedSearches.append(search) } }
     func record(token: String) { lock.withLock { recordedTokens.append(token) } }
 }
@@ -20,7 +23,8 @@ extension SearchLoader {
         suggestions: { _, _ in SearchSuggestions() },
         search: { _, _, _ in SearchResults(chips: [], topResult: nil, items: Page(items: [], continuation: nil), correction: nil) },
         more: { _, _ in Page(items: [], continuation: nil) },
-        feedback: { _, _ in })
+        feedback: { _, _ in },
+        subscribe: { _, _, _ in })
 }
 
 private func song(_ id: String, video: Bool = false) -> MusicItem { .song(Song(videoId: id, title: id, isVideo: video)) }
@@ -46,7 +50,8 @@ private let allChips = [
 
 private func loader(
     _ calls: Calls, search: @escaping @Sendable (String, String?) async throws -> SearchResults,
-    more: @escaping @Sendable (String) async throws -> Page<MusicItem> = { _ in Page(items: [], continuation: nil) }
+    more: @escaping @Sendable (String) async throws -> Page<MusicItem> = { _ in Page(items: [], continuation: nil) },
+    subscribe: @escaping @Sendable (String, Bool) async throws -> Void = { _, _ in }
 ) -> SearchLoader {
     SearchLoader(
         suggestions: { _, _ in SearchSuggestions() },
@@ -58,14 +63,21 @@ private func loader(
             calls.record(token: token)
             return try await more(token)
         },
-        feedback: { _, _ in })
+        feedback: { _, _ in },
+        subscribe: { id, subscribed, _ in
+            calls.record(subscription: "\(id) \(subscribed)")
+            try await subscribe(id, subscribed)
+        })
 }
 
 @MainActor
 private func makeModel(
-    _ loader: SearchLoader, query: String = "q", filter: String? = nil, chips: [Chip] = []
+    _ loader: SearchLoader, query: String = "q", filter: String? = nil, chips: [Chip] = [],
+    toasts: ToastCenter = ToastCenter(), signedIn: Bool = false
 ) -> SearchModel {
-    SearchModel(query: query, filter: filter, chips: chips, loader: loader, credentials: { nil })
+    SearchModel(
+        query: query, filter: filter, chips: chips, loader: loader, toasts: toasts,
+        credentials: { signedIn ? Credentials(cookies: []) : nil })
 }
 
 @MainActor
@@ -85,6 +97,48 @@ private func content(_ model: SearchModel) -> SearchModel.Content? {
 
 @MainActor
 struct SearchModelTests {
+    @Test func topResultSubscriptionNeedsStateAndChannel() async {
+        func subscribed(_ top: MusicItem) async -> Bool? {
+            let model = makeModel(loader(Calls(), search: { _, _ in results([], top: top) }))
+            await model.load()
+            guard case .loaded(let content) = model.state else { return nil }
+            return content.isTopResultSubscribed
+        }
+        #expect(await subscribed(.artist(Artist(browseId: "UCpage", name: "a", isSubscribed: false, channelId: "UCchan"))) == false)
+        #expect(await subscribed(.artist(Artist(browseId: "UCpage", name: "a", isSubscribed: true))) == nil)
+        #expect(await subscribed(.artist(Artist(browseId: "UCpage", name: "a", channelId: "UCchan"))) == nil)
+        #expect(await subscribed(album("MPREb")) == nil)
+    }
+
+    @Test func subscribingFromTopResultUsesTheChannelIdAndRevertsOnFailure() async {
+        let calls = Calls()
+        let top = MusicItem.artist(Artist(browseId: "UCpage", name: "a", isSubscribed: false, channelId: "UCchan"))
+        let toasts = ToastCenter()
+        let model = makeModel(
+            loader(calls, search: { _, _ in results([], top: top) }, subscribe: { _, _ in throw Failure() }),
+            toasts: toasts, signedIn: true)
+        await model.load()
+        model.toggleTopResultSubscribed()
+        guard case .loaded(let flipped) = model.state else { return }
+        #expect(flipped.isTopResultSubscribed == true)
+        #expect(await waitUntil { toasts.message != nil })
+        #expect(calls.subscriptions == ["UCchan true"])
+        guard case .loaded(let reverted) = model.state else { return }
+        #expect(reverted.isTopResultSubscribed == false)
+    }
+
+    @Test func guestToggleSendsNothing() async {
+        let calls = Calls()
+        let top = MusicItem.artist(Artist(browseId: "UCpage", name: "a", isSubscribed: false, channelId: "UCchan"))
+        let model = makeModel(loader(calls, search: { _, _ in results([], top: top) }))
+        await model.load()
+        model.toggleTopResultSubscribed()
+        try? await Task.sleep(for: .milliseconds(100))
+        #expect(calls.subscriptions.isEmpty)
+        guard case .loaded(let content) = model.state else { return }
+        #expect(content.isTopResultSubscribed == false)
+    }
+
     @Test func unfilteredResultsAreGroupedInFixedOrderAndCapped() async {
         let items = (1...6).map { song("s\($0)") } + [video("v1"), album("a1"), artist("r1"), playlist("p1"), link("l1")]
         let model = makeModel(loader(Calls(), search: { _, _ in results(items.reversed(), chips: allChips) }))

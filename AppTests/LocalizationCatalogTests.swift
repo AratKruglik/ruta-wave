@@ -39,6 +39,22 @@ struct LocalizationCatalogTests {
         }
     }
 
+    @Test func countKeysHaveAllUkrainianPluralForms() {
+        let strings = catalog()
+        let forms: Set = ["one", "few", "many", "other"]
+        func pluralForms(_ container: [String: Any]?) -> Set<String> {
+            Set(((container?["variations"] as? [String: Any])?["plural"] as? [String: Any])?.keys.map { $0 } ?? [])
+        }
+        func uk(_ key: String) -> [String: Any]? { (strings[key]?["localizations"] as? [String: Any])?["uk"] as? [String: Any] }
+        for key in ["%lld selected", "Removed %lld songs", "Liked %lld songs", "Disliked %lld songs", "Titles can be up to %lld characters."] {
+            #expect(pluralForms(uk(key)) == forms, "Missing uk plural forms: \(key)")
+        }
+        for key in ["Liked %lld of %lld songs", "Disliked %lld of %lld songs"] {
+            let total = ((uk(key)?["substitutions"] as? [String: Any])?["total"]) as? [String: Any]
+            #expect(pluralForms(total) == forms, "Missing uk plural forms: \(key)")
+        }
+    }
+
     @Test func retiredWordmarkKeysAreGone() {
         let strings = catalog()
         #expect(strings["RutaWave"] == nil)

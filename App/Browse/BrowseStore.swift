@@ -89,7 +89,7 @@ final class BrowseStore {
         guard case .search(let query, let filter) = route else { return nil }
         if let cached = searchModels[route] { return cached }
         let chips = searchModels.first { $0.key.searchQuery == query }?.value.chips ?? []
-        let model = SearchModel(query: query, filter: filter, chips: chips, loader: searchLoader, credentials: credentials)
+        let model = SearchModel(query: query, filter: filter, chips: chips, loader: searchLoader, toasts: toasts, credentials: credentials)
         model.isReady = isReady
         searchModels[route] = model
         return model

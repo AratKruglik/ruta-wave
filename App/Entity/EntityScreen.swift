@@ -25,17 +25,21 @@ struct EntityScreen: View {
         switch model.state {
         case .loading:
             ScrollView {
-                VStack(alignment: .leading, spacing: Metrics.space24) {
-                    SkeletonEntityHeader(isArtist: isArtist, isWide: isWide)
-                    SkeletonRows(count: 8)
-                }
-                .padding(isArtist ? .vertical : .all, padding)
+                skeleton
+                    .padding(.bottom, padding)
+                    .padding(.top, isArtist ? artistTopOffset : padding)
+                    .placeholderStyle()
             }
             .scrollDisabled(true)
         case .notAvailable:
-            UnavailableView(title: unavailableTitle, onBack: navigation.back)
+            ContentUnavailableView {
+                Text(unavailableTitle).font(.rwTitle)
+            } actions: {
+                Button("Back", action: navigation.back)
+                    .buttonStyle(PillButtonStyle(isProminent: true))
+            }
         case .failed:
-            PageErrorView(onRetry: model.retry)
+            LoadErrorView(title: failedTitle, onRetry: model.retry)
         case .loaded(let content):
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Metrics.space24) {
@@ -74,6 +78,40 @@ struct EntityScreen: View {
         if case .artist = model.kind { true } else { false }
     }
 
+    private var failedTitle: LocalizedStringKey {
+        switch model.kind {
+        case .album: "Couldn't load this album"
+        case .artist: "Couldn't load this artist"
+        case .playlist: "Couldn't load this playlist"
+        }
+    }
+
+    @ViewBuilder
+    private var skeleton: some View {
+        VStack(alignment: .leading, spacing: Metrics.space24) {
+            if case .artist = model.kind {
+                ArtistHeader(model: model, artist: .placeholder, isSubscribed: nil, width: width, inset: padding)
+                ShelfView(shelf: .placeholder(layout: .list, count: 5), onMore: { _ in }).padding(.horizontal, padding)
+            } else {
+                EntityHeader(model: model, header: .placeholder, isSaved: false, isWide: isWide).padding(.horizontal, padding)
+                VStack(spacing: 0) {
+                    ForEach(0..<8, id: \.self) { _ in
+                        TrackRow(song: .placeholder, density: isAlbum ? .numbered : .detailed)
+                    }
+                }
+                .padding(.horizontal, padding)
+            }
+        }
+    }
+
+    private var artistBrowseId: String? {
+        if case .artist(let browseId) = model.kind { browseId } else { nil }
+    }
+
+    private var isAlbum: Bool {
+        if case .album = model.kind { true } else { false }
+    }
+
     private var unavailableTitle: LocalizedStringKey {
         switch model.kind {
         case .album: "This album isn't available"
@@ -109,7 +147,7 @@ struct EntityScreen: View {
     private func artistBody(_ artist: ArtistPage, _ content: EntityModel.Content) -> some View {
         ArtistHeader(model: model, artist: artist, isSubscribed: content.isSubscribed, width: width, inset: padding)
         if artist.shelves.isEmpty { emptyNote("Nothing from this artist yet") }
-        shelves(artist.shelves, moreTitle: "Show all")
+        shelves(artist.shelves, moreTitle: "Show all", hiddenArtistId: artistBrowseId)
         ArtistAbout(artist: artist).padding(.horizontal, padding)
     }
 
@@ -192,10 +230,11 @@ struct EntityScreen: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func shelves(_ shelves: [Shelf], moreTitle: LocalizedStringKey = "More") -> some View {
+    private func shelves(_ shelves: [Shelf], moreTitle: LocalizedStringKey = "More", hiddenArtistId: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: Metrics.space48) {
             ForEach(shelves.indices, id: \.self) { index in
-                ShelfView(shelf: shelves[index], onMore: { navigation.push(Route(target: $0)) }, moreTitle: moreTitle, pageMargin: padding)
+                ShelfView(shelf: shelves[index], onMore: { navigation.push(Route(target: $0)) }, moreTitle: moreTitle, pageMargin: padding,
+                    hiddenArtistId: hiddenArtistId)
             }
         }
         .padding(.horizontal, padding)
