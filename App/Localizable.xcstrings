@@ -767,16 +767,6 @@
         }
       }
     },
-    "Go to Search Field" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перейти до поля пошуку"
-          }
-        }
-      }
-    },
     "Go to album" : {
       "localizations" : {
         "uk" : {
@@ -2026,6 +2016,16 @@
         }
       }
     },
+    "Shortcuts" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скорочення"
+          }
+        }
+      }
+    },
     "Shuffle" : {
       "localizations" : {
         "uk" : {
@@ -2215,6 +2215,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тут з’являться пісні, які ви слухаєте"
+          }
+        }
+      }
+    },
+    "Space" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пробіл"
           }
         }
       }

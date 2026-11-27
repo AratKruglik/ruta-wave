@@ -18,9 +18,13 @@ struct SettingsView: View {
                 .tabItem { Label("Playback", systemImage: "play.circle") }
             PluginsSettings(registry: plugins)
                 .tabItem { Label("Plugins", systemImage: "puzzlepiece.extension") }
+            ShortcutsSettings()
+                .tabItem { Label("Shortcuts", systemImage: "keyboard") }
             AccountSettings(session: session)
                 .tabItem { Label("Account", systemImage: "person.crop.circle") }
         }
+        .preferredColorScheme(.dark)
+        .scrollIndicators(.never)
         .toggleStyle(.accentSwitch)
         .focusEffectDisabled()
         .frame(width: 480)
@@ -175,16 +179,6 @@ private struct PlaybackSettings: View {
     }
 }
 
-/// The system owns this permission, so it is read from the notification centre rather than stored.
-@MainActor @Observable
-private final class NotificationPermission {
-    private(set) var isDenied = false
-
-    func refresh() async {
-        isDenied = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
-    }
-}
-
 private struct PluginsSettings: View {
     let registry: PluginRegistry
 
@@ -205,13 +199,11 @@ private struct KaraokeSettings: View {
 
     var body: some View {
         Section {
-            Toggle("Karaoke lyrics", isOn: $isOn)
-            Text("Highlights each word as it is sung in the Lyrics tab")
-                .font(.rwCaption)
-                .foregroundStyle(.secondary)
-            Text("Experimental. It may add load on the system while the Lyrics tab is open.")
-                .font(.rwCaption)
-                .foregroundStyle(.secondary)
+            Toggle(isOn: $isOn) {
+                Text("Karaoke lyrics")
+                Text("Highlights each word as it is sung in the Lyrics tab")
+                Text("Experimental. It may add load on the system while the Lyrics tab is open.")
+            }
         }
         .onChange(of: isOn) { _, newValue in Preferences().karaokeEnabled = newValue }
     }
@@ -221,10 +213,21 @@ private extension Plugin {
     var pluginId: String { Self.id }
 }
 
+/// The system owns this permission, so it is read from the notification centre rather than stored.
+@MainActor @Observable
+private final class NotificationPermission {
+    private(set) var isDenied = false
+
+    func refresh() async {
+        isDenied = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
+    }
+}
+
 private struct PluginRow: View {
     let plugin: any Plugin
     let state: PluginRegistry.RunState?
     @State private var isOn: Bool
+    @State private var permission = NotificationPermission()
 
     init(plugin: any Plugin, state: PluginRegistry.RunState?) {
         self.plugin = plugin
@@ -233,32 +236,22 @@ private struct PluginRow: View {
         _isOn = State(initialValue: PluginSettings(id: type.id).isEnabled(default: type.isEnabledByDefault))
     }
 
+    private var isNotifications: Bool { type(of: plugin).id == NotificationsPlugin.id }
+    private var isDenied: Bool { isNotifications && permission.isDenied }
+
     var body: some View {
         Section {
-            Toggle(isOn: $isOn) { Text(type(of: plugin).title) }
+            Toggle(isOn: Binding(get: { isOn && !isDenied }, set: { isOn = $0 })) {
+                Text(type(of: plugin).title)
+                if isNotifications { Text("Notify when the track changes") }
+            }
+            .disabled(isDenied)
             if state == .failed, isOn {
                 Text("Couldn't start")
                     .font(.rwCaption)
                     .foregroundStyle(.secondary)
             }
-            if type(of: plugin).id == NotificationsPlugin.id {
-                NotificationsPluginSettings(isOn: isOn)
-            }
-        }
-        .onChange(of: isOn) { _, newValue in PluginSettings(id: type(of: plugin).id).setEnabled(newValue) }
-    }
-}
-
-private struct NotificationsPluginSettings: View {
-    let isOn: Bool
-    @State private var permission = NotificationPermission()
-
-    var body: some View {
-        Group {
-            Text("Notify when the track changes")
-                .font(.rwCaption)
-                .foregroundStyle(.secondary)
-            if isOn, permission.isDenied {
+            if isDenied {
                 HStack {
                     Text("Notifications are off in System Settings.")
                         .font(.rwCaption)
@@ -270,10 +263,11 @@ private struct NotificationsPluginSettings: View {
                 }
             }
         }
-        .task { await permission.refresh() }
+        .onChange(of: isOn) { _, newValue in PluginSettings(id: type(of: plugin).id).setEnabled(newValue) }
+        .task { if isNotifications { await permission.refresh() } }
         // The user can change the permission in System Settings while this window is open.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            Task { await permission.refresh() }
+            if isNotifications { Task { await permission.refresh() } }
         }
     }
 
@@ -281,6 +275,39 @@ private struct NotificationsPluginSettings: View {
         let bundleId = Bundle.main.bundleIdentifier ?? ""
         guard let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(bundleId)") else { return }
         NSWorkspace.shared.open(url)
+    }
+}
+
+private struct ShortcutsSettings: View {
+    // shortcut: glyphs are typed by hand, so they must follow AppCommands when a key changes.
+    private static let shortcuts: [(title: LocalizedStringKey, keys: Text)] = [
+        ("Play / Pause", Text("Space")),
+        ("Previous", Text(verbatim: "⌘←")),
+        ("Next", Text(verbatim: "⌘→")),
+        ("Seek Back 10 Seconds", Text(verbatim: "⇧⌘←")),
+        ("Seek Forward 10 Seconds", Text(verbatim: "⇧⌘→")),
+        ("Volume Up", Text(verbatim: "⌘↑")),
+        ("Volume Down", Text(verbatim: "⌘↓")),
+        ("Mute", Text(verbatim: "⌥⌘↓")),
+        ("Repeat", Text(verbatim: "⌘R")),
+        ("Shuffle", Text(verbatim: "⌘S")),
+        ("Like", Text(verbatim: "⌥⌘L")),
+        ("Dislike", Text(verbatim: "⌥⌘D")),
+        ("Player Page", Text(verbatim: "⌘P")),
+        ("Search", Text(verbatim: "⌘F")),
+        ("Back", Text(verbatim: "⌘[")),
+        ("Forward", Text(verbatim: "⌘]")),
+        ("Mini Player", Text(verbatim: "⇧⌘M")),
+    ]
+
+    var body: some View {
+        Form {
+            ForEach(Array(Self.shortcuts.enumerated()), id: \.offset) { _, shortcut in
+                LabeledContent(shortcut.title) { shortcut.keys }
+            }
+        }
+        .formStyle(.grouped)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppCommands: Commands {
     let nowPlaying: NowPlayingModel
+    let showMainWindow: @MainActor () -> Void
     @FocusedValue(\.navigation) private var navigation: NavigationModel?
     @FocusedValue(\.reorderSelection) private var reorder: ReorderAction?
 
@@ -17,6 +18,10 @@ struct AppCommands: Commands {
         }
         CommandGroup(replacing: .printItem) {}
         CommandGroup(replacing: .saveItem) {}
+        CommandGroup(before: .windowList) {
+            Button { showMainWindow() } label: { Text(verbatim: "RutaWave") }
+                .keyboardShortcut("0")
+        }
         CommandMenu("Go") {
             Button("Back") { navigation?.back() }
                 .keyboardShortcut("[")
@@ -33,9 +38,6 @@ struct AppCommands: Commands {
             Divider()
             Button("Search") { navigation?.requestSearchFocus() }
                 .keyboardShortcut("f")
-                .disabled(navigation == nil)
-            Button("Go to Search Field") { navigation?.requestSearchFocus() }
-                .keyboardShortcut("l")
                 .disabled(navigation == nil)
         }
         CommandMenu("Controls") {

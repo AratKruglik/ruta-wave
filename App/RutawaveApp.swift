@@ -30,7 +30,7 @@ struct RutawaveApp: App {
         .defaultSize(width: Metrics.defaultWindowWidth, height: Metrics.defaultWindowHeight)
         .commands {
             SidebarCommands()
-            AppCommands(nowPlaying: app.nowPlaying)
+            AppCommands(nowPlaying: app.nowPlaying, showMainWindow: { [app] in app.showMainWindow() })
         }
         .handlesExternalEvents(matching: [])
         Window("Mini Player", id: AppDelegate.miniPlayerWindowId) { MiniPlayerView(nowPlaying: app.nowPlaying) }
@@ -118,6 +118,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 plugins.sync()
             }
         }
+    }
+
+    // The Mini Player counts as a visible window, so this ignores `hasVisibleWindows`.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        showMainWindow()
+        return true
     }
 
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
