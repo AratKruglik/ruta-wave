@@ -326,6 +326,16 @@ struct StartingPageTests {
         #expect(model.path(for: .explore).isEmpty)
     }
 
+    @Test func startingPageOnReopenKeepsOtherStacks() throws {
+        let data = try saved { model in
+            model.select(.explore)
+            model.push(.explore(.charts))
+        }
+        let model = NavigationModel.restored(from: data, isSignedIn: true, startingPage: .home, isLaunch: false)
+        #expect(model.selection == .home)
+        #expect(model.path(for: .explore) == [.explore(.charts)])
+    }
+
     @Test func noStartingPageReopensTheLastSection() throws {
         let data = try saved { model in
             model.select(.explore)
