@@ -66,6 +66,7 @@ enum Metrics {
     static let space48: CGFloat = 48
 
     static let topBarHeight: CGFloat = 64
+    static let contentMaxWidth: CGFloat = 1200
     static let radiusBar: CGFloat = 20
     static let trafficLightsInset: CGFloat = 76
     static let playerBarHeight: CGFloat = 64
@@ -134,6 +135,7 @@ enum Motion {
     static let hover = 0.12
     static let panel = 0.2
     static let toastDuration: Duration = .seconds(3)
+    static let toastActionDuration: Duration = .seconds(6)
 
     static func animation(_ duration: Double, reduceMotion: Bool) -> Animation? {
         reduceMotion ? nil : .easeOut(duration: duration)

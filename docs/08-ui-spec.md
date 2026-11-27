@@ -65,7 +65,7 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 
 ## 2. Top bar
 
-**Shows:** sidebar toggle, search field, back, forward,
+**Shows:** sidebar toggle, back, forward, search field,
 avatar (signed in) or **Sign in** pill (guest).
 
 **Actions**
@@ -480,7 +480,7 @@ type and mode **[decision]**:
 | Remove from history (History rows) | ✓ | ✓ | — | — | — | — |
 | Share → Copy link / system share | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-"Play next" and "Add to queue" show a toast with **Undo**. **Stage:** 4.6, 2.4.
+"Play next" and "Add to queue" show a toast with **Undo**. A toast with Undo stays 6 s and pauses while the pointer or keyboard focus is on it. **Stage:** 4.6, 2.4.
 
 ## 12. Selection and drag and drop
 - Any track list supports multi-select (checkbox, ⌘-click, ⇧-click, ⌘A when

@@ -117,9 +117,11 @@ struct ShellView<AccountPopover: View>: View {
             set: { navigation.setPath($0, for: navigation.selection) })
         ) {
             SectionRoot(section: navigation.selection, isSignedIn: isSignedIn)
+                .cappedContentWidth()
                 .navigationDestination(for: Route.self) {
                     // Pushed pages are hosted outside the stack's modifiers, so they need the bar inset of their own.
                     RouteScreen(route: $0)
+                        .cappedContentWidth()
                         .contentMargins(.bottom, barInset, for: .scrollContent)
                         .safeAreaPadding(.top, Metrics.topBarHeight)
                         .ignoresSafeArea(.container, edges: .top)
@@ -134,7 +136,7 @@ struct ShellView<AccountPopover: View>: View {
     private var bottomOverlay: some View {
         VStack(spacing: Metrics.space8) {
             if let toast = toasts.toast {
-                ToastView(toast: toast, onUndo: toasts.undo)
+                ToastView(toast: toast, onUndo: toasts.undo, onHold: toasts.setHeld)
                     .transition(.opacity)
             }
             if isBarVisible {
@@ -166,6 +168,12 @@ struct ShellView<AccountPopover: View>: View {
             return
         }
         navigation.push(.playlist(browseId: browseId))
+    }
+}
+
+private extension View {
+    func cappedContentWidth() -> some View {
+        frame(maxWidth: Metrics.contentMaxWidth).frame(maxWidth: .infinity)
     }
 }
 
