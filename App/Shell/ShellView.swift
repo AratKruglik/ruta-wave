@@ -103,9 +103,6 @@ struct ShellView<AccountPopover: View>: View {
         .windowBackdrop()
         .noInitialFocus()
         .focusedSceneValue(\.navigation, navigation)
-        .onChange(of: navigation.path(for: navigation.selection).last, initial: true) { _, route in
-            if case .search(let query, _) = route { search.showQuery(query) }
-        }
         .background(
             WindowEventMonitor(
                 onBack: navigation.back, onForward: navigation.forward, onTogglePlay: nowPlaying.togglePlay,

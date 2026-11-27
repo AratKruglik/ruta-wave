@@ -89,12 +89,15 @@ struct BrowseScreen<Header: View>: View {
                 case BrowseTarget.explore.browseId:
                     SkeletonTiles()
                     ForEach(0..<2, id: \.self) { _ in SkeletonShelf() }
-                case BrowseTarget.moodsAndGenres.browseId, BrowseTarget.moodCategoryId:
+                case BrowseTarget.moodsAndGenres.browseId:
                     SkeletonTitle()
-                    SkeletonGrid(count: 12)
+                    ForEach(0..<2, id: \.self) { _ in SkeletonChipGrid() }
+                case BrowseTarget.moodCategoryId:
+                    SkeletonTitle()
+                    ForEach(0..<2, id: \.self) { _ in SkeletonShelf() }
                 default:
                     SkeletonTitle()
-                    SkeletonGrid(count: 12)
+                    SkeletonCardGrid()
                 }
             case .charts:
                 SkeletonTitle()
