@@ -1,6 +1,10 @@
 import SwiftUI
 
 extension Color {
+    fileprivate static func asset(_ name: String) -> Color {
+        Color(name, bundle: .main)
+    }
+
     fileprivate init(hex: UInt32, opacity: Double = 1) {
         self.init(
             .sRGB,
@@ -23,34 +27,35 @@ extension Color {
 
 extension ShapeStyle where Self == Color {
     static var themeBase: Color { Color(hex: 0x313131) }
-    static var surfaceFill: Color { Color.white.opacity(0.10) }
-    static var surfaceRaised: Color { Color.white.opacity(0.12) }
-    static var surfaceField: Color { Color.white.opacity(0.15) }
+    static var surfaceFill: Color { .asset("RWSurfaceFill") }
+    static var surfaceRaised: Color { .asset("RWSurfaceRaised") }
+    static var surfaceField: Color { .asset("RWSurfaceField") }
     static var surfaceInverse: Color { Color(hex: 0xF1F1F1) }
     static var textPrimary: Color { Color(hex: 0xF1F1F1) }
-    static var textSecondary: Color { Color.white.opacity(0.70) }
-    static var textTertiary: Color { Color(hex: 0xAAAAAA) }
+    static var textSecondary: Color { .asset("RWTextSecondary") }
+    static var textTertiary: Color { .asset("RWTextTertiary") }
     static var textOnInverse: Color { Color(hex: 0x0F0F0F) }
-    static var textDisabled: Color { Color(hex: 0x717171) }
-    static var accentProgress: Color { Color(hex: 0xFF0033) }
+    static var textDisabled: Color { .asset("RWTextDisabled") }
+    static var accentProgress: Color { .asset("AccentColor") }
     static var accentLink: Color { Color(hex: 0x3EA6FF) }
-    static var strokeSubtle: Color { Color.white.opacity(0.20) }
+    static var strokeSubtle: Color { .asset("RWStrokeSubtle") }
     static var strokeFocus: Color { Color(hex: 0xF1F1F1) }
     static var scrim: Color { Color.black.opacity(0.60) }
     static var shadow: Color { Color.black.opacity(0.25) }
 }
 
 extension Font {
+    // shortcut: the display, shelf-title and icon sizes are deliberately larger than any macOS text style, so they stay fixed; upgrade if the app gets an in-app text-size setting.
     static let rwDisplay = Font.system(size: 40, weight: .bold)
     static let rwShelfTitle = Font.system(size: 24, weight: .bold)
-    static let rwShelfStrapline = Font.system(size: 12)
-    static let rwTab = Font.system(size: 14, weight: .medium)
-    static let rwNav = Font.system(size: 16)
-    static let rwNavSelected = Font.system(size: 16, weight: .medium)
-    static let rwBody = Font.system(size: 14)
-    static let rwTitle = Font.system(size: 14, weight: .medium)
-    static let rwCaption = Font.system(size: 12)
-    static let rwButton = Font.system(size: 14, weight: .medium)
+    static let rwShelfStrapline = Font.callout
+    static let rwTab = Font.body.weight(.medium)
+    static let rwNav = Font.title3
+    static let rwNavSelected = Font.title3.weight(.medium)
+    static let rwBody = Font.body
+    static let rwTitle = Font.body.weight(.medium)
+    static let rwCaption = Font.callout
+    static let rwButton = Font.body.weight(.medium)
 
     static func rwIcon(_ size: CGFloat) -> Font { .system(size: size) }
 }
@@ -140,7 +145,11 @@ enum Motion {
     static let toastActionDuration: Duration = .seconds(6)
 
     static func animation(_ duration: Double, reduceMotion: Bool) -> Animation? {
-        reduceMotion ? nil : .easeOut(duration: duration)
+        reduceMotion ? nil : .snappy(duration: duration)
+    }
+
+    static func pageAnimation(reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : .smooth
     }
 }
 
@@ -151,7 +160,8 @@ extension EnvironmentValues {
 
 struct AccentSwitchToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
-        Toggle(configuration).toggleStyle(.switch).tint(.accentProgress)
+        // shortcut: kept so SettingsView still compiles; the global AccentColor tints the switch, so call sites can use .switch and this type can go.
+        Toggle(configuration).toggleStyle(.switch)
     }
 }
 

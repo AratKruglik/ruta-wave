@@ -224,13 +224,15 @@ struct SearchFieldModelTests {
     }
 
     @Test func aLateResponseCannotReopenAClosedDropdown() async {
+        let (started, startedSignal) = AsyncStream<Void>.makeStream()
         let model = makeModel(Recorder(), suggestions: { _ in
+            startedSignal.yield()
             try await Task.sleep(for: .milliseconds(50))
             return rich(queries: ["q"])
         })
         model.edit("a")
         let task = Task { await model.suggest() }
-        try? await Task.sleep(for: .milliseconds(10))
+        for await _ in started { break }
         model.close()
         await task.value
         #expect(!model.isDropdownVisible)
