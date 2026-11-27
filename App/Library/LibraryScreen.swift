@@ -223,8 +223,8 @@ struct LibraryGuestView: View {
                 .font(.rwBody)
                 .foregroundStyle(.textSecondary)
                 .multilineTextAlignment(.center)
-            Button(action: onSignIn) { InversePillLabel(title: "Sign in") }
-                .buttonStyle(.plain)
+            Button("Sign in", action: onSignIn)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
         .padding(Metrics.space24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

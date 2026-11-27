@@ -1,19 +1,5 @@
 import SwiftUI
 
-struct InversePillLabel: View {
-    let title: LocalizedStringKey
-
-    var body: some View {
-        Text(title)
-            .font(.rwButton)
-            .foregroundStyle(.textOnInverse)
-            .padding(.horizontal, Metrics.space16)
-            .frame(height: Metrics.pillHeight)
-            .background(.surfaceInverse, in: Capsule())
-            .fixedSize()
-    }
-}
-
 struct SkeletonChips: View {
     var body: some View {
         HStack(spacing: Metrics.space8) {
@@ -71,8 +57,8 @@ struct PageErrorView: View {
             Text("Couldn't load this page")
                 .font(.rwTitle)
                 .foregroundStyle(.textPrimary)
-            Button(action: onRetry) { InversePillLabel(title: "Retry") }
-                .buttonStyle(.plain)
+            Button("Retry", action: onRetry)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .contain)
@@ -88,8 +74,8 @@ struct UnavailableView: View {
             Text(title)
                 .font(.rwTitle)
                 .foregroundStyle(.textPrimary)
-            Button(action: onBack) { InversePillLabel(title: "Back") }
-                .buttonStyle(.plain)
+            Button("Back", action: onBack)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .contain)

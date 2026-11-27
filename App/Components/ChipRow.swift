@@ -86,11 +86,19 @@ struct ChipRow: View {
 /// Mood and genre buttons with their coloured edge.
 struct LinkChipGrid: View {
     let links: [InnerTube.NavigationLink]
+    var maxRows: Int?
     let onOpen: (InnerTube.NavigationLink) -> Void
+
+    @State private var width: CGFloat = 0
+
+    private var shownLinks: ArraySlice<InnerTube.NavigationLink> {
+        guard let maxRows else { return links[...] }
+        return links.prefix(maxRows * ShelfGeometry.fit(width: width, minimum: 180, spacing: Metrics.space16).count)
+    }
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: Metrics.space16)], spacing: Metrics.space16) {
-            ForEach(Array(links.enumerated()), id: \.offset) { _, link in
+            ForEach(Array(shownLinks.enumerated()), id: \.offset) { _, link in
                 Button { onOpen(link) } label: {
                     HStack(spacing: Metrics.space12) {
                         Rectangle()
@@ -111,6 +119,7 @@ struct LinkChipGrid: View {
                 .onReturn { onOpen(link) }
             }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
     }
 }
 

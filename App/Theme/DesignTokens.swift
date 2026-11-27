@@ -57,6 +57,7 @@ extension Font {
 
 enum Metrics {
     static let unavailableOpacity = 0.4
+    static let pressedOpacity = 0.7
     static let space4: CGFloat = 4
     static let space8: CGFloat = 8
     static let space12: CGFloat = 12
@@ -115,6 +116,7 @@ enum Metrics {
     static let explicitBadge: CGFloat = 14
     static let quickPickRows = 4
     static let rowColumnWidth: CGFloat = 440
+    static let artistColumnWidth: CGFloat = 280
     static let widePageWidth: CGFloat = 1100
     static let playerArtworkMax: CGFloat = 560
     static let playerPanelMinWidth: CGFloat = 360

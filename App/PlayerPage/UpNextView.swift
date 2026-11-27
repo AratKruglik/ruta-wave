@@ -68,11 +68,11 @@ struct UpNextView: View {
             Button("New playlist…") { save(newPlaylist: true) }
             Button("Add to playlist…") { save(newPlaylist: false) }
         } label: {
-            InversePillLabel(title: "Save")
+            Text("Save")
         }
         .menuStyle(.button)
         .menuIndicator(.hidden)
-        .buttonStyle(.plain)
+        .buttonStyle(PillButtonStyle())
         .fixedSize()
         .itemPopover($popover)
         .help("Save the queue as a playlist")
