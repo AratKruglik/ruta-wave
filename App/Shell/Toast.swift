@@ -67,8 +67,7 @@ struct ToastView: View {
             Text(toast.message)
             if toast.undo != nil {
                 Button("Undo", action: onUndo)
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.accentLink)
+                    .buttonStyle(LinkButtonStyle())
                     .help("Undo")
                     .focused($isUndoFocused)
             }

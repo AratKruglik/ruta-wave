@@ -250,7 +250,7 @@ struct LibraryGuestView: View {
                 .foregroundStyle(.textSecondary)
                 .multilineTextAlignment(.center)
             Button("Sign in", action: onSignIn)
-                .buttonStyle(PillButtonStyle(isProminent: true))
+                .buttonStyle(PillButtonStyle())
         }
         .padding(Metrics.space24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

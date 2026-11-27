@@ -48,9 +48,8 @@ struct AccountView: View {
         VStack(spacing: Metrics.space8) {
             Text(message).font(.rwBody).foregroundStyle(.textSecondary)
             Button("Retry", action: onRetry)
-                .buttonStyle(.plain)
+                .buttonStyle(LinkButtonStyle())
                 .font(.rwButton)
-                .foregroundStyle(.accentLink)
         }
     }
 }
