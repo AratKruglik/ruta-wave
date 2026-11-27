@@ -110,6 +110,20 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_IDENTITY: "-"
         DEVELOPMENT_TEAM: ""
+  RutawaveUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources: [AppUITests]
+    dependencies:
+      - target: Rutawave
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.rutawave.uitests
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+        TEST_TARGET_NAME: Rutawave
 schemes:
   Rutawave:
     build:
@@ -117,3 +131,10 @@ schemes:
         Rutawave: all
     test:
       targets: [RutawaveTests]
+  RutawaveUITests:
+    build:
+      targets:
+        Rutawave: all
+        RutawaveUITests: [test]
+    test:
+      targets: [RutawaveUITests]
