@@ -40,6 +40,10 @@ extension MusicItem {
         }
     }
 
+    var artworkSymbol: String {
+        if case .playlist(let playlist) = self, playlist.browseId == Route.likedMusicBrowseId { "heart.fill" } else { "music.note" }
+    }
+
     var isVideoCard: Bool {
         if case .song(let song) = self { song.isVideo } else { false }
     }
@@ -78,7 +82,8 @@ struct MusicCard: View {
     private var artwork: some View {
         ZStack {
             Button { activate(item, navigation: navigation, nowPlaying: nowPlaying) } label: {
-                ArtworkImage(url: item.thumbnailURL, width: width, height: height, isCircle: item.isArtist)
+                ArtworkImage(
+                    url: item.thumbnailURL, width: width, height: height, isCircle: item.isArtist, placeholderSymbol: item.artworkSymbol)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -145,6 +150,7 @@ struct MusicCard: View {
                     .font(.rwTitle)
                     .foregroundStyle(.textPrimary)
                     .lineLimit(1)
+                    .help(item.cardTitle)
                 if item.isExplicit { ExplicitBadge() }
             }
             if let subtitle = item.cardSubtitle {

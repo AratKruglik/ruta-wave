@@ -27,12 +27,16 @@ func text(_ value: JSONValue) -> String? {
     return [joined, value["simpleText"]?.string].lazy.compactMap { $0 }.first { !$0.isEmpty }
 }
 
-private let allowedAvatarHosts = ["ggpht.com", "googleusercontent.com", "ytimg.com"]
+private let allowedAvatarHosts = ["ggpht.com", "googleusercontent.com", "ytimg.com", "gstatic.com"]
 
 func lastThumbnailURL(_ photo: JSONValue) -> URL? {
-    guard let url = photo["thumbnails"]?.array?.last?["url"]?.string.flatMap(URL.init(string:)),
-          url.scheme == "https", let host = url.host?.lowercased(),
+    guard var raw = photo["thumbnails"]?.array?.last?["url"]?.string else { return nil }
+    if raw.hasPrefix("//") { raw = "https:" + raw }
+    guard let url = URL(string: raw), url.scheme == "https", let host = url.host?.lowercased(),
           allowedAvatarHosts.contains(where: { host == $0 || host.hasSuffix("." + $0) })
-    else { return nil }
+    else {
+        parserLog.notice("Rejected thumbnail host \(URL(string: raw)?.host ?? "none", privacy: .public)")
+        return nil
+    }
     return url
 }
