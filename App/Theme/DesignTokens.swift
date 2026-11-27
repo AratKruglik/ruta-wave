@@ -5,15 +5,6 @@ extension Color {
         Color(name, bundle: .main)
     }
 
-    fileprivate init(hex: UInt32, opacity: Double = 1) {
-        self.init(
-            .sRGB,
-            red: Double((hex >> 16) & 0xFF) / 255,
-            green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255,
-            opacity: opacity)
-    }
-
     /// A colour from a response: 0xAARRGGBB.
     init(argb: UInt32) {
         self.init(
@@ -26,20 +17,20 @@ extension Color {
 }
 
 extension ShapeStyle where Self == Color {
-    static var themeBase: Color { Color(hex: 0x313131) }
+    static var themeBase: Color { .asset("RWThemeBase") }
     static var surfaceFill: Color { .asset("RWSurfaceFill") }
     static var surfaceRaised: Color { .asset("RWSurfaceRaised") }
     static var surfaceField: Color { .asset("RWSurfaceField") }
-    static var surfaceInverse: Color { Color(hex: 0xF1F1F1) }
-    static var textPrimary: Color { Color(hex: 0xF1F1F1) }
+    static var surfaceInverse: Color { .asset("RWSurfaceInverse") }
+    static var textPrimary: Color { .asset("RWTextPrimary") }
     static var textSecondary: Color { .asset("RWTextSecondary") }
     static var textTertiary: Color { .asset("RWTextTertiary") }
-    static var textOnInverse: Color { Color(hex: 0x0F0F0F) }
+    static var textOnInverse: Color { .asset("RWTextOnInverse") }
     static var textDisabled: Color { .asset("RWTextDisabled") }
     static var accentProgress: Color { .asset("AccentColor") }
-    static var accentLink: Color { Color(hex: 0x3EA6FF) }
+    static var accentLink: Color { .asset("RWAccentLink") }
     static var strokeSubtle: Color { .asset("RWStrokeSubtle") }
-    static var strokeFocus: Color { Color(hex: 0xF1F1F1) }
+    static var strokeFocus: Color { .asset("RWStrokeFocus") }
     static var scrim: Color { Color.black.opacity(0.60) }
     static var shadow: Color { Color.black.opacity(0.25) }
 }
@@ -51,7 +42,6 @@ extension Font {
     static let rwShelfStrapline = Font.callout
     static let rwTab = Font.body.weight(.medium)
     static let rwNav = Font.title3
-    static let rwNavSelected = Font.title3.weight(.medium)
     static let rwBody = Font.body
     static let rwTitle = Font.body.weight(.medium)
     static let rwCaption = Font.callout
@@ -98,7 +88,6 @@ enum Metrics {
     static let iconTransport: CGFloat = 28
     static let iconPlay: CGFloat = 36
     static let hitTarget: CGFloat = 32
-    static let sidebarItemHeight: CGFloat = 48
     static let pillHeight: CGFloat = 32
     static let artworkSize: CGFloat = 40
     static let videoArtworkWidth: CGFloat = 71

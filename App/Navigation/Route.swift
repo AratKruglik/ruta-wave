@@ -19,8 +19,6 @@ enum SidebarSection: CaseIterable, Hashable, Sendable, Codable {
         }
     }
 
-    var filledSymbol: String { symbol + ".fill" }
-
     /// The value stored as the `startingPage` preference.
     var preference: String {
         switch self {
