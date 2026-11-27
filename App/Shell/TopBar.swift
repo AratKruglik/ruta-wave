@@ -1,50 +1,52 @@
-import AppKit
 import SwiftUI
 
-struct TopBar<AccountPopover: View>: View {
+struct TopBar<AccountPopover: View>: ToolbarContent {
     let isSignedIn: Bool
     let avatarURL: URL?
     let canGoBack: Bool
     let canGoForward: Bool
+    let isSidebarVisible: Bool
+    let selection: SidebarSection
     @Binding var isAccountPresented: Bool
     let onToggleSidebar: () -> Void
     let onBack: () -> Void
     let onForward: () -> Void
+    let onSelectSection: (SidebarSection) -> Void
     let onSignIn: () -> Void
     @ViewBuilder let accountPopover: () -> AccountPopover
 
-    @Environment(\.themeBase) private var themeBase
-
-    var body: some View {
-        HStack(spacing: Metrics.space8) {
-            BarIconButton(symbol: "sidebar.left", size: Metrics.iconBar, label: "Toggle sidebar", action: onToggleSidebar)
-                .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
-            .glassSurface(in: Capsule(), fallback: nil)
-            .padding(.leading, Metrics.space24)
-            HStack(spacing: Metrics.space8) {
-                BarIconButton(symbol: "chevron.left", size: Metrics.iconBar, label: "Back", action: onBack)
-                    .disabled(!canGoBack)
-                BarIconButton(symbol: "chevron.right", size: Metrics.iconBar, label: "Forward", action: onForward)
-                    .disabled(!canGoForward)
+    var body: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigation) {
+            Button(action: onToggleSidebar) { Label("Toggle sidebar", systemImage: "sidebar.left") }
+                .help("Toggle sidebar")
+            if !isSidebarVisible {
+                Menu {
+                    ForEach(SidebarSection.allCases, id: \.self) { section in
+                        Button { onSelectSection(section) } label: { Label(section.title, systemImage: section.symbol) }
+                    }
+                } label: {
+                    Label("Go", systemImage: selection.symbol)
+                }
             }
-            .padding(.horizontal, LiquidGlass.isAvailable ? Metrics.space4 : 0)
-            .glassSurface(in: Capsule(), fallback: nil, interactive: true)
-            Spacer(minLength: Metrics.space16)
-            SearchField()
-                .frame(minWidth: 240, maxWidth: 720)
-            Spacer(minLength: Metrics.space16)
-            trailing
+            Button(action: onBack) { Label("Back", systemImage: "chevron.left") }
+                .help("Back")
+                .disabled(!canGoBack)
+            Button(action: onForward) { Label("Forward", systemImage: "chevron.right") }
+                .help("Forward")
+                .disabled(!canGoForward)
         }
-        .padding(.leading, Metrics.trafficLightsInset)
-        .padding(.trailing, Metrics.space16)
-        .frame(height: Metrics.topBarHeight)
-        .glassGroup()
-        .background(TitleBarDragArea())
-        .background(backdrop)
+        searchItem
+        ToolbarItem(placement: .primaryAction) { trailing }
     }
 
-    /// On macOS 26 the pages' scroll edge effect covers the content under the bar; older systems get the opaque bar.
-    private var backdrop: Color { LiquidGlass.isAvailable ? .clear : themeBase }
+    @ToolbarContentBuilder private var searchItem: some ToolbarContent {
+        if #available(macOS 26, *) {
+            ToolbarItem(placement: .principal) { SearchField().frame(minWidth: 240, idealWidth: 480, maxWidth: 720) }
+                .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .principal) { SearchField().frame(minWidth: 240, idealWidth: 480, maxWidth: 720) }
+        }
+    }
 
     @ViewBuilder private var trailing: some View {
         if isSignedIn {
@@ -77,50 +79,3 @@ struct AccountAvatar: View {
         .accessibilityHidden(true)
     }
 }
-
-private struct TitleBarDragArea: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView { DragView() }
-    func updateNSView(_ view: NSView, context: Context) {}
-
-    private final class DragView: NSView {
-        override var mouseDownCanMoveWindow: Bool { true }
-
-        override func mouseDown(with event: NSEvent) {
-            guard event.clickCount == 2 else {
-                window?.performDrag(with: event)
-                return
-            }
-            switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") {
-            case "Minimize": window?.performMiniaturize(nil)
-            case "None": break
-            default: window?.performZoom(nil)
-            }
-        }
-    }
-}
-
-#if DEBUG
-#Preview("Signed in") {
-    TopBar(
-        isSignedIn: true, avatarURL: nil, canGoBack: true, canGoForward: false, isAccountPresented: .constant(false),
-        onToggleSidebar: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
-    )
-    .frame(width: 1100)
-    .environment(PreviewFixtures.searchFieldModel(.empty))
-    .environment(NavigationModel())
-    .environment(PreviewFixtures.nowPlaying())
-    .background(.themeBase)
-}
-
-#Preview("Guest") {
-    TopBar(
-        isSignedIn: false, avatarURL: nil, canGoBack: false, canGoForward: false, isAccountPresented: .constant(false),
-        onToggleSidebar: {}, onBack: {}, onForward: {}, onSignIn: {}, accountPopover: { EmptyView() }
-    )
-    .frame(width: 960)
-    .environment(PreviewFixtures.searchFieldModel(.empty))
-    .environment(NavigationModel())
-    .environment(PreviewFixtures.nowPlaying())
-    .background(.themeBase)
-}
-#endif

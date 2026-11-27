@@ -43,6 +43,7 @@ struct AppCommands: Commands {
         CommandMenu("Controls") {
             Group {
                 Button("Play / Pause", action: nowPlaying.togglePlay)
+                    .help("Space")
                 Button("Previous", action: nowPlaying.previous)
                     .keyboardShortcut(.leftArrow)
                     .disabled(isEditingText)

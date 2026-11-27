@@ -24,8 +24,8 @@ final class SearchFieldModel {
     private(set) var rows: [Row] = []
     private(set) var isOpen = false
     private(set) var highlighted: Int?
-    @ObservationIgnored var isPointerOverField = false
-    @ObservationIgnored var isPointerOverDropdown = false
+    /// The field's rect in window coordinates, read live so a click can be hit-tested against it.
+    @ObservationIgnored var fieldFrame: () -> CGRect = { .zero }
 
     @ObservationIgnored private let loader: SearchLoader
     @ObservationIgnored private let credentials: @MainActor () -> Credentials?
@@ -86,12 +86,9 @@ final class SearchFieldModel {
         }
     }
 
+    /// Gaining focus never opens the list: focus also returns after a popover, sheet or Settings closes.
     func focusChanged(_ focused: Bool) {
-        if focused {
-            if isPointerOverField { isOpen = true }
-        } else if !isPointerOverDropdown {
-            close()
-        }
+        if !focused { close() }
     }
 
     func open() { isOpen = true }
@@ -170,8 +167,8 @@ final class SearchFieldModel {
         generation += 1
     }
 
-    func mouseDownInWindow() {
-        if isOpen, !isPointerOverField, !isPointerOverDropdown { close() }
+    func mouseDown(at point: CGPoint) {
+        if fieldFrame().contains(point) { open() } else if isOpen { close() }
     }
 
     func showQuery(_ query: String) {

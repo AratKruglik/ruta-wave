@@ -6,7 +6,7 @@ struct WindowEventMonitor: NSViewRepresentable {
     let onBack: @MainActor () -> Void
     let onForward: @MainActor () -> Void
     let onTogglePlay: @MainActor () -> Void
-    var onMouseDown: @MainActor () -> Void = {}
+    var onMouseDown: @MainActor (CGPoint) -> Void = { _ in }
 
     func makeNSView(context: Context) -> MonitorView { MonitorView() }
 
@@ -21,7 +21,7 @@ struct WindowEventMonitor: NSViewRepresentable {
         var onBack: @MainActor () -> Void = {}
         var onForward: @MainActor () -> Void = {}
         var onTogglePlay: @MainActor () -> Void = {}
-        var onMouseDown: @MainActor () -> Void = {}
+        var onMouseDown: @MainActor (CGPoint) -> Void = { _ in }
         private var monitor: Any?
 
         private static let spaceKeyCode: UInt16 = 49
@@ -41,17 +41,17 @@ struct WindowEventMonitor: NSViewRepresentable {
             }
         }
 
-        /// A focused control presses itself on Space; only a window with no first responder plays or pauses.
+        /// A focused control presses itself on Space; only a window with no first responder, or a list (the sidebar), plays or pauses.
         private var isNothingFocused: Bool {
             guard let window else { return false }
-            return window.firstResponder == nil || window.firstResponder === window
+            return window.firstResponder == nil || window.firstResponder === window || window.firstResponder is NSTableView
         }
 
         private func handle(_ event: NSEvent) -> Bool {
             guard event.window === window else { return false }
             switch event.type {
             case .leftMouseDown:
-                onMouseDown()
+                onMouseDown(event.locationInWindow)
                 return false
             case .otherMouseDown:
                 switch event.buttonNumber {

@@ -239,13 +239,45 @@ struct SearchFieldModelTests {
         #expect(model.rows.isEmpty)
     }
 
-    @Test func focusOpensTheDropdownOnlyWithThePointerOverTheField() {
+    @Test func focusNeverOpensTheDropdown() {
         let model = makeModel(Recorder())
         model.focusChanged(true)
         #expect(!model.isOpen)
-        model.isPointerOverField = true
-        model.focusChanged(true)
+    }
+
+    @Test func blurAlwaysCloses() {
+        let model = makeModel(Recorder())
+        model.open()
+        model.focusChanged(false)
+        #expect(!model.isOpen)
+    }
+
+    @Test func explicitActionsOpenTheDropdown() {
+        let typing = makeModel(Recorder())
+        typing.edit("a")
+        #expect(typing.isOpen)
+        let opening = makeModel(Recorder())
+        opening.open()
+        #expect(opening.isOpen)
+    }
+
+    @Test func aMouseDownOnTheFieldReopensAClosedDropdown() {
+        let model = makeModel(Recorder())
+        model.fieldFrame = { CGRect(x: 10, y: 10, width: 100, height: 40) }
+        model.open()
+        model.close()
+        #expect(!model.isOpen)
+        model.mouseDown(at: CGPoint(x: 50, y: 30))
         #expect(model.isOpen)
+    }
+
+    @Test func aMouseDownElsewhereClosesAndKeepsTheText() {
+        let model = makeModel(Recorder())
+        model.fieldFrame = { CGRect(x: 10, y: 10, width: 100, height: 40) }
+        model.edit("rad")
+        model.mouseDown(at: CGPoint(x: 500, y: 500))
+        #expect(!model.isOpen)
+        #expect(model.text == "rad")
     }
 
     @Test func movingTheHighlightOpensAClosedDropdown() {
