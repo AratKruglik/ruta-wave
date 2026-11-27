@@ -11,12 +11,15 @@ private struct GlassSurface<S: Shape>: ViewModifier {
     let fallback: Color?
     let interactive: Bool
     @Environment(\.themeBase) private var themeBase
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
-        if #available(macOS 26, *) {
+        if #available(macOS 26, *), !reduceTransparency {
             content.glassEffect(interactive ? .regular.interactive() : .regular, in: shape)
         } else if let fallback {
             content.background(fallback, in: shape).background(themeBase, in: shape)
+        } else if reduceTransparency {
+            content.background(themeBase, in: shape)
         } else {
             content
         }
@@ -25,13 +28,18 @@ private struct GlassSurface<S: Shape>: ViewModifier {
 
 private struct WindowBackdrop: ViewModifier {
     @Environment(\.themeBase) private var themeBase
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
         if #available(macOS 15, *) {
             content.containerBackground(for: .window) {
-                ZStack {
-                    Rectangle().fill(.ultraThinMaterial)
-                    themeBase.opacity(0.55)
+                if reduceTransparency {
+                    themeBase
+                } else {
+                    ZStack {
+                        Rectangle().fill(.ultraThinMaterial)
+                        themeBase.opacity(0.55)
+                    }
                 }
             }
         } else {
@@ -42,14 +50,15 @@ private struct WindowBackdrop: ViewModifier {
 
 private struct PopoverSurface: ViewModifier {
     @Environment(\.themeBase) private var themeBase
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
-        if LiquidGlass.isAvailable { content } else { content.background(themeBase) }
+        if LiquidGlass.isAvailable && !reduceTransparency { content } else { content.background(themeBase) }
     }
 }
 
 extension View {
-    /// Liquid Glass on macOS 26 and later; before it, `fallback` over the theme base, or nothing when `fallback` is nil.
+    /// Liquid Glass on macOS 26 and later; before it, `fallback` over the theme base, or nothing when `fallback` is nil. The opaque theme base when Reduce Transparency is on.
     func glassSurface(in shape: some Shape, fallback: Color? = .surfaceRaised, interactive: Bool = false) -> some View {
         modifier(GlassSurface(shape: shape, fallback: fallback, interactive: interactive))
     }
@@ -64,9 +73,9 @@ extension View {
         }
     }
 
-    /// Translucent window: the desktop shows through a material tinted with the theme base. Opaque before macOS 15.
+    /// Translucent window: the desktop shows through a material tinted with the theme base. Opaque before macOS 15, and the opaque theme base when Reduce Transparency is on.
     func windowBackdrop() -> some View { modifier(WindowBackdrop()) }
 
-    /// System popovers are Liquid Glass on macOS 26; an opaque fill there would hide it.
+    /// System popovers are Liquid Glass on macOS 26; an opaque fill there would hide it. The opaque theme base when Reduce Transparency is on.
     func popoverSurface() -> some View { modifier(PopoverSurface()) }
 }
