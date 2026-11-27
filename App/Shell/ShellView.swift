@@ -47,6 +47,7 @@ struct ShellView<AccountPopover: View>: View {
                 )
                 .id(isSignedIn)
                 .focusSection()
+                .focusable(!navigation.isPlayerPagePresented)
                 .accessibilityHidden(navigation.isPlayerPagePresented)
                 .barClearance(.bottom, playerBarClearance)
                 .barClearance(.top, Metrics.topBarHeight)
