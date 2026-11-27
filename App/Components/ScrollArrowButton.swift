@@ -10,11 +10,11 @@ struct ScrollArrowButton: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.rwIcon(Metrics.iconRow))
-                .foregroundStyle(isEnabled ? .textPrimary : .textDisabled)
+                .foregroundStyle(.textPrimary)
                 .frame(width: Metrics.shelfControl, height: Metrics.shelfControl)
                 .background(.surfaceFill, in: Circle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(IconButtonStyle())
         .disabled(!isEnabled)
         .help(label)
         .accessibilityHidden(true)

@@ -50,8 +50,8 @@ struct ArtistHeader: View {
     private var actions: some View {
         HStack(spacing: Metrics.space12) {
             if let shuffle = artist.shuffle {
-                Button { nowPlaying.play(shuffle) } label: { InversePillLabel(title: "Shuffle") }
-                    .buttonStyle(.plain)
+                Button("Shuffle") { nowPlaying.play(shuffle) }
+                    .buttonStyle(PillButtonStyle(isProminent: true))
             }
             if let radio = artist.radio {
                 Button { nowPlaying.play(radio) } label: { SecondaryPillLabel(title: "Radio") }
@@ -61,9 +61,9 @@ struct ArtistHeader: View {
                 Button {
                     if nowPlaying.isSignedIn { model.toggleSubscribed() } else { isSubscribePromptShown = true }
                 } label: {
-                    if isSubscribed { SecondaryPillLabel(title: "Subscribed") } else { InversePillLabel(title: "Subscribe") }
+                    Text(isSubscribed ? LocalizedStringKey("Subscribed") : LocalizedStringKey("Subscribe"))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PillButtonStyle())
                 .accessibilityAddTraits(isSubscribed ? .isSelected : [])
                 .guestPrompt(isPresented: $isSubscribePromptShown, reason: "Sign in to subscribe", onSignIn: requestSignIn.perform)
             }
