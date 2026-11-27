@@ -127,13 +127,22 @@ public struct Artist: Sendable, Equatable {
     public let subtitle: String?
     public let thumbnailURL: URL?
     public let rank: ChartRank?
+    /// Only a search top-result card carries these. `nil` when the card has no subscribe button.
+    public let isSubscribed: Bool?
+    /// The channel to subscribe to. It differs from `browseId`.
+    public let channelId: String?
 
-    public init(browseId: String, name: String, subtitle: String? = nil, thumbnailURL: URL? = nil, rank: ChartRank? = nil) {
+    public init(
+        browseId: String, name: String, subtitle: String? = nil, thumbnailURL: URL? = nil, rank: ChartRank? = nil,
+        isSubscribed: Bool? = nil, channelId: String? = nil
+    ) {
         self.browseId = browseId
         self.name = name
         self.subtitle = subtitle
         self.thumbnailURL = thumbnailURL
         self.rank = rank
+        self.isSubscribed = isSubscribed
+        self.channelId = channelId
     }
 }
 

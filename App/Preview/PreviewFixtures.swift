@@ -211,10 +211,11 @@ enum PreviewFixtures {
                     correction: variant == .all
                         ? SearchCorrection(correctedQuery: "radiohead", originalQuery: "radioheed", originalParams: "EgIQAQ%3D%3D") : nil)
             },
-            more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in })
+            more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in },
+            subscribe: { _, _, _ in })
         return SearchModel(
             query: "radiohead", filter: filtered ? searchChips[0].searchParams : nil, chips: variant == .loading ? searchChips : [],
-            loader: loader, credentials: { nil })
+            loader: loader, toasts: ToastCenter(), credentials: { nil })
     }
 
     enum SearchFieldVariant { case empty, history, suggestions }
@@ -226,7 +227,8 @@ enum PreviewFixtures {
             history: variant == .history ? ["daft punk", "boards of canada", "burial"].map { SearchHistoryEntry(query: $0, feedbackToken: $0) } : [])
         let loader = SearchLoader(
             suggestions: { _, _ in suggestions }, search: { _, _, _ in throw InnerTubeError.unexpectedResponse },
-            more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in })
+            more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in },
+            subscribe: { _, _, _ in })
         let model = SearchFieldModel(
             loader: loader, credentials: { Credentials(cookies: []) }, toasts: ToastCenter(), sleep: { _ in })
         model.open()

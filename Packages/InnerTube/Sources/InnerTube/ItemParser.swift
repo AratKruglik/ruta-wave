@@ -58,7 +58,8 @@ enum ItemParser {
         build(
             destination: destination(renderer["onTap"]), title: renderer["title"].flatMap(text),
             subtitleRuns: renderer["subtitle"]?["runs"]?.array ?? [],
-            thumbnail: thumbnail(renderer["thumbnail"]), renderer: renderer)
+            thumbnail: thumbnail(renderer["thumbnail"]), renderer: renderer,
+            subscribe: renderer["buttons"]?.array?.lazy.compactMap { $0["subscribeButtonRenderer"] }.first)
     }
 
     /// A cover sits in a `musicThumbnailRenderer`, or a `croppedSquareThumbnailRenderer` on generated mixes.
@@ -168,7 +169,8 @@ enum ItemParser {
 
     private static func build(
         destination: Destination?, title: String?, subtitleRuns: [JSONValue], subtitle: String? = nil,
-        durationRuns: [JSONValue] = [], thumbnail: JSONValue?, renderer: JSONValue, playTarget: WatchTarget? = nil
+        durationRuns: [JSONValue] = [], thumbnail: JSONValue?, renderer: JSONValue, playTarget: WatchTarget? = nil,
+        subscribe: JSONValue? = nil
     ) -> MusicItem? {
         guard let destination, let title else { return nil }
         let subtitle = (subtitle ?? text(.object(["runs": .array(subtitleRuns)]))).flatMap { $0.isEmpty ? nil : $0 }
@@ -187,7 +189,8 @@ enum ItemParser {
                 browseId: browseId, title: title, subtitle: subtitle, artists: artists, thumbnailURL: url, isExplicit: isExplicit,
                 playTarget: playTarget, params: params))
         case .artist(let browseId):
-            return .artist(Artist(browseId: browseId, name: title, subtitle: subtitle, thumbnailURL: url, rank: rank))
+            return .artist(Artist(browseId: browseId, name: title, subtitle: subtitle, thumbnailURL: url, rank: rank,
+                isSubscribed: subscribe?["subscribed"]?.bool, channelId: subscribe?["channelId"]?.string))
         case .playlist(let browseId):
             return .playlist(Playlist(browseId: browseId, title: title, subtitle: subtitle, thumbnailURL: url, playTarget: playTarget))
         }

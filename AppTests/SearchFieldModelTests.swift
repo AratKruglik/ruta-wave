@@ -35,7 +35,8 @@ private func makeModel(
             feedback: { token, _ in
                 recorder.record(token: token)
                 try await feedback(token)
-            }),
+            },
+            subscribe: { _, _, _ in }),
         credentials: { credentials }, toasts: toasts, sleep: { _ in })
 }
 
