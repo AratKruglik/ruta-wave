@@ -22,6 +22,7 @@ Status as of 2026-11-18: stages 0 and 1.1–1.3 are merged (skeleton, sign-in, I
 | [06-backlog.md](06-backlog.md) | Subtasks for step-by-step delivery, one pipeline run each |
 | [07-designbook.md](07-designbook.md) | How the app looks: layout, colour, type, components |
 | [08-ui-spec.md](08-ui-spec.md) | What every part of the interface does: data, actions, states, guest behaviour |
+| [09-ui-ux-audit.md](09-ui-ux-audit.md) | UI/UX audit of 2026-11-27 (in Ukrainian): 38 findings, tracked in [#148](https://github.com/AratKruglik/ruta-wave/issues/148) |
 
 ## The decision in one paragraph
 
