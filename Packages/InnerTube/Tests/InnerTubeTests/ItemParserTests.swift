@@ -50,6 +50,19 @@ private func row(endpoint: String? = nil, titleRun: String = #"{"text":"Title"}"
         #expect(try ItemParser.item(json(twoRow(endpoint: browse("VLPL1", "MUSIC_PAGE_TYPE_PLAYLIST")))) == .playlist(Playlist(browseId: "VLPL1", title: "Title")))
     }
 
+    @Test func thumbnailSchemeIsHttpsOnly() throws {
+        func cover(_ url: String) throws -> URL? {
+            let extra = #","thumbnailRenderer":{"musicThumbnailRenderer":{"thumbnail":{"thumbnails":[{"url":"\#(url)"}]}}}"#
+            guard case .playlist(let playlist)? = try ItemParser.item(json(twoRow(endpoint: browse("VLPL1", "MUSIC_PAGE_TYPE_PLAYLIST"), extra: extra))) else {
+                Issue.record("expected playlist")
+                return nil
+            }
+            return playlist.thumbnailURL
+        }
+        #expect(try cover("//lh3.googleusercontent.com/a=w226") == URL(string: "https://lh3.googleusercontent.com/a=w226"))
+        #expect(try cover("http://lh3.googleusercontent.com/a=w226") == nil)
+    }
+
     @Test func albumCardKeepsItsBrowseParams() throws {
         let endpoint = #"{"browseEndpoint":{"browseId":"MPREb_1","params":"p1","browseEndpointContextSupportedConfigs":{"browseEndpointContextMusicConfig":{"pageType":"MUSIC_PAGE_TYPE_ALBUM"}}}}"#
         guard case .album(let album)? = try ItemParser.item(json(twoRow(endpoint: endpoint))) else {

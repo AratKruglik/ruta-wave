@@ -1367,6 +1367,16 @@
         }
       }
     },
+    "Paused" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На паузі"
+          }
+        }
+      }
+    },
     "Pick another country above." : {
       "localizations" : {
         "uk" : {

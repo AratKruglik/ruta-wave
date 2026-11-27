@@ -1079,4 +1079,27 @@ struct ResumeOnStartTests {
         await h.settle()
         #expect(h.preferences.lastPlayback?.elapsed == 50)
     }
+
+    @Test func currentRowFollowsTheQueuePositionAmongDuplicates() {
+        let h = Harness()
+        let songs = [Song(videoId: "a", title: "T"), Song(videoId: "b", title: "T"), Song(videoId: "a", title: "T")]
+        h.player.song = song("a")
+        h.player.queue = [item("a", current: false), item("b", current: false), item("a", current: true)]
+        #expect(h.model.currentRow(in: songs) == 2)
+    }
+
+    @Test func currentRowFallsBackToTheFirstMatch() {
+        let h = Harness()
+        let songs = [Song(videoId: "a", title: "T"), Song(videoId: "b", title: "T"), Song(videoId: "a", title: "T")]
+        h.player.song = song("a")
+        h.player.queue = [item("b", current: true)]
+        #expect(h.model.currentRow(in: songs) == 0)
+        h.player.queue = [item("x", current: false), item("y", current: false), item("z", current: false), item("a", current: true)]
+        #expect(h.model.currentRow(in: songs) == 0)
+    }
+
+    @Test func currentRowIsNilWithoutASong() {
+        let h = Harness()
+        #expect(h.model.currentRow(in: [Song(videoId: "a", title: "T")]) == nil)
+    }
 }

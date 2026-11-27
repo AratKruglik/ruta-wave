@@ -150,8 +150,8 @@ struct LibraryScreen: View {
     private var songActions: some View {
         let liked = MusicItem.playlist(Playlist(browseId: Route.likedMusicBrowseId, title: String(localized: "Liked music")))
         return HStack(spacing: Metrics.space12) {
-            Button { nowPlaying.play(liked) } label: { InversePillLabel(title: "Play") }
-                .buttonStyle(.plain)
+            Button("Play") { nowPlaying.play(liked) }
+                .buttonStyle(PillButtonStyle(isProminent: true))
             Button { nowPlaying.shuffle(liked) } label: { HeaderPill(symbol: "shuffle", title: Text("Shuffle")) }
                 .buttonStyle(.plain)
         }

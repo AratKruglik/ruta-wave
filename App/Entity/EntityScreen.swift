@@ -5,6 +5,7 @@ struct EntityScreen: View {
     let model: EntityModel
 
     @Environment(NavigationModel.self) private var navigation
+    @Environment(NowPlayingModel.self) private var nowPlaying
     @State private var width = Metrics.defaultWindowWidth
     @State private var selection = TrackSelection()
 
@@ -88,11 +89,13 @@ struct EntityScreen: View {
         EntityHeader(model: model, header: album.header, isSaved: content.isSaved, isWide: isWide)
             .padding(.horizontal, padding)
         let order = album.tracks.map(\.song.rowKey)
+        let showsArtwork = album.tracks.contains { $0.song.thumbnailURL != nil }
         VStack(spacing: 0) {
             ForEach(album.tracks.indices, id: \.self) { index in
                 let song = album.tracks[index].song
                 TrackRow(
-                    song: song, density: .numbered, selection: $selection.row(for: song, order: order, songs: album.tracks.map(\.song)), number: album.tracks[index].number)
+                    song: song, density: .numbered, selection: $selection.row(for: song, order: order, songs: album.tracks.map(\.song)), number: album.tracks[index].number,
+                    showsArtwork: showsArtwork)
             }
         }
         .padding(.horizontal, padding)
@@ -117,11 +120,13 @@ struct EntityScreen: View {
         EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, isWide: isWide)
             .padding(.horizontal, padding)
         let order = content.tracks.map(\.rowKey)
+        let currentRow = nowPlaying.currentRow(in: content.tracks)
         LazyVStack(spacing: 0) {
             ForEach(content.tracks.indices, id: \.self) { index in
                 let song = content.tracks[index]
                 TrackRow(
                     song: song, density: .detailed, selection: $selection.row(for: song, order: order, songs: content.tracks),
+                    isCurrentRow: index == currentRow,
                     place: model.canEdit ? .ownPlaylistRow : .plain, sourcePlaylistId: model.canEdit ? model.playlistBrowseId : nil,
                     onAction: { if $0 == .removeFromPlaylist { model.removeRows([song.rowKey]) } })
                     .dropDestination(for: TrackDrag.self) { drags, _ in reorder(drags, before: song) }
@@ -207,13 +212,15 @@ private struct SuggestionsShelf: View {
                 .font(.rwShelfTitle)
                 .foregroundStyle(.textPrimary)
                 .accessibilityAddTraits(.isHeader)
-            ForEach(Array(shelf.items.enumerated()), id: \.offset) { _, item in
-                if case .song(let song) = item {
-                    HStack(spacing: Metrics.space12) {
-                        TrackRow(song: song, density: .detailed)
-                        Button("Add") { onAdd(song) }
-                            .buttonStyle(PillButtonStyle())
-                            .accessibilityLabel("Add \(song.title)")
+            VStack(spacing: 0) {
+                ForEach(Array(shelf.items.enumerated()), id: \.offset) { _, item in
+                    if case .song(let song) = item {
+                        HStack(spacing: Metrics.space12) {
+                            TrackRow(song: song, density: .detailed)
+                            Button("Add") { onAdd(song) }
+                                .buttonStyle(PillButtonStyle())
+                                .accessibilityLabel("Add \(song.title)")
+                        }
                     }
                 }
             }

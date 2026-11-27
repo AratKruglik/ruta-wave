@@ -71,8 +71,8 @@ struct RelatedEmptyView: View {
         ContentUnavailableView {
             Text("Nothing related for this track").font(.rwTitle)
         } actions: {
-            Button(action: onRetry) { InversePillLabel(title: "Retry") }
-                .buttonStyle(.plain)
+            Button("Retry", action: onRetry)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
     }
 }
@@ -91,8 +91,8 @@ struct RelatedErrorView: View {
         } description: {
             Text(reason)
         } actions: {
-            Button(action: onRetry) { InversePillLabel(title: "Retry") }
-                .buttonStyle(.plain)
+            Button("Retry", action: onRetry)
+                .buttonStyle(PillButtonStyle(isProminent: true))
         }
     }
 }
