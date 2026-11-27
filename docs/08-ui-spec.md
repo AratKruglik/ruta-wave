@@ -68,6 +68,10 @@ sidebar playlist list (replaced by the sign-in card) and the avatar menu.
 **Shows:** sidebar toggle, back, forward, search field,
 avatar (signed in) or **Sign in** pill (guest).
 
+Pages reserve the bar's height as a safe area (the player bar's too). On
+macOS 26 and later content scrolls under both bars behind the system scroll
+edge effect; earlier systems get an opaque top bar.
+
 **Actions**
 - Sidebar toggle (⌃⌘S): collapses / expands the sidebar; state is remembered.
 - Back / forward: see 1.3; disabled when there is nowhere to go.
