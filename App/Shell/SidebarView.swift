@@ -221,9 +221,8 @@ private struct PlaylistList: View {
                     .font(.rwCaption)
                     .foregroundStyle(.textSecondary)
                 Button("Retry", action: onRetry)
-                    .buttonStyle(.plain)
+                    .buttonStyle(LinkButtonStyle())
                     .font(.rwCaption)
-                    .foregroundStyle(.accentLink)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, Metrics.space12)

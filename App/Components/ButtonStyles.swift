@@ -25,6 +25,16 @@ struct IconButtonStyle: ButtonStyle {
     }
 }
 
+struct LinkButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(.accentLink)
+            .opacity(isEnabled ? (configuration.isPressed ? Metrics.pressedOpacity : 1) : Metrics.unavailableOpacity)
+    }
+}
+
 struct BarIconButton: View {
     let symbol: String
     let size: CGFloat

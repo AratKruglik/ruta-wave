@@ -53,7 +53,7 @@ struct TopBar<AccountPopover: View>: ToolbarContent {
             Button { isAccountPresented.toggle() } label: {
                 AccountAvatar(url: avatarURL, size: Metrics.avatarSize)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(IconButtonStyle())
             .help("Account")
             .accessibilityLabel("Account")
             .popover(isPresented: $isAccountPresented) { accountPopover() }

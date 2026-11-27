@@ -38,9 +38,8 @@ struct InlineErrorRow: View {
                 .font(.rwBody)
                 .foregroundStyle(.textSecondary)
             Button("Retry", action: onRetry)
-                .buttonStyle(.plain)
+                .buttonStyle(LinkButtonStyle())
                 .font(.rwButton)
-                .foregroundStyle(.accentLink)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Metrics.space16)

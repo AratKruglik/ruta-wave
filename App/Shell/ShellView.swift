@@ -234,9 +234,8 @@ private struct GuestBanner: View {
                 .font(.rwBody)
                 .foregroundStyle(.textPrimary)
             Button("Retry", action: onRetry)
-                .buttonStyle(.plain)
+                .buttonStyle(LinkButtonStyle())
                 .font(.rwButton)
-                .foregroundStyle(.accentLink)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Metrics.space8)
