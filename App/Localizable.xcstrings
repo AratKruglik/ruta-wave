@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ of %@" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ з %@"
+          }
+        }
+      }
+    },
     "%lld selected" : {
       "localizations" : {
         "uk" : {

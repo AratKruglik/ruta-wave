@@ -129,6 +129,7 @@ struct EntityHeader: View {
                         .buttonStyle(.plain)
                         .font(.rwTitle)
                         .foregroundStyle(.textPrimary)
+                        .modifier(LinkPointer())
                 } else {
                     Text(artist.name).font(.rwTitle).foregroundStyle(.textPrimary)
                 }

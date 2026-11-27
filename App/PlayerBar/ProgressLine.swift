@@ -72,12 +72,18 @@ struct ProgressLine: View {
         }
         .frame(height: Self.hitHeight)
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: isActive)
-        .accessibilityElement()
-        .accessibilityLabel("Playback position")
-        .accessibilityValue(Text(verbatim: PlaybackRules.formatTime(player.elapsed)))
-        .accessibilityAdjustableAction { direction in
-            guard isEnabled else { return }
-            nowPlaying.skip(by: direction == .increment ? Self.skipSeconds : -Self.skipSeconds)
+        .accessibilityRepresentation {
+            Slider(
+                value: Binding(get: { min(max(player.elapsed, 0), max(duration, 1)) }, set: { nowPlaying.seek(to: $0) }),
+                in: 0...max(duration, 1)
+            )
+            .accessibilityLabel("Playback position")
+            .accessibilityValue("\(PlaybackRules.formatTime(player.elapsed)) of \(PlaybackRules.formatTime(duration))")
+            .accessibilityAdjustableAction { direction in
+                guard isEnabled else { return }
+                nowPlaying.skip(by: direction == .increment ? Self.skipSeconds : -Self.skipSeconds)
+            }
+            .disabled(!isEnabled)
         }
     }
 }

@@ -7,12 +7,34 @@ import SwiftUI
 import SystemKit
 import UserNotifications
 
+#if DEBUG
+enum UITestFixtures {
+    static let isEnabled = ProcessInfo.processInfo.arguments.contains("-UITestFixtures")
+
+    static var route: URL? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-UITestRoute"), arguments.indices.contains(index + 1) else { return nil }
+        return URL(string: arguments[index + 1])
+    }
+
+    @MainActor static let preferences: Preferences = {
+        let suite = "RutawaveUITests"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        return Preferences(defaults: defaults)
+    }()
+}
+#endif
+
 @main
 struct RutawaveApp: App {
     @NSApplicationDelegateAdaptor private var app: AppDelegate
     @Environment(\.openWindow) private var openWindow
 
     init() {
+        #if DEBUG
+        guard !UITestFixtures.isEnabled else { return }
+        #endif
         // SecItemDelete can block on a Keychain prompt for the old binary's item, so this must stay off the main actor.
         Task.detached(priority: .utility) { LegacyStores.remove() }
         Task.detached(priority: .utility) { await InnerTubeClient().refreshClientVersion() }
@@ -65,32 +87,59 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var playerWindow: PlayerWindow?
 
     override init() {
+        #if DEBUG
+        let isFixture = UITestFixtures.isEnabled
+        let session = isFixture ? AuthSession.fixtureGuest() : AuthSession()
+        #else
+        let isFixture = false
         let session = AuthSession()
+        #endif
         let player = PlayerEngine()
         let toasts = ToastCenter()
         self.session = session
         self.player = player
         self.toasts = toasts
+        #if DEBUG
+        if isFixture {
+            nowPlaying = NowPlayingModel(
+                player: PreviewPlayer(), toasts: toasts, preferences: UITestFixtures.preferences, credentials: { nil }, client: nil)
+        } else {
+            nowPlaying = NowPlayingModel(player: player, toasts: toasts, credentials: { session.credentials })
+        }
+        #else
         nowPlaying = NowPlayingModel(player: player, toasts: toasts, credentials: { session.credentials })
+        #endif
         let systemNowPlaying = SystemNowPlaying(
             send: { [nowPlaying] in nowPlaying.perform($0) }, publish: { [player] in player.publishNowPlaying($0) })
         nowPlaying.albumChanged = { systemNowPlaying.setAlbum($1, for: $0) }
         self.systemNowPlaying = systemNowPlaying
-        NotificationsPlugin.migrateLegacySetting()
+        if !isFixture { NotificationsPlugin.migrateLegacySetting() }
         let notifications = NotificationsPlugin(posting: UserNotificationPosting(), isFrontmost: { NSApp.isActive })
         self.notifications = notifications
         plugins = PluginRegistry(plugins: [notifications], player: player)
         super.init()
+        #if DEBUG
+        if isFixture, let route = UITestFixtures.route {
+            links.pending = MusicLink(route)
+            if links.pending == nil { assertionFailure("Rejected -UITestRoute: \(route)") }
+        }
+        #endif
         statusMenu = StatusMenu(
             nowPlaying: nowPlaying, showMainWindow: { [weak self] in self?.showMainWindow() },
             showMiniPlayer: { [weak self] in self?.showMiniPlayer() })
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
+        #if DEBUG
+        guard !UITestFixtures.isEnabled else { return }
+        #endif
         applyPresentation()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if DEBUG
+        guard !UITestFixtures.isEnabled else { return }
+        #endif
         let preferences = Preferences()
         // The single-account migration signs out without an isSignedIn change, so no observer clears the old account's track.
         if session.droppedLegacySession { preferences.lastPlayback = nil }

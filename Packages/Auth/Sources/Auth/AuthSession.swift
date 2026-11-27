@@ -10,7 +10,7 @@ public final class AuthSession {
         case keychainUnavailable(KeychainError)
     }
 
-    private static let migrationKey = "singleAccountMigrated"
+    static let migrationKey = "singleAccountMigrated"
     private static let legacyIndexKey = "authUserIndex"
 
     public private(set) var state: State = .signedOut

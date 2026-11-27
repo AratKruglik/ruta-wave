@@ -45,7 +45,35 @@ struct RootView: View {
     /// Later main windows (a Dock reopen after closing) keep the page the user left instead of re-running launch rules.
     @MainActor private static var hasRestoredLaunchState = false
 
+    private static var isFixture: Bool {
+        #if DEBUG
+        UITestFixtures.isEnabled
+        #else
+        false
+        #endif
+    }
+
     init(session: AuthSession, nowPlaying: NowPlayingModel, toasts: ToastCenter, network: NetworkMonitor, links: LinkInbox) {
+        #if DEBUG
+        if Self.isFixture {
+            self.session = session
+            self.nowPlaying = nowPlaying
+            self.toasts = toasts
+            self.network = network
+            self.links = links
+            let preferences = UITestFixtures.preferences
+            _navigation = State(initialValue: .restored(from: nil, isSignedIn: false))
+            _browse = State(initialValue: BrowseStore(
+                loader: PreviewFixtures.browseLoader(.guest), searchLoader: PreviewFixtures.searchLoader(.all),
+                entityLoader: PreviewFixtures.entityLoader(.playlist), libraryLoader: PreviewFixtures.libraryLoader(.playlists),
+                toasts: toasts, credentials: { nil }, preferences: preferences))
+            _trackTabs = State(initialValue: TrackTabsModel(loader: PreviewFixtures.trackTabsLoader(), credentials: { nil }))
+            _sidebar = State(initialValue: SidebarModel(loader: PreviewFixtures.sidebarLoader(.guest), credentials: { nil }, toasts: toasts))
+            _searchField = State(initialValue: SearchFieldModel(
+                loader: PreviewFixtures.searchLoader(.all), credentials: { nil }, toasts: toasts))
+            return
+        }
+        #endif
         self.session = session
         self.nowPlaying = nowPlaying
         self.toasts = toasts
@@ -120,6 +148,7 @@ struct RootView: View {
             isNewPlaylistPresented = false
         }
         .onChange(of: navigation.snapshot(isSignedIn: session.state.isSignedIn)) { _, snapshot in
+            guard !Self.isFixture else { return }
             Preferences().navigationState = try? JSONEncoder().encode(snapshot)
         }
         .onChange(of: links.pending, initial: true) { _, link in
@@ -137,13 +166,13 @@ struct RootView: View {
             sidebar.applyLibraryChange(change.playlist, saved: change.saved)
             Task { await sidebar.load() }
         }
-        .onChange(of: session.state.isSignedIn || guest.state == .connected, initial: true) { _, ready in
+        .onChange(of: session.state.isSignedIn || guest.state == .connected || Self.isFixture, initial: true) { _, ready in
             browse.setReady(ready)
         }
         .onChange(of: session.isSessionExpired, initial: true) { _, expired in
             if expired { isSigningIn = true }
         }
-        .sheet(isPresented: Binding(get: { isSigningIn }, set: { if !$0 { cancelSignIn() } })) {
+        .sheet(isPresented: Binding(get: { isSigningIn && !Self.isFixture }, set: { if !$0 { cancelSignIn() } })) {
             SignInSheet(session: session, onCancel: cancelSignIn)
         }
         .sheet(isPresented: $isNewPlaylistPresented) {
@@ -184,7 +213,7 @@ struct RootView: View {
             await sidebar.load()
         }
         .task(id: ReloadKey(identity: session.state.isSignedIn, attempt: guestAttempt)) {
-            guard !session.state.isSignedIn else { return }
+            guard !session.state.isSignedIn, !Self.isFixture else { return }
             await guest.connect()
         }
     }
