@@ -1,3 +1,4 @@
+import AppKit
 import InnerTube
 import SwiftUI
 
@@ -23,31 +24,59 @@ struct SidebarView: View {
         let deletes: Bool
     }
 
+    /// Clicks navigate through the row's own tap, so a re-click on the selected row still reaches the action
+    /// (the List only reports changes); the selection setter takes keyboard and VoiceOver changes.
+    private var selection: Binding<SidebarItem?> {
+        Binding(
+            get: { selectedPlaylistId.map(SidebarItem.playlist) ?? .section(selectedSection) },
+            set: { item in
+                let mouseEvents: Set<NSEvent.EventType> = [.leftMouseDown, .leftMouseUp, .rightMouseDown, .rightMouseUp]
+                guard let item, !mouseEvents.contains(NSApp.currentEvent?.type ?? .applicationDefined) else { return }
+                activate(item)
+            })
+    }
+
+    private func activate(_ item: SidebarItem) {
+        switch item {
+        case .section(let section): onSelectSection(section)
+        case .playlist(let browseId): onSelectPlaylist(browseId)
+        }
+    }
+
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: Metrics.space4) {
+        List(selection: selection) {
+            Section {
                 ForEach(SidebarSection.allCases, id: \.self) { section in
-                    NavItem(section: section, isSelected: selectedPlaylistId == nil && selectedSection == section) {
-                        onSelectSection(section)
-                    }
+                    Label { Text(section.title) } icon: { Image(systemName: section.symbol) }
+                        .sidebarRow(.section(section)) { activate(.section(section)) }
                 }
-                Divider()
-                    .overlay(.strokeSubtle)
-                    .padding(.vertical, Metrics.space16)
-                NewPlaylistButton(isSignedIn: isSignedIn, onNewPlaylist: onNewPlaylist, onSignIn: onSignIn)
+            }
+            Section {
                 if isSignedIn {
                     PlaylistList(
-                        model: model, selectedId: selectedPlaylistId, onSelect: onSelectPlaylist, onRetry: onRetry,
+                        model: model, onRetry: onRetry,
                         onRequestDelete: { pendingRemoval = Removal(playlist: $0, deletes: true) }, onRemove: removeFromLibrary,
-                        onResolve: resolveAndAct, onConfirmRemoval: confirmRemoval)
+                        onResolve: resolveAndAct, activate: { activate(.playlist($0)) })
                 } else {
                     GuestCard(onSignIn: onSignIn)
                 }
+            } header: {
+                HStack {
+                    Text("Playlists")
+                    Spacer()
+                    NewPlaylistButton(isSignedIn: isSignedIn, onNewPlaylist: onNewPlaylist, onSignIn: onSignIn)
+                }
             }
-            .padding(.horizontal, Metrics.space12)
-            .padding(.top, Metrics.space8)
         }
+        .listStyle(.sidebar)
         .contentMargins(.bottom, Metrics.contentBottomMargin, for: .scrollContent)
+        .onDeleteCommand(perform: deleteSelectedPlaylist)
+        .task(id: selectedPlaylistId) {
+            guard let selectedPlaylistId, selectedPlaylistId != Route.likedMusicBrowseId else { return }
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
+            await model.resolveOwnership(selectedPlaylistId)
+        }
         .confirmationDialog(
             pendingRemoval?.deletes == false ? "Remove this playlist from your library?" : "Delete this playlist?",
             isPresented: Binding(get: { pendingRemoval != nil }, set: { if !$0 { pendingRemoval = nil } }),
@@ -66,6 +95,13 @@ struct SidebarView: View {
                 Text("“\(removal.playlist.title)” will be removed from your library. You can save it again later.")
             }
         }
+    }
+
+    private func deleteSelectedPlaylist() {
+        guard let selectedPlaylistId, selectedPlaylistId != Route.likedMusicBrowseId,
+              case .loaded(let playlists) = model.state,
+              let playlist = playlists.first(where: { $0.browseId == selectedPlaylistId }) else { return }
+        confirmRemoval(playlist)
     }
 
     private func delete(_ playlist: Playlist) {
@@ -136,52 +172,35 @@ private struct NewPlaylistButton: View {
     }
 }
 
-private struct NavItem: View {
-    let section: SidebarSection
-    let isSelected: Bool
-    let action: () -> Void
+private enum SidebarItem: Hashable {
+    case section(SidebarSection)
+    case playlist(String)
+}
 
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: Metrics.space12) {
-                Image(systemName: isSelected ? section.filledSymbol : section.symbol)
-                    .font(.rwIcon(Metrics.iconSidebar - 4))
-                    .frame(width: Metrics.iconSidebar)
-                Text(section.title)
-                    .font(isSelected ? .rwNavSelected : .rwNav)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Metrics.space12)
-            .frame(height: Metrics.sidebarItemHeight)
-            .background(isSelected ? .surfaceFill : Color.clear, in: RoundedRectangle(cornerRadius: Metrics.radiusCard))
-            .contentShape(RoundedRectangle(cornerRadius: Metrics.radiusCard))
-        }
-        .buttonStyle(.plain)
-        .onReturn(action)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+private extension View {
+    func sidebarRow(_ item: SidebarItem, action: @escaping () -> Void) -> some View {
+        frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .tag(item)
+            .simultaneousGesture(TapGesture().onEnded(action))
     }
 }
 
 private struct PlaylistList: View {
     let model: SidebarModel
-    let selectedId: String?
-    let onSelect: (String) -> Void
     let onRetry: () -> Void
     let onRequestDelete: (Playlist) -> Void
     let onRemove: (Playlist) -> Void
     let onResolve: (Playlist) -> Void
-    let onConfirmRemoval: (Playlist) -> Void
+    let activate: (String) -> Void
 
     @Environment(NowPlayingModel.self) private var nowPlaying
-
 
     var body: some View {
         switch model.state {
         case .loading:
             ForEach(0..<3, id: \.self) { _ in
-                PlaylistRow(title: "Playlist title", subtitle: .text("Owner"), isSelected: false, action: {})
+                PlaylistRow(title: "Playlist title", subtitle: .text("Owner"))
                     .redacted(reason: .placeholder)
                     .accessibilityHidden(true)
             }
@@ -196,10 +215,10 @@ private struct PlaylistList: View {
             ForEach(playlists, id: \.browseId) { playlist in
                 PlaylistRow(
                     title: playlist.browseId == Route.likedMusicBrowseId ? String(localized: "Liked music") : playlist.title,
-                    subtitle: subtitle(for: playlist), isSelected: selectedId == playlist.browseId,
+                    subtitle: subtitle(for: playlist),
                     onPrefetch: playlist.browseId == Route.likedMusicBrowseId ? nil : { await model.resolveOwnership(playlist.browseId) }
-                ) { onSelect(playlist.browseId) }
-                .onDeleteCommand(perform: playlist.browseId == Route.likedMusicBrowseId ? nil : { onConfirmRemoval(playlist) })
+                )
+                .sidebarRow(.playlist(playlist.browseId)) { activate(playlist.browseId) }
                 .contextMenu { menu(for: playlist) }
                 .dropDestination(for: TrackDrag.self) { drags, _ in drop(drags, on: playlist) }
             }
@@ -257,43 +276,30 @@ private struct PlaylistRow: View {
 
     let title: String
     let subtitle: Subtitle
-    let isSelected: Bool
-    /// Runs after the pointer or keyboard focus rests on the row, so a later menu can already know the playlist's owner.
+    /// Runs after the pointer rests on the row, so a later menu can already know the playlist's owner.
     var onPrefetch: (() async -> Void)?
-    let action: () -> Void
 
     @State private var isHovering = false
-    @FocusState private var isFocused: Bool
 
     var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: title)
-                    .font(.rwTitle)
-                    .foregroundStyle(.textPrimary)
-                    .lineLimit(1)
-                subtitleView
-                    .font(.rwCaption)
-                    .foregroundStyle(.textSecondary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, Metrics.space12)
-            .padding(.vertical, Metrics.space8)
-            .background(isSelected ? .surfaceFill : Color.clear, in: RoundedRectangle(cornerRadius: Metrics.radiusCard))
-            .contentShape(RoundedRectangle(cornerRadius: Metrics.radiusCard))
+        VStack(alignment: .leading, spacing: 0) {
+            Text(verbatim: title)
+                .font(.rwTitle)
+                .foregroundStyle(.textPrimary)
+                .lineLimit(1)
+            subtitleView
+                .font(.rwCaption)
+                .foregroundStyle(.textSecondary)
+                .lineLimit(1)
         }
-        .buttonStyle(.plain)
-        .focused($isFocused)
-        .onReturn(action)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .onHover { isHovering = $0 }
-        .task(id: isHovering || isFocused) {
-            guard isHovering || isFocused, let onPrefetch else { return }
+        .task(id: isHovering) {
+            guard isHovering, let onPrefetch else { return }
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
             await onPrefetch()
         }
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     @ViewBuilder private var subtitleView: some View {

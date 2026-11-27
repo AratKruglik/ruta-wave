@@ -62,11 +62,9 @@ struct SearchField: View {
         .glassSurface(in: shape, fallback: .surfaceField)
         .contentShape(shape)
         .onTapGesture { isFocused = true }
-        .onHover { model.isPointerOverField = $0 }
-        .overlay(alignment: .topLeading) {
-            if model.isDropdownVisible {
+        .background {
+            SuggestionPanel(isPresented: model.isDropdownVisible, model: model) {
                 SearchDropdown(model: model) { perform($0) }
-                    .offset(y: Metrics.searchFieldHeight + Metrics.space4)
             }
         }
         .onChange(of: isFocused) { _, focused in

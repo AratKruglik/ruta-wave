@@ -294,7 +294,7 @@ private struct ShortcutsSettings: View {
         ("Like", Text(verbatim: "⌥⌘L")),
         ("Dislike", Text(verbatim: "⌥⌘D")),
         ("Player Page", Text(verbatim: "⌘P")),
-        ("Search", Text(verbatim: "⌘F")),
+        ("Search", Text(verbatim: "⌘F, ⌘L")),
         ("Back", Text(verbatim: "⌘[")),
         ("Forward", Text(verbatim: "⌘]")),
         ("Mini Player", Text(verbatim: "⇧⌘M")),
