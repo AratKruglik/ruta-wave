@@ -254,6 +254,19 @@ struct SearchModelTests {
     }
 }
 
+@Test(arguments: [
+    ("EgWKAQIIAWoK", SearchSection.Kind.songs), ("EgWKAQIQAWoK", .videos), ("EgWKAQIYAWoK", .albums),
+    ("EgWKAQIgAWoK", .artists), ("EgeKAQQoAEABX", .playlists), ("EgeKAQQoADgBX", .playlists),
+])
+func filterParamsMapToTheirKind(params: String, kind: SearchSection.Kind) {
+    #expect(SearchSection.Kind(filter: params) == kind)
+}
+
+@Test func missingOrUnknownFilterParamsHaveNoKind() {
+    #expect(SearchSection.Kind(filter: nil) == nil)
+    #expect(SearchSection.Kind(filter: "zzz") == nil)
+}
+
 private func video(_ id: String) -> MusicItem { song(id, video: true) }
 
 private final class Counter: @unchecked Sendable {

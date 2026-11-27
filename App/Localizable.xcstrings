@@ -271,22 +271,22 @@
         }
       }
     },
-    "Check the spelling or try different keywords." : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перевірте написання або спробуйте інші слова."
-          }
-        }
-      }
-    },
     "Clear" : {
       "localizations" : {
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Очистити"
+          }
+        }
+      }
+    },
+    "Clear search" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистити пошук"
           }
         }
       }
@@ -1163,16 +1163,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Наразі немає новинок"
-          }
-        }
-      }
-    },
-    "No results for “%@”" : {
-      "localizations" : {
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нічого не знайдено за запитом «%@»"
           }
         }
       }

@@ -75,7 +75,7 @@ struct SearchFieldModelTests {
     @Test func aGuestWithEmptyTextSendsNothingAndShowsNoDropdown() async {
         let recorder = Recorder()
         let model = makeModel(recorder, credentials: nil, suggestions: { _ in rich(["x"]) })
-        model.focusChanged(true)
+        model.open()
         await model.suggest()
         #expect(recorder.inputs.isEmpty)
         #expect(model.rows.isEmpty)
@@ -86,7 +86,7 @@ struct SearchFieldModelTests {
         let model = makeModel(Recorder(), suggestions: { _ in
             rich((1...9).map { "h\($0)" }, queries: ["q"])
         })
-        model.focusChanged(true)
+        model.open()
         await model.suggest()
         #expect(model.rows.count == SearchFieldModel.historyLimit + 1)
         #expect(model.rows.first == .history(entry("h1")))
@@ -166,7 +166,7 @@ struct SearchFieldModelTests {
         let model = makeModel(recorder, suggestions: { _ in rich(["a", "b"]) }, feedback: { _ in
             try await Task.sleep(for: .milliseconds(50))
         })
-        model.focusChanged(true)
+        model.open()
         await model.suggest()
         model.remove(entry("a"))
         model.remove(entry("a"))
@@ -181,7 +181,7 @@ struct SearchFieldModelTests {
     @Test func failedRemovalRestoresTheRowInPlaceWithAToast() async {
         let toasts = ToastCenter()
         let model = makeModel(Recorder(), toasts: toasts, suggestions: { _ in rich(["a", "b"]) }, feedback: { _ in throw Failure() })
-        model.focusChanged(true)
+        model.open()
         await model.suggest()
         model.remove(entry("a"))
         #expect(await waitUntil { model.rows.count == 2 })
@@ -196,7 +196,7 @@ struct SearchFieldModelTests {
                 try await Task.sleep(for: .milliseconds(50))
                 throw Failure()
             })
-        model.focusChanged(true)
+        model.open()
         await model.suggest()
         model.remove(entry("a"))
         await model.suggest()
@@ -212,7 +212,7 @@ struct SearchFieldModelTests {
             try await Task.sleep(for: .milliseconds(50))
             throw Failure()
         })
-        model.focusChanged(true)
+        model.open()
         await model.suggest()
         model.remove(entry("a"))
         model.reset()
@@ -235,5 +235,20 @@ struct SearchFieldModelTests {
         await task.value
         #expect(!model.isDropdownVisible)
         #expect(model.rows.isEmpty)
+    }
+
+    @Test func focusOpensTheDropdownOnlyWithThePointerOverTheField() {
+        let model = makeModel(Recorder())
+        model.focusChanged(true)
+        #expect(!model.isOpen)
+        model.isPointerOverField = true
+        model.focusChanged(true)
+        #expect(model.isOpen)
+    }
+
+    @Test func movingTheHighlightOpensAClosedDropdown() {
+        let model = makeModel(Recorder())
+        model.moveHighlight(1)
+        #expect(model.isOpen)
     }
 }

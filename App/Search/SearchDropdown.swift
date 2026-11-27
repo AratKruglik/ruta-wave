@@ -12,6 +12,9 @@ struct SearchDropdown: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(model.rows.enumerated()), id: \.offset) { index, row in
+                if case .item = row, index > 0, !model.rows[index - 1].isItem {
+                    Divider().overlay(.strokeSubtle).padding(.vertical, Metrics.space4)
+                }
                 rowView(row, isHighlighted: model.highlighted == index)
             }
         }
@@ -35,6 +38,10 @@ struct SearchDropdown: View {
             EntityRow(item: item, isHighlighted: isHighlighted) { onAction(model.activate(row)) }
         }
     }
+}
+
+extension SearchFieldModel.Row {
+    fileprivate var isItem: Bool { if case .item = self { true } else { false } }
 }
 
 private struct RowChrome<Content: View>: View {

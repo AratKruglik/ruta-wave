@@ -229,7 +229,7 @@ enum PreviewFixtures {
             more: { _, _ in Page(items: [], continuation: nil) }, feedback: { _, _ in })
         let model = SearchFieldModel(
             loader: loader, credentials: { Credentials(cookies: []) }, toasts: ToastCenter(), sleep: { _ in })
-        model.focusChanged(true)
+        model.open()
         return model
     }
 
