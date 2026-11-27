@@ -1,6 +1,5 @@
 import InnerTube
 import SwiftUI
-import SystemKit
 
 struct RelatedView: View {
     let browseId: String
@@ -25,11 +24,15 @@ struct RelatedView: View {
     @ViewBuilder
     private var content: some View {
         switch phase {
-        case .loading: SkeletonRows(count: 6).accessibilityHidden(true)
+        case .loading: Self.placeholder
         case .loaded(let page): loaded(page)
         case .empty: RelatedEmptyView(onRetry: retry)
-        case .failed: RelatedErrorView(onRetry: retry)
+        case .failed: LoadErrorView(title: "Couldn't load Related", onRetry: retry)
         }
+    }
+
+    static var placeholder: some View {
+        ShelfView(shelf: .placeholder(layout: .rows), onMore: { _ in }, isPanel: true).placeholderStyle()
     }
 
     private func retry() {
@@ -70,26 +73,6 @@ struct RelatedEmptyView: View {
     var body: some View {
         ContentUnavailableView {
             Text("Nothing related for this track").font(.rwTitle)
-        } actions: {
-            Button("Retry", action: onRetry)
-                .buttonStyle(PillButtonStyle(isProminent: true))
-        }
-    }
-}
-
-struct RelatedErrorView: View {
-    let onRetry: () -> Void
-    @Environment(NetworkMonitor.self) private var network: NetworkMonitor?
-
-    private var reason: LocalizedStringKey {
-        network?.isOnline == false ? "You're offline" : "Check your connection and try again"
-    }
-
-    var body: some View {
-        ContentUnavailableView {
-            Text("Couldn't load Related").font(.rwTitle)
-        } description: {
-            Text(reason)
         } actions: {
             Button("Retry", action: onRetry)
                 .buttonStyle(PillButtonStyle(isProminent: true))

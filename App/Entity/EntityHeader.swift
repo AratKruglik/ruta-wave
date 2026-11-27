@@ -220,32 +220,3 @@ struct EntityHeader: View {
         nowPlaying.play(NSEvent.modifierFlags.contains(.option) ? model.shuffleTarget : model.playTarget)
     }
 }
-
-/// The loading header in the final layout, so nothing shifts when the page arrives.
-struct SkeletonEntityHeader: View {
-    let isArtist: Bool
-    let isWide: Bool
-
-    var body: some View {
-        Group {
-            if isArtist {
-                Rectangle().fill(.surfaceFill).frame(height: Metrics.artistHeroHeight)
-            } else {
-                let layout = isWide
-                    ? AnyLayout(HStackLayout(alignment: .bottom, spacing: Metrics.space32))
-                    : AnyLayout(VStackLayout(alignment: .leading, spacing: Metrics.space24))
-                layout {
-                    RoundedRectangle(cornerRadius: Metrics.radiusCover).fill(.surfaceFill)
-                        .frame(width: Metrics.entityCover, height: Metrics.entityCover)
-                    VStack(alignment: .leading, spacing: Metrics.space12) {
-                        Capsule().fill(.surfaceFill).frame(width: 320, height: 40)
-                        Capsule().fill(.surfaceFill).frame(width: 200, height: 14)
-                        Capsule().fill(.surfaceFill).frame(width: 140, height: 14)
-                        Circle().fill(.surfaceFill).frame(width: Metrics.playButton, height: Metrics.playButton)
-                    }
-                }
-            }
-        }
-        .accessibilityHidden(true)
-    }
-}

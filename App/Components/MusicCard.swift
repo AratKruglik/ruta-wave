@@ -55,6 +55,7 @@ extension MusicItem {
 
 struct MusicCard: View {
     let item: MusicItem
+    var width: CGFloat?
 
     private enum Field: Hashable { case main, play, menu }
 
@@ -65,8 +66,8 @@ struct MusicCard: View {
     @State private var popover: ItemPopover?
     @FocusState private var focus: Field?
 
-    private var width: CGFloat { item.isVideoCard ? Metrics.videoCardWidth : Metrics.cardSize }
-    private var height: CGFloat { item.isVideoCard ? Metrics.videoCardHeight : Metrics.cardSize }
+    private var cardWidth: CGFloat { width ?? (item.isVideoCard ? Metrics.videoCardWidth : Metrics.cardSize) }
+    private var height: CGFloat { item.isVideoCard ? cardWidth * 9 / 16 : cardWidth }
     private var showsControls: Bool { isHovering || focus != nil }
 
     var body: some View {
@@ -74,7 +75,7 @@ struct MusicCard: View {
             artwork
             texts
         }
-        .frame(width: width)
+        .frame(width: cardWidth)
         .onHover { isHovering = $0 }
         .animation(Motion.animation(Motion.hover, reduceMotion: reduceMotion), value: showsControls)
     }
@@ -83,7 +84,7 @@ struct MusicCard: View {
         ZStack {
             Button { activate(item, navigation: navigation, nowPlaying: nowPlaying) } label: {
                 ArtworkImage(
-                    url: item.thumbnailURL, width: width, height: height, isCircle: item.isArtist, placeholderSymbol: item.artworkSymbol)
+                    url: item.thumbnailURL, width: cardWidth, height: height, isCircle: item.isArtist, placeholderSymbol: item.artworkSymbol)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -137,7 +138,7 @@ struct MusicCard: View {
                     .accessibilityHidden(true)
             }
         }
-        .frame(width: width, height: height)
+        .frame(width: cardWidth, height: height)
         .draggable(dragPayload)
         .contextMenu { ItemMenu(item: item, popover: $popover) }
         .itemPopover($popover)
@@ -154,7 +155,7 @@ struct MusicCard: View {
                 if item.isExplicit { ExplicitBadge() }
             }
             if let subtitle = item.cardSubtitle {
-                Text(subtitle)
+                Text(subtitle.replacingOccurrences(of: " • ", with: "\u{00A0}•\u{00A0}"))
                     .font(.rwCaption)
                     .foregroundStyle(.textSecondary)
                     .lineLimit(2)

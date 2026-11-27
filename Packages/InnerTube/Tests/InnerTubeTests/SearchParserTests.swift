@@ -18,8 +18,19 @@ private func results(_ name: String) throws -> SearchResults {
         }
         #expect(top.name == "Radiohead")
         #expect(top.browseId.hasPrefix("UC"))
+        #expect(top.isSubscribed == nil && top.channelId == nil)
         #expect(search.items.continuation == nil)
         #expect(search.correction == nil)
+    }
+
+    @Test func artistTopResultCarriesSubscriptionAndChannel() throws {
+        guard case .artist(let top) = try #require(try results("search-artist-subscribe").topResult) else {
+            Issue.record("expected artist card")
+            return
+        }
+        #expect(top.isSubscribed == true)
+        #expect(top.channelId == "UCq19-LqvG35A-30oyAiPiqA")
+        #expect(top.channelId != top.browseId)
     }
 
     @Test func unfilteredItemsKeepServerOrderAndKinds() throws {

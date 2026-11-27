@@ -22,15 +22,19 @@ struct HistoryScreen: View {
         switch model.state {
         case .loading:
             ScrollView {
-                VStack(alignment: .leading, spacing: Metrics.space16) {
+                VStack(alignment: .leading, spacing: Metrics.space24) {
                     title
-                    SkeletonRows(count: 8)
+                    VStack(alignment: .leading, spacing: Metrics.space8) {
+                        Text(verbatim: "Placeholder day").font(.rwTitle)
+                        ForEach(0..<8, id: \.self) { _ in TrackRow(song: .placeholder, density: .detailed) }
+                    }
+                    .placeholderStyle()
                 }
                 .padding(padding)
             }
             .scrollDisabled(true)
         case .failed:
-            PageErrorView(onRetry: model.retry)
+            LoadErrorView(title: "Couldn't load History", onRetry: model.retry)
         case .empty:
             VStack(alignment: .leading, spacing: Metrics.space16) {
                 title

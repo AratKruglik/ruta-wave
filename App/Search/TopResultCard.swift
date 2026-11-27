@@ -3,10 +3,14 @@ import SwiftUI
 
 struct TopResultCard: View {
     let item: MusicItem
+    var isSubscribed: Bool?
+    var onToggleSubscribed: () -> Void = {}
 
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
+    @Environment(\.requestSignIn) private var requestSignIn
     @State private var popover: ItemPopover?
+    @State private var isSubscribePromptShown = false
 
     var body: some View {
         HStack(alignment: .center, spacing: Metrics.space24) {
@@ -49,10 +53,24 @@ struct TopResultCard: View {
         case .album, .playlist:
             pills(primary: ("Play", { nowPlaying.play(item) }), secondary: ("Shuffle", { nowPlaying.shuffle(item) }))
         case .artist:
-            pills(primary: ("Shuffle", { nowPlaying.shuffle(item) }), secondary: ("Radio", { nowPlaying.startRadio(item) }))
+            HStack(spacing: Metrics.space8) {
+                pills(primary: ("Shuffle", { nowPlaying.shuffle(item) }), secondary: ("Radio", { nowPlaying.startRadio(item) }))
+                if let isSubscribed { subscribeButton(isSubscribed) }
+            }
         case .link:
             EmptyView()
         }
+    }
+
+    private func subscribeButton(_ isSubscribed: Bool) -> some View {
+        Button {
+            if nowPlaying.isSignedIn { onToggleSubscribed() } else { isSubscribePromptShown = true }
+        } label: {
+            Text(isSubscribed ? LocalizedStringKey("Subscribed") : LocalizedStringKey("Subscribe"))
+        }
+        .buttonStyle(PillButtonStyle())
+        .accessibilityAddTraits(isSubscribed ? .isSelected : [])
+        .guestPrompt(isPresented: $isSubscribePromptShown, reason: "Sign in to subscribe", onSignIn: requestSignIn.perform)
     }
 
     private func pills(primary: (LocalizedStringKey, () -> Void), secondary: (LocalizedStringKey, () -> Void)) -> some View {
@@ -84,6 +102,7 @@ private struct SecondaryPill: View {
 #Preview("Top result") {
     VStack(spacing: Metrics.space16) {
         ForEach(Array(PreviewFixtures.cardItems.prefix(3).enumerated()), id: \.offset) { _, item in TopResultCard(item: item) }
+        TopResultCard(item: PreviewFixtures.cardItems[2], isSubscribed: true)
     }
     .padding()
     .frame(width: 800)

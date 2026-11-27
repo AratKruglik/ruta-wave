@@ -100,9 +100,9 @@ struct PlayerPage: View {
             if let id = details[keyPath: browseId] { content(id) } else { PanelMessage(text: unavailable) }
         } else if nowPlaying.detailsFailed {
             let retry = { if let song = nowPlaying.player.song { Task { await nowPlaying.loadDetails(for: song) } } }
-            if isRelated { RelatedErrorView(onRetry: retry) } else { PageErrorView(onRetry: retry) }
+            LoadErrorView(title: isRelated ? "Couldn't load Related" : "Couldn't load lyrics", onRetry: retry)
         } else {
-            SkeletonRows(count: 6).accessibilityHidden(true)
+            if isRelated { RelatedView.placeholder } else { LyricsView.placeholder }
         }
     }
 

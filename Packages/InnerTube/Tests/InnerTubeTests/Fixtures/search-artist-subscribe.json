@@ -1,0 +1,134 @@
+{
+ "contents": {
+  "tabbedSearchResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "content": {
+       "sectionListRenderer": {
+        "contents": [
+         {
+          "musicCardShelfRenderer": {
+           "title": {
+            "runs": [
+             {
+              "navigationEndpoint": {
+               "browseEndpoint": {
+                "browseEndpointContextSupportedConfigs": {
+                 "browseEndpointContextMusicConfig": {
+                  "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                 }
+                },
+                "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+               }
+              },
+              "text": "Radiohead"
+             }
+            ]
+           },
+           "subtitle": {
+            "runs": [
+             {
+              "text": "Artist"
+             },
+             {
+              "text": " • "
+             },
+             {
+              "text": "5.47M subscribers"
+             }
+            ]
+           },
+           "onTap": {
+            "browseEndpoint": {
+             "browseEndpointContextSupportedConfigs": {
+              "browseEndpointContextMusicConfig": {
+               "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+              }
+             },
+             "browseId": "UCr_iyUANcn9OX_yy9piYoLw"
+            }
+           },
+           "thumbnail": {
+            "musicThumbnailRenderer": {
+             "thumbnail": {
+              "thumbnails": [
+               {
+                "height": 60,
+                "url": "https://lh3.googleusercontent.com/G-Vsaq4pw6Bl5Ny4p_wV9obzu_eyZxynQycvCvQru4Wglzfxg4NO9owDKnSlKys_-WRzPEc0O6ydGA=w60-h60-p-l90-rj",
+                "width": 60
+               },
+               {
+                "height": 120,
+                "url": "https://lh3.googleusercontent.com/G-Vsaq4pw6Bl5Ny4p_wV9obzu_eyZxynQycvCvQru4Wglzfxg4NO9owDKnSlKys_-WRzPEc0O6ydGA=w120-h120-p-l90-rj",
+                "width": 120
+               }
+              ]
+             },
+             "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_CIRCLE",
+             "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FILL"
+            }
+           },
+           "buttons": [
+            {
+             "buttonRenderer": {
+              "command": {
+               "watchPlaylistEndpoint": {
+                "params": "wAEB8gECGAE%3D",
+                "playlistId": "RDAOk8jEIzOyB2trfXZrSEVz_Q"
+               }
+              },
+              "icon": {
+               "iconType": "MUSIC_SHUFFLE"
+              },
+              "size": "SIZE_DEFAULT",
+              "style": "STYLE_DARK_ON_WHITE",
+              "text": {
+               "runs": [
+                {
+                 "text": "Shuffle"
+                }
+               ]
+              }
+             }
+            },
+            {
+             "buttonRenderer": {
+              "command": {
+               "watchPlaylistEndpoint": {
+                "params": "wAEB",
+                "playlistId": "RDEMk8jEIzOyB2trfXZrSEVz_Q"
+               }
+              },
+              "icon": {
+               "iconType": "MIX"
+              },
+              "style": "STYLE_WHITE_TRANSLUCENT",
+              "text": {
+               "runs": [
+                {
+                 "text": "Mix"
+                }
+               ]
+              }
+             }
+            },
+            {
+             "subscribeButtonRenderer": {
+              "channelId": "UCq19-LqvG35A-30oyAiPiqA",
+              "subscribed": true,
+              "enabled": true
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

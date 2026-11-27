@@ -31,7 +31,7 @@ struct BrowseScreen<Header: View>: View {
             }
             .scrollDisabled(true)
         case .failed:
-            PageErrorView(onRetry: model.retry)
+            LoadErrorView(title: model.source.errorTitle, onRetry: model.retry)
         case .empty:
             model.source.emptyPage
         case .loaded(let page):
@@ -82,30 +82,64 @@ struct BrowseScreen<Header: View>: View {
         VStack(alignment: .leading, spacing: Metrics.space48) {
             switch self {
             case .home:
-                SkeletonChips()
-                ForEach(0..<3, id: \.self) { _ in SkeletonShelf() }
+                ChipRow(chips: Array(repeating: Chip(title: "Placeholder"), count: 6), onSelect: { _ in })
+                ForEach(0..<3, id: \.self) { _ in cardShelf }
             case .browse(let target):
                 switch target.browseId {
                 case BrowseTarget.explore.browseId:
-                    SkeletonTiles()
-                    ForEach(0..<2, id: \.self) { _ in SkeletonShelf() }
+                    ShelfView(shelf: .placeholderLinks([.newReleases, .charts, .moodsAndGenres]), onMore: { _ in })
+                    ForEach(0..<2, id: \.self) { _ in cardShelf }
                 case BrowseTarget.moodsAndGenres.browseId:
-                    SkeletonTitle()
-                    ForEach(0..<2, id: \.self) { _ in SkeletonChipGrid() }
+                    placeholderTitle
+                    ForEach(0..<2, id: \.self) { _ in
+                        ShelfView(
+                            shelf: .placeholderLinks(Array(repeating: .moodCategory(params: ""), count: 12), title: "Placeholder shelf title"),
+                            onMore: { _ in })
+                    }
                 case BrowseTarget.moodCategoryId:
-                    SkeletonTitle()
-                    ForEach(0..<2, id: \.self) { _ in SkeletonShelf() }
+                    placeholderTitle
+                    ForEach(0..<2, id: \.self) { _ in cardShelf }
                 default:
-                    SkeletonTitle()
-                    SkeletonCardGrid()
+                    placeholderTitle
+                    ShelfView(shelf: .placeholder(layout: .grid, count: 12), onMore: { _ in })
                 }
             case .charts:
-                SkeletonTitle()
-                Capsule().fill(.surfaceFill).frame(width: 160, height: Metrics.chipHeight)
-                SkeletonRows(count: 10)
+                placeholderTitle
+                Picker("Country", selection: .constant(0)) {
+                    Text(verbatim: "Placeholder country").tag(0)
+                }
+                .pickerStyle(.menu)
+                .font(.rwButton)
+                .fixedSize()
+                ForEach(0..<2, id: \.self) { _ in
+                    ShelfView(shelf: .placeholder(layout: .rows, count: 12, ranked: true), onMore: { _ in })
+                }
             }
         }
-        .accessibilityHidden(true)
+        .placeholderStyle()
+    }
+
+    private var cardShelf: some View {
+        ShelfView(shelf: .placeholder(layout: .cards), onMore: { _ in })
+    }
+
+    private var placeholderTitle: some View {
+        Text(verbatim: "Placeholder title").font(.rwDisplay)
+    }
+
+    var errorTitle: LocalizedStringKey {
+        switch self {
+        case .home: "Couldn't load Home"
+        case .charts: "Couldn't load Charts"
+        case .browse(let target):
+            switch target.browseId {
+            case BrowseTarget.explore.browseId: "Couldn't load Explore"
+            case BrowseTarget.newReleases.browseId: "Couldn't load New releases"
+            case BrowseTarget.moodsAndGenres.browseId: "Couldn't load Moods & genres"
+            case BrowseTarget.moodCategoryId: "Couldn't load this category"
+            default: "Couldn't load this page"
+            }
+        }
     }
 
     var emptyPage: EmptyPageView {
