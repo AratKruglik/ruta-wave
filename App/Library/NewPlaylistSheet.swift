@@ -29,7 +29,8 @@ struct NewPlaylistSheet: View {
         (.public, "Public"), (.unlisted, "Unlisted"), (.private, "Private"),
     ]
 
-    private var isTooLong: Bool { draft.title.trimmingCharacters(in: .whitespacesAndNewlines).count > PlaylistEdit.maxTitleLength }
+    private var titleLength: Int { draft.title.trimmingCharacters(in: .whitespacesAndNewlines).count }
+    private var isTooLong: Bool { titleLength > PlaylistEdit.maxTitleLength }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.space16) {
@@ -38,23 +39,24 @@ struct NewPlaylistSheet: View {
                 .foregroundStyle(.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             VStack(alignment: .leading, spacing: Metrics.space4) {
-                TextField("Title", text: $draft.title)
+                fieldLabel("Title")
+                TextField("", text: $draft.title)
                     .textFieldStyle(.roundedBorder)
                     .font(.rwBody)
+                    .controlSize(.large)
                     .focused($isTitleFocused)
                     .accessibilityLabel("Title")
                     .onSubmit(create)
-                if isTooLong {
-                    Text("Titles can be up to \(PlaylistEdit.maxTitleLength) characters.")
-                        .font(.rwCaption)
-                        .foregroundStyle(.textSecondary)
-                }
+                titleHint
             }
-            TextField("Description (optional)", text: $draft.description, axis: .vertical)
-                .textFieldStyle(.roundedBorder)
-                .font(.rwBody)
-                .lineLimit(3...6)
-                .accessibilityLabel("Description")
+            VStack(alignment: .leading, spacing: Metrics.space4) {
+                fieldLabel("Description")
+                TextField("", text: $draft.description, axis: .vertical)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.rwBody)
+                    .lineLimit(3...6)
+                    .accessibilityLabel("Description")
+            }
             if showsPrivacy {
                 Picker("Privacy", selection: $draft.privacy) {
                     ForEach(Self.privacies, id: \.0) { privacy, title in Text(title).tag(privacy) }
@@ -73,6 +75,29 @@ struct NewPlaylistSheet: View {
         .padding(Metrics.space24)
         .frame(width: 420)
         .onAppear { isTitleFocused = true }
+    }
+
+    private func fieldLabel(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.rwCaption)
+            .foregroundStyle(.textSecondary)
+            .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private var titleHint: some View {
+        if titleLength >= PlaylistEdit.maxTitleLength - 20 {
+            HStack(spacing: Metrics.space8) {
+                if isTooLong { Text("Titles can be up to \(PlaylistEdit.maxTitleLength) characters.") }
+                Spacer(minLength: 0)
+                Text(verbatim: "\(titleLength)/\(PlaylistEdit.maxTitleLength)").monospacedDigit()
+            }
+            .font(.rwCaption)
+            .foregroundStyle(.textSecondary)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Titles can be up to \(PlaylistEdit.maxTitleLength) characters."))
+            .accessibilityValue(Text(verbatim: "\(titleLength)"))
+        }
     }
 
     private func create() {
