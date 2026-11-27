@@ -81,7 +81,7 @@ struct EntityScreen: View {
 
     @ViewBuilder
     private func albumBody(_ album: AlbumPage, _ content: EntityModel.Content) -> some View {
-        EntityHeader(model: model, header: album.header, isSaved: content.isSaved, showsShuffle: true, isWide: isWide)
+        EntityHeader(model: model, header: album.header, isSaved: content.isSaved, isWide: isWide)
             .padding(.horizontal, padding)
         let order = album.tracks.map(\.song.rowKey)
         VStack(spacing: 0) {
@@ -110,7 +110,7 @@ struct EntityScreen: View {
 
     @ViewBuilder
     private func playlistBody(_ playlist: PlaylistPage, _ content: EntityModel.Content) -> some View {
-        EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, showsShuffle: false, isWide: isWide)
+        EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, isWide: isWide)
             .padding(.horizontal, padding)
         let order = content.tracks.map(\.rowKey)
         LazyVStack(spacing: 0) {
