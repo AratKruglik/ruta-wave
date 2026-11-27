@@ -45,8 +45,7 @@ struct EntityScreen: View {
                     }
                 }
                 .padding(.bottom, padding)
-                // The artist photo runs under the bar to the window top, like the header gradient of the other pages.
-                .padding(.top, isArtist ? -Metrics.topBarHeight : padding)
+                .padding(.top, isArtist ? artistTopOffset : padding)
                 .background(alignment: .top) {
                     if !isArtist { ThemeHeaderGradient().padding(.top, -Metrics.topBarHeight) }
                 }
@@ -65,6 +64,11 @@ struct EntityScreen: View {
         }
     }
 
+    /// Before macOS 26 the artist photo is lifted under the bar to the window top, like the header gradient of the other pages.
+    private var artistTopOffset: CGFloat {
+        if #available(macOS 26, *) { 0 } else { -Metrics.topBarHeight }
+    }
+
     private var isArtist: Bool {
         if case .artist = model.kind { true } else { false }
     }
@@ -81,7 +85,7 @@ struct EntityScreen: View {
 
     @ViewBuilder
     private func albumBody(_ album: AlbumPage, _ content: EntityModel.Content) -> some View {
-        EntityHeader(model: model, header: album.header, isSaved: content.isSaved, showsShuffle: true, isWide: isWide)
+        EntityHeader(model: model, header: album.header, isSaved: content.isSaved, isWide: isWide)
             .padding(.horizontal, padding)
         let order = album.tracks.map(\.song.rowKey)
         VStack(spacing: 0) {
@@ -110,7 +114,7 @@ struct EntityScreen: View {
 
     @ViewBuilder
     private func playlistBody(_ playlist: PlaylistPage, _ content: EntityModel.Content) -> some View {
-        EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, showsShuffle: false, isWide: isWide)
+        EntityHeader(model: model, header: playlist.header, isSaved: content.isSaved, isWide: isWide)
             .padding(.horizontal, padding)
         let order = content.tracks.map(\.rowKey)
         LazyVStack(spacing: 0) {

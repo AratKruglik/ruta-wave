@@ -91,7 +91,7 @@ struct LibraryModelTests {
 
     @Test func likedMusicFromTheResponseIsNotDuplicatedInTheItems() async {
         var loader = LibraryLoader.stub
-        let liked = MusicItem.playlist(Playlist(browseId: "VLLM", title: "Server liked"))
+        let liked = MusicItem.playlist(Playlist(browseId: "VLLM", title: "Server liked", thumbnailURL: URL(string: "https://x/liked.jpg")))
         loader.page = { _, _ in page([playlist("a"), liked, playlist("b")], next: "t1") }
         loader.more = { _, _ in Page(items: [liked, playlist("c")], continuation: nil) }
         let model = makeModel(loader)
@@ -99,7 +99,8 @@ struct LibraryModelTests {
         model.loadMore()
         #expect(await waitUntil { content(model)?.paging == .done })
         #expect(titles(model) == ["a", "b", "c"])
-        #expect(content(model)?.likedMusic?.title == "Server liked")
+        #expect(content(model)?.likedMusic?.title == String(localized: "Liked music"))
+        #expect(content(model)?.likedMusic?.thumbnailURL == URL(string: "https://x/liked.jpg"))
     }
 
     @Test func rememberedSectionLoadsFirstAndIsMarkedSelected() async {

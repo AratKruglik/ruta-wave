@@ -36,6 +36,7 @@ struct ArtistHeader: View {
 
     private var hero: some View {
         ArtworkImage(url: artist.thumbnailURL, width: width, height: Metrics.artistHeroHeight, cornerRadius: 0)
+            .extendedUnderChrome()
             .overlay(alignment: .bottomLeading) {
                 Text(artist.name)
                     .font(.rwDisplay)
@@ -92,5 +93,13 @@ struct ArtistAbout: View {
                 }
             }
         }
+    }
+}
+
+extension View {
+    /// Mirrors the hero under the top bar and the sidebar; before macOS 26 `EntityScreen` lifts the page under the bar instead.
+    @ViewBuilder
+    func extendedUnderChrome() -> some View {
+        if #available(macOS 26, *) { backgroundExtensionEffect() } else { self }
     }
 }

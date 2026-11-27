@@ -73,7 +73,7 @@ struct ThemeHeaderGradient: View {
     @Environment(\.themeHeaderTop) private var top
 
     var body: some View {
-        LinearGradient(colors: [top, base], startPoint: .top, endPoint: .bottom)
+        LinearGradient(colors: [top, base.opacity(0)], startPoint: .top, endPoint: .bottom)
             .frame(height: 400)
             .frame(maxWidth: .infinity)
             .allowsHitTesting(false)
