@@ -29,9 +29,16 @@ private let menuNameOnly = #"""
     }
 
     @Test func rejectsDisallowedAvatarURLs() throws {
-        for url in ["https://example.com/a.png", "file:///tmp/a.png", "http://yt3.ggpht.com/a.png", "https://evilggpht.com/a.png"] {
+        for url in ["https://example.com/a.png", "file:///tmp/a.png", "http://yt3.ggpht.com/a.png", "https://evilggpht.com/a.png", "https://evilgstatic.com/a.png", "//evil.example/a", "//lh3.googleusercontent.com@evil.example/a"] {
             let photo = try parse(#"{"thumbnails":[{"url":"\#(url)"}]}"#)
             #expect(lastThumbnailURL(photo) == nil)
+        }
+    }
+
+    @Test func acceptsGstaticAndProtocolRelativeURLs() throws {
+        for (raw, expected) in [("https://www.gstatic.com/a.png", "https://www.gstatic.com/a.png"), ("//lh3.googleusercontent.com/a", "https://lh3.googleusercontent.com/a")] {
+            let photo = try parse(#"{"thumbnails":[{"url":"\#(raw)"}]}"#)
+            #expect(lastThumbnailURL(photo) == URL(string: expected))
         }
     }
 

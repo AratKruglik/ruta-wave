@@ -69,10 +69,22 @@ private func shelf(_ page: BrowsePage, _ title: String) throws -> Shelf {
         #expect(home.chips.map(\.isSelected) == [false, true])
         let listenAgain = try shelf(home, "Listen again")
         #expect(listenAgain.strapline == "Placeholder Name")
-        #expect(listenAgain.items.count == 2)
+        #expect(listenAgain.items.count == 3)
+        guard case .playlist(let liked)? = listenAgain.items.last else {
+            Issue.record("expected Liked Music playlist")
+            return
+        }
+        #expect(liked.browseId == "VLLM")
+        #expect(liked.thumbnailURL == URL(string: "https://www.gstatic.com/placeholder/liked-music-576.png"))
         let mixed = try shelf(home, "Mixed for you")
         #expect(mixed.more == BrowseTarget(browseId: "FEmusic_mixed_for_you"))
-        #expect(mixed.items == [.playlist(Playlist(browseId: "RDPLACEHOLDERMIX0001", title: "Placeholder Mix", subtitle: "Placeholder Artist", thumbnailURL: URL(string: "https://lh3.googleusercontent.com/placeholder-mix=w226-h226"), playTarget: WatchTarget(playlistId: "RDPLACEHOLDERMIX0001", params: "wAEB")))])
+        #expect(mixed.items.count == 2)
+        #expect(mixed.items.first == .playlist(Playlist(browseId: "RDPLACEHOLDERMIX0001", title: "Placeholder Mix", subtitle: "Placeholder Artist", thumbnailURL: URL(string: "https://lh3.googleusercontent.com/placeholder-mix=w226-h226"), playTarget: WatchTarget(playlistId: "RDPLACEHOLDERMIX0001", params: "wAEB"))))
+        guard case .playlist(let supermix)? = mixed.items.last else {
+            Issue.record("expected generated mix")
+            return
+        }
+        #expect(supermix.thumbnailURL == URL(string: "https://www.gstatic.com/placeholder/supermix=w226-h226"))
     }
 
     @Test func homeContinuationPageParsesWithoutChips() throws {

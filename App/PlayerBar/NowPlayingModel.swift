@@ -339,6 +339,16 @@ final class NowPlayingModel {
         }
     }
 
+    /// The one row of `songs` that is playing: the queue position when it lines up with the list, else the first match.
+    func currentRow(in songs: [Song]) -> Int? {
+        guard let current = player.song else { return nil }
+        if let position = player.queue.firstIndex(where: \.isCurrent), songs.indices.contains(position),
+           songs[position].videoId == current.videoId {
+            return position
+        }
+        return songs.firstIndex { $0.videoId == current.videoId }
+    }
+
     func isPlaying(_ item: MusicItem) -> Bool {
         guard let current = player.song else { return false }
         switch item {

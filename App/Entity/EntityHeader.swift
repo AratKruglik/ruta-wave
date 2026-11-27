@@ -98,7 +98,8 @@ struct EntityHeader: View {
             : AnyLayout(VStackLayout(alignment: .leading, spacing: Metrics.space24))
         layout {
             ArtworkImage(
-                url: header.thumbnailURL, width: Metrics.entityCover, height: Metrics.entityCover, cornerRadius: Metrics.radiusCover)
+                url: header.thumbnailURL, width: Metrics.entityCover, height: Metrics.entityCover, cornerRadius: Metrics.radiusCover,
+                placeholderSymbol: model.playlistBrowseId == Route.likedMusicBrowseId ? "heart.fill" : "music.note")
             VStack(alignment: .leading, spacing: Metrics.space12) {
                 HStack(spacing: Metrics.space8) {
                     Text(header.title)
