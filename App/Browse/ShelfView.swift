@@ -7,6 +7,7 @@ struct ShelfView: View {
     var moreTitle: LocalizedStringKey = "More"
     var isPanel = false
     var pageMargin: CGFloat = 0
+    var hiddenArtistId: String?
 
     @Environment(NavigationModel.self) private var navigation
     @Environment(NowPlayingModel.self) private var nowPlaying
@@ -25,11 +26,10 @@ struct ShelfView: View {
             width: width, minimum: isArtists ? Metrics.artistColumnWidth : Metrics.rowColumnWidth, spacing: Metrics.space16)
     }
 
-    private var itemWidth: CGFloat {
-        switch shelf.layout {
-        case .rows: rowFit.itemWidth
-        default: shelf.items.first?.isVideoCard == true ? Metrics.videoCardWidth : Metrics.cardSize
-        }
+    private var cardMinimum: CGFloat { shelf.items.first?.isVideoCard == true ? Metrics.videoCardWidth : Metrics.cardSize }
+
+    private var cardFit: (count: Int, itemWidth: CGFloat) {
+        ShelfGeometry.fit(width: width, minimum: cardMinimum, spacing: Metrics.space16)
     }
 
     private var columns: [[MusicItem]] {
@@ -41,7 +41,7 @@ struct ShelfView: View {
     private var carouselCount: Int { shelf.layout == .rows ? columns.count : shelf.items.count }
 
     private var visibleCount: Int {
-        shelf.layout == .rows ? rowFit.count : max(1, Int((width + Metrics.space16) / (itemWidth + Metrics.space16)))
+        shelf.layout == .rows ? rowFit.count : cardFit.count
     }
 
     var body: some View {
@@ -101,7 +101,12 @@ struct ShelfView: View {
             LinkChipGrid(links: links, maxRows: shelf.more == nil ? nil : 2) { navigation.push(Route(target: $0.target)) }
         } else {
             switch shelf.layout {
-            case .cards: carousel { index in MusicCard(item: shelf.items[index]) }
+            case .cards where isPanel: carousel { index in MusicCard(item: shelf.items[index]) }
+            case .cards:
+                carousel { index in
+                    MusicCard(item: shelf.items[index], width: cardFit.itemWidth)
+                        .containerRelativeFrame(.horizontal, count: cardFit.count, spacing: Metrics.space16)
+                }
             case .rows where isPanel:
                 LazyVStack(spacing: 0) {
                     ForEach(Array(shelf.items.enumerated()), id: \.offset) { _, item in listRow(item, startsRadio: true) }
@@ -109,7 +114,7 @@ struct ShelfView: View {
             case .rows: carousel { index in rowColumn(columns[index]) }
             case .grid:
                 LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: itemWidth), spacing: Metrics.space16, alignment: .top)],
+                    columns: [GridItem(.adaptive(minimum: cardMinimum), spacing: Metrics.space16, alignment: .top)],
                     alignment: .leading, spacing: Metrics.space24
                 ) {
                     ForEach(Array(shelf.items.enumerated()), id: \.offset) { _, item in MusicCard(item: item) }
@@ -152,7 +157,7 @@ struct ShelfView: View {
     private func listRow(_ item: MusicItem, startsRadio: Bool = false) -> some View {
         if case .song(let song) = item {
             let density: TrackRow.Density = song.rank != nil ? .numbered : (shelf.layout == .list ? .detailed : .compact)
-            TrackRow(song: song, density: density, onPlay: startsRadio ? { nowPlaying.startRadio(song) } : nil)
+            TrackRow(song: song, density: density, onPlay: startsRadio ? { nowPlaying.startRadio(song) } : nil, hiddenArtistId: hiddenArtistId)
         } else if case .artist(let artist) = item, artist.rank != nil {
             ArtistRow(artist: artist, isRanked: true)
         } else {

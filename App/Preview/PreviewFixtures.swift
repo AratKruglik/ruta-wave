@@ -199,7 +199,8 @@ enum PreviewFixtures {
             : searchChips
         let items = songs.prefix(6).map(MusicItem.song) + cardItems
         let filteredItems = songs.map(MusicItem.song)
-        let topResult = cardItems[2]
+        let topResult = MusicItem.artist(
+            Artist(browseId: "UC1", name: "Test Artist", subtitle: "1.2M subscribers", isSubscribed: false, channelId: "UCchannel1"))
         let loader = SearchLoader(
             suggestions: { _, _ in SearchSuggestions() },
             search: { _, _, _ in

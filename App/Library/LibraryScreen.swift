@@ -17,7 +17,13 @@ struct LibraryScreen: View {
             if !model.sections.isEmpty {
                 sectionPicker
             } else if case .loading = model.state {
-                SkeletonChips()
+                Picker("Library", selection: .constant(0)) {
+                    ForEach(0..<4, id: \.self) { Text(verbatim: "Placeholder").tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                .placeholderStyle()
             }
             pageBody
         }
@@ -81,14 +87,11 @@ struct LibraryScreen: View {
         switch model.state {
         case .loading:
             ScrollView {
-                switch LibraryModel.kind(of: model.section) {
-                case .songs, .artists: SkeletonRows(count: 8)
-                case .playlists, .albums: SkeletonCards()
-                }
+                skeleton
             }
             .scrollDisabled(true)
         case .failed:
-            PageErrorView(onRetry: model.retry)
+            LoadErrorView(title: "Couldn't load your library", onRetry: model.retry)
         case .loaded(let content):
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Metrics.space16) {
@@ -97,6 +100,30 @@ struct LibraryScreen: View {
                 }
                 .padding(.bottom, padding)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var skeleton: some View {
+        switch LibraryModel.kind(of: model.section) {
+        case .songs:
+            VStack(spacing: 0) {
+                ForEach(0..<8, id: \.self) { _ in TrackRow(song: .placeholder, density: .detailed) }
+            }
+            .placeholderStyle()
+        case .artists:
+            VStack(spacing: 0) {
+                ForEach(0..<8, id: \.self) { _ in ArtistRow(artist: .placeholder) }
+            }
+            .placeholderStyle()
+        case .playlists, .albums:
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .topLeading)],
+                alignment: .leading, spacing: Metrics.space24
+            ) {
+                ForEach(0..<8, id: \.self) { _ in MusicCard(item: .placeholder) }
+            }
+            .placeholderStyle()
         }
     }
 
@@ -192,21 +219,6 @@ private struct HeaderPill: View {
             .background(.surfaceFill, in: Capsule())
             .contentShape(Capsule())
             .fixedSize()
-    }
-}
-
-private struct SkeletonCards: View {
-    var body: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .topLeading)],
-            alignment: .leading, spacing: Metrics.space24
-        ) {
-            ForEach(0..<8, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: Metrics.radiusCard).fill(.surfaceFill)
-                    .frame(width: Metrics.cardSize, height: Metrics.cardSize)
-            }
-        }
-        .accessibilityHidden(true)
     }
 }
 

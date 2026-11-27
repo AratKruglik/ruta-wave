@@ -29,7 +29,8 @@ struct SearchScreen: View {
                     .padding(.horizontal, padding)
                     .padding(.top, padding)
             } else if case .loading = model.state {
-                SkeletonChips()
+                ChipRow(chips: Array(repeating: Chip(title: "Placeholder"), count: 6), onSelect: { _ in })
+                    .placeholderStyle()
                     .padding(.horizontal, padding)
                     .padding(.top, padding)
             }
@@ -58,21 +59,35 @@ struct SearchScreen: View {
 
     @ViewBuilder
     private var skeleton: some View {
-        if model.isAllSelected {
-            VStack(alignment: .leading, spacing: Metrics.space32) {
-                VStack(alignment: .leading, spacing: Metrics.space16) {
-                    header("Top result")
-                    TopResultCard(item: .placeholder)
+        Group {
+            if model.isAllSelected {
+                VStack(alignment: .leading, spacing: Metrics.space32) {
+                    VStack(alignment: .leading, spacing: Metrics.space16) {
+                        header("Top result")
+                        TopResultCard(item: .placeholder)
+                    }
+                    placeholderRows(4)
+                    ShelfView(shelf: .placeholder(layout: .cards), onMore: { _ in }, pageMargin: padding)
                 }
-                .placeholderStyle()
-                SkeletonRows(count: 4)
-                SkeletonShelf()
+            } else {
+                switch SearchSection.Kind(filter: model.filter) {
+                case .albums, .artists, .playlists:
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: Metrics.cardSize), spacing: Metrics.space16, alignment: .top)],
+                        alignment: .leading, spacing: Metrics.space24
+                    ) {
+                        ForEach(0..<12, id: \.self) { _ in MusicCard(item: .placeholder) }
+                    }
+                case .songs, .videos, .none: placeholderRows(8)
+                }
             }
-        } else {
-            switch SearchSection.Kind(filter: model.filter) {
-            case .albums, .artists, .playlists: SkeletonCardGrid()
-            case .songs, .videos, .none: SkeletonRows(count: 8)
-            }
+        }
+        .placeholderStyle()
+    }
+
+    private func placeholderRows(_ count: Int) -> some View {
+        VStack(spacing: 0) {
+            ForEach(0..<count, id: \.self) { _ in TrackRow(song: .placeholder, density: .detailed) }
         }
     }
 
@@ -85,7 +100,7 @@ struct SearchScreen: View {
             }
             .scrollDisabled(true)
         case .failed:
-            PageErrorView(onRetry: model.retry)
+            LoadErrorView(title: "Couldn't load search results", onRetry: model.retry)
         case .empty:
             ContentUnavailableView.search(text: model.query)
         case .loaded(let content):
@@ -104,7 +119,7 @@ struct SearchScreen: View {
         if let top = content.topResult {
             VStack(alignment: .leading, spacing: Metrics.space16) {
                 header("Top result")
-                TopResultCard(item: top)
+                TopResultCard(item: top, isSubscribed: content.isTopResultSubscribed, onToggleSubscribed: model.toggleTopResultSubscribed)
             }
         }
         ForEach(content.sections, id: \.kind) { section in

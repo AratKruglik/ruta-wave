@@ -512,7 +512,7 @@ account. Behaviour of the existing pieces is 1.1–1.3; moving them into the pop
 |---|---|
 | Loading | skeletons are the real layout on placeholder data, redacted (no layout shift); a spinner only for actions under 1 s |
 | Empty | a short sentence that says what will appear and how; no illustrations (exception: the system search empty state, which shows a magnifying-glass symbol) |
-| Error | page error → full-page message + **Retry**; part error → inline message + **Retry**; action error → toast; 401 → session expired flow of 2.1 |
+| Error | page or panel error → `ContentUnavailableView` with a text-only title naming what failed ("Couldn't load History"), the reason ("You're offline" / "Check your connection and try again") and **Retry**, no SF Symbol (same rule as Empty); a missing entity → its "isn't available" title + **Back**; part error → inline message + **Retry**; action error → toast; 401 → session expired flow of 2.1 |
 | Offline | banner under the top bar "You're offline", pages keep what they loaded, retries resume automatically when the network returns (`NWPathMonitor`) |
 
 ### 14.2. Toasts

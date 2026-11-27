@@ -24,6 +24,7 @@ struct TrackRow: View {
     var isCurrentRow: Bool?
     /// Off for an album whose tracks have no covers, so the title does not sit behind a dead gap.
     var showsArtwork = true
+    var hiddenArtistId: String?
     var place: ItemPlace = .plain
     /// Set on own-playlist rows so a drop on another row of the same playlist reorders.
     var sourcePlaylistId: String?
@@ -168,6 +169,12 @@ struct TrackRow: View {
     }
 
     private var artistLine: String? {
+        if let hiddenArtistId, !song.artists.isEmpty, song.artists.allSatisfy({ $0.browseId == hiddenArtistId }) {
+            guard density == .detailed, let subtitle = song.subtitle else { return nil }
+            let omitted = Set(song.artists.map(\.name) + [song.album?.name].compactMap { $0 })
+            let kept = subtitle.components(separatedBy: " • ").filter { !omitted.contains($0) }
+            return kept.isEmpty ? nil : kept.joined(separator: " • ")
+        }
         let names = song.artists.map(\.name).joined(separator: ", ")
         if !names.isEmpty { return names }
         guard density == .detailed, let album = song.album?.name, let subtitle = song.subtitle else { return song.subtitle }

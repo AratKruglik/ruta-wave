@@ -69,10 +69,10 @@ struct LyricsView: View {
     @ViewBuilder
     private var content: some View {
         switch phase {
-        case .loading: skeleton
+        case .loading: Self.placeholder
         case .loaded(let content): loaded(content)
         case .empty: PanelMessage(text: "Lyrics aren't available")
-        case .failed: PageErrorView { attempt += 1 }
+        case .failed: LoadErrorView(title: "Couldn't load lyrics") { attempt += 1 }
         }
     }
 
@@ -105,13 +105,13 @@ struct LyricsView: View {
         .lyricsBottomFade()
     }
 
-    private var skeleton: some View {
+    static var placeholder: some View {
         VStack(alignment: .leading, spacing: Metrics.space12) {
-            ForEach([260, 200, 240, 160, 220, 180], id: \.self) { width in
-                Capsule().fill(.surfaceFill).frame(width: CGFloat(width), height: 12)
+            ForEach(["Placeholder lyric line one", "Placeholder line two", "Placeholder lyric line three", "Placeholder line four", "Placeholder lyric line five", "Placeholder line six"], id: \.self) {
+                Text(verbatim: $0).font(.system(size: LyricsStyle.size))
             }
         }
-        .accessibilityHidden(true)
+        .placeholderStyle()
     }
 }
 
