@@ -95,11 +95,8 @@ RutaWave is a YouTube Music client built for the Mac:
 
 1. Download the latest `RutaWave-<version>.dmg` from [Releases](https://github.com/AratKruglik/ruta-wave/releases).
 2. Open it and drag **RutaWave** to **Applications**.
-3. The app is ad-hoc signed, not notarized, so run this once before the first launch:
 
-```bash
-xattr -dr com.apple.quarantine /Applications/RutaWave.app
-```
+Releases from 0.1.0-beta.6 on are signed with a Developer ID and notarized by Apple, so macOS opens them without extra steps.
 
 The app starts in guest mode. To get your library and Premium, sign in from the account button in the top-right corner. Sign-in happens on Google's own page inside the app, and your password never passes through RutaWave's code. The session is stored in the Keychain. *Sign out* clears it from this Mac.
 
