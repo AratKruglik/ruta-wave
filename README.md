@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/AratKruglik/ruta-wave/releases"><img src="https://img.shields.io/badge/release-0.1.0--beta.3-E8253F" alt="Latest release"></a>
+  <a href="https://github.com/AratKruglik/ruta-wave/releases"><img src="https://img.shields.io/badge/release-0.1.0--beta.5-E8253F" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-111" alt="Apple Silicon">
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
@@ -77,10 +77,10 @@ RutaWave is a YouTube Music client built for the Mac:
   </tr>
   <tr>
     <td><img src="docs/assets/screenshots/artist.jpg" alt="Artist page"><p align="center"><sub><b>Artist</b>: top songs, shuffle, radio, subscribe</sub></p></td>
-    <td><img src="docs/assets/screenshots/playlist.jpg" alt="Playlist page"><p align="center"><sub><b>Playlist</b>: the interface takes on the artwork's colours</sub></p></td>
+    <td><img src="docs/assets/screenshots/playlist.jpg" alt="Playlist page"><p align="center"><sub><b>Playlist</b>: play, shuffle, save and share</sub></p></td>
   </tr>
   <tr>
-    <td><img src="docs/assets/screenshots/search.jpg" alt="Search results"><p align="center"><sub><b>Search</b>: top result, songs, albums, artists</sub></p></td>
+    <td><img src="docs/assets/screenshots/search.jpg" alt="Search results"><p align="center"><sub><b>Search</b>: filters, the top result and songs</sub></p></td>
     <td><img src="docs/assets/screenshots/library.jpg" alt="Library"><p align="center"><sub><b>Library</b>: your playlists, with sorting and history</sub></p></td>
   </tr>
   <tr>
