@@ -227,7 +227,7 @@ works on a clean user account.
 ## Before the first public release
 
 - [x] ~~README instructions on allowing a non-notarized app to launch~~: releases are signed with a Developer ID and notarized from 0.1.0-beta.6 (#188).
-- [ ] Auto-update (Sparkle) from GitHub Releases, with stable and beta channels and an appcast on GitHub Pages (#109): built and keyed, waiting for the first update delivered end to end.
+- [ ] Auto-update (Sparkle) from GitHub Releases, with stable and beta channels and an appcast on GitHub Pages at `rutawave.kruhlyk.pro` (#109): built and keyed, waiting for the first update delivered end to end.
 - [ ] README: installing from the DMG, limitations, disclaimer of any affiliation with Google.
 - [ ] Review the name, icon and copy for Google trademarks.
 - [ ] License review: if code or text was ported from `pear-desktop`, keep the

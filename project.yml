@@ -67,7 +67,7 @@ targets:
           CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
           # Release only: Debug builds run the app-hosted unit tests and would otherwise check the live feed.
           # Literal target settings also win over environment variables, so CI cannot swap the feed.
-          SPARKLE_FEED_URL: https://aratkruglik.github.io/ruta-wave/appcast.xml
+          SPARKLE_FEED_URL: https://rutawave.kruhlyk.pro/appcast.xml
           SPARKLE_PUBLIC_ED_KEY: kwwsU11qs07tsQDy0auUj//Y+BDB2W3jcQWrGVnVbNg=
   RutawaveTests:
     type: bundle.unit-test

@@ -30,7 +30,7 @@ jobs:
         if: env.UPDATES == 'true'
         run: |
           # Sparkle orders updates by CFBundleVersion (the run number), which resets if this workflow is recreated.
-          feed="$(curl -fsSL https://aratkruglik.github.io/ruta-wave/appcast.xml)" || { echo "No appcast yet"; exit 0; }
+          feed="$(curl -fsSL https://rutawave.kruhlyk.pro/appcast.xml)" || { echo "No appcast yet"; exit 0; }
           highest="$(python3 -c 'import re,sys; print(max(map(int, re.findall(r"<sparkle:version>(\d+)</sparkle:version>", sys.stdin.read())), default=0))' <<<"$feed")"
           if (( GITHUB_RUN_NUMBER <= highest )); then
             echo "::error::Build number $GITHUB_RUN_NUMBER is not above $highest, the highest in the appcast"
