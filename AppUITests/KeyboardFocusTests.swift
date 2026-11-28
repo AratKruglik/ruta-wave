@@ -22,6 +22,7 @@ final class KeyboardFocusTests: XCTestCase {
 
         let regions = tabCycle()
         let expected: [Region] = [.toolbar, .sidebar, .content, .bar]
+        XCTAssertEqual(Set(regions), Set(expected), "Tab should reach every region; got \(regions)")
         XCTExpectFailure("AppKit's key loop visits content before the sidebar; spec 08 section 14.4 wants the sidebar first") {
             XCTAssertTrue(
                 Self.isRotation(regions, of: expected),
