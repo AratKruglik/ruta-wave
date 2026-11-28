@@ -386,7 +386,7 @@ A typed wrapper over `UserDefaults`. Mapping to the original's options:
 | `proxy` | system proxy; no separate option |
 | `likeButtons`, `swapLikeButtonsOrder` | `showDislikeButton` |
 | `usePodcastParticipantAsArtist` | not needed (podcasts out of scope, #7) |
-| `autoUpdates` | arrives together with Sparkle |
+| `autoUpdates` | Sparkle (#109): `updateChannel` (`stable` / `beta`; unset follows the running build, a version with `-` means beta) and `updateNotifications` (on). Automatic checks and downloads are Sparkle's own `SUEnableAutomaticChecks` / `SUAutomaticallyUpdate` keys; checks default to on via `Info.plist` |
 | `hideMenu`, `removeUpgradeButton`, `themes`, `disableHardwareAcceleration`, `overrideUserAgent`, `autoResetAppCache`, `restartOnConfigChanges` | not needed in a native UI |
 | `plugins.<id>` | `plugins.<id>.enabled` plus the plugin's own keys |
 

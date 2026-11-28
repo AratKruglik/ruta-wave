@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppCommands: Commands {
     let nowPlaying: NowPlayingModel
+    let updates: UpdateController?
     let showMainWindow: @MainActor () -> Void
     @FocusedValue(\.navigation) private var navigation: NavigationModel?
     @FocusedValue(\.reorderSelection) private var reorder: ReorderAction?
@@ -11,6 +12,12 @@ struct AppCommands: Commands {
     private var isEditingText: Bool { navigation?.isSearchFocused == true }
 
     var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            if let updates {
+                Button("Check for Updates…", action: updates.checkForUpdates)
+                    .disabled(!updates.canCheckForUpdates)
+            }
+        }
         CommandGroup(replacing: .newItem) {
             Button("New Playlist…") { navigation?.requestNewPlaylist() }
                 .keyboardShortcut("n")

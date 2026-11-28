@@ -1,0 +1,55 @@
+name: Appcast
+
+on:
+  release:
+    types: [published, edited, deleted]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appcast
+  cancel-in-progress: false
+
+jobs:
+  # A release event runs on the tag, which the github-pages environment refuses to deploy from,
+  # so it hands over to a run on the default branch. GITHUB_TOKEN may start workflow_dispatch runs.
+  relay:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: gh workflow run appcast.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH"
+
+  build:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build appcast.xml
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 Scripts/appcast.py site/appcast.xml
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

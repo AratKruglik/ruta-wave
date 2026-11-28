@@ -1,0 +1,9 @@
+<!-- Write what changed for the people using the app, not commit titles or PR numbers. Sections left as "- …" are dropped from the update window. -->
+## What's new
+- …
+
+## Fixed
+- …
+
+## Known issues
+- …

@@ -3247,6 +3247,166 @@
           }
         }
       }
+    },
+    "Updates" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оновлення"
+          }
+        }
+      }
+    },
+    "Channel" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Канал"
+          }
+        }
+      }
+    },
+    "Stable" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стабільний"
+          }
+        }
+      }
+    },
+    "Beta" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бета"
+          }
+        }
+      }
+    },
+    "Betas ship more often and may have bugs. You can switch back to Stable at any time: you will stay on the current beta until a newer stable version ships." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бета-версії виходять частіше й можуть містити помилки. Повернутися до стабільного каналу можна будь-коли: ви залишитеся на поточній беті, доки не вийде новіша стабільна версія."
+          }
+        }
+      }
+    },
+    "Check for updates automatically" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевіряти оновлення автоматично"
+          }
+        }
+      }
+    },
+    "Download and install updates automatically" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантажувати й встановлювати оновлення автоматично"
+          }
+        }
+      }
+    },
+    "Notify about new versions" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сповіщати про нові версії"
+          }
+        }
+      }
+    },
+    "When RutaWave is in the background or has no Dock icon." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коли RutaWave працює у фоні або без значка в Dock."
+          }
+        }
+      }
+    },
+    "Version" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Версія"
+          }
+        }
+      }
+    },
+    "Last checked" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остання перевірка"
+          }
+        }
+      }
+    },
+    "Never" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ніколи"
+          }
+        }
+      }
+    },
+    "Check Now" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірити зараз"
+          }
+        }
+      }
+    },
+    "Check for Updates…" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перевірити оновлення…"
+          }
+        }
+      }
+    },
+    "RutaWave %@ is available" : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступна RutaWave %@"
+          }
+        }
+      }
+    },
+    "Click to see what's new and install it." : {
+      "localizations" : {
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть, щоб побачити, що нового, і встановити."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -14,6 +14,9 @@ jobs:
     env:
       # Forks and repositories without the secrets fall back to an ad-hoc signed, un-notarized DMG.
       SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' && secrets.NOTARY_KEY_P8 != '' }}
+      # Without the EdDSA key the release has no Sparkle archive, so the appcast leaves it out.
+      UPDATES: ${{ secrets.SPARKLE_PRIVATE_KEY != '' }}
+      APP: build/release/Build/Products/Release/RutaWave.app
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +25,17 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_27.2.app
           xcodebuild -version
           brew install xcodegen
+
+      - name: Check the build number against the appcast
+        if: env.UPDATES == 'true'
+        run: |
+          # Sparkle orders updates by CFBundleVersion (the run number), which resets if this workflow is recreated.
+          feed="$(curl -fsSL https://rutawave.kruhlyk.pro/appcast.xml)" || { echo "No appcast yet"; exit 0; }
+          highest="$(python3 -c 'import re,sys; print(max(map(int, re.findall(r"<sparkle:version>(\d+)</sparkle:version>", sys.stdin.read())), default=0))' <<<"$feed")"
+          if (( GITHUB_RUN_NUMBER <= highest )); then
+            echo "::error::Build number $GITHUB_RUN_NUMBER is not above $highest, the highest in the appcast"
+            exit 1
+          fi
 
       - name: Import Developer ID certificate
         if: env.SIGNED == 'true'
@@ -43,6 +57,16 @@ jobs:
         env:
           CODESIGN_IDENTITY: "${{ env.SIGNED == 'true' && format('Developer ID Application: Oleksii Kruhlyk ({0})', secrets.APPLE_TEAM_ID) || '' }}"
         run: Scripts/make-dmg.sh "${GITHUB_REF_NAME#v}" "$GITHUB_RUN_NUMBER"
+
+      - name: Check the update feed configuration
+        if: env.UPDATES == 'true'
+        run: |
+          for key in SUFeedURL SUPublicEDKey; do
+            if [[ -z "$(/usr/libexec/PlistBuddy -c "Print :$key" "$APP/Contents/Info.plist" 2>/dev/null)" ]]; then
+              echo "::error::$key is empty, so this build would never update. Set SPARKLE_FEED_URL and SPARKLE_PUBLIC_ED_KEY in project.yml."
+              exit 1
+            fi
+          done
 
       - name: Notarize and staple
         if: env.SIGNED == 'true'
@@ -66,18 +90,34 @@ jobs:
           xcrun stapler staple "$dmg"
           spctl -a -vvv -t install "$dmg"
           codesign --verify --strict --verbose=2 "$dmg"
+          # The DMG submission notarized the app inside it too; a stapled app also passes Gatekeeper offline.
+          xcrun stapler staple "$APP" || echo "::warning::Could not staple the app. Sparkle updates do not need it."
 
-      - name: Publish GitHub release
+      - name: Package the Sparkle update
+        if: env.UPDATES == 'true'
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: Scripts/sign-update.sh "$APP" build/dmg
+
+      - name: Create the draft release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # A draft, so the notes can be written for people before Publish puts the release in the appcast.
           version="${GITHUB_REF_NAME#v}"
-          notes=""
-          [[ "$SIGNED" == true ]] || notes="The app is ad-hoc signed, not notarized. After copying it to Applications, run once: \`xattr -dr com.apple.quarantine /Applications/RutaWave.app\`"
-          gh release create "$GITHUB_REF_NAME" "build/dmg/RutaWave-$version.dmg" \
+          notes="$RUNNER_TEMP/notes.md"
+          cp .github/release-notes-template.md "$notes"
+          if [[ "$SIGNED" != true ]]; then
+            printf '\n<!-- github-only -->\nThe app is ad-hoc signed, not notarized. After copying it to Applications, run once: `xattr -dr com.apple.quarantine /Applications/RutaWave.app`\n<!-- /github-only -->\n' >> "$notes"
+          fi
+          files=("build/dmg/RutaWave-$version.dmg")
+          if [[ -f build/dmg/appcast-item.json ]]; then
+            files+=("build/dmg/RutaWave-$version.zip" build/dmg/appcast-item.json)
+          fi
+          gh release create "$GITHUB_REF_NAME" "${files[@]}" \
+            --draft \
             --title "RutaWave $version" \
-            --generate-notes \
-            --notes "$notes" \
+            --notes-file "$notes" \
             $([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease)
 
       - name: Remove signing material

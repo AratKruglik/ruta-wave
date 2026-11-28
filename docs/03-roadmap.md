@@ -217,6 +217,7 @@ Consequences:
 - the ad-hoc signature changes with every build, so Keychain access and system
   permissions may be requested again after an update;
 - Sparkle works without a Developer ID too (updates are signed with your own EdDSA key).
+- Superseded from 0.1.0-beta.6: release builds are signed with a Developer ID and notarized (#188), so these consequences now apply only to local and fork builds.
 
 **Done when:** one command produces the DMG, and the app from it installs and
 works on a clean user account.
@@ -225,8 +226,8 @@ works on a clean user account.
 
 ## Before the first public release
 
-- [ ] README instructions on allowing a non-notarized app to launch.
-- [ ] Auto-update (Sparkle) with a DMG or ZIP on your own hosting or GitHub Releases.
+- [x] ~~README instructions on allowing a non-notarized app to launch~~: releases are signed with a Developer ID and notarized from 0.1.0-beta.6 (#188).
+- [ ] Auto-update (Sparkle) from GitHub Releases, with stable and beta channels and an appcast on GitHub Pages at `rutawave.kruhlyk.pro` (#109): built and keyed, waiting for the first update delivered end to end.
 - [ ] README: installing from the DMG, limitations, disclaimer of any affiliation with Google.
 - [ ] Review the name, icon and copy for Google trademarks.
 - [ ] License review: if code or text was ported from `pear-desktop`, keep the

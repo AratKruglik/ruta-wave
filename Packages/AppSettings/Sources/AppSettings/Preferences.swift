@@ -174,6 +174,24 @@ public struct Preferences: @unchecked Sendable {
         nonmutating set { defaults.set(newValue, forKey: Key.hideDockIcon) }
     }
 
+    /// `stable` or `beta`; anything else is refused. `nil` until the user picks one, so the app can default from its own version.
+    public var updateChannel: String? {
+        get { defaults.string(forKey: Key.updateChannel).flatMap { Self.updateChannels.contains($0) ? $0 : nil } }
+        nonmutating set {
+            if let newValue {
+                if Self.updateChannels.contains(newValue) { defaults.set(newValue, forKey: Key.updateChannel) }
+            } else {
+                defaults.removeObject(forKey: Key.updateChannel)
+            }
+        }
+    }
+
+    /// Posts a notification for an update found while the app is in the background. On unless switched off.
+    public var updateNotifications: Bool {
+        get { defaults.object(forKey: Key.updateNotifications) == nil ? true : defaults.bool(forKey: Key.updateNotifications) }
+        nonmutating set { defaults.set(newValue, forKey: Key.updateNotifications) }
+    }
+
     public static let maxNavigationStateBytes = 64 * 1024
     public static let startingPages: [String] = ["home", "explore", "library"]
 
@@ -207,6 +225,7 @@ public struct Preferences: @unchecked Sendable {
     }
 
     private static let repeatModes: Set<String> = ["off", "all", "one"]
+    private static let updateChannels: Set<String> = ["stable", "beta"]
 
     private enum Key {
         static let sidebarCollapsed = "sidebarCollapsed"
@@ -232,6 +251,8 @@ public struct Preferences: @unchecked Sendable {
         static let showMenuBarExtra = "showMenuBarExtra"
         static let menuBarClickTogglesPlay = "menuBarClickTogglesPlay"
         static let hideDockIcon = "hideDockIcon"
+        static let updateChannel = "updateChannel"
+        static let updateNotifications = "updateNotifications"
     }
 }
 

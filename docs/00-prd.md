@@ -215,7 +215,7 @@ detailed behaviour; "Row" to the backlog row that delivers it.
 |---|---|---|---|---|
 | F-DST-1 | One command builds an ad-hoc signed DMG with Hardened Runtime | P0 | 03 stage 8 | 8.1 |
 | F-DST-2 | README: install from DMG, allowing a non-notarized app, disclaimer, limitations | P0 | 03 | R1 |
-| F-DST-3 | Auto-update (Sparkle) | P2 | 05 Q10 | after R1 |
+| F-DST-3 | Auto-update (Sparkle) with stable and beta channels (#109) | P2 | 05 Q10 | before R1 |
 
 ### 5.9. Plugins
 
