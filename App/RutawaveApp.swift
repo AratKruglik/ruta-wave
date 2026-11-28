@@ -3,6 +3,7 @@ import AppSettings
 import InnerTube
 import PlayerEngine
 import Plugins
+import Sparkle
 import SwiftUI
 import SystemKit
 import UserNotifications
@@ -85,6 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var openMiniPlayer: (() -> Void)?
     private var statusMenu: StatusMenu?
     private var playerWindow: PlayerWindow?
+    private var updater: SPUStandardUpdaterController?
 
     override init() {
         #if DEBUG
@@ -144,6 +146,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         #endif
+        if Self.hasUpdateFeed {
+            updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        }
         let preferences = Preferences()
         // The single-account migration signs out without an isSignedIn change, so no observer clears the old account's track.
         if session.droppedLegacySession { preferences.lastPlayback = nil }
@@ -196,6 +201,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .section, .route:
             links.pending = link
             showMainWindow()
+        }
+    }
+
+    // Sparkle shows a startup-failure alert when either value is empty.
+    private static var hasUpdateFeed: Bool {
+        ["SUFeedURL", "SUPublicEDKey"].allSatisfy {
+            !((Bundle.main.object(forInfoDictionaryKey: $0) as? String) ?? "").isEmpty
         }
     }
 

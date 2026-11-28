@@ -12,6 +12,8 @@ packages:
   PlayerEngine: {path: Packages/PlayerEngine}
   Plugins: {path: Packages/Plugins}
   SystemKit: {path: Packages/SystemKit}
+  # Sparkle 2.10.1. Package.resolved is in the gitignored .xcodeproj and a tag can move, so the commit is the only lock.
+  Sparkle: {url: "https://github.com/sparkle-project/Sparkle", revision: ab7d71291238df6e0492143b120c9b696a35f603}
 targets:
   Rutawave:
     type: application
@@ -34,6 +36,8 @@ targets:
             CFBundleTypeRole: Viewer
             LSHandlerRank: Alternate
             LSItemContentTypes: [com.apple.web-internet-location]
+        SUFeedURL: $(SPARKLE_FEED_URL)
+        SUPublicEDKey: $(SPARKLE_PUBLIC_ED_KEY)
     dependencies:
       - package: Auth
       - package: AppSettings
@@ -41,6 +45,7 @@ targets:
       - package: PlayerEngine
       - package: Plugins
       - package: SystemKit
+      - package: Sparkle
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.kruhlyk.rutawave
