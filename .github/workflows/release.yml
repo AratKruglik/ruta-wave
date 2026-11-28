@@ -11,6 +11,9 @@ jobs:
   dmg:
     runs-on: xcode-27
     timeout-minutes: 45
+    env:
+      # Forks and repositories without the secrets fall back to an ad-hoc signed, un-notarized DMG.
+      SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' && secrets.NOTARY_KEY_P8 != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,16 +23,65 @@ jobs:
           xcodebuild -version
           brew install xcodegen
 
+      - name: Import Developer ID certificate
+        if: env.SIGNED == 'true'
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+          base64 --decode <<<"$DEVELOPER_ID_P12" > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$DEVELOPER_ID_P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychains -d user | xargs security list-keychains -d user -s "$keychain"
+
       - name: Build DMG
+        env:
+          CODESIGN_IDENTITY: "${{ env.SIGNED == 'true' && format('Developer ID Application: Oleksii Kruhlyk ({0})', secrets.APPLE_TEAM_ID) || '' }}"
         run: Scripts/make-dmg.sh "${GITHUB_REF_NAME#v}" "$GITHUB_RUN_NUMBER"
+
+      - name: Notarize and staple
+        if: env.SIGNED == 'true'
+        env:
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          dmg="build/dmg/RutaWave-${GITHUB_REF_NAME#v}.dmg"
+          key="$RUNNER_TEMP/notary.p8"
+          result="$RUNNER_TEMP/notary.json"
+          auth=(--key "$key" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID")
+          printf '%s\n' "$NOTARY_KEY_P8" > "$key"
+          # notarytool can exit 0 for a rejected submission, so the status decides.
+          xcrun notarytool submit "$dmg" "${auth[@]}" --wait --output-format json > "$result" || true
+          cat "$result"
+          if [[ "$(plutil -extract status raw -o - "$result")" != Accepted ]]; then
+            xcrun notarytool log "$(plutil -extract id raw -o - "$result")" "${auth[@]}"
+            exit 1
+          fi
+          xcrun stapler staple "$dmg"
+          spctl -a -vvv -t install "$dmg"
+          codesign --verify --strict --verbose=2 "$dmg"
 
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${GITHUB_REF_NAME#v}"
+          notes=""
+          [[ "$SIGNED" == true ]] || notes="The app is ad-hoc signed, not notarized. After copying it to Applications, run once: \`xattr -dr com.apple.quarantine /Applications/RutaWave.app\`"
           gh release create "$GITHUB_REF_NAME" "build/dmg/RutaWave-$version.dmg" \
             --title "RutaWave $version" \
             --generate-notes \
-            --notes "The app is ad-hoc signed, not notarized. After copying it to Applications, run once: \`xattr -dr com.apple.quarantine /Applications/RutaWave.app\`" \
+            --notes "$notes" \
             $([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease)
+
+      - name: Remove signing material
+        if: always() && env.SIGNED == 'true'
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -f "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP/notary.p8"
