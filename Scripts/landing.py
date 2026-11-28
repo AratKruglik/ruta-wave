@@ -36,16 +36,17 @@ def pick_downloads(releases):
             if bool(release.get("prerelease")) != beta:
                 continue
             version = release.get("tag_name", "").removeprefix("v")
-            url = next((a["browser_download_url"] for a in release.get("assets", []) if a["name"] == f"RutaWave-{version}.dmg"), None)
-            if url:
-                return {"version": version, "url": url, "beta": beta, "published_at": release["published_at"]}
+            dmg = next((a for a in release.get("assets", []) if a["name"] == f"RutaWave-{version}.dmg"), None)
+            if dmg:
+                return {"version": version, "url": dmg["browser_download_url"], "size": dmg.get("size"), "beta": beta,
+                        "published_at": release["published_at"]}
         return None
 
     stable, beta = newest(False), newest(True)
     if stable and beta and beta["published_at"] < stable["published_at"]:
         beta = None
     primary, secondary = (stable, beta) if stable else (beta, None)
-    strip = lambda d: d and {k: d[k] for k in ("version", "url", "beta")}
+    strip = lambda d: d and {k: d[k] for k in ("version", "url", "size", "beta")}
     return {"primary": strip(primary), "secondary": strip(secondary)}
 
 
@@ -58,7 +59,10 @@ def render_downloads(downloads):
     ]
     if primary:
         channel = '<span data-i18n="download.beta">beta</span>' if primary["beta"] else '<span data-i18n="download.stable">stable</span>'
-        lines.append(f'  <p class="download-meta"><span class="version">{escape(primary["version"])}</span> · {channel} · '
+        size = primary.get("size")
+        # main.js reformats data-bytes for the page language ("6,2 МБ").
+        size_html = f'<span class="size" data-bytes="{size}">{size / 1e6:.1f} MB</span> · ' if isinstance(size, int) and size > 0 else ""
+        lines.append(f'  <p class="download-meta"><span class="version">{escape(primary["version"])}</span> · {channel} · {size_html}'
                      '<span data-i18n="download.requirements">macOS 14+ · Apple Silicon</span></p>')
     if secondary:
         lines.append(f'  <p class="download-alt"><a href="{escape(secondary["url"])}"><span data-i18n="download.tryBeta">Or try the beta</span> '

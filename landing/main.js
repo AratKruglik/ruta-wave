@@ -4,7 +4,8 @@ const UK = {
   "nav.skip": "Перейти до змісту",
   "nav.label": "Розділи",
   "nav.features": "Можливості",
-  "nav.screenshots": "Знімки",
+  "nav.evening": "Екскурсія",
+  "nav.try": "Спробувати",
   "nav.install": "Встановлення",
   "theme.toggle": "Темна тема",
   "hero.chips": "Головне",
@@ -19,7 +20,7 @@ const UK = {
   "download.requirements": "macOS 14+ · Apple Silicon",
   "download.tryBeta": "Або спробуйте бету",
   "why.title": "Чому RutaWave",
-  "why.lead": "У YouTube Music немає застосунку для macOS. Вкладка браузера, PWA чи обгортка на Electron запускають цілий Chromium заради одного сайту і ніколи не відчуваються як застосунок для Mac.",
+  "why.lead": "Я хотів, щоб YouTube Music на Маку відчувався як застосунок для Mac, тож зробив його. Офіційного застосунку для macOS немає: вкладка браузера, PWA чи обгортка на Electron запускають цілий Chromium заради одного сайту і ніколи не відчуваються як застосунок для Mac.",
   "why.native.title": "Нативний",
   "why.native.text": "Кожен екран — це SwiftUI: справжня бічна панель, меню, фокус клавіатури, VoiceOver і системна поведінка вікон.",
   "why.light.title": "Легкий",
@@ -41,7 +42,48 @@ const UK = {
   "features.colour.text": "Вікно бере відтінок з обкладинки альбому чи плейлиста, який ви відкрили.",
   "features.plugins.title": "Плагіни",
   "features.plugins.text": "Сповіщення про зміну треку та експериментальний караоке-текст, що підсвічує кожне слово, коли його співають.",
-  "shots.title": "Зблизька",
+  "story.title": "Один вечір з RutaWave",
+  "story.lead": "Прогорніть справжній вечір слухання. Кожен екран нижче — застосунок таким, яким він є сьогодні.",
+  "story.home.title": "Головна",
+  "story.home.text": "Відкриваєте RutaWave. Угорі чипи настроїв, далі полиці з тим, що ви слухали нещодавно, і нові релізи. Стартова сторінка — та, яку ви обрали в Налаштуваннях.",
+  "story.search.title": "Пошук",
+  "story.search.text": "⌘F і кілька літер. Підказки зʼявляються, поки ви друкуєте, далі найкращий результат, пісні та фільтри: пісні, відео, альбоми, виконавці й плейлисти.",
+  "story.artist.title": "Виконавець",
+  "story.artist.text": "Топ пісень, «Перемішати», «Радіо» і «Підписатися», а для кожної полиці є повний список.",
+  "story.playlist.title": "Плейлист",
+  "story.playlist.text": "Слухайте, перемішуйте, зберігайте до бібліотеки чи діліться. Ваші плейлисти живуть у бічній панелі, і їх можна редагувати просто тут.",
+  "story.player.title": "Сторінка плеєра",
+  "story.player.text": "⌘P відкриває обкладинку, чергу «Далі», текст пісні та «Схоже». Перетягуйте треки, додавайте радіочипи, зберігайте чергу як плейлист.",
+  "story.explore.title": "Огляд",
+  "story.explore.text": "Нові релізи, настрої та жанри, щоденні й щотижневі чарти для будь-якої країни. А потім ви закриваєте вікно, і музика грає далі.",
+  "demo.title": "Натисніть просто зараз",
+  "demo.lead": "Із закритим вікном RutaWave живе в рядку меню та мініплеєрі. Це власні клавіатурні скорочення застосунку, і на цій сторінці вони теж працюють.",
+  "demo.menu.file": "Файл",
+  "demo.menu.edit": "Правка",
+  "demo.menu.controls": "Керування",
+  "demo.menu.window": "Вікно",
+  "demo.player": "Мініплеєр",
+  "demo.previous": "Попередній",
+  "demo.next": "Наступний",
+  "demo.play": "Грати / Пауза",
+  "demo.like": "Подобається",
+  "demo.key.play": "Грати / Пауза",
+  "demo.key.track": "Попередній / наступний",
+  "demo.key.seek": "10 секунд назад / вперед",
+  "demo.key.volume": "Гучність",
+  "demo.key.like": "Подобається",
+  "demo.note": "Обкладинка тут умовна, але кольори змінюються разом з нею так само, як RutaWave тонує вікно під справжню обкладинку.",
+  "demo.nowPlaying": "Зараз грає",
+  "demo.paused": "Пауза",
+  "demo.liked": "Додано до вподобаних",
+  "demo.unliked": "Прибрано з вподобаних",
+  "demo.volume": "Гучність",
+  "limits.title": "Чого RutaWave не вміє",
+  "limits.lead": "Щось із цього — рішення щодо продукту, щось — чесні обмеження.",
+  "limits.offline": "Не завантажує треки і не зберігає аудіо для слухання офлайн.",
+  "limits.ads": "Не блокує рекламу й аналітику. На безкоштовному акаунті та в гостьовому режимі звучить реклама, яку показує YouTube.",
+  "limits.unofficial": "Це неофіційний застосунок. Відтворення йде через вебплеєр YouTube Music, тож коли Google змінює сайт, щось може зламатися до наступного оновлення.",
+  "limits.platforms": "Працює лише на Mac з Apple Silicon і macOS 14 або новішою: без Intel, Windows, Linux чи iOS і без App Store.",
   "shots.home": "Головний екран RutaWave з чипами настроїв і полицями альбомів",
   "shots.player": "Сторінка плеєра: обкладинка, черга «Далі» та радіочипи",
   "shots.player.alt": "Сторінка плеєра з обкладинкою і чергою «Далі»",
@@ -108,6 +150,9 @@ function applyLanguage(language) {
       element.setAttribute(attribute, uk ? UK[element.getAttribute(selector)] ?? english : english);
     }
   }
+  const megabytes = new Intl.NumberFormat(root.lang, { style: "unit", unit: "megabyte", maximumFractionDigits: 1 });
+  for (const element of document.querySelectorAll("[data-bytes]")) element.textContent = megabytes.format(element.dataset.bytes / 1e6);
+  renderClock();
   const toggle = document.getElementById("language");
   toggle.textContent = uk ? "ENG" : "УКР";
   toggle.lang = uk ? "en" : "uk";
@@ -120,6 +165,14 @@ function applyTheme() {
   const theme = root.dataset.theme ?? (systemDark.matches ? "dark" : "light");
   root.classList.toggle("dark", theme === "dark");
   document.getElementById("theme").setAttribute("aria-pressed", String(theme === "dark"));
+}
+
+const EN = { "demo.nowPlaying": "Now playing", "demo.paused": "Paused", "demo.liked": "Liked", "demo.unliked": "Like removed", "demo.volume": "Volume" };
+const t = key => (root.lang === "uk" ? UK : EN)[key];
+
+function renderClock() {
+  const clock = document.querySelector("[data-clock]");
+  clock.textContent = new Date().toLocaleString(root.lang, { weekday: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 const language = stored("language") ?? (navigator.languages ?? [navigator.language]).find(l => /^(uk|en)\b/i.test(l))?.slice(0, 2).toLowerCase();
@@ -148,3 +201,113 @@ const observer = new IntersectionObserver(entries => {
   }
 }, { rootMargin: "0px 0px -8% 0px" });
 document.querySelectorAll(".reveal").forEach(element => observer.observe(element));
+
+const story = document.querySelector(".story");
+const steps = [...story.querySelectorAll(".step")];
+const frames = story.querySelectorAll(".stage-window img");
+const times = story.querySelectorAll(".timeline li");
+
+function showStep(index) {
+  steps.forEach((step, i) => step.classList.toggle("active", i === index));
+  frames.forEach((frame, i) => frame.classList.toggle("active", i === index));
+  times.forEach((time, i) => time.classList.toggle("active", i <= index));
+  story.style.setProperty("--tint", steps[index].dataset.tint);
+}
+
+const stepObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) if (entry.isIntersecting) showStep(steps.indexOf(entry.target));
+}, { rootMargin: "-55% 0px -40% 0px" });
+steps.forEach(step => stepObserver.observe(step));
+showStep(0);
+
+const TRACKS = [
+  { title: "Червона рута", artist: "Софія Ротару", duration: 202, tint: "#e8253f" },
+  { title: "Обійми", artist: "Океан Ельзи", duration: 271, tint: "#3d7be0" },
+  { title: "Стефанія", artist: "Kalush Orchestra", duration: 179, tint: "#d9a13a" },
+  { title: "Шум", artist: "Go_A", duration: 183, tint: "#2fae78" },
+];
+const demo = document.querySelector(".demo");
+const player = { track: 0, elapsed: 47, playing: false, liked: false, volume: 70 };
+const time = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+
+function announce(message) {
+  demo.querySelector("[data-announce]").textContent = message;
+}
+
+function renderPlayer() {
+  const track = TRACKS[player.track];
+  demo.querySelectorAll("[data-track-title]").forEach(element => { element.textContent = track.title; });
+  demo.querySelector("[data-track-artist]").textContent = track.artist;
+  demo.querySelector("[data-elapsed]").textContent = time(player.elapsed);
+  demo.querySelector("[data-duration]").textContent = time(track.duration);
+  demo.querySelector("[data-progress]").style.width = `${(player.elapsed / track.duration) * 100}%`;
+  demo.querySelector("[data-volume]").style.width = `${player.volume}%`;
+  demo.querySelector(".mini-play").setAttribute("aria-pressed", String(player.playing));
+  demo.querySelector(".mini-like").setAttribute("aria-pressed", String(player.liked));
+  demo.classList.toggle("playing", player.playing);
+  demo.style.setProperty("--tint", track.tint);
+}
+
+function changeTrack(step) {
+  player.track = (player.track + step + TRACKS.length) % TRACKS.length;
+  player.elapsed = 0;
+  player.liked = false;
+  const track = TRACKS[player.track];
+  announce(`${t("demo.nowPlaying")}: ${track.title} — ${track.artist}`);
+}
+
+const ACTIONS = {
+  play() { player.playing = !player.playing; announce(player.playing ? `${t("demo.nowPlaying")}: ${TRACKS[player.track].title}` : t("demo.paused")); },
+  previous() { changeTrack(-1); },
+  next() { changeTrack(1); },
+  back() { player.elapsed = Math.max(0, player.elapsed - 10); },
+  forward() { player.elapsed = Math.min(TRACKS[player.track].duration - 1, player.elapsed + 10); },
+  louder() { player.volume = Math.min(100, player.volume + 10); announce(`${t("demo.volume")} ${player.volume}%`); },
+  quieter() { player.volume = Math.max(0, player.volume - 10); announce(`${t("demo.volume")} ${player.volume}%`); },
+  like() { player.liked = !player.liked; announce(t(player.liked ? "demo.liked" : "demo.unliked")); },
+};
+
+function run(action) {
+  ACTIONS[action]();
+  renderPlayer();
+  for (const key of demo.querySelectorAll(`.keys [data-action="${action}"]`)) {
+    key.classList.remove("hit");
+    void key.offsetWidth;
+    key.classList.add("hit");
+  }
+}
+
+demo.addEventListener("click", event => {
+  const button = event.target.closest("[data-action]");
+  if (button) run(button.dataset.action);
+});
+
+let demoInView = false;
+new IntersectionObserver(([entry]) => { demoInView = entry.isIntersecting; }, { threshold: 0.4 }).observe(demo);
+
+// Only while the demo is on screen, so ⌘← keeps meaning "back" everywhere else on the page.
+document.addEventListener("keydown", event => {
+  if (!demoInView || event.ctrlKey) return;
+  const command = event.metaKey;
+  const action =
+    event.code === "Space" && !command && !event.target.closest("button, a") ? "play" :
+    command && event.shiftKey && event.key === "ArrowLeft" ? "back" :
+    command && event.shiftKey && event.key === "ArrowRight" ? "forward" :
+    command && !event.shiftKey && !event.altKey && event.key === "ArrowLeft" ? "previous" :
+    command && !event.shiftKey && !event.altKey && event.key === "ArrowRight" ? "next" :
+    command && !event.altKey && event.key === "ArrowUp" ? "louder" :
+    command && !event.altKey && event.key === "ArrowDown" ? "quieter" :
+    command && event.altKey && event.code === "KeyL" ? "like" : null;
+  if (!action) return;
+  event.preventDefault();
+  run(action);
+});
+
+setInterval(() => {
+  if (!player.playing) return;
+  player.elapsed += 1;
+  if (player.elapsed >= TRACKS[player.track].duration) changeTrack(1);
+  renderPlayer();
+}, 1000);
+setInterval(renderClock, 30000);
+renderPlayer();

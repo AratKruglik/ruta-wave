@@ -60,3 +60,13 @@ From `ui-ux-pro-max`: the "feature-rich showcase" structure with the download re
 ## Left to the builder
 
 The copy, the exact spacing scale and the motion timing.
+
+## Revision: ideas borrowed from notchalert.propellercrew.com
+
+The user liked how that page lets the product show itself. They picked three of its ideas, plus a mix of screenshots and HTML:
+
+- **One evening with RutaWave.** A scroll-driven story. A sticky Mac window crossfades between six README screenshots (home, search, artist, playlist, player page, explore). A timeline of evening times runs under it. The glow takes each step's artwork colour. This replaces the screenshot gallery.
+- **Press it right now.** The menu bar item and the mini player are drawn in HTML. The app's own shortcuts work on the page: Space, ⌘←/⌘→, ⇧⌘←/⇧⌘→, ⌘↑/⌘↓ and ⌥⌘L. They are only handled while the demo is on screen, so ⌘← keeps meaning "back" elsewhere on the page. The keycaps are buttons too. The scene takes its tint from a stand-in cover, as the app does from a real one. ⌘R and ⌘S were left out because browsers reserve them for reload and save.
+- **Honesty and details.** A first-person line in "Why", a "What RutaWave does not do" section (from the README, plus "unofficial, can break when the site changes"), and the DMG size next to the version, taken from the release asset.
+
+Not taken: the light beam from the notch, sound (the music is someone else's), and the cookie banner (this site has no analytics).

@@ -12,7 +12,7 @@ def release(tag, *, prerelease=False, draft=False, published="2026-12-01T10:00:0
     short = tag.removeprefix("v")
     assets = [{"name": f"RutaWave-{short}.zip", "browser_download_url": f"https://dl/{short}.zip"}]
     if dmg:
-        assets.append({"name": f"RutaWave-{short}.dmg", "browser_download_url": f"https://dl/{short}.dmg"})
+        assets.append({"name": f"RutaWave-{short}.dmg", "browser_download_url": f"https://dl/{short}.dmg", "size": 6169253})
     return {"tag_name": tag, "prerelease": prerelease, "draft": draft,
             "published_at": None if draft else published, "assets": assets}
 
@@ -25,8 +25,8 @@ NEW_BETA = release("v0.3.0-beta.1", prerelease=True, published="2026-12-02T10:00
 class PickDownloadsTests(unittest.TestCase):
     def test_stable_is_primary_and_a_beta_published_later_is_secondary(self):
         picked = landing.pick_downloads([OLD_BETA, STABLE, NEW_BETA])
-        self.assertEqual(picked["primary"], {"version": "0.2.0", "url": "https://dl/0.2.0.dmg", "beta": False})
-        self.assertEqual(picked["secondary"], {"version": "0.3.0-beta.1", "url": "https://dl/0.3.0-beta.1.dmg", "beta": True})
+        self.assertEqual(picked["primary"], {"version": "0.2.0", "url": "https://dl/0.2.0.dmg", "size": 6169253, "beta": False})
+        self.assertEqual(picked["secondary"], {"version": "0.3.0-beta.1", "url": "https://dl/0.3.0-beta.1.dmg", "size": 6169253, "beta": True})
 
     def test_a_beta_published_before_the_stable_is_not_offered(self):
         picked = landing.pick_downloads([OLD_BETA, STABLE])
@@ -56,6 +56,10 @@ class RenderTests(unittest.TestCase):
         html = landing.render_downloads(landing.pick_downloads([STABLE, NEW_BETA]))
         self.assertIn('href="https://dl/0.2.0.dmg"', html)
         self.assertIn('href="https://dl/0.3.0-beta.1.dmg"', html)
+
+    def test_the_dmg_size_is_shown_in_megabytes(self):
+        html = landing.render_downloads(landing.pick_downloads([STABLE]))
+        self.assertIn('data-bytes="6169253">6.2 MB</span>', html)
 
     def test_release_values_are_escaped(self):
         html = landing.render_downloads({"primary": {"version": "1<b>", "url": 'https://x/"a', "beta": False}, "secondary": None})
