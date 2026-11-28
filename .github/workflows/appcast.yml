@@ -4,6 +4,16 @@ on:
   release:
     types: [published, edited, deleted]
   workflow_dispatch:
+  # Every deploy replaces the whole site, so a landing change rebuilds the feed too and vice versa.
+  push:
+    branches: [develop]
+    paths:
+      - landing/**
+      - Scripts/appcast.py
+      - Scripts/landing.py
+      - docs/assets/**
+      - App/AppIcon.icon/**
+      - .github/workflows/appcast.yml
 
 permissions:
   contents: read
@@ -27,7 +37,7 @@ jobs:
         run: gh workflow run appcast.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH"
 
   build:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +46,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python3 Scripts/appcast.py site/appcast.xml
+
+      - name: Build the landing page
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 Scripts/landing.py site
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -15,3 +15,5 @@ Packages/*/.build/
 /docs/plans
 # Superpowers brainstorm mockups and plan ledgers
 .superpowers/
+# Pages build output (Scripts/appcast.py, Scripts/landing.py)
+/site/
