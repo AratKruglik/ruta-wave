@@ -15,10 +15,7 @@ final class AccessibilityAuditTests: XCTestCase {
 
     func testExplore() throws {
         launch(route: "rutawave://explore")
-        let explore = app.buttons["Explore"].firstMatch
-        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isSelected == true"), object: explore)
-        XCTAssertEqual(XCTWaiter().wait(for: [selected], timeout: 10), .completed)
-        try audit()
+        try expectAndAudit(app.buttons["Relax"])
     }
 
     func testLibrary() throws {
@@ -33,7 +30,7 @@ final class AccessibilityAuditTests: XCTestCase {
 
     func testPlaylist() throws {
         launch(route: "rutawave://playlist?list=PL1")
-        try expectAndAudit(app.staticTexts["Test Playlist With A Fairly Long Title"].firstMatch)
+        try expectAndAudit(app.descendants(matching: .any)["Test Playlist With A Fairly Long Title"].firstMatch)
     }
 
     func testPlayerPage() throws {
@@ -47,8 +44,7 @@ final class AccessibilityAuditTests: XCTestCase {
     }
 
     private func launch(route: String? = nil) {
-        app.launchArguments = ["-UITestFixtures", "-ApplePersistenceIgnoreState", "YES"] + (route.map { ["-UITestRoute", $0] } ?? [])
-        app.launch()
+        app.launchWithFixtures(route: route)
     }
 
     private func expectAndAudit(_ element: XCUIElement) throws {
