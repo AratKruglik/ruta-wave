@@ -221,7 +221,7 @@ steps.forEach(step => stepObserver.observe(step));
 showStep(0);
 
 const TRACKS = [
-  { title: "Червона рута", artist: "Софія Ротару", duration: 202, tint: "#e8253f" },
+  { title: "Червона рута", artist: "Володимир Івасюк", duration: 202, tint: "#e8253f" },
   { title: "Обійми", artist: "Океан Ельзи", duration: 271, tint: "#3d7be0" },
   { title: "Стефанія", artist: "Kalush Orchestra", duration: 179, tint: "#d9a13a" },
   { title: "Шум", artist: "Go_A", duration: 183, tint: "#2fae78" },
