@@ -3,7 +3,6 @@ import AppSettings
 import InnerTube
 import PlayerEngine
 import Plugins
-import Sparkle
 import SwiftUI
 import SystemKit
 import UserNotifications
@@ -53,7 +52,7 @@ struct RutawaveApp: App {
         .defaultSize(width: Metrics.defaultWindowWidth, height: Metrics.defaultWindowHeight)
         .commands {
             SidebarCommands()
-            AppCommands(nowPlaying: app.nowPlaying, showMainWindow: { [app] in app.showMainWindow() })
+            AppCommands(nowPlaying: app.nowPlaying, updates: app.updates, showMainWindow: { [app] in app.showMainWindow() })
         }
         .handlesExternalEvents(matching: [])
         Window("Mini Player", id: AppDelegate.miniPlayerWindowId) { MiniPlayerView(nowPlaying: app.nowPlaying, showMainWindow: app.showMainWindow) }
@@ -61,7 +60,7 @@ struct RutawaveApp: App {
             .windowResizability(.contentSize)
             .keyboardShortcut("m", modifiers: [.command, .shift])
             .handlesExternalEvents(matching: [])
-        Settings { SettingsView(session: app.session, plugins: app.plugins) }
+        Settings { SettingsView(session: app.session, plugins: app.plugins, updates: app.updates) }
         #if DEBUG
         Window("Player Debug", id: "player-debug") { PlayerDebugView(player: app.player) }
             .handlesExternalEvents(matching: [])
@@ -80,13 +79,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let notifications: NotificationsPlugin
     let network = NetworkMonitor()
     let links = LinkInbox()
+    /// Set in `init` because the scenes, commands and status menu read it once and the delegate is not observable.
+    let updates: UpdateController?
     static let mainWindowId = "main"
     static let miniPlayerWindowId = "mini-player"
     var openMainWindow: (() -> Void)?
     var openMiniPlayer: (() -> Void)?
     private var statusMenu: StatusMenu?
     private var playerWindow: PlayerWindow?
-    private var updater: SPUStandardUpdaterController?
 
     override init() {
         #if DEBUG
@@ -119,6 +119,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let notifications = NotificationsPlugin(posting: UserNotificationPosting(), isFrontmost: { NSApp.isActive })
         self.notifications = notifications
         plugins = PluginRegistry(plugins: [notifications], player: player)
+        updates = !isFixture && Self.hasUpdateFeed ? UpdateController() : nil
         super.init()
         #if DEBUG
         if isFixture, let route = UITestFixtures.route {
@@ -127,7 +128,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
         statusMenu = StatusMenu(
-            nowPlaying: nowPlaying, showMainWindow: { [weak self] in self?.showMainWindow() },
+            nowPlaying: nowPlaying, updates: updates, showMainWindow: { [weak self] in self?.showMainWindow() },
             showMiniPlayer: { [weak self] in self?.showMiniPlayer() })
     }
 
@@ -146,9 +147,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         #endif
-        if Self.hasUpdateFeed {
-            updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
-        }
         let preferences = Preferences()
         // The single-account migration signs out without an isSignedIn change, so no observer clears the old account's track.
         if session.droppedLegacySession { preferences.lastPlayback = nil }
@@ -253,7 +251,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse
     ) async {
-        await MainActor.run { showMainWindow() }
+        let isUpdate = response.notification.request.content.categoryIdentifier == UpdateController.notificationCategory
+        await MainActor.run {
+            if isUpdate, let updates { updates.checkForUpdates() } else { showMainWindow() }
+        }
     }
 }
 

@@ -47,6 +47,27 @@ struct PreferencesTests {
         #expect(Preferences(defaults: defaults).useArtworkColors)
     }
 
+    @Test func updateChannelAcceptsOnlyStableAndBeta() {
+        let (preferences, defaults) = makePreferences()
+        #expect(preferences.updateChannel == nil)
+        preferences.updateChannel = "beta"
+        #expect(preferences.updateChannel == "beta")
+        preferences.updateChannel = "nightly"
+        #expect(preferences.updateChannel == "beta")
+        defaults.set("nightly", forKey: "updateChannel")
+        #expect(preferences.updateChannel == nil)
+        preferences.updateChannel = "stable"
+        preferences.updateChannel = nil
+        #expect(preferences.updateChannel == nil)
+    }
+
+    @Test func updateNotificationsDefaultOn() {
+        let (preferences, defaults) = makePreferences()
+        #expect(preferences.updateNotifications)
+        preferences.updateNotifications = false
+        #expect(!Preferences(defaults: defaults).updateNotifications)
+    }
+
     @Test func navigationStateAtTheCapIsAccepted() {
         let (preferences, _) = makePreferences()
         let atCap = Data(count: Preferences.maxNavigationStateBytes)

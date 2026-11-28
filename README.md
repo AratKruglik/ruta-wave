@@ -103,6 +103,18 @@ xattr -dr com.apple.quarantine /Applications/RutaWave.app
 
 The app starts in guest mode. To get your library and Premium, sign in from the account button in the top-right corner. Sign-in happens on Google's own page inside the app, and your password never passes through RutaWave's code. The session is stored in the Keychain. *Sign out* clears it from this Mac.
 
+## Updates
+
+RutaWave checks for new versions on its own and installs them with [Sparkle](https://sparkle-project.org). The **Updates** tab in Settings has the choices:
+
+- **Channel:** *Stable* gets regular releases. *Beta* also gets pre-releases, which ship more often and may have bugs. A beta build starts on the Beta channel.
+- **Check for updates automatically** (on by default) and **Download and install updates automatically** (off by default; the update then installs when you quit).
+- **Notify about new versions:** a system notification when an update is found while RutaWave is in the background or has no Dock icon.
+
+Switching from Beta back to Stable never installs an older version: you stay on the current beta until a stable version with a higher number ships. *Check for Updates…* is also in the RutaWave menu and in the menu bar item.
+
+Builds up to 0.1.0-beta.7 have no updater, so the first version with one has to be installed from the DMG by hand.
+
 ## Build from source
 
 You need Xcode 27 (macOS 26 SDK) and [XcodeGen](https://github.com/yonaskolb/XcodeGen).

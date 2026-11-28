@@ -5,12 +5,17 @@ import AppSettings
 @MainActor
 final class StatusMenu: NSObject {
     private let nowPlaying: NowPlayingModel
+    private let updates: UpdateController?
     private let showMainWindow: () -> Void
     private let showMiniPlayer: () -> Void
     private var item: NSStatusItem?
 
-    init(nowPlaying: NowPlayingModel, showMainWindow: @escaping () -> Void, showMiniPlayer: @escaping () -> Void) {
+    init(
+        nowPlaying: NowPlayingModel, updates: UpdateController?,
+        showMainWindow: @escaping () -> Void, showMiniPlayer: @escaping () -> Void
+    ) {
         self.nowPlaying = nowPlaying
+        self.updates = updates
         self.showMainWindow = showMainWindow
         self.showMiniPlayer = showMiniPlayer
     }
@@ -41,6 +46,9 @@ final class StatusMenu: NSObject {
         menu.addItem(.separator())
         menu.addItem(item(String(localized: "Mini Player"), #selector(miniPlayer)))
         menu.addItem(item(String(localized: "Show RutaWave"), #selector(show)))
+        if let updates {
+            menu.addItem(item(String(localized: "Check for Updates…"), #selector(checkForUpdates), isEnabled: updates.canCheckForUpdates))
+        }
         menu.addItem(withTitle: String(localized: "Quit RutaWave"), action: #selector(NSApplication.terminate), keyEquivalent: "q")
         return menu
     }
@@ -86,4 +94,5 @@ final class StatusMenu: NSObject {
     @objc private func next() { nowPlaying.next() }
     @objc private func show() { showMainWindow() }
     @objc private func miniPlayer() { showMiniPlayer() }
+    @objc private func checkForUpdates() { updates?.checkForUpdates() }
 }

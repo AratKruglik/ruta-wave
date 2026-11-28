@@ -9,6 +9,7 @@ import UserNotifications
 struct SettingsView: View {
     let session: AuthSession
     let plugins: PluginRegistry
+    let updates: UpdateController?
 
     var body: some View {
         TabView {
@@ -18,6 +19,10 @@ struct SettingsView: View {
                 .tabItem { Label("Playback", systemImage: "play.circle") }
             PluginsSettings(registry: plugins)
                 .tabItem { Label("Plugins", systemImage: "puzzlepiece.extension") }
+            if let updates {
+                UpdatesSettings(updates: updates)
+                    .tabItem { Label("Updates", systemImage: "arrow.triangle.2.circlepath") }
+            }
             ShortcutsSettings()
                 .tabItem { Label("Shortcuts", systemImage: "keyboard") }
             AccountSettings(session: session)
@@ -275,6 +280,69 @@ private struct PluginRow: View {
         let bundleId = Bundle.main.bundleIdentifier ?? ""
         guard let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(bundleId)") else { return }
         NSWorkspace.shared.open(url)
+    }
+}
+
+private struct UpdatesSettings: View {
+    @Bindable var updates: UpdateController
+    @State private var checksAutomatically: Bool
+    @State private var downloadsAutomatically: Bool
+    @State private var notifies = Preferences().updateNotifications
+
+    init(updates: UpdateController) {
+        self.updates = updates
+        _checksAutomatically = State(initialValue: updates.automaticallyChecksForUpdates)
+        _downloadsAutomatically = State(initialValue: updates.automaticallyDownloadsUpdates)
+    }
+
+    private var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? ""
+        let build = info?["CFBundleVersion"] as? String ?? ""
+        return "\(short) (\(build))"
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Channel", selection: $updates.channel) {
+                    Text("Stable").tag(UpdateChannel.stable)
+                    Text("Beta").tag(UpdateChannel.beta)
+                }
+                if updates.channel == .beta {
+                    Text("Betas ship more often and may have bugs. You can switch back to Stable at any time: you will stay on the current beta until a newer stable version ships.")
+                        .font(.rwCaption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Section {
+                Toggle("Check for updates automatically", isOn: $checksAutomatically)
+                Toggle("Download and install updates automatically", isOn: $downloadsAutomatically)
+                    .disabled(!checksAutomatically)
+                Toggle(isOn: $notifies) {
+                    Text("Notify about new versions")
+                    Text("When RutaWave is in the background or has no Dock icon.")
+                }
+            }
+            Section {
+                LabeledContent("Version") { Text(verbatim: version) }
+                LabeledContent("Last checked") {
+                    if let date = updates.lastUpdateCheckDate {
+                        Text(date, format: .dateTime.day().month().hour().minute())
+                    } else {
+                        Text("Never")
+                    }
+                }
+                Button("Check Now", action: updates.checkForUpdates)
+                    .disabled(!updates.canCheckForUpdates)
+            }
+        }
+        .formStyle(.grouped)
+        .fixedSize(horizontal: false, vertical: true)
+        .onChange(of: checksAutomatically) { _, newValue in updates.automaticallyChecksForUpdates = newValue }
+        .onChange(of: downloadsAutomatically) { _, newValue in updates.automaticallyDownloadsUpdates = newValue }
+        .onChange(of: notifies) { _, newValue in Preferences().updateNotifications = newValue }
     }
 }
 
