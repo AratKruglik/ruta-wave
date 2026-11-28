@@ -1,51 +1,27 @@
 const UK = {
+  "demo.nowPlaying": "Зараз грає",
+  "demo.paused": "Пауза",
+  "demo.liked": "Додано до вподобаних",
+  "demo.unliked": "Прибрано з вподобаних",
+  "demo.volume": "Гучність",
   "meta.title": "RutaWave — нативний клієнт YouTube Music для macOS",
   "meta.description": "RutaWave — це YouTube Music у справжньому застосунку для Mac: нативний SwiftUI, медіаклавіші, плеєр у рядку меню і без Electron. Безкоштовно, для macOS 14+ на Apple Silicon.",
   "nav.skip": "Перейти до змісту",
   "nav.label": "Розділи",
   "nav.features": "Можливості",
-  "nav.evening": "Екскурсія",
   "nav.try": "Спробувати",
   "nav.install": "Встановлення",
-  "theme.toggle": "Темна тема",
   "hero.chips": "Головне",
   "hero.chip1": "Нативний SwiftUI",
   "hero.chip2": "Без Electron",
   "hero.chip3": "Apple Silicon",
   "hero.tagline": "YouTube Music як справжній застосунок для Mac.",
   "hero.lead": "Нативний інтерфейс на SwiftUI, медіаклавіші, «Зараз грає» і плеєр у рядку меню. Без вкладки браузера і без Electron.",
-  "download.button": "Завантажити для Mac",
-  "download.beta": "бета",
-  "download.stable": "стабільна",
-  "download.requirements": "macOS 14+ · Apple Silicon",
-  "download.tryBeta": "Або спробуйте бету",
-  "why.title": "Чому RutaWave",
-  "why.lead": "Я хотів, щоб YouTube Music на Маку відчувався як застосунок для Mac, тож зробив його. Офіційного застосунку для macOS немає: вкладка браузера, PWA чи обгортка на Electron запускають цілий Chromium заради одного сайту і ніколи не відчуваються як застосунок для Mac.",
-  "why.native.title": "Нативний",
-  "why.native.text": "Кожен екран — це SwiftUI: справжня бічна панель, меню, фокус клавіатури, VoiceOver і системна поведінка вікон.",
-  "why.light.title": "Легкий",
-  "why.light.text": "Жодного вбудованого браузера. Відтворення працює в одному прихованому веб-поданні з власним плеєром сайту, яким керує Swift.",
-  "why.catalogue.title": "Увесь каталог",
-  "why.catalogue.text": "Ваш акаунт, бібліотека, рекомендації та якість звуку Premium, бо відтворення йде через офіційний вебплеєр.",
-  "why.guest.title": "Акаунт не обовʼязковий",
-  "why.guest.text": "Гостьовий режим дозволяє переглядати, шукати й слухати без входу.",
-  "features.title": "Усе, з чим ви слухаєте",
-  "features.listening.title": "Слухання",
-  "features.listening.text": "Сторінка плеєра з чергою «Далі», текстом пісні та «Схожим». Перетягування в черзі, «Грати наступною», радіочипи і звук, що грає на будь-якому Space.",
-  "features.discovery.title": "Відкриття",
-  "features.discovery.text": "Головна з чипами настроїв, «Огляд» з новими релізами, чарти для будь-якої країни, настрої та жанри, а ще пошук з підказками й фільтрами.",
-  "features.library.title": "Ваша бібліотека",
-  "features.library.text": "Плейлисти, пісні, альбоми, виконавці, підписки та вподобана музика. Створюйте й редагуйте плейлисти, прибирайте історію.",
-  "features.mac.title": "Створено для macOS",
-  "features.mac.text": "«Зараз грає» в Центрі керування, медіаклавіші та AirPods, клавіатурні скорочення для всього, пункт у рядку меню і мініплеєр.",
-  "features.colour.title": "Кольори з обкладинки",
-  "features.colour.text": "Вікно бере відтінок з обкладинки альбому чи плейлиста, який ви відкрили.",
-  "features.plugins.title": "Плагіни",
-  "features.plugins.text": "Сповіщення про зміну треку та експериментальний караоке-текст, що підсвічує кожне слово, коли його співають.",
-  "story.title": "Один вечір з RutaWave",
-  "story.lead": "Прогорніть справжній вечір слухання. Кожен екран нижче — застосунок таким, яким він є сьогодні.",
+  "why.title": "У YouTube Music немає застосунку для Mac.",
+  "story.title": "Як це виглядає",
+  "story.lead": "Справжні знімки поточної версії. Гортайте або оберіть екран.",
   "story.home.title": "Головна",
-  "story.home.text": "Відкриваєте RutaWave. Угорі чипи настроїв, далі полиці з тим, що ви слухали нещодавно, і нові релізи. Стартова сторінка — та, яку ви обрали в Налаштуваннях.",
+  "story.home.text": "Угорі чипи настроїв, далі полиці з тим, що ви слухали нещодавно, і нові релізи. Застосунок відкривається на тій сторінці, яку ви оберете в Налаштуваннях.",
   "story.search.title": "Пошук",
   "story.search.text": "⌘F і кілька літер. Підказки зʼявляються, поки ви друкуєте, далі найкращий результат, пісні та фільтри: пісні, відео, альбоми, виконавці й плейлисти.",
   "story.artist.title": "Виконавець",
@@ -55,7 +31,7 @@ const UK = {
   "story.player.title": "Сторінка плеєра",
   "story.player.text": "⌘P відкриває обкладинку, чергу «Далі», текст пісні та «Схоже». Перетягуйте треки, додавайте радіочипи, зберігайте чергу як плейлист.",
   "story.explore.title": "Огляд",
-  "story.explore.text": "Нові релізи, настрої та жанри, щоденні й щотижневі чарти для будь-якої країни. А потім ви закриваєте вікно, і музика грає далі.",
+  "story.explore.text": "Нові релізи, настрої та жанри, щоденні й щотижневі чарти для будь-якої країни.",
   "demo.title": "Натисніть просто зараз",
   "demo.lead": "Із закритим вікном RutaWave живе в рядку меню та мініплеєрі. Це власні клавіатурні скорочення застосунку, і на цій сторінці вони теж працюють.",
   "demo.menu.file": "Файл",
@@ -73,51 +49,83 @@ const UK = {
   "demo.key.volume": "Гучність",
   "demo.key.like": "Подобається",
   "demo.note": "Обкладинка тут умовна, але кольори змінюються разом з нею так само, як RutaWave тонує вікно під справжню обкладинку.",
-  "demo.nowPlaying": "Зараз грає",
-  "demo.paused": "Пауза",
-  "demo.liked": "Додано до вподобаних",
-  "demo.unliked": "Прибрано з вподобаних",
-  "demo.volume": "Гучність",
-  "limits.title": "Чого RutaWave не вміє",
-  "limits.lead": "Щось із цього — рішення щодо продукту, щось — чесні обмеження.",
+  "limits.title": "Чого він не робить",
   "limits.offline": "Не завантажує треки і не зберігає аудіо для слухання офлайн.",
   "limits.ads": "Не блокує рекламу й аналітику. На безкоштовному акаунті та в гостьовому режимі звучить реклама, яку показує YouTube.",
-  "limits.unofficial": "Це неофіційний застосунок. Відтворення йде через вебплеєр YouTube Music, тож коли Google змінює сайт, щось може зламатися до наступного оновлення.",
-  "limits.platforms": "Працює лише на Mac з Apple Silicon і macOS 14 або новішою: без Intel, Windows, Linux чи iOS і без App Store.",
+  "limits.unofficial": "Він неофіційний. Коли Google змінює сайт YouTube Music, щось може зламатися до наступного оновлення.",
+  "limits.platforms": "Працює лише на Mac з Apple Silicon і macOS 14 або новішою. Без Intel, Windows, Linux, iOS і App Store.",
   "shots.home": "Головний екран RutaWave з чипами настроїв і полицями альбомів",
-  "shots.player": "Сторінка плеєра: обкладинка, черга «Далі» та радіочипи",
   "shots.player.alt": "Сторінка плеєра з обкладинкою і чергою «Далі»",
-  "shots.explore": "Огляд: нові релізи, чарти, настрої та жанри",
   "shots.explore.alt": "Огляд з новими релізами і чартами",
-  "shots.artist": "Виконавець: топ пісень, перемішування, радіо, підписка",
   "shots.artist.alt": "Сторінка виконавця з топом пісень",
-  "shots.playlist": "Плейлист: слухати, перемішати, зберегти й поділитися",
   "shots.playlist.alt": "Сторінка плейлиста",
-  "shots.search": "Пошук: фільтри, найкращий результат і пісні",
   "shots.search.alt": "Результати пошуку з фільтрами",
-  "shots.library": "Бібліотека: ваші плейлисти, сортування та історія",
-  "shots.library.alt": "Бібліотека з плейлистами",
-  "shots.charts": "Чарти: щоденні й щотижневі, для будь-якої країни",
-  "shots.charts.alt": "Чарти для обраної країни",
   "name.title": "Про назву",
   "name.text": "Вона походить від <em>«Червоної рути»</em>, пісні, яку знає кожен українець. «Рута» — це музика і червоний колір, «Wave» — звук.",
   "install.title": "Встановлення",
-  "install.requirements": "Потрібен Mac з Apple Silicon і macOS 14 або новіша.",
-  "install.step1.title": "Завантажте",
-  "install.step1.text": "Отримайте підписаний і нотаризований DMG RutaWave.",
-  "install.step2.title": "Перетягніть у «Програми»",
-  "install.step2.text": "Відкрийте DMG і перетягніть RutaWave до теки «Програми».",
-  "install.step3.title": "Слухайте",
-  "install.step3.text": "Застосунок стартує в гостьовому режимі. Увійдіть на сторінці самого Google всередині застосунку, щоб отримати бібліотеку й Premium; ваш пароль ніколи не проходить через RutaWave.",
-  "install.updates.title": "Оновлюється сам",
-  "install.updates.text": "RutaWave перевіряє нові версії та встановлює їх через Sparkle. Оберіть канал «Стабільний» або «Бета» в Налаштуваннях → Оновлення.",
-  "final.title": "Дайте своїй музиці справжній застосунок для Mac",
   "footer.disclaimer": "RutaWave — незалежний проєкт, не повʼязаний з Google чи YouTube, не схвалений і не спонсорований ними. «YouTube» і «YouTube Music» — торговельні марки Google LLC і згадуються тут лише для опису того, з чим працює застосунок.",
   "footer.label": "Посилання проєкту",
   "footer.source": "Вихідний код",
   "footer.releases": "Усі релізи",
   "footer.issues": "Повідомити про проблему",
   "footer.made": "Зроблено в Україні",
+  "nav.tour": "Екрани",
+  "why.p1": "Тож лишається вкладка браузера, PWA чи обгортка на Electron. Кожна з них запускає цілий Chromium заради одного сайту, медіаклавіші дістаються тій вкладці, що перехопила їх останньою, і ніщо з цього не поводиться як застосунок для Mac.",
+  "why.p2": "RutaWave — моя спроба це виправити. Кожен екран зроблено на SwiftUI: справжня бічна панель, меню, фокус клавіатури, VoiceOver. Відтворення й далі йде через власний вебплеєр YouTube Music, схований в одному веб-поданні, тож працюють ваш акаунт, бібліотека, рекомендації та якість звуку Premium.",
+  "why.p3": "Акаунт навіть не обовʼязковий. У гостьовому режимі можна переглядати, шукати й слухати без входу.",
+  "story.tab.home": "Головна",
+  "story.tab.search": "Пошук",
+  "story.tab.artist": "Виконавець",
+  "story.tab.playlist": "Плейлист",
+  "story.tab.player": "Плеєр",
+  "story.tab.explore": "Огляд",
+  "menus.title": "Список можливостей — у меню",
+  "menus.lead": "Це справжні меню «Перейти», «Керування» і «Вікно» з RutaWave, пункт за пунктом, з їхніми скороченнями.",
+  "menus.go": "Перейти",
+  "menus.back": "Назад",
+  "menus.forward": "Вперед",
+  "menus.home": "Головна",
+  "menus.explore": "Огляд",
+  "menus.library": "Бібліотека",
+  "menus.search": "Пошук",
+  "menus.controls": "Керування",
+  "menus.play": "Відтворити / Пауза",
+  "menus.space": "Пробіл",
+  "menus.previous": "Попередній",
+  "menus.next": "Наступний",
+  "menus.seekBack": "Перемотати назад на 10 секунд",
+  "menus.seekForward": "Перемотати вперед на 10 секунд",
+  "menus.volumeUp": "Гучніше",
+  "menus.volumeDown": "Тихіше",
+  "menus.mute": "Вимкнути звук",
+  "menus.repeat": "Повтор",
+  "menus.shuffle": "Перемішати",
+  "menus.like": "Подобається",
+  "menus.dislike": "Не подобається",
+  "menus.moveUp": "Перемістити вгору",
+  "menus.moveDown": "Перемістити вниз",
+  "menus.playerPage": "Сторінка програвача",
+  "menus.window": "Вікно",
+  "menus.mini": "Мініплеєр",
+  "menus.file": "Файл",
+  "menus.newPlaylist": "Новий плейлист…",
+  "also.title": "І те, що в меню не вміщається",
+  "also.system.title": "Система",
+  "also.system.text": "«Зараз грає» в Центрі керування, медіаклавіші та керування з AirPods. Звук грає далі, коли вікно закрите, сховане чи на іншому Space.",
+  "also.menubar.title": "Рядок меню",
+  "also.menubar.text": "Пункт з поточним треком; клік по ньому може ставити на паузу. Можна сховати іконку з Dock, тримати вікно поверх інших, запускати під час входу.",
+  "also.colour.title": "Колір",
+  "also.colour.text": "Вікно бере відтінок з обкладинки альбому чи плейлиста, який ви відкрили.",
+  "also.queue.title": "Черга",
+  "also.queue.text": "«Далі» з перетягуванням, «Грати наступною», «Додати до черги», радіочипи і збереження черги як плейлиста.",
+  "also.lyrics.title": "Тексти",
+  "also.lyrics.text": "Текст пісні на сторінці плеєра і експериментальний плагін караоке, що підсвічує кожне слово.",
+  "also.links.title": "Посилання",
+  "also.links.text": "Відкриває посилання music.youtube.com і rutawave://. Інтерфейс англійською та українською.",
+  "install.step1": "Завантажте DMG. Він підписаний і нотаризований.",
+  "install.step2": "Відкрийте його і перетягніть RutaWave до «Програм».",
+  "install.step3": "Запустіть. Застосунок стартує в гостьовому режимі; щоб отримати бібліотеку й Premium, увійдіть на сторінці самого Google всередині застосунку. Ваш пароль ніколи не проходить через RutaWave.",
+  "install.updates": "Далі він оновлюється сам через Sparkle. Стабільний чи бета-канал обирається в Налаштуваннях → Оновлення.",
 };
 
 const root = document.documentElement;
@@ -159,14 +167,6 @@ function applyLanguage(language) {
   toggle.setAttribute("aria-label", uk ? "English" : "Українська");
 }
 
-const systemDark = matchMedia("(prefers-color-scheme: dark)");
-
-function applyTheme() {
-  const theme = root.dataset.theme ?? (systemDark.matches ? "dark" : "light");
-  root.classList.toggle("dark", theme === "dark");
-  document.getElementById("theme").setAttribute("aria-pressed", String(theme === "dark"));
-}
-
 const EN = { "demo.nowPlaying": "Now playing", "demo.paused": "Paused", "demo.liked": "Liked", "demo.unliked": "Like removed", "demo.volume": "Volume" };
 const t = key => (root.lang === "uk" ? UK : EN)[key];
 
@@ -177,8 +177,6 @@ function renderClock() {
 
 const language = stored("language") ?? (navigator.languages ?? [navigator.language]).find(l => /^(uk|en)\b/i.test(l))?.slice(0, 2).toLowerCase();
 applyLanguage(language);
-applyTheme();
-systemDark.addEventListener("change", applyTheme);
 
 document.getElementById("language").addEventListener("click", () => {
   const next = root.lang === "uk" ? "en" : "uk";
@@ -186,11 +184,6 @@ document.getElementById("language").addEventListener("click", () => {
   applyLanguage(next);
 });
 
-document.getElementById("theme").addEventListener("click", () => {
-  root.dataset.theme = root.classList.contains("dark") ? "light" : "dark";
-  store("theme", root.dataset.theme);
-  applyTheme();
-});
 
 const observer = new IntersectionObserver(entries => {
   for (const entry of entries) {
@@ -218,6 +211,10 @@ const stepObserver = new IntersectionObserver(entries => {
   for (const entry of entries) if (entry.isIntersecting) showStep(steps.indexOf(entry.target));
 }, { rootMargin: "-55% 0px -40% 0px" });
 steps.forEach(step => stepObserver.observe(step));
+story.querySelector(".timeline").addEventListener("click", event => {
+  const button = event.target.closest("[data-step]");
+  if (button) steps[button.dataset.step].scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+});
 showStep(0);
 
 const TRACKS = [

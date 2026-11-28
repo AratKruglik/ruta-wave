@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title data-i18n="meta.title">RutaWave — a native YouTube Music client for macOS</title>
   <meta name="description" data-i18n-content="meta.description" content="RutaWave plays YouTube Music in a real Mac app: native SwiftUI, media keys, a menu bar player and no Electron. Free, for macOS 14+ on Apple Silicon.">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#0e0c10" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#fbf8f7" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e0c10">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://rutawave.kruhlyk.pro/">
   <meta property="og:title" content="RutaWave">
@@ -18,32 +17,18 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="alternate" type="application/rss+xml" title="RutaWave updates" href="appcast.xml">
   <link rel="stylesheet" href="style.css">
-  <script>
-    document.documentElement.classList.add("js");
-    try { const theme = localStorage.getItem("theme"); if (theme) document.documentElement.dataset.theme = theme; } catch {}
-  </script>
+  <script>document.documentElement.classList.add("js");</script>
   <script src="main.js" defer></script>
 </head>
 <body>
   <svg hidden>
-    <symbol id="i-window" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20M6 6.5h.01M9 6.5h.01"/></symbol>
-    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
     <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
-    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
-    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></symbol>
-    <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14M12 6v14M8 8v12M4 4v16"/></symbol>
-    <symbol id="i-command" viewBox="0 0 24 24"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></symbol>
-    <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 0 0 0 20c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13a1.6 1.6 0 0 1-.43-1.12 1.64 1.64 0 0 1 1.66-1.67h2c3.05 0 5.56-2.5 5.56-5.55C21.97 6.01 17.46 2 12 2z"/></symbol>
-    <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M19.44 7.85c-.05.32.06.65.29.88l1.57 1.57a2.4 2.4 0 0 1 0 3.41l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-3.41 0l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.46-.18.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 13.7a2.4 2.4 0 0 1 0-3.4l1.53-1.53c.24-.24.58-.35.92-.3.51.08.88.53 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92L10.3 2.7a2.4 2.4 0 0 1 3.4 0l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.46.18-.9.53-.97 1.02Z"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></symbol>
     <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3.2"/></symbol>
     <symbol id="i-previous" viewBox="0 0 24 24"><path d="M19 6v12l-8-6zM11 6v12L3 12z" fill="currentColor"/></symbol>
     <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 6v12l8-6zM13 6v12l8-6z" fill="currentColor"/></symbol>
     <symbol id="i-like" viewBox="0 0 24 24"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></symbol>
     <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
   </svg>
 
   <a class="skip" href="#main" data-i18n="nav.skip">Skip to content</a>
@@ -56,16 +41,12 @@
       </a>
       <nav class="nav" data-i18n-label="nav.label" aria-label="Sections">
         <a href="#features" data-i18n="nav.features">Features</a>
-        <a href="#evening" data-i18n="nav.evening">Tour</a>
+        <a href="#tour" data-i18n="nav.tour">Screens</a>
         <a href="#try" data-i18n="nav.try">Try it</a>
         <a href="#install" data-i18n="nav.install">Install</a>
       </nav>
       <div class="tools">
         <button class="tool" type="button" id="language" lang="uk" aria-label="Українська">УКР</button>
-        <button class="tool" type="button" id="theme" data-i18n-label="theme.toggle" aria-label="Dark theme" aria-pressed="false">
-          <svg class="icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
-          <svg class="icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
-        </button>
         <a class="tool tool-text" href="https://github.com/AratKruglik/ruta-wave">GitHub</a>
       </div>
     </div>
@@ -93,39 +74,21 @@
       </div>
     </section>
 
-    <section class="section" id="why" aria-labelledby="why-title">
-      <div class="container">
-        <h2 id="why-title" class="reveal" data-i18n="why.title">Why RutaWave</h2>
-        <p class="section-lead reveal" data-i18n="why.lead">I wanted YouTube Music to feel like a Mac app, so I built one. There is no official macOS app: a browser tab, a PWA or an Electron wrapper each runs a whole Chromium for one website and never feels like a Mac app.</p>
-        <div class="cards">
-          <article class="card reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-window"/></svg>
-            <h3 data-i18n="why.native.title">Native</h3>
-            <p data-i18n="why.native.text">Every screen is SwiftUI: a real sidebar, menus, keyboard focus, VoiceOver and system window behaviour.</p>
-          </article>
-          <article class="card reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-zap"/></svg>
-            <h3 data-i18n="why.light.title">Light</h3>
-            <p data-i18n="why.light.text">No bundled browser. Playback runs in one hidden web view with the site's own player, driven from Swift.</p>
-          </article>
-          <article class="card reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-music"/></svg>
-            <h3 data-i18n="why.catalogue.title">Full catalogue</h3>
-            <p data-i18n="why.catalogue.text">Your account, library, recommendations and Premium audio quality, because playback goes through the official web player.</p>
-          </article>
-          <article class="card reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-user"/></svg>
-            <h3 data-i18n="why.guest.title">No account needed</h3>
-            <p data-i18n="why.guest.text">Guest mode lets you browse, search and play without signing in.</p>
-          </article>
+    <section class="section letter" id="why" aria-labelledby="why-title">
+      <div class="container letter-grid">
+        <h2 id="why-title" class="reveal" data-i18n="why.title">YouTube Music has no Mac app.</h2>
+        <div class="letter-body reveal">
+          <p data-i18n="why.p1">So you end up with a browser tab, a PWA or an Electron wrapper. Each one runs a whole Chromium for a single website, the media keys go to whichever tab grabbed them last, and none of it behaves like a Mac app.</p>
+          <p data-i18n="why.p2">RutaWave is my attempt to fix that. Every screen is SwiftUI: a real sidebar, menus, keyboard focus, VoiceOver. Playback still goes through YouTube Music's own web player, hidden in a single web view, so your account, library, recommendations and Premium audio quality all work.</p>
+          <p data-i18n="why.p3">You don't even need an account. Guest mode browses, searches and plays without signing in.</p>
         </div>
       </div>
     </section>
 
-    <section class="story" id="evening" aria-labelledby="evening-title">
+    <section class="story" id="tour" aria-labelledby="tour-title">
       <div class="container">
-        <h2 id="evening-title" class="reveal" data-i18n="story.title">One evening with RutaWave</h2>
-        <p class="section-lead reveal" data-i18n="story.lead">Scroll through a real evening of listening. Every screen below is the app as it is today.</p>
+        <h2 id="tour-title" class="reveal" data-i18n="story.title">What it looks like</h2>
+        <p class="section-lead reveal" data-i18n="story.lead">Real screenshots of the current version. Scroll, or pick a screen.</p>
         <div class="story-grid">
           <div class="story-stage">
             <div class="stage-window">
@@ -136,43 +99,101 @@
               <img src="screenshots/player-queue.jpg" width="1378" height="868" loading="lazy" data-i18n-alt="shots.player.alt" alt="Player page with artwork and the Up next queue">
               <img src="screenshots/explore.jpg" width="1378" height="868" loading="lazy" data-i18n-alt="shots.explore.alt" alt="Explore with new releases and charts">
             </div>
-            <ol class="timeline" aria-hidden="true">
-              <li class="active">19:04</li><li>19:10</li><li>19:26</li><li>20:02</li><li>20:40</li><li>21:15</li>
-            </ol>
+            <ol class="timeline"><li><button type="button" data-step="0" data-i18n="story.tab.home">Home</button></li><li><button type="button" data-step="1" data-i18n="story.tab.search">Search</button></li><li><button type="button" data-step="2" data-i18n="story.tab.artist">Artist</button></li><li><button type="button" data-step="3" data-i18n="story.tab.playlist">Playlist</button></li><li><button type="button" data-step="4" data-i18n="story.tab.player">Player</button></li><li><button type="button" data-step="5" data-i18n="story.tab.explore">Explore</button></li></ol>
           </div>
           <ol class="story-steps">
             <li class="step active" data-tint="#c058d8">
-              <time>19:04</time>
               <h3 data-i18n="story.home.title">Home</h3>
-              <p data-i18n="story.home.text">You open RutaWave. Mood chips across the top, then shelves with what you played lately and new releases. It opens on the page you chose in Settings.</p>
+              <p data-i18n="story.home.text">Mood chips across the top, then shelves with what you played lately and new releases. The app opens on whichever page you pick in Settings.</p>
             </li>
             <li class="step" data-tint="#5f86c4">
-              <time>19:10</time>
               <h3 data-i18n="story.search.title">Search</h3>
               <p data-i18n="story.search.text">⌘F and a few letters. Suggestions appear as you type; then the top result, songs and filters for songs, videos, albums, artists and playlists.</p>
             </li>
             <li class="step" data-tint="#e07b39">
-              <time>19:26</time>
               <h3 data-i18n="story.artist.title">An artist</h3>
               <p data-i18n="story.artist.text">Top songs, Shuffle, Radio and Subscribe, with More lists for every shelf.</p>
             </li>
             <li class="step" data-tint="#3fa07a">
-              <time>20:02</time>
               <h3 data-i18n="story.playlist.title">A playlist</h3>
               <p data-i18n="story.playlist.text">Play, shuffle, save to your library or share. Your own playlists live in the sidebar and can be edited right here.</p>
             </li>
             <li class="step" data-tint="#e3608a">
-              <time>20:40</time>
               <h3 data-i18n="story.player.title">The player page</h3>
               <p data-i18n="story.player.text">⌘P opens the artwork, the Up next queue, lyrics and Related. Drag tracks to reorder, add radio chips, save the queue as a playlist.</p>
             </li>
             <li class="step" data-tint="#d9a13a">
-              <time>21:15</time>
               <h3 data-i18n="story.explore.title">Explore</h3>
-              <p data-i18n="story.explore.text">New releases, moods and genres, and daily and weekly charts for any country. Then you close the window, and the music keeps playing.</p>
+              <p data-i18n="story.explore.text">New releases, moods and genres, and daily and weekly charts for any country.</p>
             </li>
           </ol>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="features" aria-labelledby="features-title">
+      <div class="container">
+        <h2 id="features-title" class="reveal" data-i18n="menus.title">The feature list is in the menus</h2>
+        <p class="section-lead reveal" data-i18n="menus.lead">These are RutaWave's real Go, Controls and Window menus, item for item, with their shortcuts.</p>
+        <div class="menus reveal">
+          <div class="menu-col">
+            <p class="menu-name" data-i18n="menus.go">Go</p>
+            <ul class="menu">
+              <li><span data-i18n="menus.back">Back</span><kbd>⌘[</kbd></li>
+              <li><span data-i18n="menus.forward">Forward</span><kbd>⌘]</kbd></li>
+              <li class="sep" aria-hidden="true"></li>
+              <li><span data-i18n="menus.home">Home</span><kbd>⌘1</kbd></li>
+              <li><span data-i18n="menus.explore">Explore</span><kbd>⌘2</kbd></li>
+              <li><span data-i18n="menus.library">Library</span><kbd>⌘3</kbd></li>
+              <li class="sep" aria-hidden="true"></li>
+              <li><span data-i18n="menus.search">Search</span><kbd>⌘F</kbd></li>
+            </ul>
+          </div>
+          <div class="menu-col">
+            <p class="menu-name" data-i18n="menus.controls">Controls</p>
+            <ul class="menu">
+              <li><span data-i18n="menus.play">Play / Pause</span><kbd data-i18n="menus.space">Space</kbd></li>
+              <li><span data-i18n="menus.previous">Previous</span><kbd>⌘←</kbd></li>
+              <li><span data-i18n="menus.next">Next</span><kbd>⌘→</kbd></li>
+              <li><span data-i18n="menus.seekBack">Seek Back 10 Seconds</span><kbd>⇧⌘←</kbd></li>
+              <li><span data-i18n="menus.seekForward">Seek Forward 10 Seconds</span><kbd>⇧⌘→</kbd></li>
+              <li class="sep" aria-hidden="true"></li>
+              <li><span data-i18n="menus.volumeUp">Volume Up</span><kbd>⌘↑</kbd></li>
+              <li><span data-i18n="menus.volumeDown">Volume Down</span><kbd>⌘↓</kbd></li>
+              <li><span data-i18n="menus.mute">Mute</span><kbd>⌥⌘↓</kbd></li>
+              <li class="sep" aria-hidden="true"></li>
+              <li><span data-i18n="menus.repeat">Repeat</span><kbd>⌘R</kbd></li>
+              <li><span data-i18n="menus.shuffle">Shuffle</span><kbd>⌘S</kbd></li>
+              <li><span data-i18n="menus.like">Like</span><kbd>⌥⌘L</kbd></li>
+              <li><span data-i18n="menus.dislike">Dislike</span><kbd>⌥⌘D</kbd></li>
+              <li class="sep" aria-hidden="true"></li>
+              <li><span data-i18n="menus.moveUp">Move Up</span><kbd>⌥⌘↑</kbd></li>
+              <li><span data-i18n="menus.moveDown">Move Down</span><kbd>⌥⌘↓</kbd></li>
+              <li class="sep" aria-hidden="true"></li>
+              <li><span data-i18n="menus.playerPage">Player Page</span><kbd>⌘P</kbd></li>
+            </ul>
+          </div>
+          <div class="menu-col">
+            <p class="menu-name" data-i18n="menus.window">Window</p>
+            <ul class="menu">
+              <li><span data-i18n="menus.mini">Mini Player</span><kbd>⇧⌘M</kbd></li>
+              <li><span>RutaWave</span><kbd>⌘0</kbd></li>
+            </ul>
+            <p class="menu-name" data-i18n="menus.file">File</p>
+            <ul class="menu">
+              <li><span data-i18n="menus.newPlaylist">New Playlist…</span><kbd>⌘N</kbd></li>
+            </ul>
+          </div>
+        </div>
+        <h3 class="also-title reveal" data-i18n="also.title">And what does not fit in a menu</h3>
+        <dl class="also reveal">
+          <div><dt data-i18n="also.system.title">System</dt><dd data-i18n="also.system.text">Now Playing in Control Centre, media keys and AirPods controls. Audio keeps playing when the window is closed, hidden or on another Space.</dd></div>
+          <div><dt data-i18n="also.menubar.title">Menu bar</dt><dd data-i18n="also.menubar.text">An item with the current track; a click on it can play or pause. Hide the Dock icon, keep the window on top, launch at login.</dd></div>
+          <div><dt data-i18n="also.colour.title">Colour</dt><dd data-i18n="also.colour.text">The window takes its tint from the cover of the album or playlist you are on.</dd></div>
+          <div><dt data-i18n="also.queue.title">Queue</dt><dd data-i18n="also.queue.text">Up next with drag to reorder, Play next, Add to queue, radio chips and Save queue as playlist.</dd></div>
+          <div><dt data-i18n="also.lyrics.title">Lyrics</dt><dd data-i18n="also.lyrics.text">Lyrics on the player page, and an experimental karaoke plugin that highlights each word.</dd></div>
+          <div><dt data-i18n="also.links.title">Links</dt><dd data-i18n="also.links.text">Opens music.youtube.com links and rutawave:// links. Interface in English and Ukrainian.</dd></div>
+        </dl>
       </div>
     </section>
 
@@ -218,44 +239,6 @@
       </div>
     </section>
 
-    <section class="section" id="features" aria-labelledby="features-title">
-      <div class="container">
-        <h2 id="features-title" class="reveal" data-i18n="features.title">Everything you listen with</h2>
-        <div class="features">
-          <article class="feature reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-headphones"/></svg>
-            <h3 data-i18n="features.listening.title">Listening</h3>
-            <p data-i18n="features.listening.text">A player page with the Up next queue, lyrics and Related. Drag to reorder, Play next, radio chips, and audio that keeps playing on any Space.</p>
-          </article>
-          <article class="feature reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-compass"/></svg>
-            <h3 data-i18n="features.discovery.title">Discovery</h3>
-            <p data-i18n="features.discovery.text">Home with mood chips, Explore with new releases, charts for any country, moods and genres, and search with suggestions and filters.</p>
-          </article>
-          <article class="feature reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-library"/></svg>
-            <h3 data-i18n="features.library.title">Your library</h3>
-            <p data-i18n="features.library.text">Playlists, songs, albums, artists, subscriptions and liked music. Create and edit playlists, and clean up your history.</p>
-          </article>
-          <article class="feature reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-command"/></svg>
-            <h3 data-i18n="features.mac.title">Built for macOS</h3>
-            <p data-i18n="features.mac.text">Now Playing in Control Centre, media keys and AirPods, keyboard shortcuts for everything, a menu bar item and a mini player.</p>
-          </article>
-          <article class="feature reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-palette"/></svg>
-            <h3 data-i18n="features.colour.title">Colours from the artwork</h3>
-            <p data-i18n="features.colour.text">The window takes its tint from the cover of the album or playlist you are on.</p>
-          </article>
-          <article class="feature reveal">
-            <svg class="card-icon" aria-hidden="true"><use href="#i-puzzle"/></svg>
-            <h3 data-i18n="features.plugins.title">Plugins</h3>
-            <p data-i18n="features.plugins.text">Track-change notifications and experimental karaoke lyrics that highlight each word as it is sung.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
     <section class="section name" aria-labelledby="name-title">
       <div class="container reveal">
         <h2 id="name-title" class="eyebrow" data-i18n="name.title">About the name</h2>
@@ -264,47 +247,33 @@
     </section>
 
     <section class="section" id="limits" aria-labelledby="limits-title">
-      <div class="container">
-        <h2 id="limits-title" class="reveal" data-i18n="limits.title">What RutaWave does not do</h2>
-        <p class="section-lead reveal" data-i18n="limits.lead">Some of these are product decisions, some are honest limits.</p>
-        <ul class="limits reveal">
-          <li data-i18n="limits.offline">It does not download tracks or keep audio for offline listening.</li>
-          <li data-i18n="limits.ads">It does not block ads or analytics. Free accounts and guests hear the ads YouTube serves.</li>
-          <li data-i18n="limits.unofficial">It is unofficial. Playback goes through the YouTube Music web player, so when Google changes the site, something can break until the next update.</li>
-          <li data-i18n="limits.platforms">It runs only on Macs with Apple Silicon and macOS 14 or later: no Intel, Windows, Linux or iOS, and no App Store.</li>
+      <div class="container narrow">
+        <h2 id="limits-title" class="reveal" data-i18n="limits.title">What it doesn't do</h2>
+        <ul class="plain-list reveal">
+          <li data-i18n="limits.offline">It doesn't download tracks or keep audio for offline listening.</li>
+          <li data-i18n="limits.ads">It doesn't block ads or analytics. Free accounts and guests hear the ads YouTube serves.</li>
+          <li data-i18n="limits.unofficial">It is unofficial. When Google changes the YouTube Music site, something can break until the next update.</li>
+          <li data-i18n="limits.platforms">It runs only on Macs with Apple Silicon and macOS 14 or later. No Intel, Windows, Linux, iOS or App Store.</li>
         </ul>
       </div>
     </section>
 
     <section class="section" id="install" aria-labelledby="install-title">
-      <div class="container">
+      <div class="container narrow">
         <h2 id="install-title" class="reveal" data-i18n="install.title">Install</h2>
-        <p class="section-lead reveal" data-i18n="install.requirements">Needs a Mac with Apple Silicon and macOS 14 or later.</p>
-        <ol class="steps">
-          <li class="card reveal">
-            <h3 data-i18n="install.step1.title">Download</h3>
-            <p data-i18n="install.step1.text">Get the signed and notarized RutaWave DMG.</p>
-          </li>
-          <li class="card reveal">
-            <h3 data-i18n="install.step2.title">Drag to Applications</h3>
-            <p data-i18n="install.step2.text">Open the DMG and drag RutaWave to the Applications folder.</p>
-          </li>
-          <li class="card reveal">
-            <h3 data-i18n="install.step3.title">Listen</h3>
-            <p data-i18n="install.step3.text">It starts in guest mode. Sign in on Google's own page inside the app to get your library and Premium; your password never passes through RutaWave.</p>
-          </li>
+        <ol class="install-list reveal">
+          <li data-i18n="install.step1">Download the DMG. It is signed and notarized.</li>
+          <li data-i18n="install.step2">Open it and drag RutaWave to Applications.</li>
+          <li data-i18n="install.step3">Launch it. It starts in guest mode; to get your library and Premium, sign in on Google's own page inside the app. Your password never passes through RutaWave.</li>
         </ol>
-        <div class="note reveal">
-          <h3 data-i18n="install.updates.title">Updates itself</h3>
-          <p data-i18n="install.updates.text">RutaWave checks for new versions and installs them with Sparkle. Pick the Stable or Beta channel in Settings → Updates.</p>
-        </div>
+        <p class="install-note reveal" data-i18n="install.updates">After that it updates itself through Sparkle. Stable or Beta is a choice in Settings → Updates.</p>
       </div>
     </section>
 
     <section class="section final" aria-labelledby="final-title">
       <div class="container final-inner reveal">
         <img src="icon.svg" alt="" width="96" height="96">
-        <h2 id="final-title" data-i18n="final.title">Give your music a real Mac app</h2>
+        <h2 id="final-title"><span class="wordmark">Ruta<span>Wave</span></span></h2>
         <!--downloads-->
       </div>
     </section>

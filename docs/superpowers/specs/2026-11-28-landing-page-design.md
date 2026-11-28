@@ -70,3 +70,13 @@ The user liked how that page lets the product show itself. They picked three of 
 - **Honesty and details.** A first-person line in "Why", a "What RutaWave does not do" section (from the README, plus "unofficial, can break when the site changes"), and the DMG size next to the version, taken from the release asset.
 
 Not taken: the light beam from the notch, sound (the music is someone else's), and the cookie banner (this site has no analytics).
+
+## Revision: less template, dark only
+
+The user found the icon-card grids generic, and asked for a single dark theme.
+
+- **Dark only.** The theme toggle and the light palette are gone.
+- **"Why"** is a short first-person letter: a large headline and prose, with no cards.
+- **Features are the app's real menus.** Go, Controls, Window and File, item for item with their shortcuts, as in `App/Shell/AppCommands.swift` and `RutawaveApp.swift`. Whatever the menus do not cover is a plain definition list with hairlines.
+- **The tour has no invented evening times.** The bar under the window names the screens and jumps to each one.
+- **"What it doesn't do" and "Install"** are typographic lists, not cards.
